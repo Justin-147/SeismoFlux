@@ -1,0 +1,170 @@
+schema_version: 1
+protocol_version: 1.0.0
+status: draft_pending_data_contract_freeze
+registered_without_locked_test_results: true
+planned_freeze_tag: v0.1.0-data-contract
+random_seed: 147
+stability_seeds: [147, 1147, 2147, 3147, 4147]
+
+time_semantics:
+  issue_timezone: Asia/Shanghai
+  issue_time_local: '00:00:00'
+  issue_time_utc_offset: '+08:00'
+  report_date_fallback_available_at: next_day_00:00:00_Asia/Shanghai
+  availability_rule: available_at_lte_issue_time
+  forecast_interval: '(T,T+h]'
+
+forecast:
+  horizons_days: [7, 30, 90, 180, 365]
+  magnitude_bins: [M5_6, M6_plus]
+
+calendar_split:
+  development_fit_issue_dates:
+    start: '2022-07-19'
+    end: '2023-07-01'
+  development_validation_purge:
+    start: '2023-07-02'
+    end: '2024-06-30'
+  validation_issue_dates:
+    start: '2024-07-01'
+    end: '2025-07-01'
+  validation_maturity_end: '2026-07-01'
+  locked_test_issue_dates:
+    start: null
+    end: null
+    start_rule: first_regular_issue_after_stage_9_freeze_and_validation_maturity
+    cohort_duration_days: 365
+    end_rule: start_plus_364_days
+  locked_test_maturity_end_rule: last_issue_plus_365_days
+  locked_test_formal_evaluation_rule: first_day_after_full_cohort_maturity
+  prospective_shadow_issue_dates:
+    start: null
+    end: null
+    start_rule: stage_10_first_on_time_issue_after_G7_pass
+    historical_backfill_forbidden: true
+  maximum_label_horizon_days: 365
+  target_window_rule: '(issue_time,issue_time+h]'
+  purge_rule: next_partition_start_gt_previous_issue_end_plus_365_days
+  random_split_forbidden: true
+  physical_event_sets_must_be_disjoint: true
+  validation_and_test_target_windows_must_not_overlap: true
+  rolling_origin:
+    minimum_mature_folds: 3
+    fold_rule: train_target_end_lt_assessment_target_start
+    fold_schedule_freeze: stage_1_before_location_scores
+    insufficient_fold_action: evidence_insufficient_no_random_split
+
+minimum_practical_improvement:
+  same_area_strict_recall_percentage_points: 5
+  same_recall_union_area_relative_reduction: 0.10
+  success_uncertainty_rule: point_threshold_and_95pct_interval_excludes_no_improvement
+
+evaluation:
+  information_gain:
+    definition: point_process_log_likelihood_difference_divided_by_physical_event_count
+    unit: nats_per_physical_event
+    includes_integrated_intensity_compensator: true
+  nonoverlapping_exposures:
+    selection_rule: greedy_earliest_issue_anchored_at_partition_start
+    next_issue_rule: issue_time_gte_previous_issue_time_plus_horizon
+    retain_zero_event_exposures: true
+    event_multiplicity_per_horizon_and_magnitude_bin: at_most_one
+    score_rule: event_log_terms_and_integrated_compensator_travel_together
+  best_background_selection:
+    criterion: highest_validation_mean_information_gain
+    tie_rule: simplest_model_within_one_standard_error
+    standard_error_unit: purged_rolling_fold
+  folds:
+    stable_improvement_rule: at_least_two_thirds_and_positive_median
+    minimum_mature_folds: 3
+  bootstrap:
+    unit: physical_event_cluster_joint_across_horizons
+    exposure_design: fixed_nonoverlapping_windows
+    integrated_compensator_in_replicates: fixed_from_preregistered_exposure
+    preserve_cross_horizon_event_dependence: true
+    replications: 2000
+    confidence_level: 0.95
+    interval_method: percentile
+    seed: 10147
+  permutations:
+    time_replications: 1000
+    space_replications: 1000
+    seed_rule: master_seed_plus_replication_index
+    monte_carlo_p_value: (1+count_null_gte_observed)/(replications+1)
+    G2_primary_test:
+      null_type: time_permutation
+      statistic: M5_6_macro_average_information_gain_across_evaluable_horizons
+      replication_rule: recompute_the_same_macro_statistic_for_each_joint_permutation
+      multiplicity_adjustment: none_single_preregistered_primary_endpoint
+  multiple_comparisons:
+    method: holm_familywise_error
+    alpha: 0.05
+    scope: exploratory_horizon_by_magnitude_tests_only
+    family: all_registered_horizon_by_magnitude_tests_within_stage_and_null_type
+    family_partition: separate_time_and_space_null_families
+    G2_primary_macro_endpoint_in_family: false
+  short_window_non_degradation:
+    horizons_days: [7, 30]
+    maximum_strict_recall_drop_percentage_points: 2
+    minimum_information_gain_upper_confidence_bound: 0
+  marked_model_uncertainty:
+    interval_level: 0.90
+    acceptable_empirical_coverage: [0.80, 1.00]
+
+hypotheses: [H0, H1, H2, H3, H4, H5]
+gates: [G0, G1, G2, G3, G4, G5, G6, G7, G8]
+gate_bindings:
+  G2: H1_and_practical_improvement
+  G3: H2_and_stable_fold_rule
+  G4: H3_and_short_window_non_degradation
+  G6: H5_and_practical_improvement
+  G7: locked_macro_M5_6_information_gain_and_area_recall_replication
+  G8: prospective_macro_M5_6_information_gain_and_area_recall_replication
+  stage_7: H4
+gate_primary_endpoints:
+  G2:
+    magnitude_bin: M5_6
+    aggregation: macro_average_across_evaluable_horizons
+    minimum_evaluable_horizons: 3
+    minimum_independent_events: 20
+    minimum_horizons_with_positive_point_information_gain: 3
+    information_gain_lower_95pct_bound_gt: 0
+    primary_time_permutation_monte_carlo_p_lte: 0.05
+    primary_permutation_multiplicity_adjustment: none_single_preregistered_primary_endpoint
+    practical_improvement_any_of:
+      - same_area_strict_recall_gain_percentage_points_gte: 5
+        lower_95pct_bound_gt: 0
+      - same_recall_union_area_relative_reduction_gte: 0.10
+        lower_95pct_bound_gt: 0
+    M6_plus_role: exploratory_when_independent_events_lt_10
+locked_test:
+  formal_runs_allowed: 1
+  tuning_after_result_forbidden: true
+  finite_cohort: true
+  evaluate_when_fully_mature: true
+  outcomes_sealed_until_formal_evaluation: true
+  primary_magnitude_bin: M5_6
+  primary_horizons_days: [7, 30, 90, 180, 365]
+  primary_aggregation: macro_average_across_evaluable_horizons
+  formal_recall_exposures: same_nonoverlapping_exposures_as_information_gain
+  bootstrap_rule: same_joint_physical_event_cluster_replicates_as_information_gain
+  minimum_evaluable_horizons: 3
+  minimum_independent_m5_6_events: 20
+  pass_rule:
+    information_gain_lower_95pct_bound_gt: 0
+    and_one_of:
+      - same_area_strict_recall_gain_percentage_points_gte: 5
+        lower_95pct_bound_gt: 0
+      - same_recall_union_area_relative_reduction_gte: 0.10
+        lower_95pct_bound_gt: 0
+    minimum_improving_horizons: 3
+  m6_plus_rule: exploratory_when_independent_events_lt_10
+  insufficient_sample_action: report_evidence_insufficient_without_reopening_test
+  execution_commands:
+    forecast_stage_9_mode: locked_test_only
+    mature_stage_9_mode: sealed_until_full_cohort_maturity
+prospective_gate_G8:
+  minimum_mature_issue_dates: 52
+  minimum_independent_m5_plus_events: 20
+  minimum_independent_m6_plus_events_for_non_exploratory_claim: 10
+  pass_rule: replicate_locked_test_primary_endpoints_with_95pct_interval_excluding_no_improvement

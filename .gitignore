@@ -1,0 +1,48 @@
+# Python environments and caches
+.venv/
+.wheel-test/
+.wheel-smoke/
+.wheel-final/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.uv-cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Raw, intermediate, and generated scientific artifacts
+data/interim/**
+!data/interim/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+models/registry/**
+!models/registry/.gitkeep
+models/frozen/**
+!models/frozen/.gitkeep
+outputs/experiments/**
+!outputs/experiments/.gitkeep
+outputs/backtests/**
+!outputs/backtests/.gitkeep
+outputs/prospective/**
+!outputs/prospective/.gitkeep
+outputs/releases/**
+!outputs/releases/.gitkeep
+outputs/run_manifests/**
+!outputs/run_manifests/.gitkeep
+
+# Local overrides and secrets
+.env
+.env.*
+!.env.example
+configs/local*.yaml

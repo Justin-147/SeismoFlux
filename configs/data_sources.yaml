@@ -1,0 +1,50 @@
+schema_version: 1
+source_root_env: SEISMOFLUX_SOURCE_ROOT
+source_root: 'D:\AIPred\LocationPred'
+source_root_resolution: environment_overrides_config
+inventory_output: data/manifests/source_inventory.csv
+
+sources:
+  - id: anomaly_tables
+    category: dynamic_anomaly
+    kind: directory
+    path: anomaly
+    recursive: true
+    license_status: unknown_no_redistribution
+  - id: earthquake_catalog_m3_plus
+    category: earthquake_catalog
+    kind: file
+    path: china3new.eqt
+    recursive: false
+    license_status: unknown_no_redistribution
+  - id: earthquake_catalog_m5_plus
+    category: earthquake_catalog
+    kind: file
+    path: 1900年以来5级以上地震目录_simple.xlsx
+    recursive: false
+    license_status: unknown_no_redistribution
+  - id: fault_coordinates
+    category: active_fault
+    kind: file
+    path: FaultCord.xlsx
+    recursive: false
+    license_status: unknown_no_redistribution
+  - id: fault_attributes
+    category: active_fault
+    kind: file
+    path: FaultAttri_ALLV4_修改.xlsx
+    recursive: false
+    license_status: unknown_no_redistribution
+  - id: long_term_hazard
+    category: long_term_hazard
+    kind: file
+    path: weight_analysis-修改newV4_修改.xlsx
+    recursive: false
+    license_status: unknown_no_redistribution
+  - id: plotbd_basemap_and_fault_traces
+    category: basemap_and_fault_trace
+    kind: directory
+    path: PlotBD
+    recursive: true
+    license_status: unknown_no_redistribution
+    include_extensions: [.gmt, .dat]

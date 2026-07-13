@@ -1,0 +1,51 @@
+config_version: 1
+
+project:
+  name: SeismoFlux
+  timezone: Asia/Shanghai
+  random_seed: 147
+
+config_files:
+  data_sources: configs/data_sources.yaml
+  research_protocol: configs/research_protocol.yaml
+  operating_points: configs/operating_points.yaml
+
+time_semantics:
+  issue_timezone: Asia/Shanghai
+  issue_time_local: '00:00:00'
+  report_date_fallback_available_at: next_day_00:00:00_Asia/Shanghai
+  availability_rule: available_at_lte_issue_time
+  forecast_interval: '(T,T+h]'
+
+study_area:
+  polygon: data/processed/china_mainland.geojson
+  include_external_trigger_buffer_km: 300
+  equal_area_crs: custom_albers_china
+
+forecast:
+  horizons_days: [7, 30, 90, 180, 365]
+  magnitude_bins:
+    - id: M5_6
+      min: 5.0
+      max_exclusive: 6.0
+    - id: M6_plus
+      min: 6.0
+      max_exclusive: null
+
+integration:
+  base_cell_km: 25
+  refine_cell_km: 12.5
+  convergence_cells_km: [50, 25, 12.5]
+
+regions:
+  component_counts: [5, 8, 10, 12]
+  union_area_budgets_km2: [300000, 450000, 600000, 750000, 960000]
+  operational_max_components: 10
+  operational_max_union_area_km2: 960000
+  strict_coverage_buffer_km: 0
+  tolerant_coverage_buffer_km: 70
+
+parallel:
+  reserve_physical_cores: 2
+  max_workers: 12
+  nested_parallelism: false
