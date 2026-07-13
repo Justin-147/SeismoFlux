@@ -1,0 +1,28 @@
+schema_version: 1
+status: candidate_only
+selection_scope: one_global_point_shared_by_all_horizons_and_magnitude_bins
+selection_rule: smallest_area_meeting_practical_gain_then_fewer_components_then_higher_recall
+component_count_candidates: [5, 8, 10, 12]
+diagnostic_only_component_counts: [12]
+union_area_budget_candidates_km2: [300000, 450000, 600000, 750000, 960000]
+same_recall_reference: best_background_strict_recall_within_each_stratum
+primary_selection_strata: nonempty_M5_6_horizons
+empty_stratum_rule: report_evidence_insufficient_and_exclude_from_macro_denominator
+minimum_evaluable_primary_strata: 3
+adoption_requirements:
+  any_of:
+    - same_area_strict_recall_gain_percentage_points: 5
+      lower_95pct_bound_gt: 0
+    - same_recall_union_area_relative_reduction: 0.10
+      lower_95pct_bound_gt: 0
+  formal_evaluation_exposures: same_nonoverlapping_exposures_as_information_gain
+  bootstrap: joint_physical_event_clusters_across_horizons
+fallback_when_no_candidate_passes:
+  gate_G6: fail
+  model: simple_threshold_region
+  component_count: 5
+  union_area_budget_km2: 300000
+operational_limits:
+  max_components: 10
+  max_union_area_km2: 960000
+selected_operating_point: null

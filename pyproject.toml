@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "seismoflux"
+version = "0.0.1"
+description = "Anomaly-informed spatiotemporal seismicity forecasting under alarm-area constraints."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+authors = [{ name = "Justin-147" }]
+keywords = ["seismology", "point-process", "forecasting", "earthquake"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+  "pydantic==2.11.7",
+  "PyYAML==6.0.2",
+]
+
+[project.scripts]
+seismoflux = "seismoflux.cli:main"
+
+[dependency-groups]
+dev = [
+  "mypy==1.16.1",
+  "pytest==8.4.1",
+  "pytest-cov==6.2.1",
+  "ruff==0.12.4",
+  "types-PyYAML==6.0.12.20250516",
+]
+
+[tool.uv]
+required-version = "==0.8.6"
+package = true
+default-groups = ["dev"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/seismoflux"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+pretty = true
+files = ["src", "tests"]
