@@ -3,7 +3,7 @@
 - 阶段：1（数据接入和质量审计）
 - 数据契约版本：`0.1.0`
 - 验收日期：2026-07-13
-- 状态：本地数据门控通过；PR、远端 CI、合并与标签发布待完成
+- 状态：完成；G0 数据门控、本地验收、远端双平台 CI、受保护 `main` 合并、标签发布及远端回读均通过
 - 原始输入清单 SHA-256：`69d8c0126d7aebbecfa253b175eda57c8a530de102095d9fd0d85dbc33e5d93c`
 - 数据目录 SHA-256：`0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50`
 - 标准化快照 ID：`debc98054172a4a1`（由原始清单、接入配置、契约与依赖指纹共同派生）
@@ -71,12 +71,12 @@
 
 独立质量报告见 [`docs/data_quality_report.md`](data_quality_report.md)，机器可读报告见 [`data/manifests/data_quality_report.json`](../data/manifests/data_quality_report.json)。
 
-## 发布闭环（待完成）
+## 发布闭环
 
-- [ ] 提交阶段 1 变更并推送阶段分支；
-- [ ] 创建 PR 并通过 Ubuntu、Windows 必需 CI；
-- [ ] 合并到受保护的 `main`；
-- [ ] 在合并后的验收提交上创建并推送 `v0.1.0-data-contract` 标签；
-- [ ] 回读远端 `main`、分支保护和标签后，才允许进入阶段 2。
-
-本记录不会预先填写 PR 编号、CI 结果、合并提交或标签对象；这些证据只能在实际发布动作完成后追加。
+- 阶段实现提交：`a041781ae1e6296ac81a09e060049508c3652c81`（`feat: complete phase 1 data contract`），已推送至 `codex/phase-1`。
+- 阶段实现 PR：[`#3 feat: complete phase 1 data contract`](https://github.com/Justin-147/SeismoFlux/pull/3)。
+- GitHub Actions：[`quality (ubuntu-latest)` 与 `quality (windows-latest)`](https://github.com/Justin-147/SeismoFlux/pull/3/checks) 均通过。
+- `main` 分支保护回读：强制 PR、严格同步、Ubuntu/Windows 必需检查、管理员约束、线性历史、会话解决以及禁止强推/删除均已启用。
+- PR #3 已于 2026-07-13 以 rebase 方式合并；阶段 1 实现对应的 `main` 提交为 `5fbc61ebc93ad1be19f943fe7224f380e052f361`，远端阶段分支已删除。
+- 带注释标签 [`v0.1.0-data-contract`](https://github.com/Justin-147/SeismoFlux/tree/v0.1.0-data-contract) 已创建并推送；标签对象为 `cbb852c1bfabac98d96bd61d1239115d280edaa2`，远端标签剥离后指向 `5fbc61ebc93ad1be19f943fe7224f380e052f361`。
+- 远端 `main`、分支保护和标签均已回读；G0 的解析、时区、去重、异常状态和泄漏测试全部通过，允许进入阶段 2。
