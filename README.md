@@ -8,9 +8,9 @@ SeismoFlux 研究条件地震活动强度和受面积约束的关注区域，不
 
 ## 当前状态
 
-项目严格按 [`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`](SEISMOFLUX_IMPLEMENTATION_HANDOFF.md) 从零实施。阶段 0 已闭环；阶段 1 数据契约版本为 `0.1.0`，本地数据接入与质量审计门控已通过：11 个标准化数据集重复运行的文件、内容和模式哈希全部一致，未来信息泄漏违规为 0，当前 106 项测试通过。
+项目严格按 [`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`](SEISMOFLUX_IMPLEMENTATION_HANDOFF.md) 从零实施。阶段 0 和阶段 1 已闭环；阶段 1 数据契约版本为 `0.1.0`。11 个标准化数据集重复运行的文件、内容和模式哈希全部一致，未来信息泄漏违规为 0，106 项测试通过，G0 数据门控通过。
 
-阶段 1 的 PR、远端 CI、合并和 `v0.1.0-data-contract` 标签仍待发布闭环；完成前不会进入阶段 2。完整证据与待办状态见 [`docs/phase1_acceptance.md`](docs/phase1_acceptance.md)。
+阶段 1 已通过 [PR #3](https://github.com/Justin-147/SeismoFlux/pull/3) 的 Ubuntu、Windows 必需 CI，并以 [`v0.1.0-data-contract`](https://github.com/Justin-147/SeismoFlux/tree/v0.1.0-data-contract) 标签固定。下一阶段为阶段 2“不含异常的背景基线”；完整验收证据见 [`docs/phase1_acceptance.md`](docs/phase1_acceptance.md)。
 
 ## 本地环境
 
