@@ -1,7 +1,7 @@
 # 阶段 0 验收记录
 
 - 阶段：0（仓库和科学契约）
-- 状态：本地、远端 CI 与 `main` 保护验收通过；PR 合并待完成
+- 状态：完成；本地验收、远端 CI、`main` 保护、PR 合并与远端回读均通过
 - 标签解释：按首轮执行清单 §40，把第一个标签 `v0.1.0-data-contract` 留到阶段 1；阶段 0 以提交固定基线，不另冒充数据契约标签
 
 ## 验收范围
@@ -41,4 +41,4 @@
 - 草稿 PR：[`#1 Stage 0: establish repository and scientific contract`](https://github.com/Justin-147/SeismoFlux/pull/1)。
 - GitHub Actions：[`quality (ubuntu-latest)` 与 `quality (windows-latest)`](https://github.com/Justin-147/SeismoFlux/pull/1/checks) 均通过。
 - `main` 分支保护回读：强制 PR、严格同步、Ubuntu/Windows 必需检查、管理员约束、线性历史、会话解决以及禁止强推/删除均已启用。
-- PR 合并及 `main` 远端提交回读：待本次记录通过最终 CI 后执行。
+- PR #1 已于 2026-07-13 以 rebase 方式合并；`main` 远端回读提交为 `848cddc`，阶段分支已删除。
