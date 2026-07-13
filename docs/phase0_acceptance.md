@@ -1,7 +1,7 @@
 # 阶段 0 验收记录
 
 - 阶段：0（仓库和科学契约）
-- 状态：本地验收通过；远端 CI、合并与 `main` 保护待完成
+- 状态：本地与远端 CI 验收通过；合并与 `main` 保护待完成
 - 标签解释：按首轮执行清单 §40，把第一个标签 `v0.1.0-data-contract` 留到阶段 1；阶段 0 以提交固定基线，不另冒充数据契约标签
 
 ## 验收范围
@@ -35,8 +35,10 @@
 - 异常周报候选文件名显示 2024 年第 36 期和 2025 年第 44 期缺失；阶段 0 不解析或补齐，阶段 1 在质量报告中正式确认。
 - 原始候选目录未设置 Windows 只读属性；阶段 0 代码只以二进制只读方式打开并在哈希前后核验文件稳定性，阶段 1 仍需固化受控只读流程。
 
-## 远端闭环（待填写）
+## 远端闭环
 
-- GitHub Actions 双平台运行：待阶段分支 PR 创建后填写。
+- 阶段实现提交：`908facf`（`build: establish stage 0 scientific contract`）。
+- 草稿 PR：[`#1 Stage 0: establish repository and scientific contract`](https://github.com/Justin-147/SeismoFlux/pull/1)。
+- GitHub Actions：[`quality (ubuntu-latest)` 与 `quality (windows-latest)`](https://github.com/Justin-147/SeismoFlux/pull/1/checks) 均通过。
 - `main` 分支保护回读：当前私有仓库的 GitHub 套餐返回 HTTP 403，需公开仓库或升级支持私有分支保护后完成。
-- 阶段提交、PR、合并及远端提交回读：待完成。
+- PR 合并及 `main` 远端提交回读：待分支保护完成后执行。
