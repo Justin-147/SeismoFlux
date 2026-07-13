@@ -1,0 +1,207 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "fault_segment",
+  "description": "Fault geometry, keyed attributes, and long-term scores; never row-position joined.",
+  "fields": [
+    {
+      "name": "fault_segment_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "fault_id",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "segment_number",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "fault_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "segment_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "simplified_geometry_wkb",
+      "nullable": false,
+      "type": "binary"
+    },
+    {
+      "name": "raw_point_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "geometry_point_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "is_new_in_source_version",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "strike_deg",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "dip_deg",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "slip_angle_deg",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "geologic_total_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geologic_strike_slip_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geologic_dip_slip_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geodetic_total_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geodetic_strike_slip_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geodetic_strike_slip_error_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geodetic_dip_slip_rate_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "geodetic_dip_slip_error_mm_per_year",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "recurrence_period_years",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "recurrence_reliability",
+      "nullable": true,
+      "type": "int64"
+    },
+    {
+      "name": "last_strong_earthquake_year_raw",
+      "nullable": true,
+      "type": "int64"
+    },
+    {
+      "name": "last_strong_earthquake_reliability",
+      "nullable": true,
+      "type": "int64"
+    },
+    {
+      "name": "elapsed_ratio_at_snapshot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "rupture_gap_weight",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "locking_weight",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "microseismic_sparsity_weight",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "coulomb_stress_weight",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "long_term_hazard_score",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "missing_fields",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "geometry_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "attribute_source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "hazard_source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "historical_model_eligible",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "true_trace_id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "true_trace_mapping_status",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "true_trace_match_confidence",
+      "nullable": false,
+      "type": "string"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "fault_id",
+    "segment_number"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "anomaly_report_period",
+  "description": "Observed weekly report periods; missing periods are never treated as zero anomalies.",
+  "fields": [
+    {
+      "name": "report_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_sha256",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "report_year",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "report_period",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "report_date",
+      "nullable": false,
+      "type": "date32[day]"
+    },
+    {
+      "name": "available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "row_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "row_report_date_mismatch_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "row_report_date_before_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "row_report_date_after_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "deformation_row_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "fluid_row_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "electromagnetic_row_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "cross_fault_row_count",
+      "nullable": false,
+      "type": "int64"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "report_date",
+    "source_file"
+  ]
+}

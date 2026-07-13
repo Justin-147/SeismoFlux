@@ -1,0 +1,68 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "fault_trace_crosswalk_audit",
+  "description": "Unreviewed stage-1 name candidates; spatial acceptance is deferred to stage 5.",
+  "fields": [
+    {
+      "name": "crosswalk_candidate_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "fault_segment_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "trace_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "fault_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "trace_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "name_match_method",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "match_confidence",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "trace_duplicate_group_id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "trace_duplicate_name_conflict",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "historical_model_eligible",
+      "nullable": false,
+      "type": "bool"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "fault_segment_id",
+    "trace_id",
+    "crosswalk_candidate_id"
+  ]
+}

@@ -1,0 +1,61 @@
+schema_version: 1
+contract_version: 0.1.0
+
+source_inventory: data/manifests/source_inventory.csv
+
+outputs:
+  processed_root: data/processed/stage1
+  contracts_root: data/contracts
+  data_catalog: data/manifests/data_catalog.json
+  quality_json: data/manifests/data_quality_report.json
+  quality_markdown: docs/data_quality_report.md
+  study_area_geojson: data/processed/china_mainland.geojson
+
+source_roles:
+  anomaly: anomaly_tables
+  earthquake_m3_plus: earthquake_catalog_m3_plus
+  earthquake_m5_plus: earthquake_catalog_m5_plus
+  fault_coordinates: fault_coordinates
+  fault_attributes: fault_attributes
+  long_term_hazard: long_term_hazard
+  basemap_and_fault_trace: plotbd_basemap_and_fault_traces
+
+time_assumptions:
+  anomaly_report_fallback: max_file_and_row_report_date_next_day_00_fixed_UTC_plus_08
+  anomaly_occurrence_time_precision: source_date_only_as_00_00_fixed_UTC_plus_08_flagged
+  earthquake_origin_timezone: fixed_UTC_plus_08
+  earthquake_publication_time: origin_time_optimistic_assumption_flagged
+  geology_snapshot_available_at: '2026-07-13T00:00:00+08:00'
+
+earthquake_deduplication:
+  auto_merge:
+    max_time_delta_seconds: 5
+    max_distance_km: 5
+    max_magnitude_delta: 0.1
+    require_unique_degree_both_sides: true
+  manual_review:
+    max_time_delta_seconds: 300
+    max_distance_km: 50
+    max_magnitude_delta: 0.5
+  canonical_source_priority: [earthquake_catalog_m5_plus, earthquake_catalog_m3_plus]
+  same_source_rule: exact_semantic_duplicates_only
+
+study_area:
+  source_relative_path: PlotBD/CN-border-L1.gmt
+  selection_rule: largest_valid_closed_ring_by_equal_area_then_lowest_segment_number
+  expected_segment_number_1based: 1
+  boundary_predicate: covers
+  island_policy: continuous_mainland_excludes_hainan_taiwan_and_other_islands
+  simplify_geometry: false
+  expected_source_sha256: f35c62ab35e7707a71885b370e07e504a902156321448c3de317542e8958e782
+  expected_coordinate_count: 45996
+  expected_geodesic_area_km2: 9415313.311
+  area_tolerance_km2: 1.0
+
+parquet:
+  compression: zstd
+  compression_level: 9
+  version: '2.6'
+  data_page_version: '1.0'
+  use_dictionary: false
+  timestamp_unit: us

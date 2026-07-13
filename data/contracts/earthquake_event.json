@@ -1,0 +1,87 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "earthquake_event",
+  "description": "Canonical physical events after configured, auditable source deduplication.",
+  "fields": [
+    {
+      "name": "event_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "origin_time_utc",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "origin_time_local",
+      "nullable": false,
+      "type": "timestamp[us, tz=+08:00]"
+    },
+    {
+      "name": "longitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "latitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "depth_km",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "magnitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "magnitude_type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "place",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "catalog_sources",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "inside_study_area",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "dedup_confidence",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "anchor_source_record_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "quality_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "origin_time_utc",
+    "event_id"
+  ]
+}

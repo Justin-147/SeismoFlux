@@ -1,0 +1,83 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "fault_point_raw",
+  "description": "Original simplified-fault points without destructive coordinate cleaning.",
+  "fields": [
+    {
+      "name": "fault_point_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "fault_id",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "segment_number",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "point_number",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "longitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "latitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "is_new_in_source_version",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "fault_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "segment_name_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_row",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "source_available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "historical_model_eligible",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "quality_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "fault_id",
+    "segment_number",
+    "point_number"
+  ]
+}
