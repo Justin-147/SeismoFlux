@@ -1,0 +1,480 @@
+schema_version: 1
+protocol_version: 0.2.0
+data_contract_version: 0.1.0
+status: preregistered_before_any_background_score
+frozen_before_background_scores: true
+frozen_on: '2026-07-13'
+freeze_tag: v0.2.0-background-protocol
+background_scores_seen_before_freeze: false
+
+inputs:
+  environment_lock: uv.lock
+  environment_lock_sha256: 34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5
+  data_catalog: data/manifests/data_catalog.json
+  data_catalog_sha256: 0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50
+  expected_stage1_snapshot_id: debc98054172a4a1
+  earthquake_dataset: earthquake_event
+  earthquake_dataset_path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+  earthquake_dataset_sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+  study_area: data/processed/china_mainland.geojson
+  study_area_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+  issue_manifest: data/manifests/background_fold_manifest.json
+  issue_manifest_sha256: 3a06f9fc1527a5b4e943de874fa81bda19d0afb0aeec832fb2e0af95f20f2e92
+  issue_manifest_source_dataset: anomaly_report_period
+  issue_manifest_source_sha256: aac44418994b6b99c633dcf536e452ad315439336bc580a13f719d95a069e176
+  issue_manifest_column_allowlist: [available_at]
+  issue_manifest_feature_values_forbidden: true
+  include_external_trigger_buffer_km: 300
+  model_feature_allowlist:
+    - origin_time_utc
+    - available_at
+    - longitude
+    - latitude
+    - magnitude
+    - inside_study_area
+  forbidden_model_dataset_prefixes: [anomaly_, fault_, basemap_]
+  anomaly_schedule_metadata_exception: available_at_only_for_actual_issue_calendar
+
+time:
+  timezone: Asia/Shanghai
+  issue_time_local: '00:00:00'
+  forecast_interval: '(T,T+h]'
+  catalog_start_utc: '1970-01-01T00:00:00Z'
+  final_parameter_fit_end_utc: '2023-06-30T16:00:00Z'
+  purge_start_local: '2023-07-02'
+  purge_end_local: '2024-06-30'
+  validation_start_local: '2024-07-01'
+  validation_end_local: '2025-07-01'
+  validation_maturity_end_local: '2026-07-01'
+  representative_issue_date_local: '2025-06-26'
+  horizons_days: [7, 30, 90, 180, 365]
+  issue_schedule: actual_available_at_dates_from_frozen_manifest
+  issue_date_bounds_inclusive: true
+  event_availability_rule: available_at_lte_issue_time
+  earthquake_publication_time_assumption: origin_time_is_optimistic_available_at
+  publication_delay_sensitivity_days: [0, 1, 7]
+  parameter_snapshot_mapping:
+    historical_fold_assessment: fit_only_through_that_folds_fit_end_utc
+    validation: fit_only_through_final_parameter_fit_end_utc
+    actual_development_issue_dates: schedule_only_not_scored_by_stage2_final_snapshot
+    online_history_update: fixed_parameters_may_condition_on_events_available_after_fit_and_before_evaluation_time
+
+parameter_selection_folds:
+  role: historical_catalog_hyperparameter_and_stability_selection
+  selection_rule: frozen_calendar_before_location_scores
+  assessment_interval: '(start,end]'
+  target_events_must_not_enter_fit: true
+  folds:
+    - id: fold_1
+      fit_end_utc: '2004-12-31T16:00:00Z'
+      assessment_start_utc: '2005-12-31T16:00:00Z'
+      assessment_end_utc: '2009-12-31T16:00:00Z'
+    - id: fold_2
+      fit_end_utc: '2009-12-31T16:00:00Z'
+      assessment_start_utc: '2010-12-31T16:00:00Z'
+      assessment_end_utc: '2014-12-31T16:00:00Z'
+    - id: fold_3
+      fit_end_utc: '2014-12-31T16:00:00Z'
+      assessment_start_utc: '2015-12-31T16:00:00Z'
+      assessment_end_utc: '2019-12-31T16:00:00Z'
+    - id: fold_4
+      fit_end_utc: '2019-12-31T16:00:00Z'
+      assessment_start_utc: '2020-12-31T16:00:00Z'
+      assessment_end_utc: '2023-06-30T16:00:00Z'
+
+completeness:
+  method: maximum_curvature_with_fixed_correction
+  magnitude_bin_width: 0.1
+  maximum_curvature_correction: 0.2
+  candidate_magnitudes: [3.0, 3.2, 3.5, 4.0]
+  sensitivity_magnitudes: [3.0, 3.2, 3.5, 4.0]
+  selection_rule: smallest_candidate_gte_max_eligible_temporal_and_spatial_estimate
+  estimate_above_maximum_candidate_action: fail_stage
+  no_eligible_temporal_or_spatial_strata_action: fail_stage
+  target_event_domain: inside_study_area_only
+  parent_buffer_events_excluded: true
+  cutoff_mapping:
+    historical_fold_assessment: that_folds_fit_end_utc
+    validation: '2023-06-30T16:00:00Z'
+  temporal_diagnostic:
+    block_anchor_utc: '1970-01-01T00:00:00Z'
+    block_years: 5
+    minimum_events_per_block: 200
+    final_partial_block_minimum_years: 3
+    final_partial_block_rule: include_if_duration_and_event_minimum_met_otherwise_report_only
+    regime_change_flag_mc_difference: 0.3
+    regime_change_flag_annual_count_ratio: 2.0
+    interpretation: detection_regime_candidate_not_causal_claim
+  spatial_diagnostic:
+    equal_area_cell_km: 500
+    sparse_parent_cell_km: 1000
+    grid_origin_m: [0.0, 0.0]
+    minimum_events_per_stratum: 200
+    sparse_rule: use_fixed_1000km_parent_then_flag_indeterminate_if_still_sparse
+    minimum_eligible_strata: 1
+    indeterminate_strata_use_global_selected_mc: true
+  gr_estimator: aki_1965_bin_width_corrected_mle
+  magnitude_type_policy: numeric_catalog_magnitude_with_missing_type_flag
+  pre_1970_m5_catalog_for_completeness_forbidden: true
+
+uniform_poisson:
+  rate_estimator: inside_event_count_over_equal_area_days
+
+spatial_poisson:
+  method: equal_area_gaussian_kde
+  mixture_boundary_normalization: normalize_complete_mixture_once_over_study_area
+  gaussian_support: infinite
+  rate_component: inside_training_event_count_over_training_days
+  spatial_density_integral_over_study_area: 1.0
+  normalization_grid_km: 12.5
+  normalization_quadrature_rule: density_at_clipped_cell_representative_point_times_exact_clipped_area
+  convergence_failure_action: fail_model_and_G1_for_that_model
+  bandwidth_candidates_km: [75, 100, 150, 200, 300]
+  fold_score: continuous_time_information_gain_per_physical_event_on_same_fold_events_and_compensator
+  best_bandwidth_rule: highest_equal_weight_mean_of_four_development_fold_scores
+  paired_difference: candidate_minus_best_bandwidth_on_same_fold_events_and_compensator
+  standard_error_formula: sample_stddev_of_four_paired_fold_differences_ddof1_div_sqrt4
+  one_standard_error_eligibility: candidate_mean_fold_score_gte_best_mean_fold_score_minus_paired_standard_error
+  selection_rule: largest_eligible_bandwidth_km
+  exact_tie_rule: largest_bandwidth_km
+  candidate_pool: only_bandwidths_passing_normalization_and_grid_convergence
+  fitting_events: inside_study_area_only
+  fitting_cutoff_mapping:
+    historical_fold_assessment: that_folds_fit_end_utc
+    validation: '2023-06-30T16:00:00Z'
+
+etas:
+  family: standard_isotropic_space_time_marked_etas
+  implementation: seismoflux_numpy_scipy_cpu
+  direct_external_code_copy_forbidden: true
+  final_fit_start_utc: '2000-01-01T00:00:00Z'
+  historical_fold_fit_start_utc: '2000-01-01T00:00:00Z'
+  history_start_utc: '1970-01-01T00:00:00Z'
+  background_component:
+    spatial_density: selected_boundary_normalized_kde
+    density_domain: study_area
+    density_integral_over_study_area: 1.0
+    immigrant_rate_parameter: background_rate_per_day_inside_study_area
+    exogenous_immigrants_outside_study_area: false
+  likelihood:
+    target_events: magnitude_gte_selected_mc_and_inside_study_area_only
+    parent_events: magnitude_gte_selected_mc_inside_study_area_or_within_300km_buffer
+    external_parent_role: conditional_history_only_never_target_or_background_training_event
+    compensator_domain: study_area_only
+    assessment_history_update: sequential_events_with_available_at_lte_evaluation_time_without_parameter_refit
+    background_normalization_grid_km: 12.5
+    compensator_grid_km: 12.5
+    quadrature_rule: density_at_clipped_cell_representative_point_times_exact_clipped_area
+    convergence_failure_action: fail_model_and_G1_for_that_model
+  temporal_kernel:
+    form: normalized_infinite_support_omori_utsu
+    history_parent_cutoff_days: 3650.0
+    cutoff_role: omit_older_history_parents_without_kernel_renormalization
+  spatial_kernel:
+    form: normalized_truncated_isotropic_inverse_power
+    support_radius_km: 300.0
+    renormalize_radially_on_support: true
+    d_km2: 25.0
+    q: 1.5
+    gamma: 1.0
+    sensitivity_d_km2: [25.0, 100.0, 400.0]
+  magnitude_model:
+    family: truncated_gutenberg_richter
+    lower_magnitude: selected_completeness_magnitude
+    upper_magnitude: 9.5
+    interval: closed
+    observed_magnitude_above_upper_action: fail_stage
+    b_estimator: aki_1965_bin_width_corrected_mle
+    effective_lower_edge: selected_mc_minus_half_magnitude_bin_width
+    b_formula: log10_e_divided_by_mean_magnitude_minus_effective_lower_edge
+    beta_definition: beta_equals_b_times_ln_10
+    density: beta_exp_minus_beta_x_divided_by_one_minus_exp_minus_beta_L_for_0_lte_x_lte_L
+    productivity_expectation: truncated_exponential_closed_form
+  branching_ratio:
+    formula: productivity_k_times_expected_exp_alpha_m_minus_mc_under_truncated_gr
+    expectation_if_alpha_ne_beta: beta_div_beta_minus_alpha_times_one_minus_exp_minus_beta_minus_alpha_L_div_one_minus_exp_minus_beta_L
+    expectation_if_abs_alpha_minus_beta_lte_1e_12: beta_times_L_div_one_minus_exp_minus_beta_L
+    equality_tolerance: 1.0e-12
+    temporal_kernel_total_mass: one_on_infinite_support
+    spatial_kernel_total_mass: one_after_radial_cutoff_renormalization
+    maximum: 0.95
+    violation_action: reject_fit
+  parameter_bounds:
+    background_rate_per_day: [0.01, 10.0]
+    productivity_k: [0.0001, 0.5]
+    alpha: [0.05, 2.0]
+    c_days: [0.001, 30.0]
+    p: [1.01, 2.5]
+  multi_start_indices: [0, 1, 2, 3, 4]
+  optimizer: scipy_lbfgsb
+  optimizer_parameterization:
+    variables: [background_rate_per_day, productivity_k, alpha, c_days, p_minus_one]
+    transform: natural_log_each_positive_variable
+    transformed_bounds: natural_log_of_physical_bounds
+    start_generation: sha256_optimizer_start_namespace_then_PCG64_uniform_on_transformed_bounds_for_each_index
+    objective_dtype: float64
+  maximum_iterations: 500
+  optimizer_options:
+    scipy_tol: null
+    ftol: 1.0e-12
+    gtol: 1.0e-6
+    maxiter: 500
+    maxfun: 100000
+    maxls: 20
+    gradient_source: numerical_three_point_objective_including_background_trigger_and_compensator
+    gradient_relative_step: 1.0e-6
+    invalid_physical_or_branching_point_objective: positive_infinity
+    gradient_invalid_stencil: second_order_one_sided_inward_or_fail_start
+  numerical_stability:
+    minimum_converged_starts: 4
+    gradient_infinity_norm_maximum: 1.0e-4
+    best_three_relative_objective_range_maximum: 1.0e-4
+    best_three_relative_objective_denominator: max_1_abs_best_objective
+    transformed_parameter_maximum_range: 0.1
+    transformed_parameter_range_statistic: maximum_over_parameters_of_max_minus_min_across_best_three_transformed_vectors
+    hessian_minimum_eigenvalue: 1.0e-8
+    hessian_condition_number_maximum: 1.0e10
+    hessian_method: central_second_difference_of_objective_on_transformed_scale
+    hessian_relative_step: 1.0e-4
+    hessian_step_formula: relative_step_times_max_1_abs_parameter
+    hessian_symmetrize: true
+    hessian_invalid_stencil_action: fail_etas_stability_without_one_sided_substitution
+    hessian_condition_number_definition: largest_eigenvalue_divided_by_smallest_eigenvalue_of_symmetric_positive_definite_hessian
+    finite_nonnegative_intensity_required: true
+    failure_action: register_failed_etas_without_relaxing_thresholds
+  parameter_uncertainty:
+    method: observed_hessian_delta
+    confidence_level: 0.95
+    non_positive_definite_hessian_action: fail_etas_stability
+  future_simulation_replicates: 128
+  future_descendant_generations_included: true
+  simulation:
+    target_domain: study_area_only
+    propagation_domain: study_area_plus_300km_buffer_with_absorbing_outer_boundary
+    background_immigrant_domain: study_area_only
+    retain_buffer_descendants_as_parents: true
+    buffer_events_in_outputs_or_metrics: false
+
+randomness:
+  root_seed: 147
+  bit_generator: numpy.random.PCG64
+  float_dtype: float64
+  python_hash_forbidden: true
+  global_rng_forbidden: true
+  seed_derivation:
+    encoding: utf-8
+    separator_hex: '00'
+    ordered_fields: [literal_seismoflux, root_seed_decimal, protocol_version, namespace, model_id, issue_id_or_dash, replicate_index_decimal_8]
+    digest: sha256
+    entropy: first_16_digest_bytes_as_unsigned_big_endian_integer
+    generator: numpy.random.Generator
+    namespaces: [optimizer_start, future_simulation, simulation_regression, bootstrap]
+    worker_count_invariant: true
+    gather_order: replicate_index_ascending
+    reference_sha256: ee4831fcb2a99d18069fbb1fe427c2ef8fba0055d8bd2efa26cfdd7d32d36dcb
+    reference_entropy_integer: 316731122229485399933275391768849269487
+    namespace_contexts:
+      optimizer_start:
+        model_ids: [etas/fold_1, etas/fold_2, etas/fold_3, etas/fold_4, etas/final_validation]
+        issue_id_or_dash: '-'
+        replicate_index_role: optimizer_start_index
+        replicate_index_first: 0
+        replicate_index_last_inclusive: 4
+      future_simulation:
+        model_id: etas/final_validation
+        issue_id_rule: validation_slash_actual_issue_date_yyyy_mm_dd_from_frozen_manifest
+        replicate_index_role: future_catalog_replicate
+        replicate_index_first: 0
+        replicate_index_last_inclusive: 127
+      simulation_regression:
+        model_id: etas_inverse_power_cut300_v1
+        issue_id_or_dash: '-'
+        replicate_index_role: analytic_fixture_replicate
+        replicate_index_first: 0
+        replicate_index_last_inclusive: 8191
+      bootstrap:
+        model_ids: [spatial_poisson_vs_uniform_poisson, etas_vs_uniform_poisson]
+        issue_id: g1_primary_validation_2024-07-01_2025-07-01
+        replicate_index_role: bootstrap_replicate
+        replicate_index_first: 0
+        replicate_index_last_inclusive: 1999
+  future_simulation:
+    longest_horizon_days: 365
+    simulate_once_per_replicate: true
+    reuse_same_catalog_for_horizons_days: [7, 30, 90, 180, 365]
+    reuse_same_catalog_for_grid_cells_km: [50, 25, 12.5]
+    maximum_events_per_replicate: 100000
+    event_cap_hit_is_failure: true
+    stable_event_order: [origin_time, generation, parent_id, within_parent_child_index]
+
+integration:
+  equal_area_crs: '+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs'
+  grid_cells_km: [50, 25, 12.5]
+  primary_grid_cell_km: 25
+  grid_origin_m: [0.0, 0.0]
+  cell_index_formula: column_floor_x_minus_origin_x_div_cell_m_row_floor_y_minus_origin_y_div_cell_m
+  cell_bounds: x_origin_plus_column_times_cell_m_lte_x_lt_next_and_y_origin_plus_row_times_cell_m_lte_y_lt_next
+  cell_order: row_y_ascending_then_column_x_ascending
+  cell_id_template: g{cell_size_mm_8digit}_r{signed_row_8digit}_c{signed_column_8digit}
+  inclusion_rule: positive_area_intersection_with_study_area
+  boundary_rule: shapely_intersection_then_positive_exact_projected_area
+  quadrature_point: shapely_representative_point_of_clipped_geometry
+  cell_mass_formula: density_at_quadrature_point_times_clipped_area
+  refinement_rule: target_independent_full_grid_only
+  primary_convergence_pair_km: [25, 12.5]
+  diagnostic_convergence_pair_km: [50, 25]
+  convergence_common_parent_rule: aggregate_fine_cell_mass_to_aligned_coarse_parent
+  relative_expected_count_formula: abs_coarse_minus_fine_div_max_abs_fine_and_floor
+  density_l1_formula: sum_abs_coarse_normalized_cell_mass_minus_aggregated_fine_normalized_cell_mass
+  relative_expected_count_tolerance: 0.02
+  density_l1_tolerance: 0.05
+  relative_denominator_floor: 1.0e-12
+  both_totals_below_floor_relative_difference: 0.0
+  target_independent_grid: true
+  convergence_failure_action: fail_model_and_G1_for_that_model
+
+evaluation:
+  primary_target: unmarked_events_at_or_above_selected_completeness_magnitude_inside_study_area_only
+  information_gain_unit: nats_per_physical_event
+  includes_integrated_intensity_compensator: true
+  g1_primary_endpoint:
+    type: continuous_time_sequential_conditional_point_process_log_likelihood
+    validation_interval_local: '(2024-07-01T00:00:00,2025-07-01T00:00:00]'
+    validation_parameter_snapshot: final_fit_through_2023-06-30T16:00:00Z
+    validation_history_rule: update_with_available_events_before_each_event_time_without_refitting
+    horizon_aggregation: none
+    score_formula: nonuniform_log_likelihood_minus_uniform_log_likelihood_divided_by_inside_physical_target_event_count
+    zero_target_event_action: evidence_insufficient
+    development_folds: parameter_selection_folds
+    development_fold_score: same_continuous_time_score_over_each_folds_assessment_interval
+    development_fold_summary: equal_weight_mean_and_sample_standard_error_ddof1
+  issue_based_horizon_backtests:
+    role: secondary_integration_diagnostics_not_used_by_G1
+    partitions: [validation]
+    actual_development_dates_role: reserved_for_later_anomaly_comparison_not_scored_with_final_background_snapshot
+    issue_dates_source: frozen_background_fold_manifest
+    exposure_selection: greedy_earliest_nonoverlapping_from_first_actual_issue_date
+    retain_zero_event_exposures: true
+    zero_event_exposure_contribution: integrated_compensator_only
+    denominator: unique_inside_physical_target_events_per_partition_and_horizon
+    zero_total_target_event_action: report_undefined_evidence_insufficient
+    event_multiplicity_per_partition_horizon: at_most_one
+    cross_horizon_aggregation: none_report_each_horizon_only
+  bootstrap_replications: 2000
+  bootstrap_seed_source: sha256_bootstrap_namespace
+  confidence_level: 0.95
+  g1_pass_rule:
+    eligible_nonuniform_models: [spatial_poisson, etas]
+    conjunction_unit: same_nonuniform_model_must_satisfy_every_requirement
+    any_nonuniform_model_validation_information_gain_gt_zero: true
+    minimum_positive_development_folds: 3
+    required_development_folds: 4
+    development_folds_reference: parameter_selection_folds
+    model_must_be_numerically_stable: true
+  model_selection:
+    eligible_model_pool: only_models_with_successful_fit_and_all_model_specific_numerical_stability_and_grid_convergence_gates
+    failed_model_role: excluded_from_validation_best_one_standard_error_threshold_and_final_selection
+    validation_best_rule: highest_validation_information_gain_per_physical_event
+    simplicity_order: [uniform_poisson, spatial_poisson, etas]
+    paired_difference: candidate_minus_validation_best_on_same_fold_events_and_compensator
+    standard_error_formula: sample_stddev_of_four_paired_fold_differences_ddof1_div_sqrt4
+    one_standard_error_eligibility: candidate_validation_ig_gte_best_validation_ig_minus_paired_standard_error
+    final_rule: first_eligible_model_in_simplicity_order
+  target_magnitude_bins_role: exploratory_until_stage_7
+  minimum_target_events_for_non_exploratory_claim: 20
+  insufficient_nonoverlapping_exposures_action: report_evidence_insufficient_without_overlapping_windows
+
+numerical_regression:
+  production_fixture: tests/fixtures/background/etas_micro_reference.json
+  production_fixture_sha256: c6db5e4079f583f0ff12d24136459368614ab389765081ef8945594762cc7a04
+  production_scalar_absolute_tolerance: 1.0e-14
+  production_scalar_relative_tolerance: 5.0e-12
+  production_log_likelihood_absolute_tolerance: 1.0e-11
+  authoritative_oracle: CRAN_ETAS_0.7.2_and_JSS_2019
+  oracle_metadata: tests/fixtures/background/jss_japan_reference.json
+  oracle_metadata_sha256: 28f66bdbc192be37923108b063036104d73c8ef32142a58e57e633a60be2e924
+  oracle_execution: isolated_optional_external_not_production_dependency
+  oracle_code_copy_forbidden: true
+  japan_reference:
+    total_events: 10072
+    target_events: 4656
+    log_likelihood: -15310.96
+    aic: 30637.91
+    parameter_max_absolute_tolerance: 0.001
+    likelihood_absolute_tolerance: 0.01
+  simulation_oracle: lmizrahi_etas_3.2_commit_9152bb25c0f9c4beb9121c88e92f1adb2c582161
+  cross_implementation_comparison: distributional_not_row_identity
+  analytic_simulation:
+    fixture_id: etas_inverse_power_cut300_v1
+    replicate_count: 8192
+    magnitude_distribution:
+      family: truncated_gutenberg_richter
+      lower_magnitude: 3.0
+      upper_magnitude: 7.0
+      beta: 2.0
+    root_event: {time_days: 0.0, x_km: 0.0, y_km: 0.0, magnitude: 4.0}
+    simulation_end: genealogical_extinction
+    temporal_horizon_days: null
+    spatial_cutoff_km: 300.0
+    expected_mean_exp_alpha_delta_m: 1.964027580075817
+    expected_generic_branching_ratio: 0.3928055160151634
+    expected_generic_offspring_variance: 0.5586167266674938
+    expected_root_direct_offspring_mean: 0.5436563656918091
+    expected_root_total_descendants_mean: 0.8953578796104242
+    expected_root_total_descendants_variance: 2.8311915410643453
+    expected_root_zero_descendant_probability: 0.580621402297363
+    descendant_mean_absolute_tolerance: 0.08
+    descendant_variance_relative_tolerance: 0.25
+    zero_descendant_probability_absolute_tolerance: 0.03
+    direct_offspring_pit_ks_maximum: 0.035
+    minimum_pooled_direct_offspring: 3500
+    event_cap_hits_required: 0
+    nonfinite_values_required: 0
+  external_simulation_oracle:
+    execution: isolated_manual_release_check
+    production_dependency: false
+    replicate_count_per_implementation: 4096
+    scenario:
+      fixture_id: etas_inverse_power_cut300_v1
+      temporal_horizon_days: 365
+      include_all_descendant_generations: true
+      comparison_requires_adapted_common_kernel_conventions: true
+    sampling_for_continuous_comparison: first_direct_child_per_nonempty_replicate
+    statistics: [descendant_count, descendant_mean, descendant_variance, zero_descendant_probability, generation_at_least_2_probability, direct_child_time, direct_child_radius, direct_child_magnitude]
+    descendant_count_two_sample_ks_maximum: 0.05
+    descendant_mean_relative_tolerance: 0.10
+    descendant_mean_absolute_floor: 0.05
+    descendant_variance_relative_tolerance: 0.20
+    probability_absolute_tolerance: 0.03
+    continuous_two_sample_ks_maximum: 0.06
+    event_cap_hits_required: 0
+    nonfinite_values_required: 0
+    unavailable_external_oracle_action: record_not_run_without_waiving_production_regressions
+
+outputs:
+  content_address_algorithm: sha256_seismoflux_canonical_json_v1_first_16_hex
+  canonical_json:
+    mapping_keys: unicode_NFC_strings_sorted_by_codepoint
+    string_values: unicode_NFC
+    integers: base10_no_leading_zero
+    floats: finite_only_encoded_as_typed_object_with_python_float_hex_string
+    nonfinite_float_action: reject
+    mapping_separators: comma_and_colon_without_whitespace
+    encoding: utf-8_without_bom_or_trailing_newline
+    project_paths: normalized_posix_relative
+  content_address_inputs: [protocol, input_hashes, model_parameters, code_commit, uv_lock_sha256]
+  input_hashes_required_keys: [environment_lock, data_catalog, earthquake_dataset, study_area, issue_manifest, production_fixture, oracle_metadata]
+  existing_id_different_bytes_action: hard_fail_no_overwrite
+  write_protocol:
+    staging: same_parent_temporary_directory
+    file_manifest_fields: [relative_path, byte_count, sha256, media_type]
+    durability: flush_and_fsync_files_before_manifest
+    publish: atomic_directory_rename
+    existing_identical_id_action: verify_manifest_and_return_without_rewrite
+  processed_root: data/processed/stage2
+  backtest_root: outputs/backtests/background
+  experiment_root: outputs/experiments/background
+  model_root: models/registry/background
+  registry: data/manifests/background_model_registry.json
+  fold_manifest: data/manifests/background_fold_manifest.json
+  report: docs/background_baseline_report.md

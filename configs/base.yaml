@@ -9,6 +9,7 @@ config_files:
   data_sources: configs/data_sources.yaml
   ingestion: configs/ingestion.yaml
   research_protocol: configs/research_protocol.yaml
+  background: configs/background.yaml
   operating_points: configs/operating_points.yaml
 
 time_semantics:

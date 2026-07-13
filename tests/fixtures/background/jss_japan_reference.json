@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "oracle_id": "cran_etas_0_7_2_jss_japan",
+  "execution_role": "isolated_optional_external_oracle",
+  "production_dependency": false,
+  "code_or_data_redistribution": false,
+  "sources": {
+    "jss_article": "https://www.jstatsoft.org/article/view/v088c01",
+    "cran_package": "https://cran.r-project.org/package=ETAS",
+    "cran_tarball": "https://cran.r-project.org/src/contrib/ETAS_0.7.2.tar.gz",
+    "package_version": "0.7.2",
+    "package_license": "GPL-2-or-later",
+    "tarball_sha256": "53819f5043c4d33fe688b33a8f8e40d3cd69376613283468c18bbd4a67c43359",
+    "rda_member": "ETAS/data/japan.quakes.rda",
+    "rda_sha256": "873cf037a8754728980e0f765543f6151369b7757ea3f0041bbb06864892a4ec"
+  },
+  "raw_dataset": {
+    "rda_rows": 13724,
+    "minimum_magnitude": 4.5,
+    "depth_limit_km": 100.0,
+    "source_coordinate_system": "longitude_latitude_decimal_degree"
+  },
+  "catalog_construction": {
+    "time_begin": "default_first_source_event",
+    "study_start": "1953-05-26",
+    "study_end": "1990-01-08",
+    "magnitude_threshold": 4.5,
+    "flatmap": true,
+    "distance_unit": "degree",
+    "roundoff": true,
+    "timezone": "GMT",
+    "region_polygon_longitude": [134.0, 137.9, 143.1, 144.9, 147.8, 137.8, 137.4, 135.1, 130.6],
+    "region_polygon_latitude": [31.9, 33.0, 33.2, 35.2, 41.3, 44.2, 40.2, 38.0, 35.4],
+    "constructed_revents_rows": 10072,
+    "target_event_rows": 4656
+  },
+  "fit_arguments": {
+    "nnp": 5,
+    "bwm": 0.05,
+    "ndiv": 1000,
+    "no_itr": 11,
+    "rel_tol": 0.001,
+    "eps": 0.000001,
+    "cxxcode": true,
+    "nthreads": 1,
+    "mver": 1
+  },
+  "initial_theta": {
+    "order": ["mu", "A", "c", "alpha", "p", "D", "q", "gamma"],
+    "values": [0.592844590, 0.204288231, 0.022692883, 1.495169224, 1.109752319, 0.001175925, 1.860044210, 1.041549634]
+  },
+  "expected": {
+    "beta": 1.9734,
+    "theta": {
+      "mu": 0.5505,
+      "A": 0.1658,
+      "c": 0.0296,
+      "alpha": 1.6579,
+      "p": 1.1534,
+      "D": 0.0018,
+      "q": 1.9507,
+      "gamma": 1.0670
+    },
+    "log_likelihood": -15310.96,
+    "aic": 30637.91,
+    "aic_fitted_parameter_count": 8
+  },
+  "units": {
+    "beta": "magnitude^-1",
+    "mu": "dimensionless_multiplier_of_semiparametric_background_u",
+    "A": "expected_direct_offspring_scale_dimensionless",
+    "c": "day",
+    "alpha": "magnitude^-1",
+    "p": "dimensionless",
+    "D": "degree^2",
+    "q": "dimensionless",
+    "gamma": "magnitude^-1",
+    "u": "events*day^-1*degree^-2"
+  },
+  "tolerances": {
+    "counts": "exact",
+    "max_absolute_beta_or_theta_error_strictly_less_than": 0.001,
+    "absolute_log_likelihood_error_strictly_less_than": 0.01,
+    "absolute_aic_error_strictly_less_than": 0.01
+  }
+}
