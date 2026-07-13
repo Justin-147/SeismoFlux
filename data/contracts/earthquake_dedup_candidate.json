@@ -1,0 +1,84 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "earthquake_dedup_candidate",
+  "description": "Cross-catalog duplicate candidates and their non-transitive decisions.",
+  "fields": [
+    {
+      "name": "candidate_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "m3_group_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "m5_group_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "m3_source_record_ids",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "m5_source_record_ids",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "time_delta_seconds",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "distance_km",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "magnitude_delta",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "exact_match",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "auto_eligible",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "m3_auto_degree",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "m5_auto_degree",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "decision",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "merged_event_id",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "time_delta_seconds",
+    "distance_km",
+    "magnitude_delta",
+    "candidate_id"
+  ]
+}

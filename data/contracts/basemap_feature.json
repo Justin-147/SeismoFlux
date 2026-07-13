@@ -1,0 +1,94 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "basemap_feature",
+  "description": "Visualization and boundary linework kept separate from fault attributes.",
+  "fields": [
+    {
+      "name": "basemap_feature_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "role",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_segment_number",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "geometry_wkb",
+      "nullable": false,
+      "type": "binary"
+    },
+    {
+      "name": "raw_point_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "geometry_point_count",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "is_closed",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "geometry_hash",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "duplicate_group_id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "duplicate_geometry",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "quality_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "delimiter_source_line",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "source_comments",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "source_available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "model_feature_eligible",
+      "nullable": false,
+      "type": "bool"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "role",
+    "source_file",
+    "source_segment_number",
+    "basemap_feature_id"
+  ]
+}

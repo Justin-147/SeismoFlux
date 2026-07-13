@@ -1,8 +1,10 @@
 schema_version: 1
 protocol_version: 1.0.0
-status: draft_pending_data_contract_freeze
+data_contract_version: 0.1.0
+status: stage_1_data_contract_frozen
 registered_without_locked_test_results: true
-planned_freeze_tag: v0.1.0-data-contract
+freeze_tag: v0.1.0-data-contract
+frozen_on: '2026-07-13'
 random_seed: 147
 stability_seeds: [147, 1147, 2147, 3147, 4147]
 

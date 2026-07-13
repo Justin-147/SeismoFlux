@@ -42,13 +42,92 @@ def test_every_command_supports_machine_readable_dry_run(
 def test_deferred_command_fails_instead_of_making_placeholder_output(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    exit_code = main(["ingest"])
+    exit_code = main(["build-background"])
     captured = capsys.readouterr()
     manifest = cast(dict[str, Any], json.loads(captured.out))
 
     assert exit_code == 2
     assert manifest["status"] == "blocked"
-    assert "deferred to stage 1" in captured.err
+    assert "deferred to stage 2" in captured.err
+
+
+@pytest.mark.parametrize(
+    ("command", "pipeline_name"),
+    (("ingest", "ingest_stage1"), ("validate-data", "validate_stage1_data")),
+)
+def test_stage1_dry_run_does_not_execute_pipeline(
+    command: str,
+    pipeline_name: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def unexpected_pipeline_call(**_: Any) -> dict[str, Any]:
+        raise AssertionError("dry-run must not execute the stage-1 pipeline")
+
+    monkeypatch.setattr(cli_module, pipeline_name, unexpected_pipeline_call)
+
+    exit_code = main([command, "--dry-run"])
+    captured = capsys.readouterr()
+    manifest = cast(dict[str, Any], json.loads(captured.out))
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert manifest["implementation_status"] == "implemented"
+    assert manifest["status"] == "planned"
+    assert manifest["details"]["source_count"] == 7
+
+
+@pytest.mark.parametrize(
+    ("command", "pipeline_name"),
+    (("ingest", "ingest_stage1"), ("validate-data", "validate_stage1_data")),
+)
+def test_stage1_execute_calls_pipeline_and_emits_completed_manifest(
+    command: str,
+    pipeline_name: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    calls: list[dict[str, Any]] = []
+
+    def pipeline(**kwargs: Any) -> dict[str, Any]:
+        calls.append(kwargs)
+        return {"pipeline_result": "passed"}
+
+    monkeypatch.setattr(cli_module, pipeline_name, pipeline)
+
+    exit_code = main([command])
+    captured = capsys.readouterr()
+    manifest = cast(dict[str, Any], json.loads(captured.out))
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert len(calls) == 1
+    assert calls[0]["config_path"] == Path("configs/base.yaml")
+    assert manifest["mode"] == "execute"
+    assert manifest["implementation_status"] == "implemented"
+    assert manifest["status"] == "completed"
+    assert manifest["details"]["pipeline_result"] == "passed"
+
+
+@pytest.mark.parametrize(
+    "destination",
+    (
+        "data/manifests/data_catalog.json",
+        "data/manifests/data_quality_report.json",
+        "data/contracts/run-manifest.json",
+        "data/processed/stage1/run-manifest.json",
+    ),
+)
+def test_stage1_manifest_cannot_overwrite_protected_artifacts(
+    destination: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["ingest", "--dry-run", "--manifest", destination])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert "collides with a protected project artifact" in captured.err
 
 
 def test_dry_run_writes_only_an_explicit_manifest(

@@ -1,0 +1,67 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "anomaly_entity_audit",
+  "description": "Non-destructive anomaly identity, duplicate, and end-time review records.",
+  "fields": [
+    {
+      "name": "audit_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "audit_type",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "source_sheet",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "report_date",
+      "nullable": true,
+      "type": "date32[day]"
+    },
+    {
+      "name": "anomaly_ids",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "observation_ids",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "reliability_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "previous_reported_end_time",
+      "nullable": true,
+      "type": "timestamp[us, tz=+08:00]"
+    },
+    {
+      "name": "current_reported_end_time",
+      "nullable": true,
+      "type": "timestamp[us, tz=+08:00]"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "audit_type",
+    "audit_id"
+  ]
+}

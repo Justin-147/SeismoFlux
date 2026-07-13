@@ -1,0 +1,204 @@
+{
+  "blocking_errors": [],
+  "contract_version": "0.1.0",
+  "domains": {
+    "anomaly": {
+      "available_at_max_utc": "2026-07-01T16:00:00+00:00",
+      "available_at_min_utc": "2022-07-20T16:00:00+00:00",
+      "blank_row_count": 0,
+      "end_flag_counts": {
+        "否": 56188,
+        "是": 3716
+      },
+      "exact_duplicate_excess_row_count": 10,
+      "exact_duplicate_group_count": 6,
+      "file_count": 205,
+      "merged_cell_count": 0,
+      "missing_field_counts": {
+        "latitude": 143,
+        "longitude": 143,
+        "measurement": 467,
+        "station_name": 143
+      },
+      "missing_report_periods": [
+        {
+          "expected_report_date": "2024-09-04",
+          "report_period": 36,
+          "report_year": 2024
+        },
+        {
+          "expected_report_date": "2025-10-29",
+          "report_period": 44,
+          "report_year": 2025
+        }
+      ],
+      "natural_key_collision_excess_row_count": 11,
+      "natural_key_collision_group_count": 6,
+      "observation_count": 59904,
+      "raw_row_report_date_max": "2026-07-01",
+      "raw_row_report_date_min": "2022-07-18",
+      "report_date_max": "2026-07-01",
+      "report_date_min": "2022-07-20",
+      "report_state_counts": {
+        "取消": 949,
+        "持续": 57964,
+        "新增": 991
+      },
+      "reported_end_time_count": 3716,
+      "reported_end_time_max": "2026-07-01T00:00:00+08:00",
+      "reported_end_time_min": "2018-12-31T00:00:00+08:00",
+      "right_censored_count": 56193,
+      "row_report_date_mismatch_count": 313,
+      "row_report_date_offset_days": {
+        "-1": 91,
+        "-2": 35,
+        "-7": 186,
+        "0": 59591,
+        "4": 1
+      },
+      "rows_by_discipline": {
+        "形变": 17985,
+        "流体": 14367,
+        "电磁": 9258,
+        "跨断层": 18294
+      },
+      "spatial_bbox_wgs84": {
+        "max_latitude": 49.27,
+        "max_longitude": 130.32,
+        "min_latitude": 19.98,
+        "min_longitude": 74.37
+      },
+      "start_time_max": "2026-06-28T00:00:00+08:00",
+      "start_time_min": "2003-10-01T00:00:00+08:00",
+      "unique_file_report_date_count": 205,
+      "unique_raw_row_report_date_count": 212,
+      "worksheet_count": 820
+    },
+    "earthquake": {
+      "available_at_max_utc": "2026-07-09T04:25:56+00:00",
+      "available_at_min_utc": "1899-12-31T16:00:00+00:00",
+      "cross_auto_ambiguous_edges": 0,
+      "cross_auto_eligible_candidates": 2882,
+      "cross_auto_merged_candidates": 2882,
+      "cross_exact_candidates": 2822,
+      "cross_review_candidates": 3006,
+      "depth_km_max": 670.0,
+      "depth_km_min": 0.0,
+      "depth_missing_records": 15198,
+      "events": 40898,
+      "inside_study_area_events": 29637,
+      "latitude_max": 83.2,
+      "latitude_min": -61.15,
+      "longitude_max": 179.95,
+      "longitude_min": -180.0,
+      "m3_below_3_records": 273,
+      "m3_input_records": 38375,
+      "m5_below_5_records": 0,
+      "m5_input_records": 5410,
+      "m5_possible_day_level_time_records": 122,
+      "m5_possible_default_depth_10_records": 2850,
+      "m5_second_60_records": 7,
+      "magnitude_max": 8.7,
+      "magnitude_min": 0.8,
+      "magnitude_type_missing_records": 43785,
+      "negative_depth_records": 15198,
+      "origin_time_max_utc": "2026-07-09T04:25:56+00:00",
+      "origin_time_min_utc": "1899-12-31T16:00:00+00:00",
+      "place_missing_records": 33,
+      "publication_time_assumption_records": 43785,
+      "repaired_place_records": 37963,
+      "same_source_duplicate_groups": 5,
+      "same_source_duplicate_records_collapsed": 5,
+      "schema_version": "earthquake-v1",
+      "source_records": 43785,
+      "timezone": "UTC+08:00"
+    },
+    "geology_and_basemap": {
+      "basemap_adjacent_duplicate_count": 2,
+      "basemap_bbox_wgs84": {
+        "max_latitude": 56.9071,
+        "max_longitude": 148.029,
+        "min_latitude": 3.408477,
+        "min_longitude": 62.892
+      },
+      "basemap_duplicate_geometry_excess": 165,
+      "basemap_duplicate_group_count": 165,
+      "basemap_feature_count": 1468,
+      "crosswalk_candidate_count": 1611,
+      "crosswalk_status": "name_candidates_only_unreviewed",
+      "elapsed_ratio_at_snapshot_max": 19.285350188602305,
+      "elapsed_ratio_at_snapshot_min": 0.00016666666666666666,
+      "elapsed_ratio_at_snapshot_missing_count": 4,
+      "fault_adjacent_duplicate_count": 8,
+      "fault_key_join_rule": "fault_id_and_segment_number_strict_one_to_one",
+      "fault_key_sets_equal": true,
+      "fault_non_simple_count": 1,
+      "fault_point_bbox_wgs84": {
+        "max_latitude": 48.2189,
+        "max_longitude": 131.0763,
+        "min_latitude": 17.505,
+        "min_longitude": 69.2595
+      },
+      "fault_point_count": 7339,
+      "fault_segment_count": 519,
+      "fault_segment_missing_field_counts": {
+        "geodetic_dip_slip_error_mm_per_year": 4,
+        "geodetic_dip_slip_rate_mm_per_year": 4,
+        "geodetic_strike_slip_error_mm_per_year": 4,
+        "geodetic_strike_slip_rate_mm_per_year": 4,
+        "geodetic_total_rate_mm_per_year": 4,
+        "geologic_dip_slip_rate_mm_per_year": 491,
+        "geologic_strike_slip_rate_mm_per_year": 482,
+        "geologic_total_rate_mm_per_year": 134,
+        "recurrence_period_years": 4
+      },
+      "fault_trace_adjacent_duplicate_count": 72,
+      "fault_trace_bbox_wgs84": {
+        "max_latitude": 55.000158,
+        "max_longitude": 134.4805,
+        "min_latitude": 15.005527,
+        "min_longitude": 72.0
+      },
+      "fault_trace_count": 7216,
+      "fault_trace_duplicate_geometry_excess": 197,
+      "fault_trace_duplicate_group_count": 144,
+      "fault_trace_duplicate_name_conflict_group_count": 30,
+      "fault_trace_non_simple_count": 18,
+      "fault_trace_numeric_name_count": 44,
+      "fault_trace_usable_count": 7215,
+      "fault_trace_zero_length_count": 1,
+      "hazard_score_mismatch_count": 0,
+      "historical_model_eligible": false,
+      "source_available_at": "2026-07-12T16:00:00Z",
+      "study_area_target_independent": true,
+      "true_trace_accepted_mapping_count": 0,
+      "true_trace_mapping_status_counts": {
+        "unmatched": 277,
+        "unreviewed": 242
+      }
+    }
+  },
+  "leakage": {
+    "checks": {
+      "anomaly_available_at_rule": 0,
+      "anomaly_end_or_manual_field_backfill": 0,
+      "anomaly_occurrence_time_precision": 0,
+      "basemap_model_feature_use": 0,
+      "earthquake_available_at_assumption": 0,
+      "historical_geology_early_use": 0
+    },
+    "violations": 0
+  },
+  "schema_version": 1,
+  "source_inventory_sha256": "69d8c0126d7aebbecfa253b175eda57c8a530de102095d9fd0d85dbc33e5d93c",
+  "status": "pass_with_documented_warnings",
+  "warnings": [
+    "所有原始和标准化数据授权仍为 unknown_no_redistribution，标准化数据不得提交 Git。",
+    "两个地震目录缺少权威时区、坐标系、震级类型和逐事件发布时间元数据。",
+    "地震目录暂按固定 UTC+08 与发震时刻可用的乐观假设标准化，并逐条标记。",
+    "异常起止时间源字段只有日期，暂按固定 UTC+08 当日 00:00 表示并逐条标记。",
+    "当前断层属性和长期危险性快照不得用于其 available_at 之前的历史回测。",
+    "研究区只含连续大陆最大闭合环，明确排除海南、台湾及其他离岛。",
+    "宽阈值地震重复和断层真实迹线映射均保持未审计状态，不自动接受。"
+  ]
+}

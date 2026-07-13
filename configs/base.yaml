@@ -7,6 +7,7 @@ project:
 
 config_files:
   data_sources: configs/data_sources.yaml
+  ingestion: configs/ingestion.yaml
   research_protocol: configs/research_protocol.yaml
   operating_points: configs/operating_points.yaml
 
@@ -20,7 +21,7 @@ time_semantics:
 study_area:
   polygon: data/processed/china_mainland.geojson
   include_external_trigger_buffer_km: 300
-  equal_area_crs: custom_albers_china
+  equal_area_crs: '+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs'
 
 forecast:
   horizons_days: [7, 30, 90, 180, 365]

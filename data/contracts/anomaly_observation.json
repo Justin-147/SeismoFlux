@@ -1,0 +1,205 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "anomaly_observation",
+  "description": "One immutable observation as listed in one weekly anomaly report.",
+  "fields": [
+    {
+      "name": "observation_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "anomaly_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "station_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "report_date",
+      "nullable": false,
+      "type": "date32[day]"
+    },
+    {
+      "name": "raw_row_report_date",
+      "nullable": false,
+      "type": "date32[day]"
+    },
+    {
+      "name": "available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "unit",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "station_name",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "longitude",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "latitude",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "discipline",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "measurement",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "instrument_or_method",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "observation_period",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "forecast_efficacy",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "trend_time",
+      "nullable": true,
+      "type": "date32[day]"
+    },
+    {
+      "name": "start_time",
+      "nullable": false,
+      "type": "timestamp[us, tz=+08:00]"
+    },
+    {
+      "name": "reported_end_time",
+      "nullable": true,
+      "type": "timestamp[us, tz=+08:00]"
+    },
+    {
+      "name": "end_flag",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "report_state",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "anomaly_type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "anomaly_description",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "annual_anomaly",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "r_value",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "r0_value",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "term_class",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "is_listed",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "right_censored",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "identity_complete",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "reliability_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    },
+    {
+      "name": "source_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_sha256",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_sheet",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_row",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "source_serial_number",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "source_period_year",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "source_period",
+      "nullable": false,
+      "type": "int64"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "report_date",
+    "source_file",
+    "source_sheet",
+    "source_row",
+    "observation_id"
+  ]
+}

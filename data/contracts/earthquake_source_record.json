@@ -1,0 +1,138 @@
+{
+  "contract_version": "0.1.0",
+  "dataset": "earthquake_source_record",
+  "description": "Every raw catalog row retained with normalization and source lineage.",
+  "fields": [
+    {
+      "name": "source_record_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "duplicate_group_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_file_sha256",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "source_row",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "name": "raw_record_sha256",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "origin_time_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "origin_time_local",
+      "nullable": false,
+      "type": "timestamp[us, tz=+08:00]"
+    },
+    {
+      "name": "origin_time_utc",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "available_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "name": "longitude_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "latitude_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "depth_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "magnitude_raw",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "name": "longitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "latitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "depth_km",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "name": "magnitude",
+      "nullable": false,
+      "type": "double"
+    },
+    {
+      "name": "magnitude_type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "place_raw",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "place",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "fixed_field_raw",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "name": "inside_study_area",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "name": "normalization_flags",
+      "nullable": false,
+      "type": "list<element: string>"
+    }
+  ],
+  "schema_version": 1,
+  "sort_keys": [
+    "source_id",
+    "source_row",
+    "source_record_id"
+  ]
+}
