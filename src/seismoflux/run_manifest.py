@@ -17,6 +17,7 @@ from seismoflux.config import SeismoFluxConfig, project_root_for, sha256_file
 
 
 def _git_metadata(project_root: Path) -> tuple[str | None, bool | None]:
+    git_environment = {**os.environ, "GIT_OPTIONAL_LOCKS": "0"}
     try:
         commit_result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -25,6 +26,7 @@ def _git_metadata(project_root: Path) -> tuple[str | None, bool | None]:
             text=True,
             timeout=5,
             cwd=project_root,
+            env=git_environment,
         )
         status_result = subprocess.run(
             ["git", "status", "--porcelain"],
@@ -33,6 +35,7 @@ def _git_metadata(project_root: Path) -> tuple[str | None, bool | None]:
             text=True,
             timeout=5,
             cwd=project_root,
+            env=git_environment,
         )
     except (OSError, subprocess.SubprocessError):
         return None, None

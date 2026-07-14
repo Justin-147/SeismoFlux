@@ -265,7 +265,6 @@ def test_background_loader_rejects_content_hash_drift(
         ("data_catalog.json", "data catalog SHA-256"),
         ("china_mainland.geojson", "study-area SHA-256"),
         ("earthquake_event.parquet", "local earthquake dataset SHA-256"),
-        ("anomaly_report_period.parquet", "source dataset SHA-256"),
         ("background_fold_manifest.json", "issue manifest SHA-256"),
         ("etas_micro_reference.json", "production fixture SHA-256"),
         ("jss_japan_reference.json", "oracle metadata SHA-256"),
@@ -293,10 +292,6 @@ def test_loader_rejects_selective_input_hash_drift(
             "data/processed/stage1/debc98054172a4a1/earthquake_event.parquet",
             "local earthquake dataset file is missing",
         ),
-        (
-            "data/processed/stage1/debc98054172a4a1/anomaly_report_period.parquet",
-            "source dataset file is missing",
-        ),
     ],
 )
 def test_loader_rejects_missing_frozen_data_files(
@@ -316,6 +311,28 @@ def test_loader_rejects_missing_frozen_data_files(
 
     with pytest.raises(ValueError, match=message):
         load_background_config(BACKGROUND_CONFIG)
+
+
+def test_loader_never_resolves_or_hashes_physical_anomaly_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_resolver = resolve_project_path
+    original_hash = sha256_file
+
+    def guarded_resolver(config_path: Path, value: str) -> Path:
+        if value.endswith("anomaly_report_period.parquet"):
+            raise AssertionError("stage 2 resolved the forbidden anomaly source")
+        return original_resolver(config_path, value)
+
+    def guarded_hash(path: Path) -> str:
+        if path.name == "anomaly_report_period.parquet":
+            raise AssertionError("stage 2 opened the forbidden anomaly source")
+        return original_hash(path)
+
+    monkeypatch.setattr(background_config_module, "resolve_project_path", guarded_resolver)
+    monkeypatch.setattr(background_config_module, "sha256_file", guarded_hash)
+
+    load_background_config(BACKGROUND_CONFIG)
 
 
 def test_project_loader_rejects_base_seed_drift(monkeypatch: pytest.MonkeyPatch) -> None:

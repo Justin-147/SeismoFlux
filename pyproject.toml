@@ -71,5 +71,14 @@ pretty = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["pyarrow", "pyarrow.*", "shapely", "shapely.*", "xlrd", "xlrd.*"]
+module = [
+  "pandas",
+  "pandas.*",
+  "pyarrow",
+  "pyarrow.*",
+  "shapely",
+  "shapely.*",
+  "xlrd",
+  "xlrd.*",
+]
 ignore_missing_imports = true

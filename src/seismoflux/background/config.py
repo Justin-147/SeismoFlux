@@ -1076,17 +1076,14 @@ def _validate_referenced_metadata(config_path: Path, config: BackgroundConfig) -
     source_dataset_path_value = source.get("anomaly_report_period_path")
     if not isinstance(source_dataset_path_value, str):
         raise ValueError("manifest source-dataset path is missing")
-    source_dataset_path = resolve_project_path(config_path, source_dataset_path_value)
     _require_equal(
         source_dataset_path_value,
         source_dataset.get("path"),
         "manifest source-dataset path",
     )
-    _require_file_sha256(
-        source_dataset_path,
-        config.inputs.issue_manifest_source_sha256,
-        "source dataset",
-    )
+    # Stage 2 may consume only the frozen ``available_at`` calendar projection.
+    # The physical anomaly source was verified by stage 1 and must not be opened,
+    # resolved, or admitted into the stage-2 execution seal.
     _require_equal(
         source.get("stage1_snapshot_id"),
         config.inputs.expected_stage1_snapshot_id,

@@ -5,13 +5,16 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from contextlib import suppress
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from seismoflux import __version__
+from seismoflux.background.config import BackgroundConfig, load_project_background_config
+from seismoflux.background.execution import build_background_plan
 from seismoflux.config import (
     SeismoFluxConfig,
     load_config,
@@ -40,11 +43,27 @@ class CommandSpec:
     planned_outputs: tuple[str, ...]
 
 
+class _BackgroundManifestResult(Protocol):
+    def to_manifest_details(self) -> dict[str, object]: ...
+
+
+def run_background_stage2(
+    config_path: Path,
+    *,
+    progress: Callable[[str], None],
+) -> _BackgroundManifestResult:
+    """Lazily import the scientific runner only for an actual stage-2 execution."""
+
+    from seismoflux.background.runner import run_background_stage2 as execute
+
+    return execute(config_path, progress=progress)
+
+
 COMMAND_SPECS: dict[str, CommandSpec] = {
     "inventory": CommandSpec(0, True, ("external raw files",), ("source inventory CSV",)),
     "ingest": CommandSpec(1, True, ("external raw files",), ("standardized data",)),
     "validate-data": CommandSpec(1, True, ("standardized data",), ("data quality report",)),
-    "build-background": CommandSpec(2, False, ("earthquake catalog",), ("background registry",)),
+    "build-background": CommandSpec(2, True, ("earthquake catalog",), ("background registry",)),
     "build-anomaly-history": CommandSpec(
         3, False, ("anomaly observations",), ("anomaly state history",)
     ),
@@ -334,6 +353,152 @@ def _run_stage1(namespace: argparse.Namespace) -> int:
     return 0
 
 
+def _background_input_references(background: BackgroundConfig) -> list[str]:
+    return [
+        background.inputs.environment_lock,
+        background.inputs.data_catalog,
+        background.inputs.earthquake_dataset_path,
+        background.inputs.study_area,
+        background.inputs.issue_manifest,
+        background.numerical_regression.production_fixture,
+        background.numerical_regression.oracle_metadata,
+    ]
+
+
+def _background_output_references(background: BackgroundConfig) -> list[str]:
+    return [
+        background.outputs.processed_root,
+        background.outputs.model_root,
+        background.outputs.backtest_root,
+        background.outputs.experiment_root,
+        background.outputs.registry,
+        background.outputs.report,
+    ]
+
+
+def _background_progress(message: str) -> None:
+    sys.stderr.write(f"阶段2背景基线: {message}\n")
+    sys.stderr.flush()
+
+
+def _stderr_best_effort(message: str) -> None:
+    """Report a secondary CLI condition without changing the scientific outcome."""
+
+    with suppress(Exception):
+        sys.stderr.write(message)
+
+
+def _run_background(namespace: argparse.Namespace) -> int:
+    config_path = Path(namespace.config)
+    project = load_config(config_path)
+    background = load_project_background_config(config_path)
+    input_references = _background_input_references(background)
+    output_references = _background_output_references(background)
+    manifest_destination = _validated_manifest_destination(
+        namespace.manifest,
+        config_path=config_path,
+        protected_paths=[
+            resolve_project_path(config_path, project.config_files.background),
+            *(resolve_project_path(config_path, item) for item in input_references),
+            resolve_project_path(config_path, background.outputs.registry),
+            resolve_project_path(config_path, background.outputs.report),
+        ],
+        protected_directories=[
+            resolve_project_path(config_path, background.outputs.processed_root),
+            resolve_project_path(config_path, background.outputs.model_root),
+            resolve_project_path(config_path, background.outputs.backtest_root),
+            resolve_project_path(config_path, background.outputs.experiment_root),
+        ],
+    )
+    plan = build_background_plan(background, project)
+    dry_run = bool(namespace.dry_run)
+    details = plan.to_manifest_details()
+    if dry_run:
+        manifest = build_run_manifest(
+            command="build-background",
+            dry_run=True,
+            implementation_stage=2,
+            implementation_status="implemented",
+            status="planned",
+            arguments=_safe_arguments(namespace),
+            config_path=config_path,
+            config=project,
+            planned_inputs=[project.config_files.background, *input_references],
+            planned_outputs=output_references,
+            details=details,
+        )
+        emit_run_manifest(manifest, manifest_destination)
+        return 0
+
+    try:
+        result = run_background_stage2(
+            config_path,
+            progress=_background_progress,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        failed_details = {
+            **details,
+            "failure": {
+                "error_type": type(exc).__name__,
+                "message": str(exc),
+                "fixed_delivery_confirmed": False,
+                "partial_content_addressed_bundles_may_exist": True,
+            },
+        }
+        reporting_error: Exception | None = None
+        try:
+            manifest = build_run_manifest(
+                command="build-background",
+                dry_run=False,
+                implementation_stage=2,
+                implementation_status="implemented",
+                status="failed",
+                arguments=_safe_arguments(namespace),
+                config_path=config_path,
+                config=project,
+                planned_inputs=[project.config_files.background, *input_references],
+                planned_outputs=output_references,
+                details=failed_details,
+            )
+            emit_run_manifest(manifest, manifest_destination)
+        except Exception as manifest_exc:
+            reporting_error = manifest_exc
+        _stderr_best_effort(f"seismoflux: {exc}\n")
+        if reporting_error is not None:
+            _stderr_best_effort(
+                "seismoflux: 失败运行清单报告也失败"
+                f" ({type(reporting_error).__name__}: {reporting_error}); "
+                "原始阶段2错误保持有效, 固定交付未确认。\n"
+            )
+        return 2
+
+    # The production runner returns only after all content-addressed bundles and
+    # the fixed registry/report pair are durably published. Reporting below is
+    # auxiliary and must never reclassify that completed scientific delivery.
+    try:
+        details = result.to_manifest_details()
+        manifest = build_run_manifest(
+            command="build-background",
+            dry_run=False,
+            implementation_stage=2,
+            implementation_status="implemented",
+            status="completed",
+            arguments=_safe_arguments(namespace),
+            config_path=config_path,
+            config=project,
+            planned_inputs=[project.config_files.background, *input_references],
+            planned_outputs=output_references,
+            details=details,
+        )
+        emit_run_manifest(manifest, manifest_destination)
+    except Exception as exc:
+        _stderr_best_effort(
+            "seismoflux: 阶段2固定交付已确认; 辅助运行清单报告失败"
+            f" ({type(exc).__name__}: {exc})。\n"
+        )
+    return 0
+
+
 def _run_deferred(namespace: argparse.Namespace) -> int:
     command = str(namespace.command)
     spec = COMMAND_SPECS[command]
@@ -385,6 +550,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_inventory(namespace)
         if namespace.command in {"ingest", "validate-data"}:
             return _run_stage1(namespace)
+        if namespace.command == "build-background":
+            return _run_background(namespace)
         return _run_deferred(namespace)
     except (OSError, RuntimeError, ValueError) as exc:
         sys.stderr.write(f"seismoflux: {exc}\n")
