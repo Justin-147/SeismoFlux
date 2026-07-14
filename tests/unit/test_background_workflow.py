@@ -7,7 +7,7 @@ import pytest
 from numpy.typing import NDArray
 
 from seismoflux.background.catalog import EarthquakeCatalog, utc_timestamp_to_day
-from seismoflux.background.config import load_background_config
+from seismoflux.background.config import load_background_protocol
 from seismoflux.background.workflow import (
     SnapshotDefinition,
     analyze_snapshot_completeness,
@@ -40,7 +40,7 @@ def _catalog(
 
 
 def test_snapshot_definitions_preserve_four_purged_folds_and_local_validation() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
 
     snapshots = build_snapshot_definitions(config)
 

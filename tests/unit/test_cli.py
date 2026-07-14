@@ -13,7 +13,20 @@ import pytest
 import yaml
 
 import seismoflux.cli as cli_module
+from seismoflux.background.config import load_background_protocol
 from seismoflux.cli import COMMAND_SPECS, main
+
+BACKGROUND_CONFIG = Path("configs/background.yaml")
+
+
+@pytest.fixture
+def _background_protocol_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    protocol = load_background_protocol(BACKGROUND_CONFIG)
+    monkeypatch.setattr(
+        cli_module,
+        "load_project_background_config",
+        lambda _path: protocol,
+    )
 
 
 def _required_arguments(command: str) -> list[str]:
@@ -30,7 +43,9 @@ def _required_arguments(command: str) -> list[str]:
 
 @pytest.mark.parametrize("command", sorted(COMMAND_SPECS))
 def test_every_command_supports_machine_readable_dry_run(
-    command: str, capsys: pytest.CaptureFixture[str]
+    command: str,
+    capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     exit_code = main([command, *_required_arguments(command), "--dry-run"])
     captured = capsys.readouterr()
@@ -58,6 +73,7 @@ def test_deferred_command_fails_instead_of_making_placeholder_output(
 def test_background_dry_run_is_score_free_and_machine_readable(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     def forbidden(*_: object, **__: object) -> object:
         raise AssertionError("background dry-run must not load rows, score, or publish")
@@ -85,6 +101,7 @@ def test_background_dry_run_is_score_free_and_machine_readable(
 def test_background_dry_run_without_manifest_never_calls_filesystem_writers(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     def forbidden(*_: object, **__: object) -> object:
         raise AssertionError("background dry-run attempted a filesystem write")
@@ -117,6 +134,7 @@ class _SyntheticBackgroundRun:
 def test_background_execute_calls_single_production_entry_and_emits_result_manifest(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     calls: list[tuple[Path, object]] = []
 
@@ -146,6 +164,7 @@ def test_background_execute_calls_single_production_entry_and_emits_result_manif
 def test_background_failure_emits_machine_readable_negative_run_manifest(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     def fail(*_: object, **__: object) -> object:
         raise RuntimeError("synthetic background failure")
@@ -167,6 +186,7 @@ def test_background_post_delivery_reporting_failure_preserves_success(
     failure_point: str,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     calls = 0
 
@@ -202,6 +222,7 @@ def test_background_post_delivery_reporting_failure_preserves_success(
 def test_background_failure_manifest_error_does_not_mask_runner_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     def fail_run(*_: object, **__: object) -> object:
         raise RuntimeError("synthetic pre-delivery failure")
@@ -224,6 +245,7 @@ def test_background_failure_manifest_error_does_not_mask_runner_error(
 def test_background_dry_run_manifest_failure_remains_a_cli_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     def fail(*_: object, **__: object) -> object:
         raise OSError("synthetic dry-run manifest failure")
@@ -242,6 +264,7 @@ def test_background_dry_run_manifest_failure_remains_a_cli_failure(
 def test_background_reporting_survives_a_broken_stderr(
     runner_succeeds: bool,
     monkeypatch: pytest.MonkeyPatch,
+    _background_protocol_loader: None,
 ) -> None:
     class _BrokenStderr:
         def write(self, _: str) -> int:
@@ -276,6 +299,7 @@ def test_background_reporting_survives_a_broken_stderr(
 def test_background_manifest_cannot_collide_with_inputs_or_outputs(
     destination: str,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     exit_code = main(["build-background", "--dry-run", "--manifest", destination])
     captured = capsys.readouterr()
@@ -382,6 +406,7 @@ def test_dry_run_writes_only_an_explicit_manifest(
 def test_background_dry_run_writes_only_an_explicit_manifest(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
+    _background_protocol_loader: None,
 ) -> None:
     output = tmp_path / "阶段2运行清单.json"
 

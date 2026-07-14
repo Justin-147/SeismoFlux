@@ -12,7 +12,10 @@ from shapely.geometry import box
 import seismoflux.background.pipeline_etas as pipeline_etas
 from seismoflux.background.catalog import EarthquakeCatalog, utc_timestamp_to_day
 from seismoflux.background.completeness import CompletenessAnalysis, CompletenessAudit
-from seismoflux.background.config import BackgroundConfig, load_background_config
+from seismoflux.background.config import (
+    BackgroundConfig,
+    load_background_protocol,
+)
 from seismoflux.background.etas_fit import (
     ETASFitResult,
     ETASLikelihoodProblem,
@@ -185,7 +188,7 @@ def _poisson_inputs(
 
 
 def test_five_snapshot_etas_keeps_physical_late_report_and_gates_parent_availability() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     completeness = _completeness(config)
     delayed_catalog = _catalog()
@@ -251,7 +254,7 @@ def test_five_snapshot_etas_keeps_physical_late_report_and_gates_parent_availabi
 
 
 def test_unstable_fits_are_audited_without_stopping_attempts() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)
@@ -302,7 +305,7 @@ def test_unstable_fits_are_audited_without_stopping_attempts() -> None:
 def test_programming_exceptions_propagate_without_becoming_scientific_failures(
     exception_type: type[Exception],
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)
@@ -333,7 +336,7 @@ def test_programming_exceptions_propagate_without_becoming_scientific_failures(
 def test_internal_contract_value_error_propagates_instead_of_becoming_etas_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)
@@ -359,7 +362,7 @@ def test_grid_and_score_contract_errors_propagate(
     helper_name: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)
@@ -381,7 +384,7 @@ def test_grid_and_score_contract_errors_propagate(
 
 
 def test_progress_callback_is_observational_and_reports_every_snapshot() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)
@@ -434,7 +437,7 @@ def test_progress_callback_is_observational_and_reports_every_snapshot() -> None
 def test_three_grid_failure_retains_complete_gate_evidence_and_continues(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     catalog = _catalog()
     completeness = _completeness(config)

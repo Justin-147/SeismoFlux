@@ -16,7 +16,10 @@ from seismoflux.background.completeness import (
     CompletenessError,
     CompletenessScientificInability,
 )
-from seismoflux.background.config import BackgroundConfig, load_background_config
+from seismoflux.background.config import (
+    BackgroundConfig,
+    load_background_protocol,
+)
 from seismoflux.background.etas_fit import (
     ETASEvent,
     ETASFitResult,
@@ -352,7 +355,7 @@ def test_successful_production_pipeline_uses_absolute_fixture_progress_and_exact
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     study_area, family = _study_and_grids()
     catalog = _catalog()
     calendar = _calendar()
@@ -502,7 +505,7 @@ def test_final_etas_failure_keeps_identical_spatial_horizons_and_explicit_skips(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     study_area, family = _study_and_grids()
     calendar = _calendar()
     fixture_path = (tmp_path / "fixture.json").resolve()
@@ -624,7 +627,7 @@ def test_failed_production_regression_hard_stops_before_analytic_or_data(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     study_area, family = _study_and_grids()
     calls: list[str] = []
     monkeypatch.setattr(
@@ -670,7 +673,7 @@ def test_completeness_inability_returns_auditable_scientific_failure(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     study_area, family = _study_and_grids()
     monkeypatch.setattr(
         pipeline_module,
@@ -738,7 +741,7 @@ def test_poisson_inability_retains_completed_upstream_scientific_evidence(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     study_area, family = _study_and_grids()
     completeness = _completeness(config)
     monkeypatch.setattr(

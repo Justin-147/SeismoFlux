@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -9,17 +10,17 @@ import pytest
 from pydantic import ValidationError
 
 import seismoflux.background.config as background_config_module
+import seismoflux.config as config_module
 from seismoflux.background.config import (
     BackgroundConfig,
     load_background_config,
+    load_background_protocol,
     load_project_background_config,
 )
 from seismoflux.config import (
     SeismoFluxConfig,
     load_config,
     load_yaml_mapping,
-    resolve_project_path,
-    sha256_file,
 )
 
 BACKGROUND_CONFIG = Path("configs/background.yaml")
@@ -27,6 +28,52 @@ BASE_CONFIG = Path("configs/base.yaml")
 
 PathPart = str | int
 MappingPath = tuple[PathPart, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _FrozenStage1InputHarness:
+    resolve: Callable[[Path, str], Path]
+    hash_file: Callable[[Path], str]
+
+
+@pytest.fixture
+def frozen_stage1_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> _FrozenStage1InputHarness:
+    """Stand in only for the two frozen stage-1 data files excluded from Git."""
+
+    protocol = load_background_protocol(BACKGROUND_CONFIG)
+    study_area_path = (tmp_path / "china_mainland.geojson").resolve()
+    earthquake_path = (tmp_path / "earthquake_event.parquet").resolve()
+    study_area_path.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    earthquake_path.write_bytes(b"synthetic stage-1 parquet placeholder")
+
+    original_resolver = config_module.resolve_project_path
+    original_hash = config_module.sha256_file
+    path_overrides = {
+        protocol.inputs.study_area: study_area_path,
+        protocol.inputs.earthquake_dataset_path: earthquake_path,
+    }
+    expected_hashes = {
+        study_area_path: protocol.inputs.study_area_sha256,
+        earthquake_path: protocol.inputs.earthquake_dataset_sha256,
+    }
+
+    def resolve(config_path: Path, value: str) -> Path:
+        if value in path_overrides:
+            return path_overrides[value]
+        return original_resolver(config_path, value)
+
+    def hash_file(path: Path) -> str:
+        resolved = path.resolve()
+        if resolved in expected_hashes:
+            return expected_hashes[resolved]
+        return original_hash(path)
+
+    monkeypatch.setattr(background_config_module, "resolve_project_path", resolve)
+    monkeypatch.setattr(background_config_module, "sha256_file", hash_file)
+    return _FrozenStage1InputHarness(resolve=resolve, hash_file=hash_file)
 
 
 def _mapping_paths(value: object, path: MappingPath = ()) -> Iterator[MappingPath]:
@@ -52,7 +99,10 @@ def _at_path(value: object, path: MappingPath) -> dict[str, Any]:
     return current
 
 
-def test_project_background_configuration_loads_with_frozen_invariants() -> None:
+def test_project_background_configuration_loads_with_frozen_invariants(
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
+) -> None:
+    del frozen_stage1_inputs
     config = load_project_background_config(BASE_CONFIG)
 
     assert config.background_scores_seen_before_freeze is False
@@ -62,6 +112,20 @@ def test_project_background_configuration_loads_with_frozen_invariants() -> None
     assert config.time.horizons_days == (7, 30, 90, 180, 365)
     assert config.integration.grid_cells_km == (50, 25, 12.5)
     assert config.evaluation.g1_primary_endpoint.horizon_aggregation == "none"
+
+
+def test_background_protocol_loader_does_not_open_referenced_inputs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden(*_: object, **__: object) -> object:
+        raise AssertionError("pure protocol loading opened a referenced input")
+
+    monkeypatch.setattr(background_config_module, "resolve_project_path", forbidden)
+    monkeypatch.setattr(background_config_module, "sha256_file", forbidden)
+
+    config = load_background_protocol(BACKGROUND_CONFIG)
+
+    assert config.protocol_version == "0.2.0"
 
 
 def test_every_background_mapping_level_rejects_unknown_fields() -> None:
@@ -248,7 +312,10 @@ def test_fold_fit_end_cannot_reach_assessment_start() -> None:
 
 def test_background_loader_rejects_content_hash_drift(
     monkeypatch: pytest.MonkeyPatch,
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
 ) -> None:
+    del frozen_stage1_inputs
+
     def wrong_hash(_path: Path) -> str:
         return "0" * 64
 
@@ -271,12 +338,13 @@ def test_background_loader_rejects_content_hash_drift(
     ],
 )
 def test_loader_rejects_selective_input_hash_drift(
-    monkeypatch: pytest.MonkeyPatch, filename: str, message: str
+    monkeypatch: pytest.MonkeyPatch,
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
+    filename: str,
+    message: str,
 ) -> None:
-    original_hash = sha256_file
-
     def selective_hash(path: Path) -> str:
-        return "0" * 64 if path.name == filename else original_hash(path)
+        return "0" * 64 if path.name == filename else frozen_stage1_inputs.hash_file(path)
 
     monkeypatch.setattr(background_config_module, "sha256_file", selective_hash)
 
@@ -297,15 +365,14 @@ def test_loader_rejects_selective_input_hash_drift(
 def test_loader_rejects_missing_frozen_data_files(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
     missing_value: str,
     message: str,
 ) -> None:
-    original_resolver = resolve_project_path
-
     def selective_resolver(config_path: Path, value: str) -> Path:
         if value == missing_value:
-            return tmp_path / Path(value).name
-        return original_resolver(config_path, value)
+            return tmp_path / "missing" / Path(value).name
+        return frozen_stage1_inputs.resolve(config_path, value)
 
     monkeypatch.setattr(background_config_module, "resolve_project_path", selective_resolver)
 
@@ -315,19 +382,17 @@ def test_loader_rejects_missing_frozen_data_files(
 
 def test_loader_never_resolves_or_hashes_physical_anomaly_source(
     monkeypatch: pytest.MonkeyPatch,
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
 ) -> None:
-    original_resolver = resolve_project_path
-    original_hash = sha256_file
-
     def guarded_resolver(config_path: Path, value: str) -> Path:
         if value.endswith("anomaly_report_period.parquet"):
             raise AssertionError("stage 2 resolved the forbidden anomaly source")
-        return original_resolver(config_path, value)
+        return frozen_stage1_inputs.resolve(config_path, value)
 
     def guarded_hash(path: Path) -> str:
         if path.name == "anomaly_report_period.parquet":
             raise AssertionError("stage 2 opened the forbidden anomaly source")
-        return original_hash(path)
+        return frozen_stage1_inputs.hash_file(path)
 
     monkeypatch.setattr(background_config_module, "resolve_project_path", guarded_resolver)
     monkeypatch.setattr(background_config_module, "sha256_file", guarded_hash)
@@ -335,7 +400,11 @@ def test_loader_never_resolves_or_hashes_physical_anomaly_source(
     load_background_config(BACKGROUND_CONFIG)
 
 
-def test_project_loader_rejects_base_seed_drift(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_project_loader_rejects_base_seed_drift(
+    monkeypatch: pytest.MonkeyPatch,
+    frozen_stage1_inputs: _FrozenStage1InputHarness,
+) -> None:
+    del frozen_stage1_inputs
     project = load_config(BASE_CONFIG)
     changed_project = project.project.model_copy(update={"random_seed": 148})
     changed_config = project.model_copy(update={"project": changed_project})

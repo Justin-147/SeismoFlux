@@ -7,10 +7,10 @@ from typing import Any, cast
 
 import pytest
 
-from seismoflux.background.config import load_project_background_config
+from seismoflux.background.config import load_background_protocol
 from seismoflux.background.issues import load_frozen_issue_calendar
 
-BASE_CONFIG = Path("configs/base.yaml")
+BACKGROUND_CONFIG = Path("configs/background.yaml")
 ISSUE_MANIFEST = Path("data/manifests/background_fold_manifest.json")
 
 
@@ -25,7 +25,7 @@ def _write_manifest(tmp_path: Path, value: dict[str, Any]) -> Path:
 
 
 def test_frozen_issue_calendar_loads_all_dates_and_greedy_exposures() -> None:
-    config = load_project_background_config(BASE_CONFIG)
+    config = load_background_protocol(BACKGROUND_CONFIG)
     calendar = load_frozen_issue_calendar(ISSUE_MANIFEST, config=config)
 
     assert len(calendar.development.actual_issue_dates_local) == 50
@@ -54,7 +54,7 @@ def test_issue_calendar_rejects_non_greedy_or_selectively_deleted_exposure(
     with pytest.raises(ValueError, match="frozen greedy rule"):
         load_frozen_issue_calendar(
             _write_manifest(tmp_path, raw),
-            config=load_project_background_config(BASE_CONFIG),
+            config=load_background_protocol(BACKGROUND_CONFIG),
         )
 
 
@@ -85,5 +85,5 @@ def test_issue_calendar_rejects_boundary_and_schema_drift(
     with pytest.raises(ValueError, match=message):
         load_frozen_issue_calendar(
             _write_manifest(tmp_path, raw),
-            config=load_project_background_config(BASE_CONFIG),
+            config=load_background_protocol(BACKGROUND_CONFIG),
         )

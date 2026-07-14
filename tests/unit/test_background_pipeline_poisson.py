@@ -15,7 +15,10 @@ from seismoflux.background.completeness import (
     CompletenessAnalysis,
     CompletenessAudit,
 )
-from seismoflux.background.config import BackgroundConfig, load_background_config
+from seismoflux.background.config import (
+    BackgroundConfig,
+    load_background_protocol,
+)
 from seismoflux.background.evidence import EXPECTED_SNAPSHOTS
 from seismoflux.background.grid import (
     GRID_CELL_SIZES_KM,
@@ -115,7 +118,7 @@ def _completeness(config: BackgroundConfig) -> tuple[CompletenessSnapshot, ...]:
 
 
 def test_five_snapshot_pipeline_builds_complete_causal_evidence() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     catalog = _catalog()
     result = run_poisson_kde_pipeline(
         config,
@@ -179,7 +182,7 @@ def test_five_snapshot_pipeline_builds_complete_causal_evidence() -> None:
 
 
 def test_final_validation_location_cannot_change_grid_gates_or_bandwidth_selection() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     completeness = _completeness(config)
 
@@ -216,7 +219,7 @@ def test_final_validation_location_cannot_change_grid_gates_or_bandwidth_selecti
 
 
 def test_zero_target_fold_and_zero_training_snapshot_are_explicit_hard_failures() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     completeness = _completeness(config)
     family = _grid_family()
 
@@ -241,7 +244,7 @@ def test_zero_target_fold_and_zero_training_snapshot_are_explicit_hard_failures(
 
 
 def test_completeness_input_must_be_exactly_four_folds_plus_final() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     with pytest.raises(ValueError, match="exactly four folds plus final"):
         run_poisson_kde_pipeline(
             config,
@@ -252,7 +255,7 @@ def test_completeness_input_must_be_exactly_four_folds_plus_final() -> None:
 
 
 def test_progress_callback_is_observational_and_reports_every_snapshot() -> None:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     catalog = _catalog()
     family = _grid_family()
     completeness = _completeness(config)

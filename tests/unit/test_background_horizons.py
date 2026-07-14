@@ -7,7 +7,7 @@ from shapely.geometry import box
 
 from seismoflux.background.adapters import etas_variant_id
 from seismoflux.background.catalog import EarthquakeCatalog, utc_timestamp_to_day
-from seismoflux.background.config import load_background_config
+from seismoflux.background.config import load_background_protocol
 from seismoflux.background.etas_fit import ETASModelSpec, ETASParameters
 from seismoflux.background.grid import (
     GRID_CELL_SIZES_KM,
@@ -134,7 +134,7 @@ def _models(
 
 
 def _run(*, with_targets: bool = True) -> BackgroundHorizonBacktests:
-    config = load_background_config("configs/background.yaml")
+    config = load_background_protocol("configs/background.yaml")
     family = _grid_family()
     uniform, spatial = _models(family)
     spec = ETASModelSpec(mc=3.0, beta=math.log(10.0))

@@ -14,14 +14,14 @@ from seismoflux.background.adapters import (
     etas_variant_id,
     point_area_quadrature_from_grid,
 )
-from seismoflux.background.config import load_background_config
+from seismoflux.background.config import load_background_protocol
 from seismoflux.background.grid import build_clipped_grid
 
 CONFIG = Path("configs/background.yaml")
 
 
 def test_protocol_adapters_match_every_frozen_etas_numerical_setting() -> None:
-    config = load_background_config(CONFIG)
+    config = load_background_protocol(CONFIG)
     spec = build_etas_model_spec(config, selected_mc=3.5, aki_b_value=0.9)
     bounds = build_etas_parameter_bounds(config)
     options = build_optimizer_options(config)
@@ -43,7 +43,7 @@ def test_protocol_adapters_match_every_frozen_etas_numerical_setting() -> None:
 
 
 def test_analytic_expectations_and_variant_identity_are_protocol_derived() -> None:
-    config = load_background_config(CONFIG)
+    config = load_background_protocol(CONFIG)
     expected = build_analytic_simulation_expectations(config)
 
     assert expected.expected_generic_branching_ratio == 0.3928055160151634
@@ -67,7 +67,7 @@ def test_point_area_quadrature_preserves_exact_clipped_area_and_units() -> None:
 
 
 def test_model_spec_rejects_unregistered_spatial_sensitivity() -> None:
-    config = load_background_config(CONFIG)
+    config = load_background_protocol(CONFIG)
     with pytest.raises(ValueError, match="frozen main or sensitivity"):
         build_etas_model_spec(
             config,

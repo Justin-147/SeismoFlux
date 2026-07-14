@@ -1118,11 +1118,18 @@ def _validate_referenced_metadata(config_path: Path, config: BackgroundConfig) -
     )
 
 
+def load_background_protocol(path: str | Path) -> BackgroundConfig:
+    """Parse and validate the frozen stage-2 protocol without opening data inputs."""
+
+    config_path = Path(path)
+    return BackgroundConfig.model_validate(load_yaml_mapping(config_path))
+
+
 def load_background_config(path: str | Path) -> BackgroundConfig:
     """Load the stage-2 protocol and verify all content-addressed inputs."""
 
     config_path = Path(path)
-    config = BackgroundConfig.model_validate(load_yaml_mapping(config_path))
+    config = load_background_protocol(config_path)
     _validate_referenced_metadata(config_path, config)
     return config
 
