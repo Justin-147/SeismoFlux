@@ -9,8 +9,10 @@ from numpy.typing import NDArray
 from seismoflux.background.catalog import EarthquakeCatalog, utc_timestamp_to_day
 from seismoflux.background.config import load_background_protocol
 from seismoflux.background.workflow import (
+    ETASParentRoleMasks,
     SnapshotDefinition,
     analyze_snapshot_completeness,
+    build_local_support_etas_parent_roles,
     build_snapshot_definitions,
     catalog_completeness_events,
     catalog_etas_events,
@@ -24,6 +26,7 @@ def _catalog(
     available_days: NDArray[np.float64],
     magnitudes: NDArray[np.float64],
     inside: NDArray[np.bool_],
+    inside_buffer: NDArray[np.bool_] | None = None,
 ) -> EarthquakeCatalog:
     count = len(origin_days)
     return EarthquakeCatalog(
@@ -36,7 +39,9 @@ def _catalog(
         y_km=np.full(count, 10.0),
         magnitude=magnitudes,
         inside_study_area=inside,
-        inside_external_buffer=np.ones(count, dtype=np.bool_),
+        inside_external_buffer=(
+            np.ones(count, dtype=np.bool_) if inside_buffer is None else inside_buffer
+        ),
     )
 
 
@@ -141,6 +146,135 @@ def test_etas_adapter_rejects_wrong_mask_or_negative_delay() -> None:
             catalog,
             np.ones(len(catalog), dtype=np.bool_),
             publication_delay_days=-1.0,
+        )
+
+
+def test_local_support_parent_roles_apply_local_mc_without_external_buffer_leakage() -> None:
+    catalog = _catalog(
+        np.arange(1.0, 6.0),
+        np.arange(1.0, 6.0),
+        np.asarray([4.0, 4.4, 4.5, 4.0, 5.0]),
+        np.asarray([True, True, True, False, False]),
+        np.asarray([True, True, True, True, False]),
+    )
+    supported = np.asarray([True, False, False, False, False])
+    unsupported = np.asarray([False, True, True, False, False])
+    local_mc = np.asarray([np.nan, 4.5, 4.5, np.nan, np.nan])
+
+    roles = build_local_support_etas_parent_roles(
+        catalog,
+        supported_domain_mask=supported,
+        unsupported_domain_mask=unsupported,
+        common_mc=4.0,
+        unsupported_local_mc=local_mc,
+    )
+
+    assert isinstance(roles, ETASParentRoleMasks)
+    assert roles.supported_parent.tolist() == [True, False, False, False, False]
+    assert roles.true_external_buffer_parent.tolist() == [False, False, False, True, False]
+    assert roles.unsupported_conditional_parent.tolist() == [False, False, True, False, False]
+    assert roles.parent_mask.tolist() == [True, False, True, True, False]
+
+    events = catalog_etas_events(
+        catalog,
+        roles.parent_mask,
+        inside_target_domain_mask=supported,
+        inside_parent_domain_mask=roles.parent_mask,
+    )
+    assert tuple(event.event_id for event in events) == ("e0000", "e0002", "e0003")
+    assert tuple(event.inside_study_area for event in events) == (True, False, False)
+    assert all(event.inside_parent_domain for event in events)
+
+
+def test_local_support_parent_roles_accept_prevalidated_mask_and_exclude_sensitivity() -> None:
+    catalog = _catalog(
+        np.arange(1.0, 5.0),
+        np.arange(1.0, 5.0),
+        np.asarray([4.0, 4.4, 4.5, 4.0]),
+        np.asarray([True, True, True, False]),
+    )
+    supported = np.asarray([True, False, False, False])
+    unsupported = np.asarray([False, True, True, False])
+    prevalidated = np.asarray([False, False, True, False])
+
+    primary = build_local_support_etas_parent_roles(
+        catalog,
+        supported_domain_mask=supported,
+        unsupported_domain_mask=unsupported,
+        common_mc=4.0,
+        prevalidated_unsupported_parent_mask=prevalidated,
+    )
+    sensitivity = primary.excluding_unsupported_parents()
+
+    assert primary.parent_mask.tolist() == [True, False, True, True]
+    assert sensitivity.supported_parent.tolist() == [True, False, False, False]
+    assert sensitivity.true_external_buffer_parent.tolist() == [False, False, False, True]
+    assert sensitivity.unsupported_conditional_parent.tolist() == [False] * 4
+    assert sensitivity.parent_mask.tolist() == [True, False, False, True]
+    assert not sensitivity.parent_mask.flags.writeable
+
+
+def test_local_support_parent_roles_reject_unpartitioned_or_leaking_masks() -> None:
+    catalog = _catalog(
+        np.arange(1.0, 4.0),
+        np.arange(1.0, 4.0),
+        np.asarray([4.0, 4.5, 4.0]),
+        np.asarray([True, True, False]),
+    )
+    supported = np.asarray([True, False, False])
+    unsupported = np.asarray([False, True, False])
+
+    with pytest.raises(ValueError, match="contained in unsupported_domain_mask"):
+        build_local_support_etas_parent_roles(
+            catalog,
+            supported_domain_mask=supported,
+            unsupported_domain_mask=unsupported,
+            common_mc=4.0,
+            prevalidated_unsupported_parent_mask=np.asarray([True, False, False]),
+        )
+    with pytest.raises(ValueError, match="exactly partition"):
+        build_local_support_etas_parent_roles(
+            catalog,
+            supported_domain_mask=np.asarray([True, False, False]),
+            unsupported_domain_mask=np.asarray([False, False, False]),
+            common_mc=4.0,
+            prevalidated_unsupported_parent_mask=np.zeros(3, dtype=np.bool_),
+        )
+
+
+def test_etas_adapter_custom_domains_are_validated_without_changing_defaults() -> None:
+    catalog = _catalog(
+        np.asarray([1.0, 2.0]),
+        np.asarray([1.0, 2.0]),
+        np.asarray([4.0, 4.5]),
+        np.asarray([True, False]),
+    )
+    selected = np.asarray([True, True])
+
+    default = catalog_etas_events(catalog, selected)
+    assert tuple(event.inside_study_area for event in default) == (True, False)
+    assert tuple(event.inside_parent_domain for event in default) == (True, True)
+    explicit_legacy_domains = catalog_etas_events(
+        catalog,
+        selected,
+        inside_target_domain_mask=catalog.inside_study_area,
+        inside_parent_domain_mask=catalog.inside_external_buffer,
+    )
+    assert explicit_legacy_domains == default
+
+    with pytest.raises(ValueError, match="selected custom ETAS targets"):
+        catalog_etas_events(
+            catalog,
+            selected,
+            inside_target_domain_mask=np.asarray([True, False]),
+            inside_parent_domain_mask=np.asarray([False, True]),
+        )
+    with pytest.raises(ValueError, match="event mask must be contained"):
+        catalog_etas_events(
+            catalog,
+            selected,
+            inside_target_domain_mask=np.asarray([False, False]),
+            inside_parent_domain_mask=np.asarray([True, False]),
         )
 
 

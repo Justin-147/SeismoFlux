@@ -146,7 +146,7 @@ def test_one_validation_issue_uses_exactly_128_reusable_catalogs_and_sparse_grid
     study_area, grid_family = _study_and_grids()
     calendar = _calendar()
     original = raw_simulate_future_catalog
-    calls: list[tuple[float, int, str | None, int]] = []
+    calls: list[tuple[float, int, str, str | None, int]] = []
 
     def record_simulation(
         parameters: ETASParameters,
@@ -162,6 +162,7 @@ def test_one_validation_issue_uses_exactly_128_reusable_catalogs_and_sparse_grid
             (
                 horizon_days,
                 maximum_events,
+                seed_context.protocol_version,
                 seed_context.issue_id,
                 seed_context.replicate_index,
             )
@@ -202,7 +203,13 @@ def test_one_validation_issue_uses_exactly_128_reusable_catalogs_and_sparse_grid
 
     assert len(calls) == FUTURE_REPLICATE_COUNT
     assert calls == [
-        (365.0, FUTURE_MAXIMUM_EVENTS, "validation/2025-06-26", replicate_index)
+        (
+            365.0,
+            FUTURE_MAXIMUM_EVENTS,
+            "0.2.0",
+            "validation/2025-06-26",
+            replicate_index,
+        )
         for replicate_index in range(FUTURE_REPLICATE_COUNT)
     ]
     assert first.issue_id == "validation/2025-06-26"
@@ -348,11 +355,24 @@ def test_all_validation_issues_are_worker_invariant_and_calendar_ordered() -> No
         grid_family,
         calendar,
     )
+    frozen_seed = future_module._future_seed_context("validation/2025-06-26", 0)
+    assert frozen_seed.digest().hex() == (
+        "afed47b8a6764db262e94e7c1ecba7aebee16b9307bf22eca7955af4e90ebe6b"
+    )
+    local_support_seed = future_module._future_seed_context(
+        "validation/2025-06-26",
+        0,
+        protocol_version="0.2.1",
+    )
+    assert local_support_seed.digest().hex() == (
+        "818f625f9af9c5430244f2b9541f4339e4bd2a2efdb25bf26e357645f4a26bd5"
+    )
 
     without_callback = simulate_all_validation_issue_ensembles(
         *arguments,
         max_workers=12,
         physical_core_probe=lambda: None,
+        protocol_version="0.2.1",
     )
     sequential_progress: list[str] = []
     sequential = simulate_all_validation_issue_ensembles(
@@ -360,6 +380,7 @@ def test_all_validation_issues_are_worker_invariant_and_calendar_ordered() -> No
         max_workers=12,
         physical_core_probe=lambda: None,
         progress=sequential_progress.append,
+        protocol_version="0.2.1",
     )
     parallel_progress: list[str] = []
     parallel = simulate_all_validation_issue_ensembles(
@@ -367,6 +388,7 @@ def test_all_validation_issues_are_worker_invariant_and_calendar_ordered() -> No
         max_workers=3,
         physical_core_probe=lambda: 8,
         progress=parallel_progress.append,
+        protocol_version="0.2.1",
     )
 
     assert without_callback == sequential

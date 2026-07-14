@@ -72,6 +72,7 @@ from seismoflux.background.publication import (
     publish_processed_bundle,
 )
 from seismoflux.background.scientific import ScientificJson, scientific_json, scientific_mapping
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 
 SnapshotId = Literal["fold_1", "fold_2", "fold_3", "fold_4", "final_validation"]
 ModelId = Literal["uniform_poisson", "spatial_poisson", "etas"]
@@ -1312,6 +1313,7 @@ def build_background_deliverables(
 ) -> BackgroundDeliverables:
     """Adapt one complete or expected-negative result without recomputing scores."""
 
+    require_background_scoring_authorized(config)
     expected_protocol = _protocol_sha256(config)
     if result.protocol_sha256 != expected_protocol:
         raise ValueError("pipeline result does not match the frozen background protocol")
@@ -1489,6 +1491,7 @@ def publish_background_deliverables(
 ) -> PublishedBackgroundDeliverables:
     """Publish only the four bundles and build (but do not write) their registry."""
 
+    require_background_scoring_authorized(config)
     if not isinstance(project_root, Path):
         raise TypeError("project_root must be pathlib.Path")
     if not isinstance(execution_seal, ExecutionSeal):

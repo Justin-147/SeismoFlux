@@ -18,6 +18,7 @@ from seismoflux.background.grid import (
     ThreeGridConvergenceGateEvidence,
     aggregate_fine_masses_to_coarse,
     build_clipped_grid,
+    build_equal_area_grid_family,
     build_grid_family,
     cell_bounds,
     cell_id,
@@ -82,6 +83,24 @@ def test_grid_constants_are_the_frozen_protocol_values() -> None:
     assert RELATIVE_EXPECTED_COUNT_TOLERANCE == 0.02
     assert DENSITY_L1_TOLERANCE == 0.05
     assert RELATIVE_DENOMINATOR_FLOOR == 1.0e-12
+
+
+def test_already_projected_equal_area_domain_builds_the_same_fixed_grid_family() -> None:
+    projected = box(-37_500.0, -18_750.0, 62_500.0, 43_750.0)
+
+    family = build_equal_area_grid_family(projected)
+
+    assert family.study_area_equal_area is projected
+    assert tuple(grid.spec.cell_size_km for grid in family.grids) == GRID_CELL_SIZES_KM
+    assert all(
+        math.isclose(
+            math.fsum(cell.clipped_area_m2 for cell in grid.cells),
+            projected.area,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-6,
+        )
+        for grid in family.grids
+    )
 
 
 def test_grid_spec_rejects_non_preregistered_resolution() -> None:

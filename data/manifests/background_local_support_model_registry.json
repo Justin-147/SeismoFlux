@@ -1,0 +1,2233 @@
+{
+  "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+  "authorized_public_repository": "github.com/Justin-147/SeismoFlux",
+  "bundles": [
+    {
+      "artifact_id": "ace1b7c02448fa09",
+      "bundle_kind": "processed",
+      "manifest_sha256": "1eca46ada49eb526ca0c6da19442bf7878d8b71daef2064f5248282156323572"
+    },
+    {
+      "artifact_id": "5c8fa982bb94b9ad",
+      "bundle_kind": "model",
+      "manifest_sha256": "1b8c67ac82a83d6885dee06ea32b8907b333c6118c5ec7968f7b779589447acf"
+    },
+    {
+      "artifact_id": "c4b7f62b02d5dfaf",
+      "bundle_kind": "backtest",
+      "manifest_sha256": "d09f25b87c392710e03ea74a9a1ed937a8502b8cca72b6077e9df2d45ccf34ab"
+    },
+    {
+      "artifact_id": "09fc68bda0d10c96",
+      "bundle_kind": "experiment",
+      "manifest_sha256": "d97195816eaa66c6f56b6b48d3a8ea80af025ae316686781ff07798fa9910797"
+    }
+  ],
+  "code_commit": "34fa7b4a491a062ff6e86daecf5568539661b42f",
+  "execution_seal_id": "3f8219ccc9ea68545f99e6d5bfb7cb0553ce6ce9340c10a8a8523fb0f51f08a4",
+  "gate_name": "G1-LS",
+  "input_hashes": {
+    "data_catalog": "0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50",
+    "earthquake_dataset": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+    "environment_lock": "34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5",
+    "issue_manifest": "d7ae5266c9143ed0a67a9954da52039b2753f108698fb05477466a6d5b934e38",
+    "oracle_metadata": "28f66bdbc192be37923108b063036104d73c8ef32142a58e57e633a60be2e924",
+    "production_fixture": "c6db5e4079f583f0ff12d24136459368614ab389765081ef8945594762cc7a04",
+    "study_area": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02",
+    "support_manifest": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d"
+  },
+  "locked_test": {
+    "artifact_ids": [],
+    "result": null,
+    "run": false,
+    "score_ids": [],
+    "target_count": null
+  },
+  "protocol_freeze_tag": "v0.2.1-background-local-support-protocol",
+  "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+  "protocol_version": "0.2.1",
+  "reserve_physical_cores": 2,
+  "results_figure": {
+    "contains_coordinates": false,
+    "contains_geometry": false,
+    "path": "docs/background_local_support_results.svg",
+    "sha256": "2ac4a523b531d012602634d66f5dc3e31745761c3760701aaf402b64f1fa812e"
+  },
+  "schema_version": "1.0.0",
+  "science": {
+    "bootstrap": [
+      {
+        "confidence_level": 0.95,
+        "failure_reason": null,
+        "lower": 0.23563560415584203,
+        "model_id": "spatial_poisson",
+        "point_estimate": 0.40214989166558435,
+        "replications": 2000,
+        "score_id": "2caab62ae506b6b16c4828eb67dd9bc83131f1e6a5658b90090aa5a15edc9a51",
+        "status": "completed",
+        "upper": 0.5628646653558568
+      },
+      {
+        "confidence_level": null,
+        "failure_reason": "validation score is unavailable",
+        "lower": null,
+        "model_id": "etas",
+        "point_estimate": null,
+        "replications": null,
+        "score_id": null,
+        "status": "not_run",
+        "upper": null
+      }
+    ],
+    "etas_parent_sensitivity": [
+      {
+        "exclude_all_unsupported_parents": {
+          "failure_reasons": [
+            "numerical stability: fewer than four L-BFGS-B starts converged",
+            "numerical stability: fewer than three converged starts are available for agreement audit"
+          ],
+          "information_gain_nats_per_event": null,
+          "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75/exclude_unsupported_conditional_parents",
+          "score_id": null
+        },
+        "information_gain_difference_exclude_minus_primary": null,
+        "primary_includes_eligible_unsupported_parents": {
+          "failure_reasons": [
+            "numerical stability: fewer than four L-BFGS-B starts converged",
+            "numerical stability: fewer than three converged starts are available for agreement audit"
+          ],
+          "information_gain_nats_per_event": null,
+          "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+          "score_id": null
+        },
+        "role": "conditional_parent_history_sensitivity_not_spatial_support_spillover",
+        "snapshot_id": "fold_1",
+        "status": "not_evaluable"
+      },
+      {
+        "exclude_all_unsupported_parents": {
+          "failure_reasons": [
+            "numerical stability: fewer than four L-BFGS-B starts converged",
+            "numerical stability: fewer than three converged starts are available for agreement audit"
+          ],
+          "information_gain_nats_per_event": null,
+          "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75/exclude_unsupported_conditional_parents",
+          "score_id": null
+        },
+        "information_gain_difference_exclude_minus_primary": null,
+        "primary_includes_eligible_unsupported_parents": {
+          "failure_reasons": [
+            "numerical stability: fewer than four L-BFGS-B starts converged",
+            "numerical stability: fewer than three converged starts are available for agreement audit"
+          ],
+          "information_gain_nats_per_event": null,
+          "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+          "score_id": null
+        },
+        "role": "conditional_parent_history_sensitivity_not_spatial_support_spillover",
+        "snapshot_id": "fold_3",
+        "status": "not_evaluable"
+      }
+    ],
+    "failure": null,
+    "future": {
+      "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+      "configured_replicate_count": 128,
+      "event_cap_exceeded": null,
+      "event_cap_hit_is_failure": true,
+      "failure_reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit",
+      "issue_count": 0,
+      "maximum_events_per_replicate": 100000,
+      "parameter_snapshot_id": "a115155136c15431d4e9da46c6838d69f243dc58dba3a2233de21f8c5bddcba9",
+      "replicate_count": 0,
+      "root_seed": 147,
+      "seed_derivation": {
+        "digest": "sha256",
+        "encoding": "utf-8",
+        "entropy": "first_16_digest_bytes_as_unsigned_big_endian_integer",
+        "gather_order": "replicate_index_ascending",
+        "generator": "numpy.random.Generator",
+        "issue_id_rule": "validation_slash_actual_issue_date_yyyy_mm_dd_from_frozen_manifest",
+        "model_id": "etas/final_validation",
+        "namespace": "future_simulation",
+        "ordered_fields": [
+          "literal_seismoflux",
+          "root_seed_decimal",
+          "protocol_version",
+          "namespace",
+          "model_id",
+          "issue_id_or_dash",
+          "replicate_index_decimal_8"
+        ],
+        "protocol_version": "0.2.1",
+        "replicate_index_first": 0,
+        "replicate_index_last_inclusive": 127,
+        "replicate_index_role": "future_catalog_replicate",
+        "root_seed": 147,
+        "seed_context_identity": "fe7bece2b1e9b49c847410c28aafebcdec77db533f554263ed567f4ff0beeb6c",
+        "separator_hex": "00",
+        "worker_count_invariant": true
+      },
+      "status": "not_run",
+      "support_id": "local-support-f6816ab6c6581306"
+    },
+    "g1_ls_and_selection": {
+      "g1_ls": {
+        "model_pass": [
+          [
+            "spatial_poisson",
+            "spatial_poisson/gaussian_kde_bw75km",
+            true
+          ],
+          [
+            "etas",
+            "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            false
+          ]
+        ],
+        "passed": true,
+        "passing_model_variants": [
+          "spatial_poisson/gaussian_kde_bw75km"
+        ],
+        "status": "passed"
+      },
+      "selection": {
+        "excluded_model_variants": [
+          "etas/d25_q1.5_gamma1_cut300_kde_bw75"
+        ],
+        "paired_standard_errors": [
+          [
+            "uniform_poisson/spatial_uniform_v1",
+            0.016330711313710805
+          ],
+          [
+            "spatial_poisson/gaussian_kde_bw75km",
+            0.0
+          ]
+        ],
+        "selected_model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+        "validation_best_model_variant_id": "spatial_poisson/gaussian_kde_bw75km"
+      },
+      "stage3_allowed": true
+    },
+    "model_evidence": [
+      {
+        "eligible_for_selection": true,
+        "model_id": "uniform_poisson",
+        "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+        "passes_g1_ls_as_same_model": false,
+        "positive_development_fold_count": 0,
+        "snapshots": [
+          {
+            "candidate_log_likelihood": -12732.231194252032,
+            "candidate_score_id": "1b1ad17b298291634d4d0c5a7d4d25eacd902959ece26d6d52f7dcd8f8ca2263",
+            "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+            "information_gain_nats_per_event": 0.0,
+            "model_id": "uniform_poisson",
+            "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+            "parameter_snapshot_id": "066ccaaf2f63344f9a44a4f0fd9be5998706af26e963f9e8d7a1b4b15fceee18",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_1",
+            "status": "succeeded",
+            "support_id": "local-support-f06e7c7496ea2357",
+            "supported_area_km2": 9165305.754432771,
+            "target_event_count": 710,
+            "uniform_log_likelihood": -12732.231194252032,
+            "uniform_score_id": "1b1ad17b298291634d4d0c5a7d4d25eacd902959ece26d6d52f7dcd8f8ca2263"
+          },
+          {
+            "candidate_log_likelihood": -8501.391590432115,
+            "candidate_score_id": "4bc4ff43e4e844bbc3746f752ce0eda4b325282603102e0b02450457268a923c",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.0,
+            "model_id": "uniform_poisson",
+            "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+            "parameter_snapshot_id": "6cd6d3b38a40d29437375842b464e1146e8aae351a62bd5f27f74efe28592ad8",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_2",
+            "status": "succeeded",
+            "support_id": "local-support-eaee903b28c55ace",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 467,
+            "uniform_log_likelihood": -8501.391590432115,
+            "uniform_score_id": "4bc4ff43e4e844bbc3746f752ce0eda4b325282603102e0b02450457268a923c"
+          },
+          {
+            "candidate_log_likelihood": -7046.517822350099,
+            "candidate_score_id": "268cab769b31f94ccbe97e6395c9de385cbce3307b52386620ec40ebf807fa2e",
+            "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+            "information_gain_nats_per_event": 0.0,
+            "model_id": "uniform_poisson",
+            "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+            "parameter_snapshot_id": "69c82749ea32effd635883b8d25d5520058af648a370a7d4eae20b203f1078f0",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_3",
+            "status": "succeeded",
+            "support_id": "local-support-f86126dbec5bb79b",
+            "supported_area_km2": 9388998.067398028,
+            "target_event_count": 383,
+            "uniform_log_likelihood": -7046.517822350099,
+            "uniform_score_id": "268cab769b31f94ccbe97e6395c9de385cbce3307b52386620ec40ebf807fa2e"
+          },
+          {
+            "candidate_log_likelihood": -5176.412867890714,
+            "candidate_score_id": "7129920e906bb50b1a52b2884c33bbc4fdef4036ab65edfa32028ef16488f40d",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.0,
+            "model_id": "uniform_poisson",
+            "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+            "parameter_snapshot_id": "e9473852ac418a9d4c8493c65a9dbd0ee9a03a168123859eb08dee939d6496ca",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_4",
+            "status": "succeeded",
+            "support_id": "local-support-788851371baf0e3b",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 284,
+            "uniform_log_likelihood": -5176.412867890714,
+            "uniform_score_id": "7129920e906bb50b1a52b2884c33bbc4fdef4036ab65edfa32028ef16488f40d"
+          },
+          {
+            "candidate_log_likelihood": -1766.1766576731168,
+            "candidate_score_id": "3b738b791391dfa6670b55ae617059e64463fb521dc6ef5bf9a9c985f1d0bdcc",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.0,
+            "model_id": "uniform_poisson",
+            "model_variant_id": "uniform_poisson/spatial_uniform_v1",
+            "parameter_snapshot_id": "eeb3c37845180ae8fd593b0688c9855e224f7f2819c373f2b1be85e163a72985",
+            "selected_mc": 4.0,
+            "snapshot_id": "final_validation",
+            "status": "succeeded",
+            "support_id": "local-support-f6816ab6c6581306",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 96,
+            "uniform_log_likelihood": -1766.1766576731168,
+            "uniform_score_id": "3b738b791391dfa6670b55ae617059e64463fb521dc6ef5bf9a9c985f1d0bdcc"
+          }
+        ]
+      },
+      {
+        "eligible_for_selection": true,
+        "model_id": "spatial_poisson",
+        "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+        "passes_g1_ls_as_same_model": true,
+        "positive_development_fold_count": 4,
+        "snapshots": [
+          {
+            "candidate_log_likelihood": -12352.874936200558,
+            "candidate_score_id": "d6b01af21401297ac7d0dc2679d5401689972bf60f2dd428c617cb9c2b4a4cc5",
+            "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+            "information_gain_nats_per_event": 0.5343045888048981,
+            "model_id": "spatial_poisson",
+            "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+            "parameter_snapshot_id": "9946f9a506f803c542d2eca048d23eab04ede8a787042df6cfd1b00380606de1",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_1",
+            "status": "succeeded",
+            "support_id": "local-support-f06e7c7496ea2357",
+            "supported_area_km2": 9165305.754432771,
+            "target_event_count": 710,
+            "uniform_log_likelihood": -12732.231194252032,
+            "uniform_score_id": "1b1ad17b298291634d4d0c5a7d4d25eacd902959ece26d6d52f7dcd8f8ca2263"
+          },
+          {
+            "candidate_log_likelihood": -8225.28425977251,
+            "candidate_score_id": "27538c73d670b9c8a635810480d198a0b6cccc70aef4a6f6a1ff9030faec9ea7",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.5912362540890861,
+            "model_id": "spatial_poisson",
+            "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+            "parameter_snapshot_id": "f2f89168e362c587ed9d371e097c2d7977414a98ef0e9b26299ad750ea73ee50",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_2",
+            "status": "succeeded",
+            "support_id": "local-support-eaee903b28c55ace",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 467,
+            "uniform_log_likelihood": -8501.391590432115,
+            "uniform_score_id": "4bc4ff43e4e844bbc3746f752ce0eda4b325282603102e0b02450457268a923c"
+          },
+          {
+            "candidate_log_likelihood": -6825.601749857347,
+            "candidate_score_id": "6492464fb05923f81f93d0ab95c8695832d8c84688187d0c4453bf37ae57d9e3",
+            "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+            "information_gain_nats_per_event": 0.5768043668218106,
+            "model_id": "spatial_poisson",
+            "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+            "parameter_snapshot_id": "b23ca47bfd768132a88fa167baa0fd92e5cc0701f42b6d37b8b02a0c9f527389",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_3",
+            "status": "succeeded",
+            "support_id": "local-support-f86126dbec5bb79b",
+            "supported_area_km2": 9388998.067398028,
+            "target_event_count": 383,
+            "uniform_log_likelihood": -7046.517822350099,
+            "uniform_score_id": "268cab769b31f94ccbe97e6395c9de385cbce3307b52386620ec40ebf807fa2e"
+          },
+          {
+            "candidate_log_likelihood": -5002.777033757873,
+            "candidate_score_id": "c0d0f5fb5cc5cd381b0efbae8f7b6f710a5b120e734908142b90e4f10f96d2b4",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.6113937821578906,
+            "model_id": "spatial_poisson",
+            "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+            "parameter_snapshot_id": "83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_4",
+            "status": "succeeded",
+            "support_id": "local-support-788851371baf0e3b",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 284,
+            "uniform_log_likelihood": -5176.412867890714,
+            "uniform_score_id": "7129920e906bb50b1a52b2884c33bbc4fdef4036ab65edfa32028ef16488f40d"
+          },
+          {
+            "candidate_log_likelihood": -1727.5702680732209,
+            "candidate_score_id": "2caab62ae506b6b16c4828eb67dd9bc83131f1e6a5658b90090aa5a15edc9a51",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "information_gain_nats_per_event": 0.40214989166558435,
+            "model_id": "spatial_poisson",
+            "model_variant_id": "spatial_poisson/gaussian_kde_bw75km",
+            "parameter_snapshot_id": "252f14cad07205b10c1a605fdd21613044bc4072c98bcaa74cf357b7d766ed02",
+            "selected_mc": 4.0,
+            "snapshot_id": "final_validation",
+            "status": "succeeded",
+            "support_id": "local-support-f6816ab6c6581306",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 96,
+            "uniform_log_likelihood": -1766.1766576731168,
+            "uniform_score_id": "3b738b791391dfa6670b55ae617059e64463fb521dc6ef5bf9a9c985f1d0bdcc"
+          }
+        ]
+      },
+      {
+        "eligible_for_selection": false,
+        "model_id": "etas",
+        "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+        "passes_g1_ls_as_same_model": false,
+        "positive_development_fold_count": 0,
+        "snapshots": [
+          {
+            "failure_reasons": [
+              "numerical stability: fewer than four L-BFGS-B starts converged",
+              "numerical stability: fewer than three converged starts are available for agreement audit"
+            ],
+            "model_id": "etas",
+            "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            "snapshot_id": "fold_1",
+            "status": "failed"
+          },
+          {
+            "failure_reasons": [
+              "numerical stability: fewer than four L-BFGS-B starts converged",
+              "numerical stability: fewer than three converged starts are available for agreement audit"
+            ],
+            "model_id": "etas",
+            "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            "snapshot_id": "fold_2",
+            "status": "failed"
+          },
+          {
+            "failure_reasons": [
+              "numerical stability: fewer than four L-BFGS-B starts converged",
+              "numerical stability: fewer than three converged starts are available for agreement audit"
+            ],
+            "model_id": "etas",
+            "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            "snapshot_id": "fold_3",
+            "status": "failed"
+          },
+          {
+            "failure_reasons": [
+              "numerical stability: fewer than four L-BFGS-B starts converged",
+              "numerical stability: fewer than three converged starts are available for agreement audit"
+            ],
+            "model_id": "etas",
+            "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            "snapshot_id": "fold_4",
+            "status": "failed"
+          },
+          {
+            "failure_reasons": [
+              "numerical stability: fewer than four L-BFGS-B starts converged",
+              "numerical stability: fewer than three converged starts are available for agreement audit"
+            ],
+            "model_id": "etas",
+            "model_variant_id": "etas/d25_q1.5_gamma1_cut300_kde_bw75",
+            "snapshot_id": "final_validation",
+            "status": "failed"
+          }
+        ]
+      }
+    ],
+    "outcome_status": "completed",
+    "poisson_kde": {
+      "bandwidth_candidates": [
+        {
+          "bandwidth_km": 75.0,
+          "eligible": true,
+          "fold_scores": [
+            0.5343045888048981,
+            0.5912362540890861,
+            0.5768043668218106,
+            0.6113937821578906
+          ],
+          "mean_score": 0.5784347479684213,
+          "paired_standard_error": 0.0
+        },
+        {
+          "bandwidth_km": 100.0,
+          "eligible": false,
+          "fold_scores": [
+            0.5079156200224082,
+            0.5569530735937758,
+            0.5371309282483144,
+            0.5980327862655533
+          ],
+          "mean_score": 0.5500081020325129,
+          "paired_standard_error": 0.005714858419763378
+        },
+        {
+          "bandwidth_km": 150.0,
+          "eligible": false,
+          "fold_scores": [
+            0.4177680747656964,
+            0.4885329404245531,
+            0.46741399361146024,
+            0.5652577283719922
+          ],
+          "mean_score": 0.4847431842934255,
+          "paired_standard_error": 0.016101455774391763
+        },
+        {
+          "bandwidth_km": 200.0,
+          "eligible": false,
+          "fold_scores": [
+            0.35243910286533847,
+            0.43712717121806755,
+            0.42431838207841244,
+            0.5371830630021551
+          ],
+          "mean_score": 0.4377669297909934,
+          "paired_standard_error": 0.023155507798653784
+        },
+        {
+          "bandwidth_km": 300.0,
+          "eligible": false,
+          "fold_scores": [
+            0.30228748480935164,
+            0.36188657401446045,
+            0.37410857973897926,
+            0.48741537991851736
+          ],
+          "mean_score": 0.3814245046203272,
+          "paired_standard_error": 0.025227786736501046
+        }
+      ],
+      "best_mean_bandwidth_km": 75.0,
+      "pre_score_gates": {
+        "candidates": [
+          {
+            "bandwidth_km": 75.0,
+            "failure_reason": null,
+            "numerical_evidence_id": "ae8f8e5f65cceda9587bb0411f3345c86149e81812de320b29dd8e0e6f13c469",
+            "passed": true
+          },
+          {
+            "bandwidth_km": 100.0,
+            "failure_reason": null,
+            "numerical_evidence_id": "59f612b05a8bb43db8132ead9a5d908273b6c1a5a887e8abe6ec7c8147cadc13",
+            "passed": true
+          },
+          {
+            "bandwidth_km": 150.0,
+            "failure_reason": null,
+            "numerical_evidence_id": "a6b129082bc5e85439aa12fcbcd4e15e2e2ecb4e3a062d4e72b15c1954be5f45",
+            "passed": true
+          },
+          {
+            "bandwidth_km": 200.0,
+            "failure_reason": null,
+            "numerical_evidence_id": "557dc11a207ac1a07eb1ee2291c4dc26eceb05cf17a02b94d9ac83f446a14a69",
+            "passed": true
+          },
+          {
+            "bandwidth_km": 300.0,
+            "failure_reason": null,
+            "numerical_evidence_id": "36ac05dfdfa27442a4d3e8a63bd453a3eaf792cd894250cf5829dbf2e80f4fe9",
+            "passed": true
+          }
+        ]
+      },
+      "scoreability_gate": {
+        "snapshots": [
+          {
+            "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+            "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+            "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_1",
+            "support_id": "local-support-f06e7c7496ea2357",
+            "supported_area_km2": 9165305.754432771,
+            "target_event_count": 710,
+            "training_duration_days": 12783.666666666666,
+            "training_event_count": 3189
+          },
+          {
+            "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_2",
+            "support_id": "local-support-eaee903b28c55ace",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 467,
+            "training_duration_days": 14609.666666666666,
+            "training_event_count": 4182
+          },
+          {
+            "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+            "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+            "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_3",
+            "support_id": "local-support-f86126dbec5bb79b",
+            "supported_area_km2": 9388998.067398028,
+            "target_event_count": 383,
+            "training_duration_days": 16435.666666666668,
+            "training_event_count": 4722
+          },
+          {
+            "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+            "selected_mc": 4.0,
+            "snapshot_id": "fold_4",
+            "support_id": "local-support-788851371baf0e3b",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": 284,
+            "training_duration_days": 18261.666666666668,
+            "training_event_count": 5237
+          },
+          {
+            "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+            "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+            "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+            "selected_mc": 4.0,
+            "snapshot_id": "final_validation",
+            "support_id": "local-support-f6816ab6c6581306",
+            "supported_area_km2": 9415305.754432771,
+            "target_event_count": null,
+            "training_duration_days": 19538.666666666668,
+            "training_event_count": 5629
+          }
+        ]
+      },
+      "selected_bandwidth_km": 75.0,
+      "snapshots": [
+        {
+          "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+          "grid_gates": [
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 75.0,
+              "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0022159586996995,
+                  "density_l1_difference": 0.01115983374687228,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0004616933167136,
+                  "relative_expected_count_difference": 0.0017534558241506795
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0004616933167136,
+                  "density_l1_difference": 0.0030096242533557667,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00046169331671364056
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8940875219130264,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_1",
+              "support_id": "local-support-f06e7c7496ea2357",
+              "supported_area_km2": 9165305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 100.0,
+              "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.001311643389202,
+                  "density_l1_difference": 0.006474198754200207,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.000255636784341,
+                  "relative_expected_count_difference": 0.0010557367197209083
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.000255636784341,
+                  "density_l1_difference": 0.0017454030458507466,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00025563678434092907
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8653286175637873,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_1",
+              "support_id": "local-support-f06e7c7496ea2357",
+              "supported_area_km2": 9165305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 150.0,
+              "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0005990169171792,
+                  "density_l1_difference": 0.002947922667713156,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0001079583597856,
+                  "relative_expected_count_difference": 0.0004910055492398784
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0001079583597856,
+                  "density_l1_difference": 0.000800230486311515,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.0001079583597856093
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8205781339100712,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_1",
+              "support_id": "local-support-f06e7c7496ea2357",
+              "supported_area_km2": 9165305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 200.0,
+              "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0003995232644067,
+                  "density_l1_difference": 0.001725706848077216,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000691119087717,
+                  "relative_expected_count_difference": 0.0003303885218536703
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000691119087717,
+                  "density_l1_difference": 0.0004720134431750321,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 6.911190877167961e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.7844192028936736,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_1",
+              "support_id": "local-support-f06e7c7496ea2357",
+              "supported_area_km2": 9165305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 300.0,
+              "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.000260040107345,
+                  "density_l1_difference": 0.0008845430017029449,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.000044017303821,
+                  "relative_expected_count_difference": 0.00021601329520110773
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.000044017303821,
+                  "density_l1_difference": 0.00024146405814414072,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 4.4017303820975684e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.723267942805069,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_1",
+              "support_id": "local-support-f06e7c7496ea2357",
+              "supported_area_km2": 9165305.754432771
+            }
+          ],
+          "rate_per_day": 0.24945894500795288,
+          "selected_mc": 4.0,
+          "snapshot_id": "fold_1",
+          "support_id": "local-support-f06e7c7496ea2357",
+          "supported_area_km2": 9165305.754432771,
+          "training_duration_days": 12783.666666666666,
+          "training_event_count": 3189,
+          "training_evidence_id": "46c30a48a97443a10df381995ede9a35516fc4ba6babf61b1048b56137319c45"
+        },
+        {
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "grid_gates": [
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 75.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0017477294846056,
+                  "density_l1_difference": 0.010699304341406663,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.00036948623665,
+                  "relative_expected_count_difference": 0.0013777341941331631
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.00036948623665,
+                  "density_l1_difference": 0.0028537238210382507,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.0003694862366498963
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.9144090988981323,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_2",
+              "support_id": "local-support-eaee903b28c55ace",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 100.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0010272627139183,
+                  "density_l1_difference": 0.006108267371202797,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0002048093638636,
+                  "relative_expected_count_difference": 0.00082228493839956
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0002048093638636,
+                  "density_l1_difference": 0.0016348702866835045,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.0002048093638635784
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8911141319930519,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_2",
+              "support_id": "local-support-eaee903b28c55ace",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 150.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0004740000240624,
+                  "density_l1_difference": 0.002785947075580109,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000870169444933,
+                  "relative_expected_count_difference": 0.0003869494084138873
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000870169444933,
+                  "density_l1_difference": 0.000747161775622101,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 8.701694449331221e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8549220936541089,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_2",
+              "support_id": "local-support-eaee903b28c55ace",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 200.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0003250603840401,
+                  "density_l1_difference": 0.001608250229921413,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000572724673968,
+                  "relative_expected_count_difference": 0.00026777258064688577
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000572724673968,
+                  "density_l1_difference": 0.00043549643099250276,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 5.7272467396840554e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8251687705702835,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_2",
+              "support_id": "local-support-eaee903b28c55ace",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 300.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.000225277172116,
+                  "density_l1_difference": 0.0007893551883841391,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.000039621204118,
+                  "relative_expected_count_difference": 0.00018564861237645665
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.000039621204118,
+                  "density_l1_difference": 0.00021466808750256942,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 3.962120411804548e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.7720966921455468,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_2",
+              "support_id": "local-support-eaee903b28c55ace",
+              "supported_area_km2": 9415305.754432771
+            }
+          ],
+          "rate_per_day": 0.2862488306828812,
+          "selected_mc": 4.0,
+          "snapshot_id": "fold_2",
+          "support_id": "local-support-eaee903b28c55ace",
+          "supported_area_km2": 9415305.754432771,
+          "training_duration_days": 14609.666666666666,
+          "training_event_count": 4182,
+          "training_evidence_id": "c7fc42706ebe16915ab93159a3aa93244330d8dd20ec8050bc582889c690b5c4"
+        },
+        {
+          "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+          "grid_gates": [
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 75.0,
+              "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0016476234566039,
+                  "density_l1_difference": 0.010234633303857807,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.000343557211517,
+                  "relative_expected_count_difference": 0.0013036183775922555
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.000343557211517,
+                  "density_l1_difference": 0.002730473496743895,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00034355721151690943
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.9154862175928487,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_3",
+              "support_id": "local-support-f86126dbec5bb79b",
+              "supported_area_km2": 9388998.067398028
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 100.0,
+              "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.000974535205597,
+                  "density_l1_difference": 0.005808063128706446,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0001921226559394,
+                  "relative_expected_count_difference": 0.000782262259354699
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0001921226559394,
+                  "density_l1_difference": 0.0015558801366047507,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00019212265593937516
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8930184230756795,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_3",
+              "support_id": "local-support-f86126dbec5bb79b",
+              "supported_area_km2": 9388998.067398028
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 150.0,
+              "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0004642700506676,
+                  "density_l1_difference": 0.0026375695483952266,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000832317673662,
+                  "relative_expected_count_difference": 0.00038100657145106255
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000832317673662,
+                  "density_l1_difference": 0.0007069734320824402,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 8.323176736624305e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8579299627197006,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_3",
+              "support_id": "local-support-f86126dbec5bb79b",
+              "supported_area_km2": 9388998.067398028
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 200.0,
+              "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0003281523249967,
+                  "density_l1_difference": 0.0015324265867009512,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000551234645747,
+                  "relative_expected_count_difference": 0.00027301381095488333
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000551234645747,
+                  "density_l1_difference": 0.00041500776681324686,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 5.51234645747023e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8288182485829289,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_3",
+              "support_id": "local-support-f86126dbec5bb79b",
+              "supported_area_km2": 9388998.067398028
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 300.0,
+              "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0002341296148753,
+                  "density_l1_difference": 0.0007570552067037853,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000379397644392,
+                  "relative_expected_count_difference": 0.0001961824073218028
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000379397644392,
+                  "density_l1_difference": 0.00020583338177081347,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 3.793976443922098e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.7760938019929615,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_3",
+              "support_id": "local-support-f86126dbec5bb79b",
+              "supported_area_km2": 9388998.067398028
+            }
+          ],
+          "rate_per_day": 0.28730200580039345,
+          "selected_mc": 4.0,
+          "snapshot_id": "fold_3",
+          "support_id": "local-support-f86126dbec5bb79b",
+          "supported_area_km2": 9388998.067398028,
+          "training_duration_days": 16435.666666666668,
+          "training_event_count": 4722,
+          "training_evidence_id": "c33f6186b3d3f2043cc5d521a32b6626d7c1e4d639f1e2ecc58dd5eba9b63d62"
+        },
+        {
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "grid_gates": [
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 75.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0016502001174155,
+                  "density_l1_difference": 0.010033669701284983,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.000341874485772,
+                  "relative_expected_count_difference": 0.0013078785013534119
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.000341874485772,
+                  "density_l1_difference": 0.0026734616661292622,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00034187448577194246
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.9180536964403374,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_4",
+              "support_id": "local-support-788851371baf0e3b",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 100.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0009900468383517,
+                  "density_l1_difference": 0.005709284699484013,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0001964049060843,
+                  "relative_expected_count_difference": 0.0007934860877068507
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0001964049060843,
+                  "density_l1_difference": 0.001525971470673526,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00019640490608430206
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8956902512397658,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_4",
+              "support_id": "local-support-788851371baf0e3b",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 150.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0004795026606639,
+                  "density_l1_difference": 0.002580932940341497,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000882565543958,
+                  "relative_expected_count_difference": 0.0003912115792820345
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000882565543958,
+                  "density_l1_difference": 0.0006914051223572235,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 8.825655439581581e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8603104190110531,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_4",
+              "support_id": "local-support-788851371baf0e3b",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 200.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0003357295027304,
+                  "density_l1_difference": 0.0014926786427845735,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000589882514896,
+                  "relative_expected_count_difference": 0.00027672492772114535
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000589882514896,
+                  "density_l1_difference": 0.00040388618546253465,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 5.898825148964448e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8308158474541112,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_4",
+              "support_id": "local-support-788851371baf0e3b",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 300.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0002340401992975,
+                  "density_l1_difference": 0.000740418646485398,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000409537785189,
+                  "relative_expected_count_difference": 0.00019307851348396516
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000409537785189,
+                  "density_l1_difference": 0.00020103902446860533,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 4.095377851887072e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.7775800361532746,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "fold_4",
+              "support_id": "local-support-788851371baf0e3b",
+              "supported_area_km2": 9415305.754432771
+            }
+          ],
+          "rate_per_day": 0.2867755772565483,
+          "selected_mc": 4.0,
+          "snapshot_id": "fold_4",
+          "support_id": "local-support-788851371baf0e3b",
+          "supported_area_km2": 9415305.754432771,
+          "training_duration_days": 18261.666666666668,
+          "training_event_count": 5237,
+          "training_evidence_id": "ed59aa557a816e43dd0af8f321ca689cee3ba6deac81eafa2b9e66f5b208af29"
+        },
+        {
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "grid_gates": [
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 75.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.001619460945619,
+                  "density_l1_difference": 0.009752608988902615,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0003336690424438,
+                  "relative_expected_count_difference": 0.001285363017328053
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0003336690424438,
+                  "density_l1_difference": 0.0025944933943698105,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 0.00033366904244380713
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.9205552492487103,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "final_validation",
+              "support_id": "local-support-f6816ab6c6581306",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 100.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0009788904233567,
+                  "density_l1_difference": 0.005538623527190686,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0001936052207665,
+                  "relative_expected_count_difference": 0.0007851331967043678
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0001936052207665,
+                  "density_l1_difference": 0.0014774684928883343,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0000000000000002,
+                  "relative_expected_count_difference": 0.00019360522076627967
+                }
+              },
+              "normalization_cell_mass_sum": 1.0000000000000002,
+              "normalization_mass": 0.898587157642248,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "final_validation",
+              "support_id": "local-support-f6816ab6c6581306",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 150.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0004822276249992,
+                  "density_l1_difference": 0.0025043476410553734,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000884792102105,
+                  "relative_expected_count_difference": 0.0003937135793221274
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000884792102105,
+                  "density_l1_difference": 0.0006710672555139648,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 8.847921021049032e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8636284342730141,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "final_validation",
+              "support_id": "local-support-f6816ab6c6581306",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 200.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.000338954694252,
+                  "density_l1_difference": 0.0014541437707290231,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000592394294248,
+                  "relative_expected_count_difference": 0.0002796986956361446
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000592394294248,
+                  "density_l1_difference": 0.0003931688475313405,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 5.9239429424762235e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.8343313294976731,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "final_validation",
+              "support_id": "local-support-f6816ab6c6581306",
+              "supported_area_km2": 9415305.754432771
+            },
+            {
+              "authorization_id": "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53",
+              "bandwidth_km": 300.0,
+              "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+              "convergence": {
+                "diagnostic_50_to_25": {
+                  "coarse_cell_size_km": 50.0,
+                  "coarse_total": 1.0002363376798626,
+                  "density_l1_difference": 0.0007268901347836626,
+                  "fine_cell_size_km": 25.0,
+                  "fine_total": 1.0000410844147734,
+                  "relative_expected_count_difference": 0.00019524524355272156
+                },
+                "primary_25_to_12_5": {
+                  "coarse_cell_size_km": 25.0,
+                  "coarse_total": 1.0000410844147734,
+                  "density_l1_difference": 0.00019719053712460418,
+                  "fine_cell_size_km": 12.5,
+                  "fine_total": 1.0,
+                  "relative_expected_count_difference": 4.108441477335134e-05
+                }
+              },
+              "normalization_cell_mass_sum": 1.0,
+              "normalization_mass": 0.7811954298438982,
+              "protocol_sha256": "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a",
+              "snapshot_id": "final_validation",
+              "support_id": "local-support-f6816ab6c6581306",
+              "supported_area_km2": 9415305.754432771
+            }
+          ],
+          "rate_per_day": 0.2880954005732223,
+          "selected_mc": 4.0,
+          "snapshot_id": "final_validation",
+          "support_id": "local-support-f6816ab6c6581306",
+          "supported_area_km2": 9415305.754432771,
+          "training_duration_days": 19538.666666666668,
+          "training_event_count": 5629,
+          "training_evidence_id": "44b1b8af27984f64c57d94675e698b404a829aa7c48aff40e29ee10122e14c60"
+        }
+      ]
+    },
+    "score_ledger": {
+      "classification_counts": [
+        {
+          "failed": 5,
+          "not_run": 0,
+          "scope": "primary_snapshot",
+          "score_count": 6,
+          "succeeded": 6,
+          "total": 11
+        },
+        {
+          "failed": 0,
+          "not_run": 0,
+          "scope": "kde_development_candidate",
+          "score_count": 20,
+          "succeeded": 20,
+          "total": 20
+        },
+        {
+          "failed": 0,
+          "not_run": 207,
+          "scope": "secondary_validation_horizon",
+          "score_count": 414,
+          "succeeded": 414,
+          "total": 621
+        },
+        {
+          "failed": 2,
+          "not_run": 0,
+          "scope": "etas_unsupported_parent_sensitivity",
+          "score_count": 0,
+          "succeeded": 0,
+          "total": 2
+        }
+      ],
+      "coverage": "complete",
+      "entry_count": 654,
+      "ledger_id": "score-ledger-0f5f2b21132dcee9",
+      "ledger_sha256": "0f5f2b21132dcee923a44a6db1e05068f394ea33fef8440d41677be17364e0f2",
+      "score_count": 440,
+      "score_ids": [
+        "1b1ad17b298291634d4d0c5a7d4d25eacd902959ece26d6d52f7dcd8f8ca2263",
+        "4bc4ff43e4e844bbc3746f752ce0eda4b325282603102e0b02450457268a923c",
+        "268cab769b31f94ccbe97e6395c9de385cbce3307b52386620ec40ebf807fa2e",
+        "7129920e906bb50b1a52b2884c33bbc4fdef4036ab65edfa32028ef16488f40d",
+        "3b738b791391dfa6670b55ae617059e64463fb521dc6ef5bf9a9c985f1d0bdcc",
+        "2caab62ae506b6b16c4828eb67dd9bc83131f1e6a5658b90090aa5a15edc9a51",
+        "d6b01af21401297ac7d0dc2679d5401689972bf60f2dd428c617cb9c2b4a4cc5",
+        "028732fd963336a267defa5a4b56b291155dd8dfe91f12b958d9010e20dce637",
+        "e146fd3f3dde162d09788f1ff9c8255e10c260d378d4677745ef91b01530f91f",
+        "d5ba41660f0ae05fc1e8873f9951da1a0b5bbe7a010f7f13eabf89f4ba1cc413",
+        "0baeb980b455e53defa14413df75d026cee681f2b5eba0b4bcfc68fcae2e1cdb",
+        "27538c73d670b9c8a635810480d198a0b6cccc70aef4a6f6a1ff9030faec9ea7",
+        "7c6861e8667eac331505a1889a718ace21d2d7513ef7f03ce3842ef8b448d71a",
+        "3cdb0665c593bb5b25f1d5c38f0ed89cd9c0f42b29e22df43ce31cd3338794b4",
+        "f8dd30a3678663f2b252434a37e76eaf835b9e7ca4e9439350bcda612827acef",
+        "b1e05a24502f63c27a389c4197ee6dc1e86e28c3792d8a3b69c0ca5c2a5850a6",
+        "6492464fb05923f81f93d0ab95c8695832d8c84688187d0c4453bf37ae57d9e3",
+        "919e05a9290654d5ccac3661e8bf07d54bbd0d577c9b022204cb23ee219f3e88",
+        "378a33b14fd7b622efae7b75109aff2c9686a8f2dfddcf19e04e099dc7903f5b",
+        "4dbcf7280365207b7e801be6427d479d8990ac0d9dc43787f0328e523b9c2612",
+        "211a3e4858215021cf83e7958b278755e3a2322af554e74647a0eb6222fa7f60",
+        "c0d0f5fb5cc5cd381b0efbae8f7b6f710a5b120e734908142b90e4f10f96d2b4",
+        "b431320a5f6551159d39727801d72fdbdc361a7e57d2edc86c6087538d2be4d3",
+        "f2c00bf5c0e06df4ad1aacb38839d78fbbaf122a3edb4ff8b4ff64be986792c3",
+        "afdbcd446cb292e33886bea14327ef71398cc0d34c3e7eb6e56631e1b929be5d",
+        "cd485435f2e0de6c5ccd47b063a6d03ba86b92e8664a8065efd90136dd715393",
+        "f3c29b199dd51dc0b0eadd143e3fe72b92b06b426f5ec0236a9c53965236f34d",
+        "263cab3013fa1431317efc27fcea66f1884cc74b917bb56e4f1e157a477f26e9",
+        "f91cc63bfc4081050f860374413efe2c15cff29cecbc71a46f63c54a275ef4dd",
+        "bc4f7b74edccf8cff4ed16b103272509b3e342a6e9d2b8d021796bbf6968792d",
+        "82c477a8763d3b74e98b9b1df545a0ad2a4266515b266e54bed99dea3d80edfc",
+        "f2ff2f343c022e2026c52bf57dde88ff9e58cec5f129983557a1e7792c70d96b",
+        "be6250be8379376f80f433c552a6e314fb89315ff475fb3460f82d0c5f0f3f7a",
+        "4ca9dbb4450f837ad08f64a717d984426652c6e1cac17985d9c53654e48087e8",
+        "fac5f9ed5a5784cd98217822042ca1f1f62f222735d342d3ec9a71c21c44d86b",
+        "067734bd5fc300c7c41d55fa6fa03a440351fe25fe35aadb0c1bec4956339bcb",
+        "7e32f8c178463c3b48d5b3c41d86b97da7dd36713bc75976e75379e1d753d084",
+        "4bb2a548b7923a710bf82194c29435bb46a6f568c7e55fab2af20162d91927d4",
+        "5d6632d1306fadc406dfe3a42a45e299096dd930edf07966051e5860c8ef07fc",
+        "c4f3e11ad0970fcbe7bd7f515c75b93b9138a49e438cac94e08e1ee020a01bd0",
+        "45dec65ca6cd751d9e3521b7b9d3e5c97caf7c98a09f891fbd2904d0e5aead23",
+        "9149c2918db1e0c21f68da772b15bd9ed775ba8d2529370cce1241826687de81",
+        "6204f76c92fa58281abdb9387f526f778e9b93d3c8a003f1b8c12f7c2207edd3",
+        "ed4123f4d870ccc7344c9b509e90d6e1a7c9623a1f71350454f81854345377b8",
+        "b75b2a454cdb53aae64c45ec28cf5297c7bd2990e56725fdba7eb70d22f572af",
+        "1e96403d679d11dc370f80eeb975dfa1773c7cbd80616a2e0f511bd2a6f2613c",
+        "c12b54f5319cdacb6561d76058162af369a2bca3a5570799ce495f97974d1081",
+        "de465faa6315d369882bfeb8cc03fc29c6c939d4a4a4831a283f8b78005fd296",
+        "8845022e8c1d9de81cb5a39274b1fb92de716872091e03d432ec08d0979fb578",
+        "31b690bf64e8db95b793b115b4d0fbb05fe59216dad132dd394c3932fc8c2116",
+        "cd5be46064677be9f1c63f3704a3979dc501f57418596d1e499df7a37f181a0c",
+        "49b7b0b2023b2068bc82144651c69dd8d3a5fdcb934b94b466f14c42e06717d7",
+        "01feef45fe9e2c547af9efe49c312ef273badeee4e52e16bbae01be118768ac4",
+        "102ad119ff009c3d2aec9d73b217d170e1136264f20cbb1a22e3a4739e1fb1ba",
+        "04fddae834dcd162a60a1c4a3511616e6cad5e368b03adb78fea518ee508bff3",
+        "5003cc25efcf409d0c8a9dd83b626917d247a0361b5289c34c78cd898953c1f8",
+        "110ae496b27ece8fb52e98ded3dbd2bce1482e886f6b7dfe4c37264a4db06303",
+        "e2cecb6f1ef8ae8820e3f2dabc6a5ac7b03d2403bdbecbc26f3c42cc949d5be8",
+        "363f8a09d07a0f3079a078bde3429973d29ba85f70cfdecae225bb9ed248e511",
+        "6281548ba4c7278a7726cf3ae5fde300f2b30ac083ec23c8b78002b9e2982176",
+        "80b38093c31e2fc0586b06229de25a5c0e3af97aef1819ea67a5a67941bc3290",
+        "f941e4463722318da308f5bc761cac1c33fbbfd670cecf3a9597bb466e2d36a1",
+        "3931a04b2c4a4c76afbd04ca39a94ddda0ff67292574c27f1df52a5c6d5e9cc4",
+        "574811078786cb72d1ac8045e98875642c6e7928bf1b7b88b5bf2c6b31789f56",
+        "f7975553dea62ebdb13b854016bd852e9d6b68aa827da4f40de386f8b9cd5868",
+        "ab1b606bec4e1ea7a303a187446be58f6b2d802f41b8f4706a4ad5e202762f55",
+        "b5748d448e49f87168d2b972c6988cb2cd0863d131666b3727a4252d379aebc6",
+        "d1ddf5756752c454a0bab3a202168cdf5ca05a9dc60d093c79e57f1468822876",
+        "eaec13914b07d7232f64da9b0f4a67288a2c7f28ab76c1203949196b632a3657",
+        "4a64fb80ccfb6ca46a6d74278470339550493ba3629f48becd562e29341929b8",
+        "dad5c5d754b1697d372bbf132a45d32497d19f558a682b564dbffb5627a97ee8",
+        "7af4589d0140ab34b4bed5c3b47baff0a71d786cd179e3ebb04101e1fba15cf6",
+        "58a03414808aad618aa729c2a17c7ab432b961c40520c8d8ab990e266a8c3445",
+        "f628a0dd89ab91788cac8960870c42a41d77ad2ab2991c03e3af561422bcec01",
+        "8dcf92f71b685fa9f2060d2220cba1e74afd9729809a0c3a4e9581ea531f7f7b",
+        "4611a27f7bda216a113fd1877f20146cc2545bb507d99076062c753716152c4e",
+        "c1fb6262a2e1405c6bb67518f463642d3d5bf1e277097a8b6dfb81cb9738fb06",
+        "f4ba0472f4aeb96df34109aae78a429a1c94fef923bd8efcd9c65bf545a88be5",
+        "be825c1a502ab584d73c809c758b6fafbab6144386df402d8db6907093912205",
+        "ed96a90fd97540b1703098ca041eb34f4ff88f38b22a0406d49b50e21cd4cb4d",
+        "e3827cabd4d375b9ba5f26b0456d8e5ba151743a972a8a5b49a77b77da2d764a",
+        "e5231b1ab64cc05e770cb4b9d5214a5639bb7508e657651444311aa0db6425b0",
+        "c6faf990d48ed4b2df91a37fad8c31b0d1e471920e97ec7e1c444fc5a9b8d5b9",
+        "bd12ec1550e957421bdbb3b7391517e938d4743448001d4c676f2e306716b8d2",
+        "a5746b913d9a853d10c523bc34f89c38bcd6813fc630a448e18cdd064276c25e",
+        "c1d4fb3b2dd968256fd5effc9c95f783fa206139611a56db7362701df527ab67",
+        "0378e4d4b738e99869ecb96ed8eeed5957dba38fafcbd8dd240cc8c6d81742e9",
+        "101fbc12f1b7aaa728943e5b833cf9c7f3475c6dcd5b641928f9f0470d2876b1",
+        "5d38233145bace547673f7685768cafa006a3bcd372f22d2d67127808919b6df",
+        "9c20e107787f67184cd07b18b35dff4869b58d1c60565ac8004d555420272f45",
+        "76e2016651bb2b927c3d273141ed4c9f43adb161d7aa26935ff1aa78a733ecea",
+        "d888ab6fd463f141e608d0ff02be1b72cd4c58faa4e65d9a5d60faf3163a212d",
+        "620db33cc4b7fe8ca9400f7f7e6945bff8b5c1cb9bd09be13135f7c31b01e63d",
+        "f5ba24c64d1385a49e7db111faa262954ba54f65e9ffcb9041c82bf8795d6425",
+        "9affb7c07c5eb2063471d2b31b4644056803099d8696b6b5470b0eb7d02bfedc",
+        "186300f1f923b73e7f9523da47c8dae560a24a857e12bc491d664f64c0dccdc8",
+        "21fb2fa612b186597c11bf459039407cac182372004eddb7c28eda8d3caad35e",
+        "358b651de7378b4cd061f47de1d968312cf7e7a83bd3a50a6589b239811e2b10",
+        "a058c2a18b5319ed81b2be4521f8ae767d3cce30ac75b7ef1a3ceb1e756e5933",
+        "a1440410deeab96a0c6807d0953fc9999b27c5f492da57f59b31dd8766e3cd12",
+        "88a49044c2ef4bee0ad5ab4b45a9f36c1459aa30719ab81e7b85c9a54617bd84",
+        "918282714e8f0edf15eee2554cb80f8b0b523b0c84e79967afe86224733d9429",
+        "cfc7ad5d9fcb597edb2e1af9593816877044399f6cb60863de5c0eb7a82042a1",
+        "3d665212f66d5ab89e417d7f030a743a9fc7fdb118312019e28c2a1d20685678",
+        "b481c601d1987b836f0ba98784a1b462d26b005ce6dcdeb51ccd6baf44c145bb",
+        "0e18bfb1766109105fcc429de6069b4a1f7bd1be7fc033f494ecf9e8fcc880f9",
+        "4b63b49cf9c40dc78fb435df79850298ad35bec0597ea4ae83c6e96dda37c71e",
+        "82fc2f67818be6eec08982f6322c882317922990bddf80f1e34cc21c2f88e149",
+        "affaf12b4d3d561362ca3c61258fc899e31ae241b6f000f28c5ef4394118a309",
+        "e01e251fcb7c7b408a72f8134a6bca780cdbaadb0b22576c6186c716e6833fef",
+        "06ce4d2e12708254f752de7e46715af1bdd7f98803ed8432eb707fc46f49920e",
+        "1009d6c43beb480ee42bf6236842aabfb385cd15bf8448beedf53e1b343492af",
+        "5f24fcedbbe5f5bcd13d69fcec76964eda8a85bea02cc4fa4ac2d54880772daf",
+        "cdd3b82a6134744e3a58844b3b3bb787c37b9bd3a69f9a6ad766accf506731c2",
+        "b9ec133ebf83a5ff90162c71cfb5798391c6ea2d0dadab6ef164d84bcaf2045c",
+        "2b3387ceaf6e9101e56fb6fffc048a0b536c214add46f3d80241fae58e9603cf",
+        "733a0d00cf8f0f1ce590cfdf34b323523a547bdac8b2d3fd5fe68fa0cdeaff76",
+        "c783b18ed08a3f5ff87b0f6e406e6f2d7d1237c365e4f7df54a6f3972c5a458c",
+        "bbb85e38b8ef1827fd5d0dc06de0bfad8a7494b7f0716630dfbbfefb425a45b6",
+        "98ea60a59add993c7f38adff2b0ce8c7db9a33ac8cf900b709f74c4fd20cd97b",
+        "6116547505d776525fc2479c5fc5ce455af31f793cba71c6da8cf051fcb8a7ea",
+        "55cc0212cfa0346c0cf5dd2eb79b27200b9342ce5bee7a3a75edf46a45fd4816",
+        "e8ccab623f9783f89749f9045a010cc8b12c6c7cafa415facbc6061b3c3d782c",
+        "b14a7cf30e2b49a8ce2aa5cc7139c29155cffb9aee2a35105d808765c197ea3b",
+        "e7c993cbf4d6d29a74bb04980c1c5e562d2de47015eecb2524c8b33d1181976b",
+        "94196a23845007c8ef699d12cb4a7420356aaac5e457f9dfa14e8635b08289bc",
+        "6dc654f6b2c66340e3f633c7f3532a2873ce29b2e9bcd43f4a361ae743a9d5be",
+        "2dbfef382fd9e85d3f4f6961b5d7a6a0e9b147c68f3eeaddd747d254599ed1cd",
+        "7f1310355318c2c14416c53b88d9af8b81ac9c0eab3cd42e5655765550563eaf",
+        "258cec1f6085ddf921c047f95f4ae5d6e1f67b7ec6422b1e4ead93447dc62954",
+        "bb7eed4f2e6c01df541b517266baf7c2278afca27919a9cd47f05eaad264be42",
+        "68b50ade20eb5d050594af7eb068e5b28bbd2856282017e86987bb37d5b87194",
+        "51c95dbd78c61f672aa6bdcfb76d171d504c943a0679bf7096b170bcfbfbfb79",
+        "c3e065ede02394e5c9bbe70b5f21dec1abdb15beb26c57b00f4ae716ca51a503",
+        "198785136be3fc5a7a9b1aa097162723e6b93ea6e747581dc4fe41565de75909",
+        "1d2e34aa2ad9be8f0c73c10f153946058839a3775fe49af56fa23f9c560fa8cb",
+        "e230fe1146a3a0b79fca58c4d206e374cd699da69d36000627a36950f3ec59fe",
+        "6f32e138c29b71a822b4792c0e1c7d72acae286d81b2255ee22b97d23e0ef11f",
+        "c0618e73ded1bf425bdabae66284ad8cea56699793525479250faa6aced8ded6",
+        "01a95105ee71768bba35ac6c865cd01392989abf7aed5e723c4e1eb2475243b9",
+        "1345c1e7d7965d9051bb07f509e74cd74f1ee0b56ddf73377e34a4608391b50a",
+        "37e9fd6251f82ed8e0a1c0219a1f2d4bcb028fa65d7220ae4dcc22070689b099",
+        "fd320f86cf1e7c957c8581b5ee893f8c35a7d72c6f3c25ce71e19227db4d77cf",
+        "b37cb52edfcc43c9e177c0525be3ce694b339b10f9deebb1a782c63c9a5743af",
+        "2ca451091bd5038f9112e115e1267af6be747c3af07c0b8f6919a6c71b398ec1",
+        "ab8b4818332c9bbafd5d0cbddc4330762cfbabaa47f3e16e6b1f6b644b0fbaa4",
+        "80c00f146001ec4795a5c6deb80013f65a3ade6c78913de46c980f49bf90d75c",
+        "b8db3c7528034d27115e1f3b6147d26f66829b5dff53fa2eaa2c90d3b1c0c335",
+        "795cd58bd1050dabcd2a8b0c4fcc9932d1d24525147b876cf1617ac2ab272dc7",
+        "fdc37a65174d8f722af44e17f51622e14831b8a40e6917d40ec58ba56d409ffb",
+        "744cd56db9dd455fd81264a6c63b20764cc9c5f41c5be1d755deb0371e233e3b",
+        "1a33a25cac711235ec3b0d37f30a66b4d506557a39d96eb3c966efc2644dfc33",
+        "5de34cac74404137712aa9d6e1069698d190212d3a2f4913eba5b216b547750e",
+        "9d4b2582fde360dbbc73f86338ce239c1c1ca5bc7e41cf8843371f8d61a4d397",
+        "3062425c6360bdf1d9292fd51f35c97bcecdae66049d83e7882b138b60eb2f43",
+        "bab523b1282cd63c81a7f921f0ca0fd0b31f8373fa251f8ca57d1fb290f4f66c",
+        "97ead7aca5c81221c675b43b65fe0bc996332005755a8f8da029c7bc8ce34499",
+        "bd91d30658bab7010a1e85f12650eb00237de3239740aaf5cdff1b1177156603",
+        "1677c66b1e5aab09329eb736f3d53f088f4a55317379be98085394263e04d001",
+        "6169f6123c073f4edf106bc76dd08223ed64e0c02d601154c725e4837e0d3991",
+        "d972ef98706ebe776bcc14c72b118cd23ffcd2c9039976fa05d6c91ab5f55dff",
+        "82f41f9aa70eae92a1b322773910e4c8c927816d13644d1850d106f67106ffb9",
+        "8e0e761442c06ec8130ab45b6c9dee933f518d6ddb83785cfe3fa9cd25398da7",
+        "180c791310c4b89a15a2f8c8c242f3451ecffc63e85c442904e03b706db3f59d",
+        "757ade6be0d632040a7773a73f805184b6bfae1fcbd325d348ebad603fe70a79",
+        "9c46ee94602debcba65dac0d302204274cc787711e7c32b4ed351935f9f70650",
+        "da693fc9cfae98cc24cdf8ac2f8856fc7f952771aa1f1f208f007dd7fc3825b5",
+        "9c0f4773ec3cf70069cd35d9e1547fa470a170b52b158929f01f63a52ac5f605",
+        "92d426380a69d52c808c9b7d05be6e3910ac8f0a1a151a11338dc7837d07243b",
+        "671703253186070b74f434b8c36714ade5eb4c59138c9b296786ec2fbddf8ade",
+        "330e3159df3b9ca05fd5d572e5ac98e6c622c577dbe5059919b1fba2c71b33ef",
+        "95de38b09e9d4c1b09585d454ad74fe64fc7e5143840bc23f2dd8d3909b13ece",
+        "60452e1e815e481f6254715eed69b14358170355087763f48de2e71412c7b03e",
+        "103e1a6f3a46a1c461ea884c085b4ee345b149286cd994cdc3392f7aad14f4b0",
+        "129697707a4a82043dcb62aff7c22346f0f8f56ab05ee6615064e7c802ee044c",
+        "b40bfbb8df981535537e2317ead5e238cfd262db6c74add13bc671d9944b7e67",
+        "cb7b1f6660eeeec0f611ddda1a9165095fdc974a5b65614d9e075248594014ac",
+        "3fc0c35af1f7345f2a27b7bb4bd2c5bbd0443e89004606369242d5a693519994",
+        "e812fa48d6d15359023e6d096f4844d9f7eebc1f4fb472bdb57fd07d71605929",
+        "43c774111dc3b088ef454d87bef5248a21b07b904f8c0a9cd11408ba04d68de8",
+        "140227ac3ae874aa2a3838e0aaa312db75317447126a2c5e890989911a8b7adc",
+        "edb19a866cf1837b0f3a85d2eed7bd8a77fa43e1a0379746c6be08a2e3ce655b",
+        "e28ad18485c67cfb3be8cb5f0e75af70e3d54276df1e559f58e89be9f7f93185",
+        "21260504ffd0784f5cbecb541cd7b255edee67575d3dfa33da9276db08bd7dd8",
+        "d2227d28da202fe20e883008464df8cfd2ddda2b1202d4986e2ad6a45c91f58a",
+        "4c64cff1fb77d029c1db577cf88ab8e5a78e15a735fde61e2fac17731d92edc3",
+        "330083701f91338083a5a76b7faf3f220b9ad8766d15fb7e9b6febc9dbd19e70",
+        "0f2636ca9d2eaf4b4d791fe83534a37d895ad1d646f2f25d3e567ddab3c37ddc",
+        "1c71788558e6652f272ff1d94a381762c2ae327a8f3621500522e8a79b04a6b1",
+        "002f4a69b91a322660111fc2f3dacbf04f0d995194252a22500492bee2777975",
+        "f30145a2f6ad27d99cc3089f3e4f64e260a9db197e83f8999ab851a5e1baa75d",
+        "7ceef4a70d6cfaaa99e0aefc725f4c509aa12ad9ecbae77533f1c24c44e81c0b",
+        "d21dac4ae281108ae2e78d2426ec01c91479d8ba07e13a1e0f15e2fdc0c22a2f",
+        "26a9e3162dae092acb762e9dcb35d3f8f029e2d55a03516ab01bd11562ec1117",
+        "20f657d36939316911d85fa370624d0c101174bfa8bbe2b2d4db42e1554d2ec5",
+        "79bfd24e94877a4fc731b50b4685bf11e19f9d32acb17b2e97791c8056c3d173",
+        "3eb853b05bd131a10c25c699fd1dfa82319db33aa8fb69e991601372dc8f57e2",
+        "4b97862a6ef168f21a878d7f1333a18e6cb6aaf6df8a48b5ae5df9b442c7ed68",
+        "d39c59fb8e41855e645c9b1984d0a79f2963f605bfc4038548b83b80c9f58284",
+        "9430e449b19430b91468ccb5696d05a31e621518a0368fce2557d8aa8e33cb13",
+        "10d5a8bb2df0faed0cdacf66d96cdc716a713c24419fa048c8787044ae79dc17",
+        "2017baa93b9e548394e29e8cc30fd2f68cea0a175bd191027a0e6dbb89482057",
+        "94213e0a3162d2aee27d5b2d12b0c46eac7819bb7c4134a07cc67c713ef2c9c9",
+        "0f13f8f7b1cf3b9a37bcc1288befe6df5e10430ca39eb50fea91a1a12ae98288",
+        "1050d37623d4873f85ccc3630c7acad0568fc3dcc51a16b0fd0b12eaed0035e6",
+        "1fcf603bdbd35301d3a9161ab9016d62254aebdf3637d63b60a9aa9c423f33a6",
+        "9ddc77c48006b7056d6ed374b92045750bf8a6f59f01dcb534b5b91a6d278ef4",
+        "bff98fe7af5815e1c6e403a1b11d01ade2dbb4b70df82423216e51e419b82961",
+        "e5f44ff09fce52940fbcb95f08f65a8a66c8be483c5be60516347004ed9becf7",
+        "2ac7dfb9bd6cc07cf8780990b49c15cd13eaa29fd41be47f4cedf6d6e01bda41",
+        "ff23cf839ed1cf1da90c55a2a0ae355869f4cb166fcfd50337e809403ba6dbe3",
+        "d59208a3f600b8f24755e5c018eaf02ed4ac9614d356f976626780ec1d468811",
+        "508d618b98e9dc4062dfca0311ef0a261ed05307c9a9700f3c39185919e72ab7",
+        "8994bf78604fbc0c6b6758fb07b5cfaa6bbf3a24383872a49077215e399734a1",
+        "e28052d8bfa076afea4d2cf92d0d82c35a400bd9f518f3f2bb633f68abf6b2a8",
+        "76c4b158271cf4782eb203a2534aefa465e87991abd769c135d70853a4ae9260",
+        "5e11f45c70f9a42cc05c518559f0f2276bcf67466066c63b03297d9926cdd244",
+        "97edd744b784b9015b950e908ab28be80e3442f1ccf56a844350d3176ddebdb9",
+        "0d7972bdcfcad2b5293b42f170836e7febc2b353b84792e2b7257836984a2e4d",
+        "3146b26a5acd0fff4b538cb26d08f3525d41510796c9a1e1564f005ddbf55d4f",
+        "63ab7fcd1929b97d44f63f65cb88eda7d4caf700092c6799a3548dd10cab6c24",
+        "90e6359c011cb840349cd0dec2fb634834cd239dca2ca91e7bfa789ff1fe20d7",
+        "21b53dce6e16aa84b17d1cee9f1f03322a2a7b52a84105a4253b98295aa265df",
+        "605099ba74d3b3d8bc1ee378d2ec24206391cbd70a129e50b1ae574ec82c4c06",
+        "9103ecd5a49efdf37d07ee12617606af9ccc7aff4f224bfcb1cdca9d76ec4edb",
+        "e73c35d408c4f83dfce4d444c6eb92cec1664d46a7a9e58d5de39b62b274520c",
+        "0b35301dbbe8f5d9295a033df0d11881b7c9e8a554840c9e1d1765eef3bbfa7a",
+        "4f4232a3c9d96c6bbbc85518e052e7443a61a7bee58cfe4299c1f76fb06e5ea7",
+        "ef2280c499b17d3f7e6e203abdcd5bd7e62921ef346f84a209f3d99c53d4d4f9",
+        "64ff43921cb0fc6f15498b4a424f254c0db4ef1dae75d6dfb1bfa82835f0edba",
+        "02f15e2610825d849a4eacdf01e3f075a482ad68f5c2da51438b4456e860f17c",
+        "6b95323dc6dd738ff34e4a7cea6faaa3311c3b3a6879ee1d442910061d1b2274",
+        "7d3c41fd9df2ceb551f8ce177bfb25108736bde64778f2f7ba7e81627bfda253",
+        "dc8aa56a4aa93279dcb613b04f0154ed7b41fc729ecb759a0a9ebd3e70bbb964",
+        "db3fc0318a73b1aa0790581fb1328db2f8b1c545d8fbf49a9b6914064c05bd52",
+        "01689d2b28ce2a084b9809f9ef33944eae2bdd165d8152a74f9ef9e960ae1858",
+        "a49f0aa55a2f2f0b8a0b4b244c262b33fe6ad86e787fd42f4511cb3d2a3887e9",
+        "37cd893d2be0beca54b81f047717490004a6883f119326699b90bd9fce9c615e",
+        "c02b1d1d2356787793a2614538a4d7b66c7f29497f0feddf2913083825be6afc",
+        "f76181fcf58c92c243fd987537c7c3f8a011eb24ec494b4ac4626bcec6dadc5d",
+        "75a0e0b081a19a165fd0e93f8399764df411cf7914c7ac457c5dd9fdb03d882d",
+        "086da4e81376a0a5bb2d75804ee8dbfc3390107b53e3400dd6055bd2661bae6e",
+        "ab3df32e1874fa50797cd469617f1fbafd4c3b54c02ae3f2af229ccf93578e35",
+        "c3eb68cf498c91d1bfde66d140cdd6d7f8025387afb507b349217df7bb479054",
+        "b7784149f898514e39e552266e0370439cc2fca3089e973464f83aed01884680",
+        "4d8d9d95c3ad7d4f488da5f48010556c889564a5fd3f70b30ed482877f57a35c",
+        "c8076992baca1740ff2e6a15d9590807c3a37bb52d72a78a4169c8ff4a3f299a",
+        "60703460ab0c6d335062d15b87987d3749bd234961372985f633c7ca9bc8e7a2",
+        "7ee357c496f9e57392601aecaa55f7e31350534c185c826e45cf9cd2aee948ca",
+        "79c498c0bbb884efbf4e0ac10e92a69cb2864f04920b9247684818488c40e675",
+        "74924c7d8840c3e79025be00b86c515d5b48dff0b6362c65eafb0859340d234c",
+        "422f7e49075595fd8fa80ed5647281b124322ffd572794dff066637a26105773",
+        "567b9def8b6c3bdc658b364dbfab7246ae69b786415bace1ac91bb5d92520dae",
+        "1df0fb913a5eb3299723e068924262e3ea39d62250c3f45de7022d72469a5fde",
+        "55bc75fada0970f54e5835e0f50f85a9bf1b5d61579f00c6823debf5c94c7ba5",
+        "6dacb68747452158ae373b94bce9ee202f8c9c9dba951e455611e12305955370",
+        "e9244f161482f95fcc88da7f0d19a7094f064849020f7829e08f30fb4aa01049",
+        "a30b6ae3f0203f2ac6315b0c83db39f2f56f208b58520edb5eff68a627368c5d",
+        "091ded6e49babb677814bdb28ee238b1037c27317c1ed84086c17457af47e34c",
+        "09e8ebf5928baf4b7c0fa048f95919f640b906986a672284820cca2d7bd3b28d",
+        "b6a108f7db5536b6b327bd7803376b9e14f70bc49ee03f356ebfd40a811ab7c1",
+        "1f9d95f6ed974d3bd1d7aa237653cd0749d633b23d417a50798c5dece7cd794b",
+        "738bba6495d5ced948afc7bd0fb50d842bfd19e7b78f17d3010eefc3766b7aff",
+        "ddc504fd65a83d30e8e17ac92127d7faa73a1c0becaf4b1e9e69bc2bae7e2b15",
+        "ea92eabd59a2eb72b2019f60c2f5913f5805ecbbc2e396eca795e2ea67948087",
+        "48a5d269c372273de08e8f3f52dba7549d3acfb7bd966e933e1009c96429d340",
+        "fc42a4aeb3d1148d0b4128abf256dd2332d5513c741aff98e68354a13a2d7b93",
+        "055857b6e364fa7bdb49d1bebc34f280d007283ddea70651b1a5331e3508acee",
+        "2a584f4603d9d1881797db1cf66a488dc23d6a41a7ca56c78f7ce329656c46a8",
+        "76ea38d4cf723a53cb02a20fbd5b2ab35ec06db328220d341867ac73fa902595",
+        "5013a9f827148058a8cf1380f37a598a88c9f92742f67dcfa6cd45e10b143247",
+        "b55cc12cf2a6fa2bbb107138b8a88a25e6acc46eb0248b52e050b1536563e0c6",
+        "6a08490de9defa587cc5ef73d4f0ca70bdeac3e7281dc382a24c7a3c9ab0bd85",
+        "7c9b340c54e13d44efa9c460ab6bb8f02d6968826c3de653fc3e409a15172c86",
+        "bbe7320a8e73c59b9b064e8ae16d2505ea3d799f0822a3ef5c0093e8ba06fa2e",
+        "5b3d9859fa6e43e2d35b6a22967faae08dd004bca6bae4a3ef43e99bcfcefbd2",
+        "23cf5ee83e2ef1033ec1e42fbf721a4f2fb92b6a3584a7978279fe29dd27555f",
+        "e67fcae22fe82cf608eb93fa8341a58700a438a119522ef991254a60cd8f0217",
+        "4b23d26a6660cc8bad793589123a8465c54c9afae6f67bbb23a9c78743bd2527",
+        "625e10b254dd9da8d8ca38502c4d0fa34f9e9669a21f0ca13d2407abec62cc38",
+        "2bfe15d7d89704970f6f0b7150bfbad893a6d1045bf215b6d9aa211d4fd0f7ae",
+        "484716f1b94febd09a93e9ba172bf7a3c9f195f1693449f380622a4fbdf5ba31",
+        "aff3a6677e2cf496ca42d2552e92d43b19eb6f2d44853d3df4eca7daa37ec04b",
+        "9e5e28ccbdea4b342c44ac67932ec92455cf9650667ba179b5d85d0531050480",
+        "cd35f07b9d4948e63a924ee1b362531f1e916345a5d2da62458722a0db79091a",
+        "a69a1cc71953229b59c72728bef71781c94dd732deeac994e7d85016601dc47a",
+        "bda6e01d6638e64f31b7d37f249ba0a737696e8281da71fc8ab88ef24c7a9d98",
+        "29fec505db3ee2989d4185098d2b137564ca4267e16672cc437bc236d06d5f1a",
+        "8d9230d89de8040357e6a1d0ea6022969b3a66abe92a173eedf24a13f01f0b17",
+        "003f56db193122707e5aee2cb26930946a1e72260beceaddae27e256f99e4bc0",
+        "d4ef64ad56798f975edb4c2c3f4265307faca0e51d337c750746a50ce291c3d2",
+        "37df6560bf765146baf5181df927c9bdeb0bacbd3ac9706748db9bf2ba90658c",
+        "a6c07c6319eba817a96f0c8fa4ce7b867642a84a6a43ae50dc8f7671f1029c7d",
+        "8b9228e0a629d8fc71b38092a219040cf355f46337a3d5edb19d3599b361c848",
+        "07e4ff09975b240bc910f4fd8869515f1f1da4265e72d2bc3e0bc286a8fbe8c4",
+        "0686af14d898687ae026fce1cf8e4fc73d706dcb094419b342384665d1db5bca",
+        "c444f1ac40ca3cd04e588c14ec586d1088318a14daf1ef1d0665fb712a522953",
+        "7abc58c4d6d46f138eba26991e3a8e30652aac7658b7b210e5dd0cc22eba8f5b",
+        "b53643f576a9aef1e9c50685df637d8408019b4661c53960c04d65cec5c54d0f",
+        "1790c59f32127a812ee0ce468074f9dd8cc0673b5cb6b8eb6841f6d14e0c842b",
+        "83c45803ac229214756437f5949bf3399a964411e8558b5749170e96f81a54e0",
+        "c4eddc8846ccc13467f4e6aab8aa488f0051e4fd4382c0f4d3a7ea760a810187",
+        "dcfe894c1856190383cf64a8a0a54bfcbb9943db8a8a130d8ed941c9a2a396c4",
+        "94c9e234cf378008b91f89480f857d220a85a58ae7c74a9e4271429dff81f64c",
+        "89e1a08d545444a4838c78b8d81615f6c1fb912d72fc06bb04ac54be6c19188f",
+        "76fc8ee46f133e2074f885d0a2cffdcad857d044264fc03eb0b2ec30b6357fdf",
+        "d4764df61dc13258ad54641dedc3941d4a41f384427a1b98a1621f41f058f92b",
+        "b8929052da48a22192b018ea54faa5765fe4e5ada8877404490d3416f6016de8",
+        "8f65134a974c93c4aeb81efd952c79a384228a02357430c7915cd2fa74bc8285",
+        "da949b16d428a8eae8b0b7de99f0859f4d68af11838f58ef4be79534b5902f98",
+        "ade200503bf1d2e0f548225cb666b5d012e1ef03b9f3a51ddeefd5ca90aece9c",
+        "22d9107996af524232dfb88ac12ca358f8cbce8ff29752e4cedf3c48d98a87e0",
+        "b0a9237793e8e7d6e0f29fe4b09e6105292d841b993b944ee2f3c5b125b5bbc9",
+        "ec3c018da09d706b54b6d27dc01791249a9a9ea46e47385a9a63710160debd2f",
+        "76d9d2756a6ba968b54699035d99cfbfd0910991a404057fc2e86b07ebc06db3",
+        "a3e8162242203542971fcf30f0c7b8969c2e13ab3f3f2305f8d87bb242260e49",
+        "c91a26766decd9b023bf4f32ce716b397c1e327ecaf310dbeb1ee19b2e104461",
+        "2d0fde02960b6557249eb278a0df2708c1fb829eda062f74d25b8ad65540cb3d",
+        "97c25cace2c82b03cd48f3627acd36f4a5a9ca003dc8e639bc889cd2cc8efd50",
+        "b29c53e2c7df44f74dc1cec9cc3bd1d396e5136ab864ef85c70eac5e7a1b49c7",
+        "8619e68ca9c6f207b55adbce4fd4b6ed1b4a1ee69ed5563f01ee0e8eab526f3b",
+        "0482974c73f19871ecbe27c7fee110a311f47cca77b68f8c77122f43993c496f",
+        "914a97627776fca9e776f87de212a7d890b5047f7e8fa01d0a28c2041b5b9c81",
+        "51bb492b53338fbd78af8088645c67cec20ba6d7c1088483e23b9acdbf1c70ba",
+        "541bd2a306de8d734fd937b93682dc59a16c6c7aba1ef860a51d4dc8db0bd655",
+        "9c2169e40524014970d95490b9b7ee36bef372dc9b2537d6545ce4c0ebc337c6",
+        "3e8fc99da325eb63f434d5a6d2e1e752435fa557d1ca313730aa0c2fd8d9b661",
+        "8fbabedf190218fba789fd7a79a078a7597f80c589f972c9a0b394057197f67c",
+        "888f91aae81fd1d41c530d834a03c87007df918a42860c6a8d0bb64201969931",
+        "48e7eb8e110a8e223413607ba0dea2920673ff0985a5edde9ece4c0c2e7ab664",
+        "46c475baed9cac936f9050e3132f3ee78d6db8b4c973248077be02cd7028963d",
+        "696528d1dde6df2a9412ee0e1c7af65e90972342a33116f20d5eb4cb268ab783",
+        "de6db45683f423add883c904dc43cd25d29dccc029ebd52cdf0bda66fc38c7b1",
+        "462c67bf74bc00a6bbe102323ec165f01d6cc923818e76b6a7127bab01f35d74",
+        "604aa3c24bb529ddf3ac4385fd83a61c6b8e1b606598b3d26ce8af651635c0d6",
+        "3c0d15d9fa9133c131c2d78ab715bdbc7271ea805b73030956c89cafec472da1",
+        "70cfef5d0e0c32ac685080589974ff1bf8b3f02ecf6d2b98331ed7ba4fd70a15",
+        "87083e97ddb074760eeeeefa318f5d6a958cc6d64f9540e7174da031ea69044f",
+        "f8af08a71dbb9999c531847b2309c6a9112b2d87c0a8c06039b9bafe51d9e910",
+        "8a6da2d705a6e9ba51fceb0279198b2ca46bc44790889cefbe0d8d721f7bb738",
+        "68813b1e7fd00f6f0b0d31129f8c89b12a4656e1e097623e10bda923c1343c38",
+        "55ea3e584245af128fc3c88b97bcc1a84dc7d1fa501ec768d37685f0f0a0879d",
+        "a0a6afd6696e7ab6d86256541630bf73f2b05b12392e279fd2d54816c029ba8f",
+        "04deaf0d4c213e5db87b4938ef16a85081d1a22df9fe9a1226ff9ba75a3818d7",
+        "500a9f3e2580abef2cafce2c6484f1a99f3784ba3bcc9518b4a669fef00352cf",
+        "e815658401c0fe65d3dcfb2509725b216046deb96f03bf74bd3a8d1f9f8dba59",
+        "aef4590cb54b6bf3c09140527de913b9490f1ec1fb23db95b4f1bbc786520197",
+        "e9af5c28939d7d9af1bdab862d172b5fc81562a812768f6153539f09558da99a",
+        "a9a588d7e510a9ddf2f9c8510b6e7dc74e31f8134bfea96536bbbead834c5140",
+        "68ca884f091412c35cb8c9251efcb1550eb341c5f407bcdb529b58f5b0fdb99d",
+        "42273dd4bb587c950c8a1fc5c4e87fbe4086906966cfdfa1f96159f2329ac50f",
+        "fd9379f5cd670982cff4ec7359b9fb011887def62c1b6e78768d01664881ac7f",
+        "c8b3eeaef420134ec43e402b02aa25a936a15825f72d46c74c62e0f0ed5aa463",
+        "2d69e7f56e8fda5571c02dbada159a60f5bef05426e49e46a642ee0a589762c2",
+        "1f21b757245dc4cfa6997b117f7a59710c69ab4ebcb2e280c1916d2db4bf5ba3",
+        "ce3d7807700e6e5a089d276ea87d63059c35ccccf06a152de068a05d72af6981",
+        "320b8941e0b00f858a91768b36594419f54d50811505dbe5715dbe6c7c972ad4",
+        "dff99ed4784f125d179df2f46d67ef7d9c0ac99c8405bb6a9088e3b2272e5ea5",
+        "7e247dbf6c9dc5f4408d3dcd8e3107c4062bef437b53337f805344a10e81d092",
+        "a9cfaa3403b64c47d5c9298443691bef2a00989671e16fa5f477421a43ba0ad1",
+        "1eaf56bd9486dcc7d005722050b70017ce180c8d35deffcd1aa884eb90c8dcd0",
+        "2f745e6739b0aa764231ebf458c9686097cf6502f84389826b06ac7822cb165a",
+        "c87b5a376172839a3f203b230930f2d08ab124d89f6a2e09d6079dbd4e9e7401",
+        "34333f2b4b1b3c4afcf0d1e5bc19972f9aed1ebe10a9b0814fcbc92e2c8e6519",
+        "5221dc8a9a66c41cf7d0613d49e3fe6d15519685a0d081a79c87cfdca91cb701",
+        "2b5caf69e68831a4e25a28083b5cec0d115b5f24da41dc53fd9b4fb288e19c97",
+        "a1e631c113263496eaeb3debd5a616e6298e950ab7849b76e529418302d138cd",
+        "c21bf6f00d6cbc6b6f1d26d5b8290be0e8e81b56371f9e82e86eb5369fe2506a",
+        "2ae125eb9a846e66008fa550026d370bedb4cabb9fcfe16b21de46e92354c80a",
+        "9fdefb649d73c8f0a0c33c185ba6b23a31830a6a7bbedc90a5a25846fa153da3",
+        "9a9f65fde001fb64cfabfdd924339f99cdf14d09fa816865649634c53b1b8a5c",
+        "c82e1d01b2e4e606e88d747477d7db1b511956f909fe5ae55fee97d26c56da0c",
+        "8854166ccb4bb0ce89601ba33bfe707ec60dd2f6aba9f61ded799418fff3b93e",
+        "5cee476d27d476b9e8049f62f58ef8234468368fa0629ef845f6ffbfd43aea3f",
+        "2890c779b0dcc2b94d613e819bf072d30e276ba81b125967dafadc5678294792",
+        "49d15ff10279771d7159ad7bdb2ebc2a281a43d54bad157234ef4d79d2194541",
+        "e58472959954a108017ac1d619a7052032b866ccf35651c728465764d8324b81",
+        "14e55e922e757196e77408675d9529fcb9f70ab5b7322d79d8e2a98b8d8afdf4",
+        "38fce4f69bb6487861e43a15f9ff3a9a3c4bea09881c7e92cefe86e5b332df0d",
+        "bc49c87b579dc0c6245b72c1a383736fab0317aefb558b48a57515148f88926d",
+        "8ac561ac3aa6fcaceacedaed2f9561883d24ce856174cda585dbbd0471793221",
+        "2461fa03165c9e774a0271765ea9ecda16a76abb759890662bc8b53573c5e849",
+        "963526ce2d4ba5740c01cef2cec82857480ee1667e0afcc47185091caa90efbf",
+        "2cb64c1c541f2d95e62cd1bf41b4bcf72191c76d88a99c4f1a4ec8fbcabcec40",
+        "2736a4c77626d8b5525fc1e7d90529028fea6b5f943af62a3fff6f00eaa36f75",
+        "674a8a9d9b979daa6d2a4a6828da3c001911c293f3d2744357dec59a899e15dc",
+        "8418f9a982d76e14a3f8898e9afb0d93d94aa9bcbf45ce5978644b787b947795",
+        "30991d5cfb774a76bd43638befcde15c269f37d019050fed90099257bfcc82cf",
+        "ca9dbcea4aadbdb25a16324cc7a1d03b39bc2dfd2646ef1b96787079d8c39685",
+        "07be429809d81b6d84084602b484c5976097e968700633353ff8ef74defbdae3",
+        "246de50440b8104ca96e4d2b91c955a0223a657cee686640f57c95334d684473",
+        "bc692314f03c9070a6b953a8c3f28bc9f5d1ed67d4ee49994a98175c32ed1e3f",
+        "7a29d0a1b7ad261019dd1312d58341c4642dc6f1edacb0e68dd43bb319ada0ac",
+        "ff1cc954ab11abc06c7c740d4c6b3ce715124e51e8c4fd9d52aa2d1fbf7ce972",
+        "bdce2e3e543a82a27b643371f1c98638417fb810810411e2c76406d9342731a6",
+        "8d07eeed45cca7c6c3725bfa93b4562c2db5c7afa620f76d1ac6d7f274533967",
+        "4a7a69bad8e5ee8a13898b5aec2750db6b32c4bd568aa177578622de9db3b1e3",
+        "a61f37db2f5ed7e40c06766420be4afab2296544d07debd02bd4f367b55b96f0",
+        "0a9664d01abacb29682b71586288737de9354e6c9b34cc62526eeed6b219994c",
+        "b945ed7f3ae8fdf09077cc526f679d43bbf234c099af300f9b9ef552a6e18a65",
+        "349f377cd09e16e70baa724a2771194918a71e89058b6249e46d1b4bef7336c5",
+        "560b778c28965b997cfa619c7a9a568ba1700e891c47326744449631ff216596",
+        "0c821821956572c362ae3a0a210b056c34c022c36ef392a2375cc2df20ee87ad",
+        "98d25a51acff776d6904dc8d37c692ff6c47ce7c82e5b117010dd3b950dcd340",
+        "9288cd514419b8330a31125eaa95783d57b7cf29c71175010814239237678c8b",
+        "01e1698e7c74093c2d04b13753be6620fcdb091b2da1a7e6c95b1e7160110d37",
+        "682c68949d911d6e13e8349e63f01295c3d68862002489a883524bdb28476737",
+        "7860550dee840656f0fb891b72607b8801ada3915048e1e3d90ce94dba82104e",
+        "0bb1a2fc472a41c18b880ffb03c9ed01cea25aeeb6abfe5cc08ab166e0adba59",
+        "80b026503d26f5e05728ad9fc34eb5706e23ce42fd4bc7e6583fa50a3d75fa96",
+        "b123705ac81249936da9200d89b27aca588ae65b2a74e1fd9f791d42504df699",
+        "f8f374134e2bedbff93d8d38d0a40c9f1b80b5d515dbabba53dd2e05a673e397",
+        "8311393c712434600fde1175fb2371749ba939cfcb89b8a1a38837bdf8ee03b9",
+        "132fe1d053c263ec8295299f0e33adf73a301ec65e67276f1ee2b6b241af59b2",
+        "8f05ec0ac2b35c78f5653a184a6c31e4d20d33281d0039228b9cb38e75e0f057",
+        "9beb65b6ee92764c954b7ede1aee47d3cdb115a26874b223c29daafbf2fc1201",
+        "7c8f799c62c864aab237dfb37668f66460f7fce9138632ff99b94c50745753f5",
+        "f79331c7c06b70eb9ea11761547a3e7e831fb12950050a5a64a6a7c1c141085a",
+        "06493cd5bd20e29dc457eb900c5595f0d17733305414129947d761167733148a",
+        "c4805ef5e66dced2b79cbce1979552c308f4603fb1f64b75c4b0fe4ddacfc9d5",
+        "43929c99a81b08e62071388ce80046e2e47568f8d08d9fb6b708c1f06d88d475",
+        "b799ef42496a3fcaa4bd844e7a55902aa94849373790e4d5eafea4c08e704542",
+        "e126cd8654fbc98a39a9faa720558b7812a1362de93c9698b326438f7d61cd6a",
+        "635a47194b646c40ce77c01346bdf7a1682c8d39c5fe08f59bd6e0583b3e3d0c",
+        "97d58dc49ee3da563058d7c93ce56f7c1ca61b3f6f13f1be0aa2f8cd4dd6cdc0",
+        "f73fb6ea08e7e1cf01459d8f4cbe9d089edb5166ef02240400caaa57ae728dd1",
+        "88c85f761dc957d639947fb1b6e47b07732e72b9a77b702335ea5968554ccccc",
+        "e426add88910b9aeec3331d1bbda6d7867f3a669be01bb998d7e0e59bff815b2",
+        "df0085d23154ebce47c0262e86da1fc78326af0daacaadf5302b53be1f545080",
+        "f6b2006ee774fb1928cd1c96f2c1942408845daa9b5143326a5ba416c7b502c9",
+        "1bf6f7e67199992cb16e9c5d53324b11ebd6f5a7fea6ceaafb1b248ae93b642f",
+        "79c83121432459256138412e8036814bd27c64adb43a78e8d37ecc2013906968",
+        "0eb7c542d235aeee05c15342e2001bb06683bbf437f74ad0a4a45a77e30dd6ab",
+        "e0885ca9726f005298981bf4b962d02608935fe75390dfa1ee9b3c9ef95a36ad",
+        "cb6f08dc42bec217ab41a91bf75b4e07e1fb859077fae4fb1c78ccbb3e8cbf34",
+        "b28167c432669b2f648b2f6625fd849cd4d731a8f3e0c54c725c0126d88489b7",
+        "516c9a475721a1521a3b156846472c3e24ae6a0ffe4e823fc2934c77ce5752d9",
+        "06e453ab6ff8a4421ef13626a36a8a0dd69b5b5dbca3035145532ca039de7ea5",
+        "f386e8f8680602030176e64fe3614ef01a8814b9e7a519485da2e450eff3fadd",
+        "48436cac7f5b0e64368af63584e7ede7f90068a950a52a0047bf330361be639e"
+      ]
+    },
+    "secondary_horizons": {
+      "comparisons": [
+        {
+          "exposure_count": 51,
+          "horizon_days": 7,
+          "information_gain_nats_per_event": 0.4021498916655859,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 0,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 11,
+          "horizon_days": 30,
+          "information_gain_nats_per_event": 0.4110730607679134,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 0,
+          "target_event_count": 88
+        },
+        {
+          "exposure_count": 4,
+          "horizon_days": 90,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 0,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 2,
+          "horizon_days": 180,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 0,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 1,
+          "horizon_days": 365,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 0,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 51,
+          "horizon_days": 7,
+          "information_gain_nats_per_event": 0.4021498916655859,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 1,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 11,
+          "horizon_days": 30,
+          "information_gain_nats_per_event": 0.4110730607679134,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 1,
+          "target_event_count": 88
+        },
+        {
+          "exposure_count": 4,
+          "horizon_days": 90,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 1,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 2,
+          "horizon_days": 180,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 1,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 1,
+          "horizon_days": 365,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 1,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 51,
+          "horizon_days": 7,
+          "information_gain_nats_per_event": 0.4021498916655859,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 7,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 11,
+          "horizon_days": 30,
+          "information_gain_nats_per_event": 0.4110730607679134,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 7,
+          "target_event_count": 88
+        },
+        {
+          "exposure_count": 4,
+          "horizon_days": 90,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 7,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 2,
+          "horizon_days": 180,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 7,
+          "target_event_count": 96
+        },
+        {
+          "exposure_count": 1,
+          "horizon_days": 365,
+          "information_gain_nats_per_event": 0.40214989166558435,
+          "model_id": "spatial_poisson",
+          "publication_delay_days": 7,
+          "target_event_count": 96
+        }
+      ],
+      "failed_comparisons": [
+        {
+          "horizon_days": 7,
+          "model_id": "etas",
+          "publication_delay_days": 0,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 30,
+          "model_id": "etas",
+          "publication_delay_days": 0,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 90,
+          "model_id": "etas",
+          "publication_delay_days": 0,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 180,
+          "model_id": "etas",
+          "publication_delay_days": 0,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 365,
+          "model_id": "etas",
+          "publication_delay_days": 0,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 7,
+          "model_id": "etas",
+          "publication_delay_days": 1,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 30,
+          "model_id": "etas",
+          "publication_delay_days": 1,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 90,
+          "model_id": "etas",
+          "publication_delay_days": 1,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 180,
+          "model_id": "etas",
+          "publication_delay_days": 1,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 365,
+          "model_id": "etas",
+          "publication_delay_days": 1,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 7,
+          "model_id": "etas",
+          "publication_delay_days": 7,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 30,
+          "model_id": "etas",
+          "publication_delay_days": 7,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 90,
+          "model_id": "etas",
+          "publication_delay_days": 7,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 180,
+          "model_id": "etas",
+          "publication_delay_days": 7,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        },
+        {
+          "horizon_days": 365,
+          "model_id": "etas",
+          "publication_delay_days": 7,
+          "reason": "numerical stability: fewer than four L-BFGS-B starts converged; numerical stability: fewer than three converged starts are available for agreement audit"
+        }
+      ],
+      "role": "secondary_supported_domain_integration_diagnostic_not_used_by_G1_LS"
+    },
+    "support": {
+      "manifest_id": "local-support-bundle-69cecbee9093a21d",
+      "public_coordinates_included": false,
+      "public_geometry_included": false,
+      "snapshot_count": 5,
+      "snapshots": [
+        {
+          "common_mc": 4.0,
+          "compensator_domain_id": "154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f",
+          "fit_end_utc": "2004-12-31T16:00:00.000000Z",
+          "fixed_cell_status_counts": {
+            "indeterminate": 19,
+            "supported": 41,
+            "unsupported": 1
+          },
+          "integration_cell_counts": {
+            "12.5km": 59983,
+            "25km": 15297,
+            "50km": 3956
+          },
+          "snapshot_id": "fold_1",
+          "support_id": "local-support-f06e7c7496ea2357",
+          "supported_area_fraction": 0.9734474900209907,
+          "supported_area_km2": 9165305.754432771,
+          "total_area_km2": 9415305.754432771
+        },
+        {
+          "common_mc": 4.0,
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "fit_end_utc": "2009-12-31T16:00:00.000000Z",
+          "fixed_cell_status_counts": {
+            "indeterminate": 17,
+            "supported": 44,
+            "unsupported": 0
+          },
+          "integration_cell_counts": {
+            "12.5km": 61583,
+            "25km": 15697,
+            "50km": 4056
+          },
+          "snapshot_id": "fold_2",
+          "support_id": "local-support-eaee903b28c55ace",
+          "supported_area_fraction": 1.0,
+          "supported_area_km2": 9415305.754432771,
+          "total_area_km2": 9415305.754432771
+        },
+        {
+          "common_mc": 4.0,
+          "compensator_domain_id": "8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1",
+          "fit_end_utc": "2014-12-31T16:00:00.000000Z",
+          "fixed_cell_status_counts": {
+            "indeterminate": 13,
+            "supported": 47,
+            "unsupported": 1
+          },
+          "integration_cell_counts": {
+            "12.5km": 61389,
+            "25km": 15642,
+            "50km": 4038
+          },
+          "snapshot_id": "fold_3",
+          "support_id": "local-support-f86126dbec5bb79b",
+          "supported_area_fraction": 0.9972058595099415,
+          "supported_area_km2": 9388998.067398028,
+          "total_area_km2": 9415305.754432771
+        },
+        {
+          "common_mc": 4.0,
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "fit_end_utc": "2019-12-31T16:00:00.000000Z",
+          "fixed_cell_status_counts": {
+            "indeterminate": 9,
+            "supported": 52,
+            "unsupported": 0
+          },
+          "integration_cell_counts": {
+            "12.5km": 61583,
+            "25km": 15697,
+            "50km": 4056
+          },
+          "snapshot_id": "fold_4",
+          "support_id": "local-support-788851371baf0e3b",
+          "supported_area_fraction": 1.0,
+          "supported_area_km2": 9415305.754432771,
+          "total_area_km2": 9415305.754432771
+        },
+        {
+          "common_mc": 4.0,
+          "compensator_domain_id": "33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55",
+          "fit_end_utc": "2023-06-30T16:00:00.000000Z",
+          "fixed_cell_status_counts": {
+            "indeterminate": 9,
+            "supported": 52,
+            "unsupported": 0
+          },
+          "integration_cell_counts": {
+            "12.5km": 61583,
+            "25km": 15697,
+            "50km": 4056
+          },
+          "snapshot_id": "final_validation",
+          "support_id": "local-support-f6816ab6c6581306",
+          "supported_area_fraction": 1.0,
+          "supported_area_km2": 9415305.754432771,
+          "total_area_km2": 9415305.754432771
+        }
+      ]
+    }
+  },
+  "scoring_code_tag": "v0.2.1-background-local-support-scoring-code-r1",
+  "scoring_code_tag_object": "6c105920fdab9a472e0d01dfcfc0371338cf20ef",
+  "stage3_allowed": true,
+  "support_manifest_id": "local-support-bundle-69cecbee9093a21d",
+  "support_manifest_sha256": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d"
+}

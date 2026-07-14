@@ -17,6 +17,13 @@ MODEL_SIMPLICITY_ORDER: tuple[ModelId, ...] = (
     "spatial_poisson",
     "etas",
 )
+BOOTSTRAP_PROTOCOL_VERSION = "0.2.0"
+BOOTSTRAP_ISSUE_ID = "g1_primary_validation_2024-07-01_2025-07-01"
+LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID = "g1_ls_primary_supported_validation_2024-07-01_2025-07-01"
+_BOOTSTRAP_ISSUE_BY_PROTOCOL = {
+    "0.2.0": BOOTSTRAP_ISSUE_ID,
+    "0.2.1": LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
+}
 
 
 def information_gain_per_event(
@@ -294,6 +301,8 @@ def bootstrap_information_gain(
     ],
     replications: int = 2000,
     confidence_level: float = 0.95,
+    protocol_version: str = BOOTSTRAP_PROTOCOL_VERSION,
+    issue_id: str = BOOTSTRAP_ISSUE_ID,
 ) -> BootstrapInterval:
     """Resample physical events while retaining the preregistered compensator."""
 
@@ -301,16 +310,25 @@ def bootstrap_information_gain(
         raise ValueError("stage-2 bootstrap must use exactly 2000 replications")
     if confidence_level != 0.95:
         raise ValueError("stage-2 bootstrap confidence level must remain 0.95")
+    if not isinstance(protocol_version, str):
+        raise TypeError("bootstrap protocol_version must be a string")
+    expected_issue_id = _BOOTSTRAP_ISSUE_BY_PROTOCOL.get(protocol_version)
+    if expected_issue_id is None:
+        raise ValueError("bootstrap protocol_version must be active 0.2.0 or 0.2.1")
+    if issue_id != expected_issue_id:
+        raise ValueError(
+            f"bootstrap issue_id for protocol {protocol_version} must be {expected_issue_id}"
+        )
     values = contributions.event_log_intensity_differences
     count = len(values)
     replicates = np.empty(replications, dtype=np.float64)
     for replicate_index in range(replications):
         generator = SeedContext(
             root_seed=147,
-            protocol_version="0.2.0",
+            protocol_version=protocol_version,
             namespace="bootstrap",
             model_id=model_seed_id,
-            issue_id="g1_primary_validation_2024-07-01_2025-07-01",
+            issue_id=issue_id,
             replicate_index=replicate_index,
         ).generator()
         sampled = generator.integers(0, count, size=count)
@@ -331,6 +349,9 @@ def bootstrap_information_gain(
 
 
 __all__ = [
+    "BOOTSTRAP_ISSUE_ID",
+    "BOOTSTRAP_PROTOCOL_VERSION",
+    "LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID",
     "MODEL_SIMPLICITY_ORDER",
     "BackgroundModelEvidence",
     "BackgroundModelSelection",
