@@ -38,6 +38,7 @@ from seismoflux.background.poisson import (
     fit_uniform_poisson,
     select_kde_bandwidth,
 )
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 from seismoflux.background.workflow import (
     CompletenessSnapshot,
     ProgressCallback,
@@ -467,6 +468,7 @@ def run_poisson_kde_pipeline(
 ) -> PoissonKDEPipelineResult:
     """Fit, gate, select, and score the frozen five-snapshot Poisson/KDE family."""
 
+    require_background_scoring_authorized(config)
     snapshots_input = _validate_completeness_snapshots(config, completeness_snapshots)
     bandwidths = tuple(float(value) for value in config.spatial_poisson.bandwidth_candidates_km)
     if bandwidths != FROZEN_BANDWIDTHS_KM:

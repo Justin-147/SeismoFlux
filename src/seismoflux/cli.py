@@ -354,7 +354,7 @@ def _run_stage1(namespace: argparse.Namespace) -> int:
 
 
 def _background_input_references(background: BackgroundConfig) -> list[str]:
-    return [
+    references = [
         background.inputs.environment_lock,
         background.inputs.data_catalog,
         background.inputs.earthquake_dataset_path,
@@ -363,6 +363,15 @@ def _background_input_references(background: BackgroundConfig) -> list[str]:
         background.numerical_regression.production_fixture,
         background.numerical_regression.oracle_metadata,
     ]
+    protocol_version = str(background.protocol_version)
+    if protocol_version == "0.2.1":
+        support_manifest = getattr(background.inputs, "support_manifest", None)
+        if not isinstance(support_manifest, str) or not support_manifest:
+            raise ValueError("background protocol 0.2.1 requires a support manifest input")
+        references.append(support_manifest)
+    elif protocol_version != "0.2.0":
+        raise ValueError(f"unsupported background protocol_version: {protocol_version!r}")
+    return references
 
 
 def _background_output_references(background: BackgroundConfig) -> list[str]:

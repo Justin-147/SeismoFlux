@@ -40,6 +40,7 @@ from seismoflux.background.execution import (
     require_execution_seal_unchanged,
     subprocess_git_runner,
 )
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 
 BundleKind: TypeAlias = Literal["processed", "model", "backtest", "experiment"]
 ModelId: TypeAlias = Literal["uniform_poisson", "spatial_poisson", "etas"]
@@ -476,6 +477,7 @@ def publish_model_bundle(
     *,
     uv_lock_sha256: str,
 ) -> BundlePublication:
+    require_background_scoring_authorized(background)
     return _publish_bundle(
         project_root,
         background,
@@ -495,6 +497,7 @@ def publish_backtest_bundle(
     *,
     uv_lock_sha256: str,
 ) -> BundlePublication:
+    require_background_scoring_authorized(background)
     return _publish_bundle(
         project_root,
         background,
@@ -514,6 +517,7 @@ def publish_experiment_bundle(
     *,
     uv_lock_sha256: str,
 ) -> BundlePublication:
+    require_background_scoring_authorized(background)
     return _publish_bundle(
         project_root,
         background,
@@ -1142,6 +1146,7 @@ def build_background_registry(
 ) -> BackgroundRegistry:
     """Build the complete registry from trusted bundle publications."""
 
+    require_background_scoring_authorized(background)
     materialized_bundles = tuple(bundles)
     if tuple(item.bundle_kind for item in materialized_bundles) != _BUNDLE_ORDER:
         raise ValueError("bundle publications must contain four kinds in frozen order")
@@ -1502,6 +1507,7 @@ def publish_registry_and_report(
 ) -> RegistryReportPublication:
     """Publish fixed registry/report projections after deterministic in-memory rendering."""
 
+    require_background_scoring_authorized(background)
     if registry.protocol_version != background.protocol_version:
         raise ValueError("registry protocol version differs from background configuration")
     expected_fingerprint = hashlib.sha256(
@@ -1869,6 +1875,7 @@ def publish_registry_and_report_sealed(
 ) -> RegistryReportPublication:
     """Re-seal all inputs, verify four bundles, then publish the fixed projections."""
 
+    require_background_scoring_authorized(background)
     current = require_execution_seal_unchanged(
         project_root,
         background,

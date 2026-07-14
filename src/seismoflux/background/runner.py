@@ -36,6 +36,7 @@ from seismoflux.background.publication import (
     RegistryReportPublication,
     publish_registry_and_report_sealed,
 )
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 from seismoflux.config import load_config, project_root_for, resolve_project_path
 
 ProgressCallback = Callable[[str], None]
@@ -205,6 +206,7 @@ def run_background_stage2(
     project_root = project_root_for(main_path).resolve()
     project = load_config(main_path)
     background: BackgroundConfig = load_project_background_config(main_path)
+    require_background_scoring_authorized(background)
 
     _notify(progress, "execution_seal:start")
     seal = create_execution_seal(project_root, background, runner=git_runner)

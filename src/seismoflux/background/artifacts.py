@@ -32,14 +32,24 @@ _REQUIRED_ADDRESS_KEYS = {
     "code_commit",
     "uv_lock_sha256",
 }
-_REQUIRED_INPUT_HASH_KEYS = {
-    "environment_lock",
-    "data_catalog",
-    "earthquake_dataset",
-    "study_area",
-    "issue_manifest",
-    "production_fixture",
-    "oracle_metadata",
+_BASE_REQUIRED_INPUT_HASH_KEYS = frozenset(
+    {
+        "environment_lock",
+        "data_catalog",
+        "earthquake_dataset",
+        "study_area",
+        "issue_manifest",
+        "production_fixture",
+        "oracle_metadata",
+    }
+)
+_SUPPORT_MANIFEST_INPUT_HASH_KEY = "support_manifest"
+_SUPPORT_MANIFEST_PROTOCOL_FIELDS = (
+    "support_manifest",
+    "support_manifest_sha256",
+)
+_SUPPORT_MANIFEST_REQUIRED_INPUT_HASH_KEYS = _BASE_REQUIRED_INPUT_HASH_KEYS | {
+    _SUPPORT_MANIFEST_INPUT_HASH_KEY
 }
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 _GIT_COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
@@ -184,15 +194,56 @@ def canonical_json_bytes(value: object) -> bytes:
     return _encode_canonical(_canonicalize(value))
 
 
+def _required_input_hash_keys(protocol: Mapping[object, object]) -> frozenset[str]:
+    """Select the frozen input-hash schema declared by the protocol payload.
+
+    The original v0.2.0 payload keeps its exact seven-key schema and forbids support
+    fields. Version 0.2.1 requires the project-relative support manifest and its
+    expected digest, and therefore uses the exact eight-key schema.
+    """
+
+    protocol_version = protocol.get("protocol_version")
+    protocol_inputs = protocol.get("inputs")
+    if protocol_version == "0.2.0":
+        if isinstance(protocol_inputs, Mapping) and any(
+            field in protocol_inputs for field in _SUPPORT_MANIFEST_PROTOCOL_FIELDS
+        ):
+            raise ValueError("background protocol 0.2.0 forbids support_manifest fields")
+        return _BASE_REQUIRED_INPUT_HASH_KEYS
+    if protocol_version != "0.2.1":
+        raise ValueError("unsupported background protocol_version for content addressing")
+    if not isinstance(protocol_inputs, Mapping):
+        raise ValueError("background protocol 0.2.1 must declare an inputs mapping")
+
+    declared = tuple(field in protocol_inputs for field in _SUPPORT_MANIFEST_PROTOCOL_FIELDS)
+    if declared != (True, True):
+        raise ValueError(
+            "background protocol 0.2.1 must declare support_manifest and "
+            "support_manifest_sha256 together"
+        )
+
+    reference = protocol_inputs["support_manifest"]
+    digest = protocol_inputs["support_manifest_sha256"]
+    if not isinstance(reference, str) or not reference.strip() or reference != reference.strip():
+        raise ValueError("background protocol support_manifest must be a non-empty path")
+    if not isinstance(digest, str) or _SHA256_PATTERN.fullmatch(digest) is None:
+        raise ValueError(
+            "background protocol support_manifest_sha256 must be a lowercase SHA-256 string"
+        )
+    return _SUPPORT_MANIFEST_REQUIRED_INPUT_HASH_KEYS
+
+
 def _validated_address_inputs(value: object) -> Mapping[str, object]:
     if not isinstance(value, Mapping) or set(value) != _REQUIRED_ADDRESS_KEYS:
         raise ValueError("background address inputs must contain the complete frozen key set")
-    if not isinstance(value["protocol"], Mapping):
+    protocol = value["protocol"]
+    if not isinstance(protocol, Mapping):
         raise TypeError("background address protocol must be a canonicalizable mapping")
     if not isinstance(value["model_parameters"], Mapping):
         raise TypeError("background model_parameters must be a canonicalizable mapping")
     input_hashes = value["input_hashes"]
-    if not isinstance(input_hashes, Mapping) or set(input_hashes) != _REQUIRED_INPUT_HASH_KEYS:
+    required_input_hash_keys = _required_input_hash_keys(protocol)
+    if not isinstance(input_hashes, Mapping) or set(input_hashes) != required_input_hash_keys:
         raise ValueError("background input_hashes must contain the complete frozen key set")
     for name, digest in input_hashes.items():
         if (
@@ -201,6 +252,13 @@ def _validated_address_inputs(value: object) -> Mapping[str, object]:
             or not _SHA256_PATTERN.fullmatch(digest)
         ):
             raise ValueError("background input hashes must be lowercase SHA-256 strings")
+    if _SUPPORT_MANIFEST_INPUT_HASH_KEY in required_input_hash_keys:
+        protocol_inputs = cast(Mapping[str, object], protocol["inputs"])
+        if (
+            input_hashes[_SUPPORT_MANIFEST_INPUT_HASH_KEY]
+            != protocol_inputs["support_manifest_sha256"]
+        ):
+            raise ValueError("input_hashes.support_manifest must equal the frozen protocol digest")
     lock_digest = value["uv_lock_sha256"]
     if not isinstance(lock_digest, str) or not _SHA256_PATTERN.fullmatch(lock_digest):
         raise ValueError("uv_lock_sha256 must be a lowercase SHA-256 string")

@@ -17,6 +17,7 @@ from seismoflux.background.config import load_background_protocol
 from seismoflux.cli import COMMAND_SPECS, main
 
 BACKGROUND_CONFIG = Path("configs/background.yaml")
+LOCAL_SUPPORT_BACKGROUND_CONFIG = Path("configs/background_local_support.yaml")
 
 
 @pytest.fixture
@@ -96,6 +97,33 @@ def test_background_dry_run_is_score_free_and_machine_readable(
         "etas",
     ]
     assert len(manifest["details"]["snapshots"]) == 5
+
+
+def test_local_support_dry_run_lists_and_protects_the_eighth_frozen_input(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    protocol = load_background_protocol(LOCAL_SUPPORT_BACKGROUND_CONFIG)
+    monkeypatch.setattr(cli_module, "load_project_background_config", lambda _path: protocol)
+
+    assert cli_module._background_input_references(protocol)[-1] == (
+        "data/manifests/background_local_support_manifest.json"
+    )
+    exit_code = main(
+        [
+            "build-background",
+            "--config",
+            "configs/base_local_support.yaml",
+            "--dry-run",
+            "--manifest",
+            "data/manifests/background_local_support_manifest.json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert "collides with a protected project artifact" in captured.err
 
 
 def test_background_dry_run_without_manifest_never_calls_filesystem_writers(
