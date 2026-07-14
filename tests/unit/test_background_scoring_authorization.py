@@ -6,6 +6,7 @@ from typing import Any, cast
 import pytest
 
 import seismoflux.background.runner as runner_module
+import seismoflux.background.scoring_authorization as authorization_module
 from seismoflux.background.config import load_background_protocol
 from seismoflux.background.deliverables import (
     build_background_deliverables,
@@ -306,7 +307,26 @@ def _authorization_git_runner(
     return run
 
 
-def test_v021_authorization_binds_frozen_blobs_scoring_tag_remote_and_seal() -> None:
+def _accept_synthetic_execution_seal(monkeypatch: pytest.MonkeyPatch) -> None:
+    def unchanged(
+        _: Path,
+        __: object,
+        expected: ExecutionSeal,
+        **___: object,
+    ) -> ExecutionSeal:
+        return expected
+
+    monkeypatch.setattr(
+        authorization_module,
+        "require_execution_seal_unchanged",
+        unchanged,
+    )
+
+
+def test_v021_authorization_binds_frozen_blobs_scoring_tag_remote_and_seal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _accept_synthetic_execution_seal(monkeypatch)
     config = load_background_protocol(LOCAL_SUPPORT_CONFIG)
     seal = _local_support_execution_seal()
     authorized = create_authorized_execution(
@@ -322,7 +342,10 @@ def test_v021_authorization_binds_frozen_blobs_scoring_tag_remote_and_seal() -> 
     require_background_scoring_authorized(config, authorized)
 
 
-def test_v021_authorization_rejects_missing_scoring_tag_before_rows_are_opened() -> None:
+def test_v021_authorization_rejects_missing_scoring_tag_before_rows_are_opened(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _accept_synthetic_execution_seal(monkeypatch)
     config = load_background_protocol(LOCAL_SUPPORT_CONFIG)
     with pytest.raises(BackgroundScoringNotAuthorizedError, match="scoring-code tag"):
         create_authorized_execution(
@@ -333,7 +356,10 @@ def test_v021_authorization_rejects_missing_scoring_tag_before_rows_are_opened()
         )
 
 
-def test_v021_authorization_rejects_stale_live_remote_branch() -> None:
+def test_v021_authorization_rejects_stale_live_remote_branch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _accept_synthetic_execution_seal(monkeypatch)
     config = load_background_protocol(LOCAL_SUPPORT_CONFIG)
     with pytest.raises(BackgroundScoringNotAuthorizedError, match="live remote"):
         create_authorized_execution(
@@ -344,7 +370,10 @@ def test_v021_authorization_rejects_stale_live_remote_branch() -> None:
         )
 
 
-def test_v021_authorization_rejects_another_public_remote_repository() -> None:
+def test_v021_authorization_rejects_another_public_remote_repository(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _accept_synthetic_execution_seal(monkeypatch)
     config = load_background_protocol(LOCAL_SUPPORT_CONFIG)
     with pytest.raises(BackgroundScoringNotAuthorizedError, match="Justin-147/SeismoFlux"):
         create_authorized_execution(
@@ -368,7 +397,10 @@ def test_v021_authorization_rechecks_seal_before_granting_capability() -> None:
         )
 
 
-def test_authorization_cannot_be_rebound_to_another_execution_seal() -> None:
+def test_authorization_cannot_be_rebound_to_another_execution_seal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _accept_synthetic_execution_seal(monkeypatch)
     config = load_background_protocol(LOCAL_SUPPORT_CONFIG)
     authorized = create_authorized_execution(
         Path.cwd(),

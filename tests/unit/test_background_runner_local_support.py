@@ -7,6 +7,7 @@ from typing import Any, cast
 import pytest
 
 import seismoflux.background.runner_local_support as runner_module
+from seismoflux.background.config import load_background_protocol
 from seismoflux.background.execution import ExecutionSeal
 from seismoflux.background.local_support_deliverables import (
     LocalSupportStage2R1Outcome,
@@ -19,6 +20,7 @@ from seismoflux.background.scoring_authorization import (
 )
 
 CONFIG = Path("configs/base_local_support.yaml").resolve()
+PROTOCOL = load_background_protocol(Path("configs/background_local_support.yaml"))
 
 
 def _forbidden_input(*_: object, **__: object) -> object:
@@ -29,6 +31,7 @@ def test_authorization_failure_occurs_before_any_data_input_is_opened(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     seal = cast(ExecutionSeal, SimpleNamespace(seal_id="seal"))
+    monkeypatch.setattr(runner_module, "load_project_background_config", lambda *_: PROTOCOL)
     monkeypatch.setattr(runner_module, "create_execution_seal", lambda *_, **__: seal)
 
     def reject(*_: object, **__: object) -> AuthorizedExecution:
@@ -60,6 +63,7 @@ def test_seal_is_rechecked_immediately_before_scoring_and_publication(
     runtime = cast(LocalSupportRuntime, SimpleNamespace(manifest_id="support"))
     science = cast(LocalSupportStage2R1Outcome, object())
     published = cast(PublishedLocalSupportDeliverables, object())
+    monkeypatch.setattr(runner_module, "load_project_background_config", lambda *_: PROTOCOL)
 
     def create_seal(*_: object, **__: object) -> ExecutionSeal:
         trace.append("seal")
