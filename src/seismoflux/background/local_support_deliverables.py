@@ -85,7 +85,6 @@ _BUNDLE_ORDER = ("processed", "model", "backtest", "experiment")
 _SNAPSHOT_ORDER = ("fold_1", "fold_2", "fold_3", "fold_4", "final_validation")
 _MODEL_ORDER = ("uniform_poisson", "spatial_poisson", "etas")
 _PUBLIC_RESULTS_FIGURE = "docs/background_local_support_results.svg"
-_SCORING_CODE_TAG = "v0.2.1-background-local-support-scoring-code"
 _RESULTS_TAG = "v0.2.1-background-local-support-baselines"
 _FORBIDDEN_PUBLIC_KEYS = {
     "assessment_target_locations",
@@ -1104,13 +1103,17 @@ def build_local_support_deliverables(
             "classification_counts": classification_counts,
         },
     }
-    _assert_public_payload(registry_science, location="registry_science")
+    normalized_registry_science = cast(
+        dict[str, object],
+        scientific_mapping(registry_science, location="registry_science"),
+    )
+    _assert_public_payload(normalized_registry_science, location="registry_science")
     return LocalSupportDeliverables(
         processed=processed,
         model=model,
         backtest=backtest,
         experiment=experiment,
-        registry_science=registry_science,
+        registry_science=normalized_registry_science,
         results_svg=results_svg,
     )
 
@@ -1140,10 +1143,11 @@ def _bundle_reference(item: BundlePublication) -> dict[str, object]:
 
 
 def _registry_bytes(registry: Mapping[str, object]) -> bytes:
-    _assert_public_payload(registry, location="registry")
+    mapped = scientific_mapping(registry, location="registry")
+    _assert_public_payload(mapped, location="registry")
     return (
         json.dumps(
-            registry,
+            mapped,
             ensure_ascii=False,
             sort_keys=True,
             indent=2,
@@ -1407,7 +1411,7 @@ def publish_local_support_deliverables(
         "gate_name": "G1-LS",
         "protocol_sha256": outcome.protocol_sha256,
         "protocol_freeze_tag": config.freeze_tag,
-        "scoring_code_tag": _SCORING_CODE_TAG,
+        "scoring_code_tag": authorization.scoring_code_tag,
         "scoring_code_tag_object": authorization.scoring_code_tag_object,
         "code_commit": seal.repository.code_commit,
         "execution_seal_id": seal.seal_id,

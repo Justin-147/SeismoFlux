@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import inspect
+import json
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, cast
@@ -89,6 +91,20 @@ def test_public_payload_guard_allows_counts_hashes_and_explicit_false_flags() ->
     )
 
 
+def test_registry_serialization_normalizes_aware_datetime_and_rejects_naive() -> None:
+    decoded = json.loads(
+        publication_module._registry_bytes(
+            {"science": {"support": {"fit_end_utc": datetime(2024, 1, 2, tzinfo=UTC)}}}
+        )
+    )
+    assert decoded["science"]["support"]["fit_end_utc"] == "2024-01-02T00:00:00.000000Z"
+
+    with pytest.raises(ValueError, match="timezone-aware"):
+        publication_module._registry_bytes(
+            {"science": {"support": {"fit_end_utc": datetime(2024, 1, 2)}}}
+        )
+
+
 def test_visual_preserves_one_sided_sensitivity_and_not_evaluable_gate() -> None:
     snapshots = tuple(
         LocalSupportVisualSnapshot(snapshot_id, 0.97, None, None)
@@ -143,6 +159,7 @@ def test_publication_rebuilds_inside_seal_and_validates_exact_score_references(
         input_hash_mapping=lambda: {"support_manifest": "c" * 64},
     )
     authorization = SimpleNamespace(
+        scoring_code_tag="v0.2.1-background-local-support-scoring-code-r1",
         scoring_code_tag_object="d" * 40,
         remote_repository="github.com/Justin-147/SeismoFlux",
     )
@@ -277,6 +294,7 @@ def test_publication_rebuilds_inside_seal_and_validates_exact_score_references(
         "fixed:reports/report.md:report",
     ]
     assert published.registry_payload["stage3_allowed"] is True
+    assert published.registry_payload["scoring_code_tag"] == authorization.scoring_code_tag
     assert published.registry_payload["science"] is adapted.registry_science
 
 
@@ -343,7 +361,7 @@ def test_real_model_summary_and_human_report_render_all_five_snapshots_and_sensi
         "authorization_id": "d" * 64,
         "execution_seal_id": "e" * 64,
         "code_commit": "f" * 40,
-        "scoring_code_tag": "v0.2.1-background-local-support-scoring-code",
+        "scoring_code_tag": "v0.2.1-background-local-support-scoring-code-r1",
         "reserve_physical_cores": 2,
         "science": {
             "outcome_status": "completed",

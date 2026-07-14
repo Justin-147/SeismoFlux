@@ -161,7 +161,7 @@ def test_score_free_v021_is_rejected_before_registry_inputs_or_filesystem_access
 _FREEZE_TAG = "v0.2.1-background-local-support-protocol"
 _FREEZE_TAG_OBJECT = "06136e22bb8c6e2606a9debd5e00d53b500f758d"
 _FREEZE_COMMIT = "966fb4e84c36aba373d90b81fe9e1350ffe349b6"
-_SCORING_TAG = "v0.2.1-background-local-support-scoring-code"
+_SCORING_TAG = "v0.2.1-background-local-support-scoring-code-r1"
 _SCORING_TAG_OBJECT = "3" * 40
 _CODE_COMMIT = "2" * 40
 _PROTOCOL_SHA256 = "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a"

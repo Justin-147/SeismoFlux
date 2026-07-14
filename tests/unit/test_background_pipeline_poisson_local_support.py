@@ -198,7 +198,7 @@ def _authorized_execution() -> AuthorizedExecution:
         freeze_tag="v0.2.1-background-local-support-protocol",
         freeze_tag_object="06136e22bb8c6e2606a9debd5e00d53b500f758d",
         freeze_tag_commit=FREEZE_COMMIT,
-        scoring_code_tag="v0.2.1-background-local-support-scoring-code",
+        scoring_code_tag="v0.2.1-background-local-support-scoring-code-r1",
         scoring_code_tag_object="3" * 40,
         scoring_code_tag_commit=CODE_COMMIT,
         code_commit=CODE_COMMIT,
@@ -526,6 +526,13 @@ def test_final_zero_target_retains_all_development_scores_after_selection(
         runtime,
         negative,
         authorized,
+    )
+    support_summary = cast(dict[str, object], deliverables.registry_science["support"])
+    support_snapshots = cast(list[dict[str, object]], support_summary["snapshots"])
+    assert all(
+        isinstance(snapshot["fit_end_utc"], str)
+        and cast(str, snapshot["fit_end_utc"]).endswith("Z")
+        for snapshot in support_snapshots
     )
     ledger_summary = cast(dict[str, object], deliverables.registry_science["score_ledger"])
     assert ledger_summary["coverage"] == "fragment"
