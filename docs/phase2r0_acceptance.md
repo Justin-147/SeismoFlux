@@ -67,14 +67,19 @@
 - 已统一“无合格时间层即全局失败”的代码、配置、协议和运行时测试。
 - 已补强严格清单的事件数、来源、状态、父格、时间块、有限 Mc 和候选映射校验。
 - 已处理研究区闭合外边界恰与固定格线重合的测度零事件；内部格线仍保持高侧优先。
+- 已将生产运行器调整为先做无数据协议授权预检，再绑定受限研究区和完整输入，并在完整加载后重复授权校验。
+- 公开 CI 的清单测试只读取公开内容；生产加载器仍对受限研究区文件 SHA、重建几何和固定格身份执行硬校验。
 
 ## 远端完成证据
 
 | 项目 | 远端回读结果 |
 | --- | --- |
-| 实现提交 | `966fb4e84c36aba373d90b81fe9e1350ffe349b6` |
-| 阶段分支 | `origin/codex/stage2-local-support` 指向实现提交 |
+| 冻结实现提交 | `966fb4e84c36aba373d90b81fe9e1350ffe349b6` |
+| 跨平台 CI 修复提交 | `32744fdae7daedf73c2a1e57d78ca1aa9b08c776`；不改变协议、科学阈值、支持清单或冻结标签 |
+| 阶段分支 | `origin/codex/stage2-local-support` 包含冻结实现、验收记录和 CI 修复 |
 | 带注释标签对象 | `06136e22bb8c6e2606a9debd5e00d53b500f758d` |
 | 标签剥离结果 | `v0.2.1-background-local-support-protocol^{}` 指向实现提交 |
 | 草稿 PR | <https://github.com/Justin-147/SeismoFlux/pull/6> |
+| 首轮 CI 诊断 | [运行 29336207596](https://github.com/Justin-147/SeismoFlux/actions/runs/29336207596) 仅因公开检出缺少被忽略的受限研究区文件而有 2 个测试失败；其余 529 项通过 |
+| 修复后 CI | [运行 29336935742](https://github.com/Justin-147/SeismoFlux/actions/runs/29336935742) 的 Ubuntu 与 Windows 质量检查均通过 |
 | 冻结前运行状态 | 未运行 2R-1 模型拟合、评分或锁定测试；`Score ID` 数量为 0 |
