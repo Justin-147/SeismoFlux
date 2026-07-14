@@ -1,0 +1,593 @@
+{
+  "bundles": [
+    {
+      "artifact_id": "969a8e1f3de2278a",
+      "bundle_kind": "processed",
+      "manifest_sha256": "6b1942434b82b96c8b13021309a5fd9c361fc72a259da134c4316d48a9f15812"
+    },
+    {
+      "artifact_id": "66eccb7719a85486",
+      "bundle_kind": "model",
+      "manifest_sha256": "0b018eebb84f6875ece2219d2b08e2b2eb0e4b6de230ec28913507e254ce01b6"
+    },
+    {
+      "artifact_id": "26ed112e452110b9",
+      "bundle_kind": "backtest",
+      "manifest_sha256": "b360f352826d48aa7eb1f747054517238aac294befc8fbc2456b30070509d0e9"
+    },
+    {
+      "artifact_id": "65c7bc81fdcc1f64",
+      "bundle_kind": "experiment",
+      "manifest_sha256": "bdc4fe75fa556db6bd0fa55eb255c5f46bdcf973ffbad9f553d4b0dfc01b6bad"
+    }
+  ],
+  "code_commit": "509057592e2abe0474c75e43b5e8bbb7cac87f53",
+  "freeze_tag": "v0.2.0-background-protocol",
+  "g1": {
+    "evidence_ids": [
+      "4e14abc393dd74fa7da6610355f0f8887ce33aed37a4c057c10a6f5789d36081"
+    ],
+    "passed": false,
+    "passing_models": [],
+    "status": "not_evaluable"
+  },
+  "input_hashes": {
+    "data_catalog": "0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50",
+    "earthquake_dataset": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+    "environment_lock": "34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5",
+    "issue_manifest": "3a06f9fc1527a5b4e943de874fa81bda19d0afb0aeec832fb2e0af95f20f2e92",
+    "oracle_metadata": "28f66bdbc192be37923108b063036104d73c8ef32142a58e57e633a60be2e924",
+    "production_fixture": "c6db5e4079f583f0ff12d24136459368614ab389765081ef8945594762cc7a04",
+    "study_area": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02"
+  },
+  "model_attempts": [
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "225cb3b8198b0159d1a985af31f8e7811b67b12ad36e3c5f8fae34818ce3f117",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "uniform_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "uniform_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_1"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_1",
+      "status": "not_run",
+      "variant": "uniform_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "8660a309c7117fd1b2ec52686272bbed3f99f7c4e9e14da72cb4c43a6ee81a26",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "uniform_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "uniform_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_2"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_2",
+      "status": "not_run",
+      "variant": "uniform_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "c105103b1a5c5057d0e86a6bc53871d1201b88667f12e77578a73cd569849d04",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "uniform_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "uniform_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_3"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_3",
+      "status": "not_run",
+      "variant": "uniform_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "afcf27869c23d4dda1ce7863263c59afc0ca6f66caadcd39cbe9dc2a430e3857",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "uniform_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "uniform_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_4"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_4",
+      "status": "not_run",
+      "variant": "uniform_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "18819c98f7128bd3e10c31fe80afbcdc1e99763366c7108c9e4d8c48717bd666",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "uniform_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "uniform_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "final_validation"
+      },
+      "score_ids": [],
+      "snapshot_id": "final_validation",
+      "status": "not_run",
+      "variant": "uniform_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "d0e895560a2058980216eec5fe0cc6221274686a79fa3967a080db964daa7786",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "spatial_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "spatial_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_1"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_1",
+      "status": "not_run",
+      "variant": "spatial_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "a8e71c11db075d9494ead2b4b7fd37fe91d22717604c7c0bc0d6b27e711785e9",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "spatial_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "spatial_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_2"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_2",
+      "status": "not_run",
+      "variant": "spatial_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "da4a6e1c740913f08225a57b96286f63beb9a8f22d47b7091b36295f0534730b",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "spatial_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "spatial_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_3"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_3",
+      "status": "not_run",
+      "variant": "spatial_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "9ccfd18d115a69e456232bc74501b712a4b904a2b7fd4dc44a74f1b9bd592512",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "spatial_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "spatial_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_4"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_4",
+      "status": "not_run",
+      "variant": "spatial_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "94868b5e4456d24056376809b07b5a96cc4b3e5eb1ba333bd0ee42bea01f5ace",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "spatial_poisson",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "spatial_poisson",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "final_validation"
+      },
+      "score_ids": [],
+      "snapshot_id": "final_validation",
+      "status": "not_run",
+      "variant": "spatial_poisson/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "16d5c228f5cfbc68a2d6dd0ad5660016981a6e97d4b91881588a2ad1e40e23ed",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "etas",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "etas",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_1"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_1",
+      "status": "not_run",
+      "variant": "etas/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "923e6508893aa70df1bb3ec574db6ee1f21439613a1c0e4bc44a4469676197ac",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "etas",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "etas",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_2"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_2",
+      "status": "not_run",
+      "variant": "etas/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "98bfd80c38e34a05409c492597eb9f769c300f6d4b2c5f566acfd19ba467f0aa",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "etas",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "etas",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_3"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_3",
+      "status": "not_run",
+      "variant": "etas/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "37581f7744b1d222c3fcaebdfb56a246a11659a1ac30fad1e8de218570a7baa6",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "etas",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "etas",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "fold_4"
+      },
+      "score_ids": [],
+      "snapshot_id": "fold_4",
+      "status": "not_run",
+      "variant": "etas/not_fitted"
+    },
+    {
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "gates": [
+        {
+          "evidence_id": "ccf813b0c6150cbe65b6d519eb1bdb61ac6b145093b890cb171e6cfd6c3bb6e2",
+          "gate_id": "upstream_completeness",
+          "status": "not_applicable"
+        }
+      ],
+      "model_id": "etas",
+      "parameter_identity": {
+        "failure_stage": "completeness",
+        "model_id": "etas",
+        "parameter_snapshot_id": null,
+        "protocol_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+        "snapshot_id": "final_validation"
+      },
+      "score_ids": [],
+      "snapshot_id": "final_validation",
+      "status": "not_run",
+      "variant": "etas/not_fitted"
+    }
+  ],
+  "protocol_fingerprint_sha256": "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032",
+  "protocol_version": "0.2.0",
+  "schema_version": 1,
+  "scientific_summary": {
+    "failure": {
+      "evidence_id": "4e14abc393dd74fa7da6610355f0f8887ce33aed37a4c057c10a6f5789d36081",
+      "failure_reason_code": "estimate_above_frozen_maximum",
+      "failure_reasons": [
+        "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0"
+      ],
+      "failure_stage": "completeness"
+    },
+    "final_selected_mc": null,
+    "future": {
+      "issue_count": 0,
+      "not_run_reason": "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0",
+      "status": "skipped"
+    },
+    "horizons": [
+      {
+        "comparison_count": 0,
+        "model_id": "spatial_poisson",
+        "not_run_reason": "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0",
+        "status": "skipped"
+      },
+      {
+        "comparison_count": 0,
+        "model_id": "etas",
+        "not_run_reason": "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0",
+        "status": "skipped"
+      }
+    ],
+    "outcome_status": "scientific_gate_failed",
+    "representative": null,
+    "selected_kde_bandwidth_km": null,
+    "snapshots": [
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "uniform_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_1",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "uniform_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_2",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "uniform_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_3",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "uniform_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_4",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "uniform_poisson",
+        "score_id": null,
+        "snapshot_id": "final_validation",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "spatial_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_1",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "spatial_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_2",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "spatial_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_3",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "spatial_poisson",
+        "score_id": null,
+        "snapshot_id": "fold_4",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "spatial_poisson",
+        "score_id": null,
+        "snapshot_id": "final_validation",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "etas",
+        "score_id": null,
+        "snapshot_id": "fold_1",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "etas",
+        "score_id": null,
+        "snapshot_id": "fold_2",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "etas",
+        "score_id": null,
+        "snapshot_id": "fold_3",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "etas",
+        "score_id": null,
+        "snapshot_id": "fold_4",
+        "status": "not_run",
+        "target_event_count": null
+      },
+      {
+        "information_gain_nats_per_event": null,
+        "model_id": "etas",
+        "score_id": null,
+        "snapshot_id": "final_validation",
+        "status": "not_run",
+        "target_event_count": null
+      }
+    ],
+    "validation_bootstrap": [
+      {
+        "confidence_level": null,
+        "lower": null,
+        "model_id": "spatial_poisson",
+        "not_run_reason": "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0",
+        "point_estimate": null,
+        "replications": null,
+        "status": "skipped",
+        "upper": null
+      },
+      {
+        "confidence_level": null,
+        "lower": null,
+        "model_id": "etas",
+        "not_run_reason": "spatial/500km/r+7/c-3: completeness estimate 4.5 exceeds frozen maximum candidate 4.0",
+        "point_estimate": null,
+        "replications": null,
+        "status": "skipped",
+        "upper": null
+      }
+    ]
+  },
+  "selection": {
+    "eligible_model_ids": [],
+    "evidence_id": "4e14abc393dd74fa7da6610355f0f8887ce33aed37a4c057c10a6f5789d36081",
+    "selected_model_id": null,
+    "status": "not_evaluable",
+    "validation_best_model_id": null
+  },
+  "stage3_allowed": false
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "fixture_id": "etas_inverse_power_cut300_v1",
+  "purpose": "closed_form_kernel_intensity_compensator_and_unmarked_loglikelihood",
+  "coordinate_unit": "km",
+  "time_unit": "day",
+  "magnitude_unit": "catalog_magnitude",
+  "include_mark_likelihood": false,
+  "kernel_conventions": {
+    "history_predicate": "t_i < t",
+    "productivity": "k(m)=K*exp(alpha*(m-Mc))",
+    "temporal_density": "g(u)=((p-1)/c)*(1+u/c)^(-p), u>0",
+    "temporal_cdf": "G(u)=1-(1+u/c)^(1-p), u>0; G(u)=0, u<=0",
+    "spatial_scale": "sigma(m)=D*exp(gamma*(m-Mc))",
+    "spatial_density_untruncated": "f(r|m)=((q-1)/(pi*sigma(m)))*(1+r^2/sigma(m))^(-q)",
+    "spatial_cdf_untruncated": "F(R|m)=1-(1+R^2/sigma(m))^(1-q)",
+    "spatial_density_cut": "f_cut(r|m)=f(r|m)/F(Rc|m) for 0<=r<=Rc; 0 otherwise",
+    "spatial_mass_cut": "F_cut(R|m)=F(min(R,Rc)|m)/F(Rc|m)",
+    "spatial_cutoff_policy": "truncate_and_radially_renormalize",
+    "study_boundary_policy": "integrate_intersection_mass_without_second_renormalization"
+  },
+  "parameters": {
+    "Mc": 3.0,
+    "background_density_per_day_km2": 0.0001,
+    "K": 0.2,
+    "alpha_per_magnitude": 1.0,
+    "c_days": 0.05,
+    "p": 1.2,
+    "D_km2": 25.0,
+    "q": 1.5,
+    "gamma_per_magnitude": 1.0,
+    "spatial_cutoff_km": 300.0
+  },
+  "study_domain": {
+    "shape": "disk_centered_at_parent",
+    "center_x_km": 0.0,
+    "center_y_km": 0.0,
+    "radius_km": 30.0,
+    "area_km2_formula": "pi*radius_km^2"
+  },
+  "assessment_interval_days": {
+    "left": 0.5,
+    "right": 2.0,
+    "closure": "(left,right]"
+  },
+  "events": [
+    {
+      "event_id": "e0",
+      "role": "prehistory",
+      "time_days": 0.0,
+      "x_km": 0.0,
+      "y_km": 0.0,
+      "magnitude": 4.0
+    },
+    {
+      "event_id": "e1",
+      "role": "observed_target",
+      "time_days": 1.0,
+      "x_km": 0.0,
+      "y_km": 0.0,
+      "magnitude": 3.5
+    }
+  ],
+  "probe": {
+    "time_days": 2.0,
+    "x_km": 3.0,
+    "y_km": 4.0,
+    "included_parent_ids": ["e0", "e1"]
+  },
+  "expected": {
+    "cutoff_mass_m4": 0.9725316805639023,
+    "cutoff_mass_m3p5": 0.9786044751689525,
+    "sigma_m4_km2": 67.95704571147613,
+    "sigma_m3p5_km2": 41.218031767503206,
+    "productivity_m4": 0.5436563656918091,
+    "productivity_m3p5": 0.32974425414002567,
+    "temporal_density_dt1_per_day": 0.10360884626454828,
+    "temporal_density_dt2_per_day": 0.046421520707462985,
+    "temporal_cdf_dt0p5": 0.3809560793161544,
+    "temporal_cdf_dt1": 0.4560535571111214,
+    "temporal_cdf_dt2": 0.5241794127485043,
+    "spatial_density_r0_m4_per_km2": 0.0024081408428924503,
+    "spatial_density_r5_m4_per_km2": 0.001505255248318638,
+    "spatial_density_r5_m3p5_per_km2": 0.0019377250658923362,
+    "spatial_mass_r30_m4": 0.7557949961304554,
+    "spatial_mass_r30_m3p5": 0.808022138518414,
+    "lambda_event_t1_r0_per_day_km2": 0.0002356448153667534,
+    "background_compensator": 0.4241150082346221,
+    "root_compensator": 0.05884943088561855,
+    "event1_postevent_compensator": 0.12151120956373394,
+    "total_compensator": 0.6044756486839746,
+    "unmarked_log_likelihood": -8.957660554934703,
+    "lambda_probe_t2_r5_per_day_km2": 0.00020418991778056394
+  },
+  "tolerances": {
+    "scalar_relative": 5e-12,
+    "scalar_absolute": 1e-14,
+    "log_likelihood_absolute": 1e-11
+  }
+}

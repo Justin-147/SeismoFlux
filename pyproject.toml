@@ -16,12 +16,15 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
+  "matplotlib==3.11.0",
+  "numpy==2.4.6",
   "openpyxl==3.1.5",
   "pandas==3.0.3",
   "pyarrow==25.0.0",
   "pydantic==2.11.7",
   "pyproj==3.7.2",
   "PyYAML==6.0.2",
+  "scipy==1.17.1",
   "shapely==2.1.2",
   "xlrd==2.0.2",
 ]
@@ -68,5 +71,14 @@ pretty = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["pyarrow", "pyarrow.*", "shapely", "shapely.*", "xlrd", "xlrd.*"]
+module = [
+  "pandas",
+  "pandas.*",
+  "pyarrow",
+  "pyarrow.*",
+  "shapely",
+  "shapely.*",
+  "xlrd",
+  "xlrd.*",
+]
 ignore_missing_imports = true

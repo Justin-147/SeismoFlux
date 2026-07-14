@@ -15,6 +15,7 @@ def test_base_configuration_matches_preregistered_contract() -> None:
     config = load_config(BASE_CONFIG)
 
     assert config.project.random_seed == 147
+    assert config.config_files.background == "configs/background.yaml"
     assert config.time_semantics.forecast_interval == "(T,T+h]"
     assert config.forecast.horizons_days == (7, 30, 90, 180, 365)
     assert config.integration.convergence_cells_km == (50, 25, 12.5)

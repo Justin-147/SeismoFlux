@@ -1,12 +1,27 @@
 schema_version: 1
-protocol_version: 1.0.0
+protocol_version: 1.1.0
 data_contract_version: 0.1.0
-status: stage_1_data_contract_frozen
+status: stage_2_background_protocol_preregistered_before_scoring
 registered_without_locked_test_results: true
-freeze_tag: v0.1.0-data-contract
+initial_freeze_tag: v0.1.0-data-contract
+phase_2_freeze_tag: v0.2.0-background-protocol
 frozen_on: '2026-07-13'
+background_protocol_version: 0.2.0
+background_protocol_path: configs/background.yaml
+background_protocol_frozen_on: '2026-07-13'
+background_scores_seen_before_freeze: false
+background_issue_manifest_path: data/manifests/background_fold_manifest.json
+background_issue_manifest_semantics: actual_available_at_dates_only
+background_issue_counts:
+  development: 50
+  validation: 51
 random_seed: 147
-stability_seeds: [147, 1147, 2147, 3147, 4147]
+randomness:
+  generator: numpy.random.PCG64
+  derivation: sha256_namespaced_context_then_first_16_bytes_big_endian_entropy
+  stage_2_authority: configs/background.yaml
+  stage_2_direct_integer_subseeds_forbidden: true
+  later_stage_namespace_contexts_must_be_frozen_before_scoring: true
 
 time_semantics:
   issue_timezone: Asia/Shanghai
@@ -31,6 +46,14 @@ calendar_split:
     start: '2024-07-01'
     end: '2025-07-01'
   validation_maturity_end: '2026-07-01'
+  actual_issue_schedule:
+    source: data/manifests/background_fold_manifest.json
+    source_column_allowlist: [available_at]
+    fixed_cadence_assumption_forbidden: true
+    development_first: '2022-07-21'
+    development_last: '2023-06-29'
+    validation_first: '2024-07-04'
+    validation_last: '2025-06-26'
   locked_test_issue_dates:
     start: null
     end: null
@@ -53,7 +76,8 @@ calendar_split:
   rolling_origin:
     minimum_mature_folds: 3
     fold_rule: train_target_end_lt_assessment_target_start
-    fold_schedule_freeze: stage_1_before_location_scores
+    fold_schedule_freeze: phase_2_score_free_protocol_amendment
+    amendment_reason: stage_1_froze_bounds_but_did_not_materialize_actual_issue_or_historical_background_fold_manifest
     insufficient_fold_action: evidence_insufficient_no_random_split
 
 minimum_practical_improvement:
@@ -62,6 +86,13 @@ minimum_practical_improvement:
   success_uncertainty_rule: point_threshold_and_95pct_interval_excludes_no_improvement
 
 evaluation:
+  background_g1:
+    target: unmarked_M_gte_selected_Mc_inside_study_area_only
+    primary_endpoint: continuous_time_sequential_conditional_point_process_information_gain
+    validation_interval_local: '(2024-07-01T00:00:00,2025-07-01T00:00:00]'
+    development_folds: configs_background_parameter_selection_folds
+    forecast_horizons_role: secondary_reported_separately_no_G1_aggregation
+    external_300km_events_role: conditional_ETAS_parents_only_never_targets_or_metrics
   information_gain:
     definition: point_process_log_likelihood_difference_divided_by_physical_event_count
     unit: nats_per_physical_event
@@ -87,11 +118,13 @@ evaluation:
     replications: 2000
     confidence_level: 0.95
     interval_method: percentile
-    seed: 10147
+    seed_source: sha256_bootstrap_namespace
+    stage_2_context_authority: configs/background.yaml
+    later_stage_contexts_must_be_frozen_before_scoring: true
   permutations:
     time_replications: 1000
     space_replications: 1000
-    seed_rule: master_seed_plus_replication_index
+    seed_rule: sha256_time_or_space_permutation_namespace_then_PCG64
     monte_carlo_p_value: (1+count_null_gte_observed)/(replications+1)
     G2_primary_test:
       null_type: time_permutation

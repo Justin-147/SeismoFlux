@@ -43,11 +43,13 @@ class ConfigFiles(StrictModel):
     data_sources: str
     ingestion: str
     research_protocol: str
+    background: str
     operating_points: str
 
     _data_sources_relative = field_validator("data_sources")(normalize_relative_path)
     _ingestion_relative = field_validator("ingestion")(normalize_relative_path)
     _research_protocol_relative = field_validator("research_protocol")(normalize_relative_path)
+    _background_relative = field_validator("background")(normalize_relative_path)
     _operating_points_relative = field_validator("operating_points")(normalize_relative_path)
 
 
