@@ -5,6 +5,7 @@ from typing import Any, cast
 
 import pytest
 
+import seismoflux.background.runner as runner_module
 from seismoflux.background.config import load_background_protocol
 from seismoflux.background.deliverables import (
     build_background_deliverables,
@@ -22,7 +23,6 @@ from seismoflux.background.publication import (
     publish_registry_and_report,
     publish_registry_and_report_sealed,
 )
-from seismoflux.background.runner import run_background_stage2
 from seismoflux.background.scoring_authorization import (
     BackgroundScoringNotAuthorizedError,
     require_background_scoring_authorized,
@@ -70,9 +70,22 @@ def test_score_free_v021_is_rejected_by_every_public_scoring_pipeline() -> None:
         )
 
 
-def test_production_runner_rejects_v021_before_sealing_or_loading_rows() -> None:
+def test_production_runner_rejects_v021_before_sealing_or_loading_rows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden(*_: object, **__: object) -> object:
+        raise AssertionError("score-free preflight must precede bound inputs and sealing")
+
+    for attribute in (
+        "load_project_background_config",
+        "create_execution_seal",
+        "load_study_area",
+        "load_earthquake_catalog",
+    ):
+        monkeypatch.setattr(runner_module, attribute, forbidden)
+
     with pytest.raises(BackgroundScoringNotAuthorizedError, match="score-free stage-2R-0"):
-        run_background_stage2(LOCAL_SUPPORT_PROJECT_CONFIG)
+        runner_module.run_background_stage2(LOCAL_SUPPORT_PROJECT_CONFIG)
 
 
 def test_score_free_v021_is_rejected_before_score_bearing_deliverable_inputs() -> None:

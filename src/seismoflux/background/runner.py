@@ -16,7 +16,11 @@ from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 from seismoflux.background.catalog import load_earthquake_catalog, load_study_area
-from seismoflux.background.config import BackgroundConfig, load_project_background_config
+from seismoflux.background.config import (
+    BackgroundConfig,
+    load_background_protocol,
+    load_project_background_config,
+)
 from seismoflux.background.deliverables import (
     PublishedBackgroundDeliverables,
     build_background_deliverables,
@@ -205,6 +209,9 @@ def run_background_stage2(
     main_path = Path(config_path).resolve(strict=True)
     project_root = project_root_for(main_path).resolve()
     project = load_config(main_path)
+    background_path = resolve_project_path(main_path, project.config_files.background)
+    preflight_background = load_background_protocol(background_path)
+    require_background_scoring_authorized(preflight_background)
     background: BackgroundConfig = load_project_background_config(main_path)
     require_background_scoring_authorized(background)
 

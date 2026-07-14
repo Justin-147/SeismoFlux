@@ -13,8 +13,11 @@ from seismoflux.background.config import (
     BackgroundConfig,
     BackgroundLocalSupportConfig,
     LocalSupportPolicyConfig,
-    load_background_config,
     load_background_protocol,
+)
+from seismoflux.background.local_support_manifest import (
+    background_local_support_manifest_bytes,
+    load_background_local_support_manifest,
 )
 from seismoflux.config import load_yaml_mapping
 
@@ -141,11 +144,16 @@ def test_real_support_manifest_is_content_addressed_and_strictly_loaded() -> Non
         config.inputs.support_manifest_sha256
     )
 
-    loaded = load_background_config(LOCAL_SUPPORT_CONFIG)
-    assert isinstance(loaded, BackgroundLocalSupportConfig)
-    assert loaded.inputs.support_manifest_sha256 == (
-        "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d"
+    loaded = load_background_local_support_manifest(manifest_path)
+    assert loaded.protocol_version == config.protocol_version
+    assert loaded.freeze_tag == config.freeze_tag
+    assert loaded.gate_name == config.local_support.gate_name
+    assert loaded.parent_protocol_execution_fingerprint == (
+        config.parent_protocol_execution_fingerprint
     )
+    assert loaded.sources.study_area.path == config.inputs.study_area
+    assert loaded.sources.study_area.sha256 == config.inputs.study_area_sha256
+    assert background_local_support_manifest_bytes(loaded) == manifest_path.read_bytes()
 
 
 def test_v021_fold_manifest_changes_only_freeze_identity() -> None:
