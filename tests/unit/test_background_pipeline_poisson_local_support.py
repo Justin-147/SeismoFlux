@@ -530,8 +530,7 @@ def test_final_zero_target_retains_all_development_scores_after_selection(
     support_summary = cast(dict[str, object], deliverables.registry_science["support"])
     support_snapshots = cast(list[dict[str, object]], support_summary["snapshots"])
     assert all(
-        isinstance(snapshot["fit_end_utc"], str)
-        and cast(str, snapshot["fit_end_utc"]).endswith("Z")
+        isinstance(snapshot["fit_end_utc"], str) and snapshot["fit_end_utc"].endswith("Z")
         for snapshot in support_snapshots
     )
     ledger_summary = cast(dict[str, object], deliverables.registry_science["score_ledger"])
