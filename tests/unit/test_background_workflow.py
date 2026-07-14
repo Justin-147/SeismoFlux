@@ -12,6 +12,7 @@ from seismoflux.background.workflow import (
     SnapshotDefinition,
     analyze_snapshot_completeness,
     build_snapshot_definitions,
+    catalog_completeness_events,
     catalog_etas_events,
     event_mask,
     physical_target_mask,
@@ -55,6 +56,22 @@ def test_snapshot_definitions_preserve_four_purged_folds_and_local_validation() 
     assert snapshots[-1].assessment_start_utc == "2024-06-30T16:00:00Z"
     assert snapshots[-1].assessment_end_utc == "2025-06-30T16:00:00Z"
     assert snapshots[-1].optimizer_model_id == "etas/final_validation"
+
+
+def test_completeness_adapter_supports_pre_unix_epoch_days() -> None:
+    timestamp = "1899-12-31T16:00:00Z"
+    day = utc_timestamp_to_day(timestamp)
+    catalog = _catalog(
+        np.asarray([day]),
+        np.asarray([day]),
+        np.asarray([5.0]),
+        np.asarray([True]),
+    )
+
+    event = catalog_completeness_events(catalog)[0]
+
+    assert event.origin_time_utc == datetime(1899, 12, 31, 16, tzinfo=UTC)
+    assert event.available_at == event.origin_time_utc
 
 
 def test_event_mask_enforces_origin_availability_magnitude_and_domain() -> None:

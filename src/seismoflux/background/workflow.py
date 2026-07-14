@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -22,6 +22,7 @@ from seismoflux.background.config import BackgroundConfig
 from seismoflux.background.etas_fit import ETASEvent
 
 ProgressCallback = Callable[[str], None]
+_UNIX_EPOCH_UTC = datetime(1970, 1, 1, tzinfo=UTC)
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,7 +104,7 @@ def build_snapshot_definitions(config: BackgroundConfig) -> tuple[SnapshotDefini
 
 
 def _day_to_utc_datetime(day: float) -> datetime:
-    return datetime.fromtimestamp(day * 86_400.0, tz=UTC)
+    return _UNIX_EPOCH_UTC + timedelta(days=day)
 
 
 def catalog_completeness_events(catalog: EarthquakeCatalog) -> tuple[CompletenessEvent, ...]:
