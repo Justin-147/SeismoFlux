@@ -14,9 +14,11 @@ from seismoflux.background.completeness import (
 )
 from seismoflux.background.local_support import (
     MINIMUM_RETAINED_AREA_FRACTION,
+    LocalSupportCellLocator,
     LocalSupportRetentionError,
     build_local_support_manifest,
     build_local_support_snapshot,
+    resolve_local_support_cell,
 )
 from seismoflux.background.scientific import scientific_json
 
@@ -170,6 +172,23 @@ def test_internal_grid_lines_and_corner_keep_high_side_priority(
     counts = {(cell.row, cell.column): cell.base_event_count for cell in result.cells}
     assert counts[expected_key] == 200
     assert sum(counts.values()) == 200
+
+
+def test_public_cell_locator_reuses_high_side_and_outer_boundary_semantics() -> None:
+    result = build_local_support_snapshot(
+        _parent_supported_events(),
+        fit_end_utc=FIT_END,
+        study_area_equal_area=box(0.0, 0.0, 1_000_000.0, 500_000.0),
+    )
+    locator = LocalSupportCellLocator(result.cells)
+
+    assert locator.resolve(x_m=500_000.0, y_m=1_000.0) is result.cells[1]
+    assert locator.resolve(x_m=1_000_000.0, y_m=1_000.0) is result.cells[1]
+    assert locator.resolve(x_m=1_000_001.0, y_m=1_000.0) is None
+    assert resolve_local_support_cell(result, x_m=500_000.0, y_m=1_000.0) is result.cells[1]
+
+    with pytest.raises(ValueError, match="finite"):
+        locator.resolve(x_m=math.nan, y_m=1_000.0)
 
 
 def test_still_sparse_parent_is_indeterminate_and_uses_common_mc() -> None:

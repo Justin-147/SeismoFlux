@@ -21,6 +21,7 @@ MODEL_SIMPLICITY_ORDER: tuple[ModelId, ...] = (
 )
 EXPECTED_SNAPSHOTS = ("fold_1", "fold_2", "fold_3", "fold_4", "final_validation")
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
+_LOCAL_SUPPORT_ID_PATTERN = re.compile(r"local-support-[0-9a-f]{16}")
 
 
 def _readonly(values: object) -> NDArray[np.float64]:
@@ -52,6 +53,11 @@ class PointProcessScoreEvidence:
     event_log_intensities: NDArray[np.float64]
     compensator: float
     numerical_gate_evidence_ids: tuple[str, ...]
+    support_id: str | None = None
+    supported_area_km2: float | None = None
+    compensator_domain_id: str | None = None
+    authorization_id: str | None = None
+    evaluation_context_id: str | None = None
 
     def __post_init__(self) -> None:
         if _SHA256_PATTERN.fullmatch(self.protocol_sha256) is None:
@@ -84,6 +90,37 @@ class PointProcessScoreEvidence:
             or len(set(gate_ids)) != len(gate_ids)
         ):
             raise ValueError("numerical gate evidence IDs must be non-empty and unique")
+        support_values = (
+            self.support_id,
+            self.supported_area_km2,
+            self.compensator_domain_id,
+            self.authorization_id,
+        )
+        if any(value is not None for value in support_values) and not all(
+            value is not None for value in support_values
+        ):
+            raise ValueError(
+                "support_id, supported_area_km2, compensator_domain_id, and authorization_id "
+                "must be supplied together"
+            )
+        if self.support_id is not None:
+            if _LOCAL_SUPPORT_ID_PATTERN.fullmatch(self.support_id) is None:
+                raise ValueError("support_id must be a frozen local-support identifier")
+            if (
+                not math.isfinite(cast(float, self.supported_area_km2))
+                or cast(float, self.supported_area_km2) <= 0.0
+            ):
+                raise ValueError("supported_area_km2 must be finite and positive")
+            if _SHA256_PATTERN.fullmatch(cast(str, self.compensator_domain_id)) is None:
+                raise ValueError("compensator_domain_id must be a lowercase SHA-256 string")
+            if _SHA256_PATTERN.fullmatch(cast(str, self.authorization_id)) is None:
+                raise ValueError("authorization_id must be a lowercase SHA-256 string")
+            if self.evaluation_context_id is not None and (
+                _SHA256_PATTERN.fullmatch(self.evaluation_context_id) is None
+            ):
+                raise ValueError("evaluation_context_id must be a lowercase SHA-256 string")
+        elif self.evaluation_context_id is not None:
+            raise ValueError("evaluation_context_id requires a local-support score identity")
         object.__setattr__(self, "target_event_ids", identifiers)
         object.__setattr__(self, "event_log_intensities", log_intensities)
         object.__setattr__(self, "numerical_gate_evidence_ids", gate_ids)
@@ -113,6 +150,17 @@ class PointProcessScoreEvidence:
             "compensator": self.compensator,
             "numerical_gate_evidence_ids": self.numerical_gate_evidence_ids,
         }
+        if self.support_id is not None:
+            payload.update(
+                {
+                    "support_id": self.support_id,
+                    "supported_area_km2": self.supported_area_km2,
+                    "compensator_domain_id": self.compensator_domain_id,
+                    "authorization_id": self.authorization_id,
+                }
+            )
+        if self.evaluation_context_id is not None:
+            payload["evaluation_context_id"] = self.evaluation_context_id
         return hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
 
 
@@ -143,6 +191,11 @@ class PairedInformationGainEvidence:
             "assessment_end_utc",
             "selected_mc",
             "target_event_ids",
+            "support_id",
+            "supported_area_km2",
+            "compensator_domain_id",
+            "authorization_id",
+            "evaluation_context_id",
         )
         for field_name in exact_fields:
             if getattr(candidate, field_name) != getattr(uniform, field_name):

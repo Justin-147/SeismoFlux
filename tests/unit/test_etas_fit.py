@@ -1149,6 +1149,32 @@ def test_optimizer_defaults_and_bounds_match_frozen_protocol() -> None:
         start_index=1,
     )
     assert not np.array_equal(first, distinct)
+    local_support_context = SeedContext(
+        147,
+        "0.2.1",
+        "optimizer_start",
+        "etas/fold_1",
+        None,
+        0,
+    )
+    assert local_support_context.digest().hex() == (
+        "c0ea9317c48be3a32a464ccc5963adf02ac137ff96802bd2b2e119a1f402600d"
+    )
+    local_support_start = optimizer_start(
+        transformed_bounds,
+        root_seed=147,
+        protocol_version="0.2.1",
+        model_id="etas/fold_1",
+        start_index=0,
+    )
+    local_support_start_again = optimizer_start(
+        transformed_bounds,
+        root_seed=147,
+        protocol_version="0.2.1",
+        model_id="etas/fold_1",
+        start_index=0,
+    )
+    assert np.array_equal(local_support_start, local_support_start_again)
     assert all(
         lower <= value <= upper
         for value, (lower, upper) in zip(first, transformed_bounds, strict=True)

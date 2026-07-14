@@ -40,7 +40,10 @@ from seismoflux.background.execution import (
     require_execution_seal_unchanged,
     subprocess_git_runner,
 )
-from seismoflux.background.scoring_authorization import require_background_scoring_authorized
+from seismoflux.background.scoring_authorization import (
+    AuthorizedExecution,
+    require_background_scoring_authorized,
+)
 
 BundleKind: TypeAlias = Literal["processed", "model", "backtest", "experiment"]
 ModelId: TypeAlias = Literal["uniform_poisson", "spatial_poisson", "etas"]
@@ -476,8 +479,9 @@ def publish_model_bundle(
     bundle: ModelBundle,
     *,
     uv_lock_sha256: str,
+    authorized_execution: AuthorizedExecution | None = None,
 ) -> BundlePublication:
-    require_background_scoring_authorized(background)
+    require_background_scoring_authorized(background, authorized_execution)
     return _publish_bundle(
         project_root,
         background,
@@ -496,8 +500,9 @@ def publish_backtest_bundle(
     bundle: BacktestBundle,
     *,
     uv_lock_sha256: str,
+    authorized_execution: AuthorizedExecution | None = None,
 ) -> BundlePublication:
-    require_background_scoring_authorized(background)
+    require_background_scoring_authorized(background, authorized_execution)
     return _publish_bundle(
         project_root,
         background,
@@ -516,8 +521,9 @@ def publish_experiment_bundle(
     bundle: ExperimentBundle,
     *,
     uv_lock_sha256: str,
+    authorized_execution: AuthorizedExecution | None = None,
 ) -> BundlePublication:
-    require_background_scoring_authorized(background)
+    require_background_scoring_authorized(background, authorized_execution)
     return _publish_bundle(
         project_root,
         background,

@@ -505,6 +505,58 @@ def _resolve_base_cell_key(
     return None
 
 
+class LocalSupportCellLocator:
+    """Resolve projected points with the exact frozen fixed-cell boundary semantics."""
+
+    __slots__ = ("_cells_by_key", "_clipped_by_key")
+
+    def __init__(self, cells: Sequence[LocalSupportCell]) -> None:
+        supplied = tuple(cells)
+        if not supplied or any(not isinstance(cell, LocalSupportCell) for cell in supplied):
+            raise ValueError("local support cell locator requires support cells")
+        cells_by_key = {(cell.row, cell.column): cell for cell in supplied}
+        if len(cells_by_key) != len(supplied):
+            raise ValueError("local support cell locator requires unique fixed cells")
+        self._cells_by_key = cells_by_key
+        self._clipped_by_key = {
+            key: _ClippedCell(
+                row=cell.row,
+                column=cell.column,
+                geometry=cell.clipped_geometry,
+                area_m2=cell.clipped_area_m2,
+            )
+            for key, cell in cells_by_key.items()
+        }
+
+    def resolve(self, *, x_m: float, y_m: float) -> LocalSupportCell | None:
+        """Return the covered fixed cell, or ``None`` for a point outside the domain."""
+
+        x_value = float(x_m)
+        y_value = float(y_m)
+        if not math.isfinite(x_value) or not math.isfinite(y_value):
+            raise ValueError("local support point coordinates must be finite")
+        key = _resolve_base_cell_key(x_value, y_value, self._clipped_by_key)
+        return None if key is None else self._cells_by_key[key]
+
+
+def resolve_local_support_cell(
+    snapshot: LocalSupportSnapshot,
+    *,
+    x_m: float,
+    y_m: float,
+) -> LocalSupportCell | None:
+    """Resolve one point against a snapshot's fixed 500 km support partition.
+
+    Internal grid lines retain high-side priority.  If an outer study boundary
+    lies exactly on a grid line and the high-side cell has no positive study
+    area, the covered adjacent cell is used instead.
+    """
+
+    if not isinstance(snapshot, LocalSupportSnapshot):
+        raise TypeError("snapshot must be a LocalSupportSnapshot")
+    return LocalSupportCellLocator(snapshot.cells).resolve(x_m=x_m, y_m=y_m)
+
+
 def build_local_support_study_area_identity(
     study_area_equal_area: BaseGeometry,
 ) -> LocalSupportStudyAreaIdentity:
@@ -1109,6 +1161,7 @@ __all__ = [
     "MINIMUM_RETAINED_AREA_FRACTION",
     "LocalSupportAudit",
     "LocalSupportCell",
+    "LocalSupportCellLocator",
     "LocalSupportCellManifest",
     "LocalSupportError",
     "LocalSupportFixedCellIdentity",
@@ -1122,4 +1175,5 @@ __all__ = [
     "build_local_support_manifest",
     "build_local_support_snapshot",
     "build_local_support_study_area_identity",
+    "resolve_local_support_cell",
 ]

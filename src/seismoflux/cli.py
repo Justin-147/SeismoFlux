@@ -54,9 +54,17 @@ def run_background_stage2(
 ) -> _BackgroundManifestResult:
     """Lazily import the scientific runner only for an actual stage-2 execution."""
 
-    from seismoflux.background.runner import run_background_stage2 as execute
+    protocol = load_project_background_config(config_path)
+    if str(protocol.protocol_version) == "0.2.1":
+        from seismoflux.background.runner_local_support import (
+            run_background_stage2_local_support,
+        )
 
-    return execute(config_path, progress=progress)
+        return run_background_stage2_local_support(config_path, progress=progress)
+
+    from seismoflux.background.runner import run_background_stage2
+
+    return run_background_stage2(config_path, progress=progress)
 
 
 COMMAND_SPECS: dict[str, CommandSpec] = {
