@@ -475,7 +475,10 @@ def _windows_physical_core_count() -> int | None:
         import ctypes
         from ctypes import wintypes
 
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        win_dll = getattr(ctypes, "WinDLL", None)
+        if win_dll is None:
+            return None
+        kernel32 = win_dll("kernel32", use_last_error=True)
         query = kernel32.GetLogicalProcessorInformationEx
         byte_count = wintypes.DWORD(0)
         query(0, None, ctypes.byref(byte_count))

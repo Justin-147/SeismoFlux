@@ -75,7 +75,9 @@ def process_peak_working_set_bytes() -> int | None:
     counters = _ProcessMemoryCounters()
     counters.cb = ctypes.sizeof(counters)
     try:
-        loader = ctypes.windll
+        loader = getattr(ctypes, "windll", None)
+        if loader is None:
+            return None
         get_current_process = loader.kernel32.GetCurrentProcess
         get_current_process.restype = ctypes.c_void_p
         get_process_memory_info = loader.psapi.GetProcessMemoryInfo
