@@ -30,6 +30,36 @@ def _background_protocol_loader(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
+class _SyntheticStage3Plan:
+    """Small score-free plan that keeps CLI contract tests data-independent."""
+
+    planned_inputs: tuple[str, ...] = (
+        "data/processed/stage1/synthetic-anomaly-observations.parquet",
+        "data/processed/stage1/synthetic-anomaly-report-periods.parquet",
+    )
+    planned_outputs: tuple[str, ...] = (
+        "data/processed/stage3/synthetic-content-addressed-bundle",
+        "data/manifests/anomaly_feature_registry.json",
+    )
+    local_output_root_reference = "data/processed/stage3"
+    public_output_references: tuple[str, ...] = ("data/manifests/anomaly_feature_registry.json",)
+
+    def to_manifest_details(self) -> dict[str, object]:
+        return {
+            "plan_source": "synthetic-cli-test",
+            "locked_test": {"run": False},
+        }
+
+
+@pytest.fixture
+def _stage3_plan_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        cli_module,
+        "build_anomaly_history_plan",
+        lambda _path: _SyntheticStage3Plan(),
+    )
+
+
 def _required_arguments(command: str) -> list[str]:
     if command in {"train", "backtest", "optimize-regions", "freeze"}:
         return ["--experiment", "synthetic-v1"]
@@ -47,6 +77,7 @@ def test_every_command_supports_machine_readable_dry_run(
     command: str,
     capsys: pytest.CaptureFixture[str],
     _background_protocol_loader: None,
+    _stage3_plan_loader: None,
 ) -> None:
     exit_code = main([command, *_required_arguments(command), "--dry-run"])
     captured = capsys.readouterr()
@@ -62,6 +93,7 @@ def test_every_command_supports_machine_readable_dry_run(
 def test_anomaly_history_execute_calls_single_stage3_entry(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _stage3_plan_loader: None,
 ) -> None:
     calls: list[tuple[Path, object]] = []
 
@@ -109,6 +141,7 @@ def test_anomaly_history_execute_calls_single_stage3_entry(
 def test_anomaly_history_failure_after_local_bundle_records_public_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    _stage3_plan_loader: None,
 ) -> None:
     def fail_after_bundle(
         config_path: Path,
