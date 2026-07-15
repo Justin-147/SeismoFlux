@@ -16,7 +16,8 @@ import pyarrow.parquet as pq
 from seismoflux.config import sha256_file
 from seismoflux.data.parquet import schema_sha256, table_content_sha256
 
-_CONTENT_HASH_DOMAIN = b"seismoflux_stage3_row_groups_v1\0"
+_CONTENT_HASH_DOMAIN = b"seismoflux_stage3_persisted_row_groups_v2\0"
+_CONTENT_HASH_ALGORITHM = b"stage3_persisted_row_groups_v2"
 
 
 class _HashLike(Protocol):
@@ -108,6 +109,15 @@ def _update_content_digest(digest: _HashLike, table: pa.Table) -> None:
     digest.update(group_digest)
 
 
+def _persisted_content_sha256(parquet_file: Any) -> str:
+    """Hash the exact Arrow view reconstructed from persisted Parquet row groups."""
+
+    digest = _content_digest_start(parquet_file.schema_arrow)
+    for index in range(parquet_file.metadata.num_row_groups):
+        _update_content_digest(digest, parquet_file.read_row_group(index))
+    return digest.hexdigest()
+
+
 def write_parquet_row_groups_atomic(
     *,
     name: str,
@@ -128,17 +138,18 @@ def write_parquet_row_groups_atomic(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     metadata = {
         b"seismoflux_contract": b"0.3.0",
-        b"seismoflux_content_hash": b"stage3_row_groups_v1",
+        b"seismoflux_content_hash": _CONTENT_HASH_ALGORITHM,
         b"seismoflux_sort_keys": ",".join(sort_keys).encode("utf-8"),
     }
     storage_schema = schema.with_metadata(metadata)
     expected_fields = _field_schema(storage_schema)
-    digest = _content_digest_start(storage_schema)
     row_count = 0
     row_group_count = 0
     previous_last_key: tuple[Any, ...] | None = None
     temporary_name: str | None = None
     writer: pq.ParquetWriter | None = None
+    persisted_schema: pa.Schema | None = None
+    content_sha256: str | None = None
     try:
         with tempfile.NamedTemporaryFile(
             "wb",
@@ -168,7 +179,6 @@ def write_parquet_row_groups_atomic(
                 sort_keys=sort_keys,
                 previous_last_key=previous_last_key,
             )
-            _update_content_digest(digest, table)
             writer.write_table(table, row_group_size=table.num_rows)
             row_count += table.num_rows
             row_group_count += 1
@@ -176,6 +186,15 @@ def write_parquet_row_groups_atomic(
         writer = None
         if row_group_count == 0:
             raise ValueError(f"stage-3 dataset must contain at least one row: {name}")
+        with pq.ParquetFile(temporary_name) as parquet_file:
+            if parquet_file.metadata.num_rows != row_count:
+                raise RuntimeError(f"Parquet round-trip changed row count for {name}")
+            if parquet_file.metadata.num_row_groups != row_group_count:
+                raise RuntimeError(f"Parquet round-trip changed row-group count for {name}")
+            persisted_schema = parquet_file.schema_arrow
+            if _field_schema(persisted_schema) != expected_fields:
+                raise RuntimeError(f"Parquet round-trip changed schema for {name}")
+            content_sha256 = _persisted_content_sha256(parquet_file)
         os.replace(temporary_name, output_path)
         temporary_name = None
     except Exception:
@@ -185,13 +204,8 @@ def write_parquet_row_groups_atomic(
             Path(temporary_name).unlink(missing_ok=True)
         raise
 
-    parquet_file = pq.ParquetFile(output_path)
-    if parquet_file.metadata.num_rows != row_count:
-        raise RuntimeError(f"Parquet round-trip changed row count for {name}")
-    if parquet_file.metadata.num_row_groups != row_group_count:
-        raise RuntimeError(f"Parquet round-trip changed row-group count for {name}")
-    if _field_schema(parquet_file.schema_arrow) != expected_fields:
-        raise RuntimeError(f"Parquet round-trip changed schema for {name}")
+    if persisted_schema is None or content_sha256 is None:
+        raise AssertionError("stage-3 persisted Parquet verification did not complete")
     relative_path = output_path.resolve().relative_to(project_root.resolve()).as_posix()
     return Stage3DatasetArtifact(
         name=name,
@@ -200,8 +214,8 @@ def write_parquet_row_groups_atomic(
         row_group_count=row_group_count,
         file_size_bytes=output_path.stat().st_size,
         file_sha256=sha256_file(output_path),
-        content_sha256=digest.hexdigest(),
-        schema_sha256=schema_sha256(parquet_file.schema_arrow),
+        content_sha256=content_sha256,
+        schema_sha256=schema_sha256(persisted_schema),
         sort_keys=sort_keys,
     )
 
@@ -233,10 +247,7 @@ def verify_stage3_parquet_artifact(
     if schema_sha256(parquet_file.schema_arrow) != entry.get("schema_sha256"):
         errors.append(f"stage-3 schema hash mismatch: {entry.get('path')}")
 
-    digest = _content_digest_start(parquet_file.schema_arrow)
-    for index in range(parquet_file.metadata.num_row_groups):
-        _update_content_digest(digest, parquet_file.read_row_group(index))
-    if digest.hexdigest() != entry.get("content_sha256"):
+    if _persisted_content_sha256(parquet_file) != entry.get("content_sha256"):
         errors.append(f"stage-3 content hash mismatch: {entry.get('path')}")
     return errors
 
