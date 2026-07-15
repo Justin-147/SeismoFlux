@@ -46,11 +46,7 @@ def utc_timestamp_to_day(value: str | pd.Timestamp) -> float:
     return float(timestamp.tz_convert("UTC").value) / NANOSECONDS_PER_DAY
 
 
-def _load_geojson_geometry(path: Path) -> BaseGeometry:
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError(f"unable to read study-area GeoJSON: {path}") from exc
+def _geojson_geometry(document: object) -> BaseGeometry:
     if not isinstance(document, dict):
         raise ValueError("study-area GeoJSON root must be a mapping")
     kind = document.get("type")
@@ -74,6 +70,32 @@ def _load_geojson_geometry(path: Path) -> BaseGeometry:
     return cast(BaseGeometry, geometry)
 
 
+def _load_geojson_geometry(path: Path) -> BaseGeometry:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"unable to read study-area GeoJSON: {path}") from exc
+    return _geojson_geometry(document)
+
+
+def _study_area_from_geometry(
+    geographic: BaseGeometry,
+    equal_area_crs: str,
+) -> StudyArea:
+    source = CRS.from_epsg(4326)
+    target = CRS.from_user_input(equal_area_crs)
+    transformer = Transformer.from_crs(source, target, always_xy=True)
+    projected = cast(BaseGeometry, transform(transformer.transform, geographic))
+    if projected.is_empty or not projected.is_valid or projected.area <= 0.0:
+        raise ValueError("projected study-area geometry is invalid")
+    return StudyArea(
+        geographic=geographic,
+        projected=projected,
+        equal_area_crs=target.to_string(),
+        area_km2=float(projected.area) / 1_000_000.0,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class StudyArea:
     """Frozen study-area geometry in geographic and equal-area coordinates."""
@@ -87,19 +109,19 @@ class StudyArea:
 def load_study_area(path: Path, equal_area_crs: str) -> StudyArea:
     """Load and project the target-independent study-area polygon."""
 
-    geographic = _load_geojson_geometry(path)
-    source = CRS.from_epsg(4326)
-    target = CRS.from_user_input(equal_area_crs)
-    transformer = Transformer.from_crs(source, target, always_xy=True)
-    projected = cast(BaseGeometry, transform(transformer.transform, geographic))
-    if projected.is_empty or not projected.is_valid or projected.area <= 0.0:
-        raise ValueError("projected study-area geometry is invalid")
-    return StudyArea(
-        geographic=geographic,
-        projected=projected,
-        equal_area_crs=target.to_string(),
-        area_km2=float(projected.area) / 1_000_000.0,
-    )
+    return _study_area_from_geometry(_load_geojson_geometry(path), equal_area_crs)
+
+
+def load_study_area_bytes(payload: bytes, equal_area_crs: str) -> StudyArea:
+    """Parse trusted in-memory GeoJSON bytes without reopening a filesystem path."""
+
+    if not isinstance(payload, bytes) or not payload:
+        raise ValueError("study-area GeoJSON payload must be non-empty bytes")
+    try:
+        document = json.loads(payload.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("unable to decode study-area GeoJSON payload") from exc
+    return _study_area_from_geometry(_geojson_geometry(document), equal_area_crs)
 
 
 @dataclass(frozen=True, slots=True)

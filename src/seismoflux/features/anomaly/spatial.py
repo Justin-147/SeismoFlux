@@ -98,6 +98,19 @@ class SpatialFeatureResult:
 
 
 @dataclass(frozen=True, slots=True)
+class Stage4PlaceboSpatialFeatureResult:
+    """Exact 200 km fields needed by the frozen stage-4 spatial placebo."""
+
+    query_xy_m: FloatArray
+    scales_km: FloatArray
+    radius_features: dict[str, FloatArray]
+    gaussian_features: dict[str, FloatArray]
+    input_entity_count: int
+    spatial_entity_count: int
+    missing_coordinate_count: int
+
+
+@dataclass(frozen=True, slots=True)
 class _PreparedEntities:
     xy_m: FloatArray
     statuses: dict[str, BoolArray]
@@ -1139,6 +1152,7 @@ def _compute_spatial_features_sparse(
     entities: SpatialEntityArrays,
     *,
     query_chunk_size: int,
+    selected_scales_km: Sequence[float],
 ) -> SpatialFeatureResult:
     queries = np.asarray(query_xy_m, dtype=np.float64)
     if queries.ndim != 2 or queries.shape[1] != 2:
@@ -1148,8 +1162,17 @@ def _compute_spatial_features_sparse(
     if query_chunk_size <= 0:
         raise ValueError("query_chunk_size must be positive")
 
+    frozen_scales = tuple(float(value) for value in selected_scales_km)
+    if (
+        not frozen_scales
+        or len(set(frozen_scales)) != len(frozen_scales)
+        or tuple(sorted(frozen_scales)) != frozen_scales
+        or any(value not in SPATIAL_SCALES_KM for value in frozen_scales)
+    ):
+        raise ValueError("selected spatial scales must be a sorted nonempty frozen subset")
+
     prepared = _prepare_entities(entities)
-    scales_km = np.asarray(SPATIAL_SCALES_KM, dtype=np.float64)
+    scales_km = np.asarray(frozen_scales, dtype=np.float64)
     scales_m = scales_km * 1000.0
     n_query = int(queries.shape[0])
     n_scale = int(scales_m.size)
@@ -1250,6 +1273,245 @@ def compute_spatial_features(
         query_xy_m,
         entities,
         query_chunk_size=query_chunk_size,
+        selected_scales_km=SPATIAL_SCALES_KM,
+    )
+
+
+def compute_stage4_placebo_spatial_features(
+    query_xy_m: ArrayLike,
+    entities: SpatialEntityArrays,
+    *,
+    query_chunk_size: int = 256,
+) -> Stage4PlaceboSpatialFeatureResult:
+    """Compute only the exact frozen 200 km fields used by the stage-4 placebo.
+
+    This is a scientific-field projection of :func:`compute_spatial_features`, not
+    a new formula.  It intentionally omits expensive identifier and unused geometry
+    aggregates while retaining the same sparse neighbourhood, kernels, reliability
+    weights, discipline entropy, age mean, and covariance calculations.
+    """
+
+    queries = np.asarray(query_xy_m, dtype=np.float64)
+    if queries.ndim != 2 or queries.shape[1] != 2:
+        raise ValueError("query_xy_m must have shape (n_query, 2)")
+    if not np.isfinite(queries).all():
+        raise ValueError("query_xy_m must contain only finite projected metre coordinates")
+    if query_chunk_size <= 0:
+        raise ValueError("query_chunk_size must be positive")
+
+    prepared = _prepare_entities(entities)
+    if prepared.coverage_unique_only:
+        raise ValueError("stage-4 placebo fields require scientific anomaly entities")
+    n_query = int(queries.shape[0])
+    shape = (n_query, 1)
+    radius_features = {
+        "listed_count": np.zeros(shape, dtype=np.float64),
+        "first_seen_count": np.zeros(shape, dtype=np.float64),
+    }
+    gaussian_features = {
+        "reliability_weighted_listed_count": np.zeros(shape, dtype=np.float64),
+        "first_seen_weighted_count": np.zeros(shape, dtype=np.float64),
+        "not_continued_weighted_count": np.zeros(shape, dtype=np.float64),
+        "age_mean_days": np.full(shape, np.nan, dtype=np.float64),
+        "discipline_shannon_normalized": np.full(shape, np.nan, dtype=np.float64),
+        "multidisciplinary_entity_weighted_fraction": np.full(
+            shape,
+            np.nan,
+            dtype=np.float64,
+        ),
+        "concentration": np.full(shape, np.nan, dtype=np.float64),
+        "diffusion_radius_km": np.full(shape, np.nan, dtype=np.float64),
+    }
+    if n_query and prepared.xy_m.shape[0]:
+        high = prepared.reliability_high.astype(np.float64)
+        cautious = prepared.reliability_cautious.astype(np.float64)
+        reliability = high + cautious * CAUTIOUS_RELIABILITY_WEIGHT
+        listed = prepared.statuses["listed"].astype(np.float64)
+        first_seen = prepared.statuses["first_seen"].astype(np.float64)
+        not_continued = prepared.statuses["not_continued"].astype(np.float64)
+        age_valid = listed.astype(np.bool_) & np.isfinite(prepared.age_days)
+        radius_signals = np.column_stack((listed, first_seen))
+        gaussian_signals = np.column_stack(
+            (
+                listed * reliability,
+                first_seen * reliability,
+                not_continued * reliability,
+                np.where(age_valid, prepared.age_days, 0.0),
+                age_valid,
+                listed * prepared.multidisciplinary * reliability,
+                *(
+                    listed * prepared.discipline_membership[:, code]
+                    for code in range(len(DISCIPLINE_NAMES))
+                ),
+            )
+        )
+        tree = cKDTree(
+            prepared.xy_m,
+            compact_nodes=True,
+            balanced_tree=True,
+            copy_data=True,
+        )
+        scale_m = 200_000.0
+        support_m = GAUSSIAN_TRUNCATION_SIGMA * scale_m
+        entity_count = prepared.xy_m.shape[0]
+        for chunk_start in range(0, n_query, query_chunk_size):
+            chunk_stop = min(chunk_start + query_chunk_size, n_query)
+            rows, entity_indices, distance_squared = _candidate_pairs(
+                tree,
+                np.asarray(queries[chunk_start:chunk_stop], dtype=np.float64),
+                prepared.xy_m,
+                maximum_support_m=support_m,
+            )
+            chunk_size = chunk_stop - chunk_start
+
+            radius_selected = distance_squared <= scale_m * scale_m
+            radius_matrix = csr_matrix(
+                (
+                    np.ones(np.count_nonzero(radius_selected), dtype=np.float64),
+                    (rows[radius_selected], entity_indices[radius_selected]),
+                ),
+                shape=(chunk_size, entity_count),
+            )
+            radius_values = np.asarray(radius_matrix @ radius_signals, dtype=np.float64)
+            radius_features["listed_count"][chunk_start:chunk_stop, 0] = radius_values[:, 0]
+            radius_features["first_seen_count"][chunk_start:chunk_stop, 0] = radius_values[:, 1]
+
+            weights = np.exp(-0.5 * distance_squared / (scale_m * scale_m))
+            gaussian_matrix = csr_matrix(
+                (weights, (rows, entity_indices)),
+                shape=(chunk_size, entity_count),
+            )
+            aggregated = np.asarray(gaussian_matrix @ gaussian_signals, dtype=np.float64)
+            gaussian_features["reliability_weighted_listed_count"][chunk_start:chunk_stop, 0] = (
+                aggregated[:, 0]
+            )
+            gaussian_features["first_seen_weighted_count"][chunk_start:chunk_stop, 0] = aggregated[
+                :, 1
+            ]
+            gaussian_features["not_continued_weighted_count"][chunk_start:chunk_stop, 0] = (
+                aggregated[:, 2]
+            )
+            _assign_ratio(
+                gaussian_features["age_mean_days"][chunk_start:chunk_stop, 0],
+                aggregated[:, 3],
+                aggregated[:, 4],
+            )
+            _assign_ratio(
+                gaussian_features["multidisciplinary_entity_weighted_fraction"][
+                    chunk_start:chunk_stop,
+                    0,
+                ],
+                aggregated[:, 5],
+                aggregated[:, 0],
+            )
+            discipline_totals = aggregated[:, 6:10]
+            discipline_sum = np.sum(discipline_totals, axis=1)
+            entropy_target = gaussian_features["discipline_shannon_normalized"][
+                chunk_start:chunk_stop,
+                0,
+            ]
+            valid_discipline = discipline_sum > 0.0
+            if np.any(valid_discipline):
+                probabilities = np.divide(
+                    discipline_totals[valid_discipline],
+                    discipline_sum[valid_discipline, None],
+                )
+                terms = np.zeros_like(probabilities)
+                positive_probability = probabilities > 0.0
+                terms[positive_probability] = probabilities[positive_probability] * np.log(
+                    probabilities[positive_probability]
+                )
+                entropy_target[valid_discipline] = -np.sum(terms, axis=1) / np.log(
+                    len(DISCIPLINE_NAMES)
+                )
+
+            listed_weights = weights * listed[entity_indices]
+            positive = listed_weights > 0.0
+            if not np.any(positive):
+                continue
+            geometry_rows = rows[positive]
+            geometry_weights = listed_weights[positive]
+            points = prepared.xy_m[entity_indices[positive]]
+            total = np.bincount(
+                geometry_rows,
+                weights=geometry_weights,
+                minlength=chunk_size,
+            ).astype(np.float64)
+            valid = total > 0.0
+            if not np.any(valid):
+                continue
+            sum_x = np.bincount(
+                geometry_rows,
+                weights=geometry_weights * points[:, 0],
+                minlength=chunk_size,
+            )
+            sum_y = np.bincount(
+                geometry_rows,
+                weights=geometry_weights * points[:, 1],
+                minlength=chunk_size,
+            )
+            mean_x = np.zeros(chunk_size, dtype=np.float64)
+            mean_y = np.zeros(chunk_size, dtype=np.float64)
+            mean_x[valid] = sum_x[valid] / total[valid]
+            mean_y[valid] = sum_y[valid] / total[valid]
+            centered_x = points[:, 0] - mean_x[geometry_rows]
+            centered_y = points[:, 1] - mean_y[geometry_rows]
+            sum_xx = np.bincount(
+                geometry_rows,
+                weights=geometry_weights * centered_x**2,
+                minlength=chunk_size,
+            )
+            sum_xy = np.bincount(
+                geometry_rows,
+                weights=geometry_weights * centered_x * centered_y,
+                minlength=chunk_size,
+            )
+            sum_yy = np.bincount(
+                geometry_rows,
+                weights=geometry_weights * centered_y**2,
+                minlength=chunk_size,
+            )
+            valid_indices = np.flatnonzero(valid)
+            covariance = np.empty((valid_indices.size, 2, 2), dtype=np.float64)
+            covariance[:, 0, 0] = sum_xx[valid] / total[valid]
+            covariance[:, 0, 1] = sum_xy[valid] / total[valid]
+            covariance[:, 1, 0] = covariance[:, 0, 1]
+            covariance[:, 1, 1] = sum_yy[valid] / total[valid]
+            eigenvalues, _eigenvectors = np.linalg.eigh(covariance)
+            trace = np.sum(np.maximum(eigenvalues, 0.0), axis=1)
+            diffusion_radius_m = np.sqrt(trace)
+            gaussian_features["diffusion_radius_km"][chunk_start:chunk_stop, 0][valid_indices] = (
+                diffusion_radius_m / 1000.0
+            )
+            gaussian_features["concentration"][chunk_start:chunk_stop, 0][valid_indices] = np.clip(
+                1.0 - diffusion_radius_m / support_m, 0.0, 1.0
+            )
+
+    return Stage4PlaceboSpatialFeatureResult(
+        query_xy_m=np.asarray(queries, dtype=np.float64),
+        scales_km=np.asarray([200.0], dtype=np.float64),
+        radius_features=radius_features,
+        gaussian_features=gaussian_features,
+        input_entity_count=prepared.input_count,
+        spatial_entity_count=prepared.spatial_count,
+        missing_coordinate_count=prepared.missing_coordinate_count,
+    )
+
+
+def compute_selected_spatial_features(
+    query_xy_m: ArrayLike,
+    entities: SpatialEntityArrays,
+    *,
+    scales_km: Sequence[float],
+    query_chunk_size: int = 256,
+) -> SpatialFeatureResult:
+    """Compute only an explicitly frozen scale subset with the accepted formulas."""
+
+    return _compute_spatial_features_sparse(
+        query_xy_m,
+        entities,
+        query_chunk_size=query_chunk_size,
+        selected_scales_km=scales_km,
     )
 
 
@@ -1261,5 +1523,8 @@ __all__ = [
     "SPATIAL_SCALES_KM",
     "SpatialEntityArrays",
     "SpatialFeatureResult",
+    "Stage4PlaceboSpatialFeatureResult",
+    "compute_selected_spatial_features",
     "compute_spatial_features",
+    "compute_stage4_placebo_spatial_features",
 ]

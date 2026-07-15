@@ -20,10 +20,10 @@
 | 规范化协议设计 | `4c136474b82b3685f830aac875af5efd4217a766506aad414c412ba7bef485bf` |
 | 随机输入封印 | `e4f26325b7e9af8264a8a5dfbcc59bc2bc9d55ee8b3ce2f5b87be2bb1e03f827` |
 | 跨清单验证内容 | `d64ba5c40230b579b5adddab374c823b0e2cb07c19d680de86461690d77c3242` |
-| 折与暴露清单内容 | `d700f15837102ab90b2c9038a6d807bd94cf2f5683a7aeb3088dc5ad9ea61788` |
-| 特征设计清单内容 | `f4b18c7af27a1f16b2ea7d01f48d9f1f03439860939fc75bcd969ac72313706f` |
-| 随机性清单内容 | `78faab7bc6a6f2485e9c3540e63b0446f0d8e4e31d45e1057940f38034998940` |
-| 空间分层清单内容 | `aac273e9ac306568a93063fad0fe0ebc28d161189e0b4f089d657ed8d7ba2654` |
+| 折与暴露清单文件 / 规范化内容 | `d700f15837102ab90b2c9038a6d807bd94cf2f5683a7aeb3088dc5ad9ea61788` / `bc7fc404451837f2a2d1b281c13e6f0cbb3920dfaefcdc8dee5444efd62fc6ab` |
+| 特征设计清单文件 / 规范化内容 | `f4b18c7af27a1f16b2ea7d01f48d9f1f03439860939fc75bcd969ac72313706f` / `cf9bc7b3800b6ebfd5cf0a085666f28c261ffe9ba8bf00704528dcf382a5efb3` |
+| 随机性清单文件 / 规范化内容 | `78faab7bc6a6f2485e9c3540e63b0446f0d8e4e31d45e1057940f38034998940` / `69c0c78b3141698ff013ba0ab4a718a82f98aed11c8145525aa95d86e7323591` |
+| 空间分层清单文件 / 规范化内容 | `aac273e9ac306568a93063fad0fe0ebc28d161189e0b4f089d657ed8d7ba2654` / `d897710b21e913bec7cf6c05c60844611ce0118f8f436aeeae22314001ebf281` |
 
 `scripts/build_stage4_preregistration.py check` 已复算四个公开清单、四个本地受限空间工件及跨清单约束，并返回 `target_read_count=0`。协议和清单中的锁定测试字段均保持空值或明确禁止状态。
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 from numpy.typing import NDArray
@@ -7,7 +9,9 @@ from numpy.typing import NDArray
 from seismoflux.features.anomaly.spatial import (
     SpatialEntityArrays,
     _compute_spatial_features_dense_reference,
+    compute_selected_spatial_features,
     compute_spatial_features,
+    compute_stage4_placebo_spatial_features,
 )
 
 
@@ -356,6 +360,120 @@ def test_sparse_backend_matches_dense_reference_on_randomized_all_fields(
             rtol=2e-12,
             atol=1e-9,
             equal_nan=True,
+        )
+
+
+@pytest.mark.parametrize("query_chunk_size", [1, 5, 64])
+def test_selected_200km_scale_exactly_matches_full_frozen_backend(
+    query_chunk_size: int,
+) -> None:
+    generator = np.random.default_rng(147)
+    queries = generator.uniform(-1_400_000.0, 1_400_000.0, size=(23, 2))
+    entities = _random_entities(90210, 113)
+
+    full = compute_spatial_features(
+        queries,
+        entities,
+        query_chunk_size=query_chunk_size,
+    )
+    selected = compute_selected_spatial_features(
+        queries,
+        entities,
+        scales_km=(200.0,),
+        query_chunk_size=query_chunk_size,
+    )
+
+    np.testing.assert_array_equal(selected.query_xy_m, full.query_xy_m)
+    np.testing.assert_array_equal(selected.scales_km, np.asarray([200.0]))
+    assert selected.input_entity_count == full.input_entity_count
+    assert selected.spatial_entity_count == full.spatial_entity_count
+    assert selected.missing_coordinate_count == full.missing_coordinate_count
+    assert selected.radius_features.keys() == full.radius_features.keys()
+    assert selected.gaussian_features.keys() == full.gaussian_features.keys()
+    for name, full_values in full.radius_features.items():
+        np.testing.assert_array_equal(
+            selected.radius_features[name],
+            full_values[:, 2:3],
+        )
+    for name, full_values in full.gaussian_features.items():
+        np.testing.assert_allclose(
+            selected.gaussian_features[name],
+            full_values[:, 2:3],
+            rtol=2e-15,
+            atol=1e-15,
+            equal_nan=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "scales_km",
+    [(), (200.0, 100.0), (200.0, 200.0), (75.0,)],
+)
+def test_selected_scale_backend_rejects_nonfrozen_or_ambiguous_subsets(
+    scales_km: tuple[float, ...],
+) -> None:
+    with pytest.raises(ValueError, match="sorted nonempty frozen subset"):
+        compute_selected_spatial_features(
+            np.asarray([[0.0, 0.0]], dtype=np.float64),
+            _entities(np.asarray([[0.0, 0.0]], dtype=np.float64)),
+            scales_km=scales_km,
+        )
+
+
+@pytest.mark.parametrize("query_chunk_size", [1, 5, 64])
+def test_stage4_placebo_projection_matches_every_retained_200km_field(
+    query_chunk_size: int,
+) -> None:
+    generator = np.random.default_rng(4147)
+    queries = generator.uniform(-1_400_000.0, 1_400_000.0, size=(29, 2))
+    entities = _random_entities(1470, 137)
+
+    full = compute_spatial_features(
+        queries,
+        entities,
+        query_chunk_size=query_chunk_size,
+    )
+    projected = compute_stage4_placebo_spatial_features(
+        queries,
+        entities,
+        query_chunk_size=query_chunk_size,
+    )
+
+    assert set(projected.radius_features) == {"listed_count", "first_seen_count"}
+    assert set(projected.gaussian_features) == {
+        "reliability_weighted_listed_count",
+        "first_seen_weighted_count",
+        "not_continued_weighted_count",
+        "age_mean_days",
+        "discipline_shannon_normalized",
+        "multidisciplinary_entity_weighted_fraction",
+        "concentration",
+        "diffusion_radius_km",
+    }
+    np.testing.assert_array_equal(projected.query_xy_m, full.query_xy_m)
+    np.testing.assert_array_equal(projected.scales_km, np.asarray([200.0]))
+    assert projected.input_entity_count == full.input_entity_count
+    assert projected.spatial_entity_count == full.spatial_entity_count
+    assert projected.missing_coordinate_count == full.missing_coordinate_count
+    for name, values in projected.radius_features.items():
+        np.testing.assert_array_equal(values, full.radius_features[name][:, 2:3])
+    for name, values in projected.gaussian_features.items():
+        np.testing.assert_allclose(
+            values,
+            full.gaussian_features[name][:, 2:3],
+            rtol=2e-15,
+            atol=1e-12,
+            equal_nan=True,
+        )
+
+
+def test_stage4_placebo_projection_rejects_coverage_unique_entities() -> None:
+    entities = _entities(np.asarray([[0.0, 0.0]], dtype=np.float64))
+    entities = replace(entities, coverage_unique_only=True)
+    with pytest.raises(ValueError, match="scientific anomaly entities"):
+        compute_stage4_placebo_spatial_features(
+            np.asarray([[0.0, 0.0]], dtype=np.float64),
+            entities,
         )
 
 
