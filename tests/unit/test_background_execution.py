@@ -5,6 +5,7 @@ import json
 from collections import deque
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 from typing import cast
 
 import pandas as pd
@@ -13,9 +14,14 @@ import yaml
 
 import seismoflux.background.execution as execution_module
 from seismoflux.background.artifacts import content_address_id
-from seismoflux.background.config import BackgroundConfig
+from seismoflux.background.config import (
+    BackgroundConfig,
+    BackgroundLocalSupportConfig,
+    load_background_protocol,
+)
 from seismoflux.background.execution import (
     CommandResult,
+    ExecutionSeal,
     ExecutionSealError,
     RepositoryIdentity,
     RepositoryIdentityError,
@@ -65,6 +71,13 @@ def background() -> BackgroundConfig:
 
 
 @pytest.fixture(scope="module")
+def local_support_background() -> BackgroundLocalSupportConfig:
+    config = load_background_protocol(Path("configs/background_local_support.yaml"))
+    assert isinstance(config, BackgroundLocalSupportConfig)
+    return config
+
+
+@pytest.fixture(scope="module")
 def project() -> SeismoFluxConfig:
     raw = yaml.safe_load(Path("configs/base.yaml").read_text(encoding="utf-8"))
     return SeismoFluxConfig.model_validate(raw)
@@ -104,13 +117,29 @@ def _responses() -> dict[tuple[str, ...], CommandResult | list[CommandResult]]:
     }
 
 
-def _ready_identity(*, commit: str = HEAD) -> RepositoryIdentity:
+def _responses_for_freeze_tag(
+    freeze_tag: str,
+) -> dict[tuple[str, ...], CommandResult | list[CommandResult]]:
+    responses = _responses()
+    if freeze_tag != FREEZE_TAG:
+        tag_result = responses.pop(TAG_COMMAND)
+        responses[("git", "rev-parse", "--verify", f"refs/tags/{freeze_tag}^{{commit}}")] = (
+            tag_result
+        )
+    return responses
+
+
+def _ready_identity(
+    *,
+    commit: str = HEAD,
+    freeze_tag: str = FREEZE_TAG,
+) -> RepositoryIdentity:
     return RepositoryIdentity(
         code_commit=commit,
         branch="main",
         upstream=UPSTREAM,
         upstream_commit=commit,
-        freeze_tag=FREEZE_TAG,
+        freeze_tag=freeze_tag,
         freeze_tag_commit=TAG_COMMIT,
         git_available=True,
         worktree_clean=True,
@@ -269,6 +298,111 @@ def test_execution_seal_binds_repository_protocol_and_all_seven_inputs(
     )
 
 
+def test_v020_execution_seal_id_is_unchanged() -> None:
+    seal = ExecutionSeal(
+        repository=_ready_identity(),
+        protocol_sha256="9" * 64,
+        input_hashes=tuple(
+            (key, f"{index:064x}")
+            for index, key in enumerate(execution_module._EXECUTION_INPUT_KEYS, start=1)
+        ),
+    )
+
+    assert seal.seal_id == ("97cbade78428312c682bb8acb8eedfcae25de27bc1cfb26806957c5924d02b79")
+
+
+def test_execution_seal_binds_sorted_eighth_support_manifest_input(
+    tmp_path: Path,
+    local_support_background: BackgroundLocalSupportConfig,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed = _sealed_input_hashes(tmp_path, local_support_background)
+    monkeypatch.setattr(execution_module, "sha256_file", lambda path: observed[path.resolve()])
+
+    seal = create_execution_seal(
+        tmp_path,
+        local_support_background,
+        runner=FakeRunner(_responses_for_freeze_tag(local_support_background.freeze_tag)),
+    )
+
+    assert tuple(seal.input_hash_mapping()) == (
+        "data_catalog",
+        "earthquake_dataset",
+        "environment_lock",
+        "issue_manifest",
+        "oracle_metadata",
+        "production_fixture",
+        "study_area",
+        "support_manifest",
+    )
+
+    support_path = tmp_path.joinpath(*local_support_background.inputs.support_manifest.split("/"))
+    observed[support_path.resolve()] = "7" * 64
+    with pytest.raises(ExecutionSealError, match="support_manifest"):
+        require_execution_seal_unchanged(
+            tmp_path,
+            local_support_background,
+            seal,
+            runner=FakeRunner(_responses_for_freeze_tag(local_support_background.freeze_tag)),
+        )
+
+
+def test_execution_seal_rejects_multiple_missing_versioned_input_keys(
+    tmp_path: Path,
+    local_support_background: BackgroundLocalSupportConfig,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed = _sealed_input_hashes(tmp_path, local_support_background)
+    monkeypatch.setattr(execution_module, "sha256_file", lambda path: observed[path.resolve()])
+    seal = create_execution_seal(
+        tmp_path,
+        local_support_background,
+        runner=FakeRunner(_responses_for_freeze_tag(local_support_background.freeze_tag)),
+    )
+    incomplete = tuple(
+        item for item in seal.input_hashes if item[0] not in {"study_area", "support_manifest"}
+    )
+
+    with pytest.raises(ValueError, match="complete sorted frozen input-hash schema"):
+        replace(seal, input_hashes=incomplete)
+
+
+@pytest.mark.parametrize(
+    "missing_fields",
+    (("support_manifest_sha256",), ("support_manifest", "support_manifest_sha256")),
+)
+def test_execution_rejects_missing_support_manifest_config_for_v021(
+    missing_fields: tuple[str, ...],
+) -> None:
+    input_values = {
+        "support_manifest": "data/manifests/background_local_support_manifest.json",
+        "support_manifest_sha256": "8" * 64,
+    }
+    for field in missing_fields:
+        del input_values[field]
+    supported = SimpleNamespace(
+        protocol_version="0.2.1",
+        inputs=SimpleNamespace(**input_values),
+    )
+
+    with pytest.raises(ValueError, match="0.2.1 requires support_manifest"):
+        execution_module._support_manifest_reference(supported)
+
+
+def test_execution_dispatches_support_manifest_strictly_by_protocol_version() -> None:
+    injected_inputs = SimpleNamespace(
+        support_manifest="data/manifests/background_local_support_manifest.json",
+        support_manifest_sha256="8" * 64,
+    )
+    v020_with_support = SimpleNamespace(protocol_version="0.2.0", inputs=injected_inputs)
+    with pytest.raises(ValueError, match="0.2.0 forbids support_manifest"):
+        execution_module._support_manifest_reference(v020_with_support)
+
+    unknown = SimpleNamespace(protocol_version="0.2.2", inputs=injected_inputs)
+    with pytest.raises(ValueError, match="unsupported background protocol_version"):
+        execution_module._support_manifest_reference(unknown)
+
+
 def test_execution_seal_recheck_rejects_any_changed_input_bytes(
     tmp_path: Path,
     background: BackgroundConfig,
@@ -411,10 +545,43 @@ def test_address_factory_uses_complete_frozen_semantic_identity(
         "oracle_metadata": background.numerical_regression.oracle_metadata_sha256,
     }
     assert address["code_commit"] == HEAD
-    assert len(content_address_id(address)) == 16
+    assert content_address_id(address) == "790ad470df5eb797"
 
     parameters["bandwidth_km"] = 300.0
     assert cast(dict[str, object], address["model_parameters"])["bandwidth_km"] == 75.0
+
+
+def test_address_factory_includes_versioned_support_manifest_hash(
+    local_support_background: BackgroundLocalSupportConfig,
+) -> None:
+    address = build_address_inputs(
+        local_support_background,
+        _ready_identity(freeze_tag=local_support_background.freeze_tag),
+        {"model_id": "spatial_poisson", "snapshot_id": "fold_1"},
+        uv_lock_sha256=local_support_background.inputs.environment_lock_sha256,
+    )
+
+    assert address["protocol"] == local_support_background.model_dump(mode="python")
+    input_hashes = cast(dict[str, str], address["input_hashes"])
+    assert tuple(sorted(input_hashes)) == (
+        "data_catalog",
+        "earthquake_dataset",
+        "environment_lock",
+        "issue_manifest",
+        "oracle_metadata",
+        "production_fixture",
+        "study_area",
+        "support_manifest",
+    )
+    assert (
+        input_hashes["support_manifest"] == local_support_background.inputs.support_manifest_sha256
+    )
+
+    changed_address = copy.deepcopy(address)
+    cast(dict[str, str], changed_address["input_hashes"])["support_manifest"] = "7" * 64
+    changed_protocol = cast(dict[str, object], changed_address["protocol"])
+    cast(dict[str, object], changed_protocol["inputs"])["support_manifest_sha256"] = "7" * 64
+    assert content_address_id(changed_address) != content_address_id(address)
 
 
 def test_address_changes_for_parameters_every_input_hash_and_commit(

@@ -27,6 +27,9 @@ EXPECTED_EQUAL_AREA_CRS = (
 EXPECTED_BACKGROUND_PROTOCOL_CANONICAL_SHA256 = (
     "b36ce50f7f4df6d712c743bb28ce4f1fd05dfdbc3d5026b4bf75d00477765c6d"
 )
+EXPECTED_BACKGROUND_LOCAL_SUPPORT_PROTOCOL_CANONICAL_SHA256 = (
+    "5dd31a212f4894625cf9db1bbfb1de3a4861a9bcffaeef9676c06707c03eceb8"
+)
 
 
 class StrictModel(BaseModel):
@@ -91,6 +94,15 @@ class InputsConfig(StrictModel):
                 "background forbidden dataset prefixes differ from the frozen boundary"
             )
         return self
+
+
+class LocalSupportInputsConfig(InputsConfig):
+    """The eighth frozen input used only by protocol 0.2.1."""
+
+    support_manifest: str
+    support_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    _support_manifest_relative = field_validator("support_manifest")(_relative_path)
 
 
 class ParameterSnapshotMappingConfig(StrictModel):
@@ -184,6 +196,16 @@ class SpatialDiagnosticConfig(StrictModel):
     indeterminate_strata_use_global_selected_mc: bool
 
 
+class LocalSupportSpatialDiagnosticConfig(StrictModel):
+    equal_area_cell_km: float = Field(gt=0)
+    sparse_parent_cell_km: float = Field(gt=0)
+    grid_origin_m: tuple[float, float]
+    minimum_events_per_stratum: int = Field(gt=0)
+    sparse_rule: Literal["use_fixed_1000km_parent_then_flag_indeterminate_if_still_sparse"]
+    minimum_eligible_strata: Literal[0]
+    indeterminate_strata_use_common_selected_mc: Literal[True]
+
+
 class CompletenessConfig(StrictModel):
     method: str
     magnitude_bin_width: float = Field(gt=0)
@@ -210,8 +232,28 @@ class CompletenessConfig(StrictModel):
         return self
 
 
+class LocalSupportCompletenessConfig(CompletenessConfig):
+    """Completeness selection after unsupported fixed cells have been removed."""
+
+    selection_rule: Literal[
+        "smallest_candidate_gte_max_eligible_temporal_and_supported_spatial_estimate"
+    ]
+    estimate_above_maximum_candidate_action: Literal[  # type: ignore[assignment]
+        "fail_if_temporal_or_common_supported_domain_estimate_above_maximum"
+    ]
+    no_eligible_temporal_or_spatial_strata_action: Literal[  # type: ignore[assignment]
+        "fail_if_no_eligible_temporal_stratum"
+    ]
+    target_event_domain: Literal["supported_domain_only"]  # type: ignore[assignment]
+    spatial_diagnostic: LocalSupportSpatialDiagnosticConfig  # type: ignore[assignment]
+
+
 class UniformPoissonConfig(StrictModel):
     rate_estimator: str
+
+
+class LocalSupportUniformPoissonConfig(UniformPoissonConfig):
+    rate_estimator: Literal["supported_event_count_over_supported_equal_area_days"]
 
 
 class SpatialPoissonFittingCutoffMappingConfig(StrictModel):
@@ -247,12 +289,51 @@ class SpatialPoissonConfig(StrictModel):
     fitting_cutoff_mapping: SpatialPoissonFittingCutoffMappingConfig
 
 
+class LocalSupportSpatialPoissonConfig(StrictModel):
+    method: Literal["equal_area_gaussian_kde"]
+    mixture_boundary_normalization: Literal["normalize_complete_mixture_once_over_supported_domain"]
+    gaussian_support: Literal["infinite"]
+    rate_component: Literal["supported_training_event_count_over_training_days"]
+    spatial_density_integral_over_supported_domain: float
+    normalization_grid_km: float = Field(gt=0)
+    normalization_quadrature_rule: Literal[
+        "density_at_supported_clipped_cell_representative_point_times_exact_clipped_area"
+    ]
+    convergence_failure_action: Literal["fail_model_and_G1_LS_for_that_model"]
+    bandwidth_candidates_km: tuple[float, ...]
+    fold_score: Literal[
+        "continuous_time_information_gain_per_physical_event_on_same_"
+        "supported_fold_events_and_compensator"
+    ]
+    best_bandwidth_rule: Literal["highest_equal_weight_mean_of_four_development_fold_scores"]
+    paired_difference: Literal[
+        "candidate_minus_best_bandwidth_on_same_supported_fold_events_and_compensator"
+    ]
+    standard_error_formula: Literal["sample_stddev_of_four_paired_fold_differences_ddof1_div_sqrt4"]
+    one_standard_error_eligibility: Literal[
+        "candidate_mean_fold_score_gte_best_mean_fold_score_minus_paired_standard_error"
+    ]
+    selection_rule: Literal["largest_eligible_bandwidth_km"]
+    exact_tie_rule: Literal["largest_bandwidth_km"]
+    candidate_pool: Literal["only_bandwidths_passing_normalization_and_grid_convergence"]
+    fitting_events: Literal["supported_domain_only"]
+    fitting_cutoff_mapping: SpatialPoissonFittingCutoffMappingConfig
+
+
 class EtasBackgroundComponentConfig(StrictModel):
     spatial_density: Literal["selected_boundary_normalized_kde"]
     density_domain: Literal["study_area"]
     density_integral_over_study_area: float
     immigrant_rate_parameter: Literal["background_rate_per_day_inside_study_area"]
     exogenous_immigrants_outside_study_area: Literal[False]
+
+
+class LocalSupportEtasBackgroundComponentConfig(StrictModel):
+    spatial_density: Literal["selected_supported_boundary_normalized_kde"]
+    density_domain: Literal["supported_domain"]
+    density_integral_over_supported_domain: float
+    immigrant_rate_parameter: Literal["background_rate_per_day_inside_supported_domain"]
+    exogenous_immigrants_outside_supported_domain: Literal[False]
 
 
 class EtasLikelihoodConfig(StrictModel):
@@ -271,6 +352,27 @@ class EtasLikelihoodConfig(StrictModel):
         "density_at_clipped_cell_representative_point_times_exact_clipped_area"
     ]
     convergence_failure_action: Literal["fail_model_and_G1_for_that_model"]
+
+
+class LocalSupportEtasLikelihoodConfig(StrictModel):
+    target_events: Literal["magnitude_gte_common_mc_and_inside_supported_domain_only"]
+    parent_events: Literal[
+        "supported_common_mc_events_or_external_buffer_or_eligible_unsupported_conditional_history"
+    ]
+    external_parent_role: Literal[
+        "buffer_and_eligible_unsupported_events_are_conditional_history_only_"
+        "never_target_or_background_training_event"
+    ]
+    compensator_domain: Literal["supported_domain_only"]
+    assessment_history_update: Literal[
+        "sequential_events_with_available_at_lte_evaluation_time_without_parameter_refit"
+    ]
+    background_normalization_grid_km: float = Field(gt=0)
+    compensator_grid_km: float = Field(gt=0)
+    quadrature_rule: Literal[
+        "density_at_supported_clipped_cell_representative_point_times_exact_clipped_area"
+    ]
+    convergence_failure_action: Literal["fail_model_and_G1_LS_for_that_model"]
 
 
 class EtasTemporalKernelConfig(StrictModel):
@@ -301,6 +403,11 @@ class EtasMagnitudeModelConfig(StrictModel):
     beta_definition: str
     density: str
     productivity_expectation: str
+
+
+class LocalSupportEtasMagnitudeModelConfig(EtasMagnitudeModelConfig):
+    lower_magnitude: Literal["common_supported_completeness_magnitude"]
+    effective_lower_edge: Literal["common_mc_minus_half_magnitude_bin_width"]
 
 
 class EtasBranchingRatioConfig(StrictModel):
@@ -396,6 +503,17 @@ class EtasSimulationConfig(StrictModel):
     buffer_events_in_outputs_or_metrics: Literal[False]
 
 
+class LocalSupportEtasSimulationConfig(StrictModel):
+    target_domain: Literal["supported_domain_only"]
+    propagation_domain: Literal[
+        "supported_domain_plus_300km_buffer_and_eligible_unsupported_conditional_history_"
+        "with_absorbing_outer_boundary"
+    ]
+    background_immigrant_domain: Literal["supported_domain_only"]
+    retain_buffer_descendants_as_parents: Literal[True]
+    buffer_or_unsupported_events_in_outputs_or_metrics: Literal[False]
+
+
 class EtasConfig(StrictModel):
     family: str
     implementation: str
@@ -420,6 +538,13 @@ class EtasConfig(StrictModel):
     future_simulation_replicates: int = Field(gt=0)
     future_descendant_generations_included: Literal[True]
     simulation: EtasSimulationConfig
+
+
+class LocalSupportEtasConfig(EtasConfig):
+    background_component: LocalSupportEtasBackgroundComponentConfig  # type: ignore[assignment]
+    likelihood: LocalSupportEtasLikelihoodConfig  # type: ignore[assignment]
+    magnitude_model: LocalSupportEtasMagnitudeModelConfig
+    simulation: LocalSupportEtasSimulationConfig  # type: ignore[assignment]
 
 
 class OptimizerStartSeedContextConfig(StrictModel):
@@ -454,6 +579,12 @@ class BootstrapSeedContextConfig(StrictModel):
     replicate_index_last_inclusive: Literal[1999]
 
 
+class LocalSupportBootstrapSeedContextConfig(BootstrapSeedContextConfig):
+    issue_id: Literal[  # type: ignore[assignment]
+        "g1_ls_primary_supported_validation_2024-07-01_2025-07-01"
+    ]
+
+
 class SeedNamespaceContextsConfig(StrictModel):
     optimizer_start: OptimizerStartSeedContextConfig
     future_simulation: FutureSimulationSeedContextConfig
@@ -468,6 +599,10 @@ class SeedNamespaceContextsConfig(StrictModel):
         ):
             raise ValueError("bootstrap seed model IDs differ from the frozen comparisons")
         return self
+
+
+class LocalSupportSeedNamespaceContextsConfig(SeedNamespaceContextsConfig):
+    bootstrap: LocalSupportBootstrapSeedContextConfig
 
 
 class SeedDerivationConfig(StrictModel):
@@ -506,6 +641,10 @@ class SeedDerivationConfig(StrictModel):
         return self
 
 
+class LocalSupportSeedDerivationConfig(SeedDerivationConfig):
+    namespace_contexts: LocalSupportSeedNamespaceContextsConfig
+
+
 class FutureSimulationRandomnessConfig(StrictModel):
     longest_horizon_days: int = Field(gt=0)
     simulate_once_per_replicate: Literal[True]
@@ -524,6 +663,10 @@ class RandomnessConfig(StrictModel):
     global_rng_forbidden: Literal[True]
     seed_derivation: SeedDerivationConfig
     future_simulation: FutureSimulationRandomnessConfig
+
+
+class LocalSupportRandomnessConfig(RandomnessConfig):
+    seed_derivation: LocalSupportSeedDerivationConfig
 
 
 class BackgroundIntegrationConfig(StrictModel):
@@ -553,6 +696,19 @@ class BackgroundIntegrationConfig(StrictModel):
     convergence_failure_action: Literal["fail_model_and_G1_for_that_model"]
 
 
+class LocalSupportBackgroundIntegrationConfig(BackgroundIntegrationConfig):
+    inclusion_rule: Literal["positive_area_intersection_with_snapshot_supported_domain"]
+    boundary_rule: Literal[
+        "shapely_intersection_with_snapshot_supported_geometry_then_positive_exact_projected_area"
+    ]
+    quadrature_point: Literal["shapely_representative_point_of_supported_clipped_geometry"]
+    cell_mass_formula: Literal["density_at_supported_quadrature_point_times_supported_clipped_area"]
+    refinement_rule: Literal["target_independent_full_supported_grid_only"]
+    convergence_failure_action: Literal[  # type: ignore[assignment]
+        "fail_model_and_G1_LS_for_that_model"
+    ]
+
+
 class G1PrimaryEndpointConfig(StrictModel):
     type: Literal["continuous_time_sequential_conditional_point_process_log_likelihood"]
     validation_interval_local: Literal["(2024-07-01T00:00:00,2025-07-01T00:00:00]"]
@@ -573,6 +729,16 @@ class G1PrimaryEndpointConfig(StrictModel):
     development_fold_summary: Literal["equal_weight_mean_and_sample_standard_error_ddof1"]
 
 
+class LocalSupportG1PrimaryEndpointConfig(G1PrimaryEndpointConfig):
+    score_formula: Literal[  # type: ignore[assignment]
+        "nonuniform_log_likelihood_minus_uniform_log_likelihood_divided_by_"
+        "supported_physical_target_event_count"
+    ]
+    development_fold_score: Literal[  # type: ignore[assignment]
+        "same_continuous_time_score_over_each_folds_supported_assessment_interval"
+    ]
+
+
 class IssueBasedHorizonBacktestsConfig(StrictModel):
     role: str
     partitions: tuple[str, ...]
@@ -585,6 +751,12 @@ class IssueBasedHorizonBacktestsConfig(StrictModel):
     zero_total_target_event_action: str
     event_multiplicity_per_partition_horizon: str
     cross_horizon_aggregation: str
+
+
+class LocalSupportIssueBasedHorizonBacktestsConfig(IssueBasedHorizonBacktestsConfig):
+    role: Literal["secondary_supported_domain_integration_diagnostics_not_used_by_G1_LS"]
+    issue_dates_source: Literal["frozen_background_local_support_fold_manifest"]
+    denominator: Literal["unique_supported_physical_target_events_per_partition_and_horizon"]
 
 
 class G1PassRuleConfig(StrictModel):
@@ -601,6 +773,11 @@ class G1PassRuleConfig(StrictModel):
         if self.eligible_nonuniform_models != ("spatial_poisson", "etas"):
             raise ValueError("G1 eligible nonuniform models must remain spatial Poisson and ETAS")
         return self
+
+
+class LocalSupportG1PassRuleConfig(G1PassRuleConfig):
+    gate_name: Literal["G1-LS"]
+    comparison_domain: Literal["same_snapshot_supported_domain"]
 
 
 class ModelSelectionConfig(StrictModel):
@@ -628,6 +805,12 @@ class ModelSelectionConfig(StrictModel):
         return self
 
 
+class LocalSupportModelSelectionConfig(ModelSelectionConfig):
+    paired_difference: Literal[  # type: ignore[assignment]
+        "candidate_minus_validation_best_on_same_supported_fold_events_and_compensator"
+    ]
+
+
 class EvaluationConfig(StrictModel):
     primary_target: Literal[
         "unmarked_events_at_or_above_selected_completeness_magnitude_inside_study_area_only"
@@ -644,6 +827,16 @@ class EvaluationConfig(StrictModel):
     target_magnitude_bins_role: str
     minimum_target_events_for_non_exploratory_claim: int = Field(gt=0)
     insufficient_nonoverlapping_exposures_action: str
+
+
+class LocalSupportEvaluationConfig(EvaluationConfig):
+    primary_target: Literal[  # type: ignore[assignment]
+        "unmarked_events_at_or_above_common_mc_inside_supported_domain_only"
+    ]
+    g1_primary_endpoint: LocalSupportG1PrimaryEndpointConfig
+    issue_based_horizon_backtests: LocalSupportIssueBasedHorizonBacktestsConfig
+    g1_pass_rule: LocalSupportG1PassRuleConfig
+    model_selection: LocalSupportModelSelectionConfig
 
 
 class JapanReferenceConfig(StrictModel):
@@ -787,6 +980,91 @@ class OutputsConfig(StrictModel):
         return _relative_path(value)
 
 
+class LocalSupportPolicyConfig(StrictModel):
+    """Frozen scientific boundary for the score-free stage-2R support repair."""
+
+    gate_name: Literal["G1-LS"]
+    support_scope: Literal["snapshot_specific_causal_fixed_grid"]
+    snapshot_event_rule: Literal[
+        "inside_study_area_and_origin_time_lte_fit_end_and_available_at_lte_fit_end"
+    ]
+    base_cell_km: float = Field(gt=0)
+    sparse_parent_cell_km: float = Field(gt=0)
+    grid_origin_m: tuple[float, float]
+    minimum_events_per_stratum: Literal[200]
+    magnitude_bin_width: float = Field(gt=0)
+    maximum_curvature_correction: float = Field(ge=0)
+    maximum_supported_raw_mc: float
+    spatial_above_maximum_action: Literal["mark_corresponding_fixed_500km_base_cell_unsupported"]
+    temporal_above_maximum_action: Literal["hard_fail_entire_experiment"]
+    sparse_parent_still_sparse_action: Literal[
+        "mark_indeterminate_retain_base_cell_and_use_common_mc"
+    ]
+    common_mc_candidates: tuple[float, ...]
+    minimum_supported_area_fraction: float = Field(gt=0, le=1)
+    minimum_supported_area_boundary_inclusive: Literal[True]
+    support_area_rule: Literal[
+        "exact_equal_area_intersection_of_study_area_and_supported_fixed_base_cells"
+    ]
+    later_snapshot_backfill_forbidden: Literal[True]
+    same_snapshot_shared_fields: tuple[str, ...]
+    uniform_rate_denominator: Literal["supported_exact_area_times_exposure"]
+    kde_training_events: Literal["supported_domain_events_only"]
+    kde_normalization_domain: Literal["supported_domain_only"]
+    etas_target_background_and_compensator_domain: Literal["supported_domain_only"]
+    etas_external_parent_buffer_km: float = Field(gt=0)
+    unsupported_parent_primary_rule: Literal[
+        "conditional_history_only_if_magnitude_gte_frozen_local_raw_mc"
+    ]
+    unsupported_parent_sensitivity: Literal["exclude_all_unsupported_cell_parents"]
+    future_unsupported_cell_output: Literal["nodata_not_zero"]
+    full_region_metrics_unsupported_targets: Literal["count_as_misses"]
+    supported_only_metrics_role: Literal["diagnostic_only"]
+    support_manifest_frozen_before_model_scores: Literal[True]
+    support_manifest_forbidden_fields: tuple[str, ...]
+    locked_test_action: Literal["do_not_run"]
+
+    @model_validator(mode="after")
+    def validate_local_support_policy(self) -> Self:
+        if self.base_cell_km != 500.0 or self.sparse_parent_cell_km != 1000.0:
+            raise ValueError("local-support base and parent grids must remain 500 and 1000 km")
+        if self.grid_origin_m != (0.0, 0.0):
+            raise ValueError("local-support grid origin must remain fixed at (0, 0) metres")
+        if self.magnitude_bin_width != 0.1 or self.maximum_curvature_correction != 0.2:
+            raise ValueError("local-support MAXC bin and correction must remain 0.1 and 0.2")
+        if self.maximum_supported_raw_mc != 4.0:
+            raise ValueError("local-support maximum supported raw Mc must remain 4.0")
+        if self.minimum_supported_area_fraction != 0.95:
+            raise ValueError("local-support minimum area fraction must remain 0.95")
+        if self.etas_external_parent_buffer_km != 300.0:
+            raise ValueError("local-support ETAS external parent buffer must remain 300 km")
+        if self.common_mc_candidates != (3.0, 3.2, 3.5, 4.0):
+            raise ValueError("local-support common Mc candidates must remain frozen")
+        if self.same_snapshot_shared_fields != (
+            "support_id",
+            "common_mc",
+            "target_event_ids",
+            "supported_area_km2",
+            "compensator_geometry",
+        ):
+            raise ValueError("all background models must share the same snapshot support fields")
+        if self.support_manifest_forbidden_fields != (
+            "assessment_target_count",
+            "assessment_target_locations",
+            "validation_target_count",
+            "validation_target_locations",
+            "model_score",
+            "information_gain",
+            "hit_result",
+            "model_selection",
+            "score_id",
+        ):
+            raise ValueError(
+                "support-manifest result-field prohibition differs from preregistration"
+            )
+        return self
+
+
 class BackgroundConfig(StrictModel):
     """Complete, frozen stage-2 background protocol."""
 
@@ -813,6 +1091,7 @@ class BackgroundConfig(StrictModel):
 
     @model_validator(mode="after")
     def validate_internal_contract(self) -> Self:
+        protocol_version = str(self.protocol_version)
         if self.time.horizons_days != EXPECTED_HORIZONS:
             raise ValueError("background horizons must be exactly 7, 30, 90, 180, and 365 days")
         if self.integration.grid_cells_km != EXPECTED_GRIDS_KM:
@@ -826,12 +1105,28 @@ class BackgroundConfig(StrictModel):
         if self.integration.equal_area_crs != EXPECTED_EQUAL_AREA_CRS:
             raise ValueError("background equal-area CRS differs from the frozen project CRS")
         finest_grid = min(self.integration.grid_cells_km)
-        if self.spatial_poisson.spatial_density_integral_over_study_area != 1.0:
-            raise ValueError("spatial Poisson density must integrate to one over the study area")
+        if protocol_version == "0.2.0":
+            if self.spatial_poisson.spatial_density_integral_over_study_area != 1.0:
+                raise ValueError(
+                    "spatial Poisson density must integrate to one over the study area"
+                )
+            if self.etas.background_component.density_integral_over_study_area != 1.0:
+                raise ValueError(
+                    "ETAS background density must integrate to one over the study area"
+                )
+        else:
+            local_spatial = cast(Any, self.spatial_poisson)
+            local_etas = cast(Any, self.etas)
+            if local_spatial.spatial_density_integral_over_supported_domain != 1.0:
+                raise ValueError(
+                    "local-support spatial Poisson density must integrate to one over support"
+                )
+            if local_etas.background_component.density_integral_over_supported_domain != 1.0:
+                raise ValueError(
+                    "local-support ETAS background density must integrate to one over support"
+                )
         if self.spatial_poisson.normalization_grid_km != finest_grid:
             raise ValueError("KDE normalization must use the frozen finest integration grid")
-        if self.etas.background_component.density_integral_over_study_area != 1.0:
-            raise ValueError("ETAS background density must integrate to one over the study area")
         if (
             self.etas.likelihood.background_normalization_grid_km != finest_grid
             or self.etas.likelihood.compensator_grid_km != finest_grid
@@ -909,7 +1204,7 @@ class BackgroundConfig(StrictModel):
             "uv_lock_sha256",
         ):
             raise ValueError("content-address inputs differ from the frozen protocol")
-        if self.outputs.input_hashes_required_keys != (
+        expected_input_hash_keys: tuple[str, ...] = (
             "environment_lock",
             "data_catalog",
             "earthquake_dataset",
@@ -917,7 +1212,10 @@ class BackgroundConfig(StrictModel):
             "issue_manifest",
             "production_fixture",
             "oracle_metadata",
-        ):
+        )
+        if protocol_version == "0.2.1":
+            expected_input_hash_keys = (*expected_input_hash_keys, "support_manifest")
+        if self.outputs.input_hashes_required_keys != expected_input_hash_keys:
             raise ValueError("required content-address input hashes differ from the frozen set")
         if (
             self.numerical_regression.analytic_simulation.spatial_cutoff_km
@@ -940,8 +1238,68 @@ class BackgroundConfig(StrictModel):
             allow_nan=False,
         ).encode("utf-8")
         canonical_sha256 = hashlib.sha256(canonical_payload).hexdigest()
-        if canonical_sha256 != EXPECTED_BACKGROUND_PROTOCOL_CANONICAL_SHA256:
+        expected_canonical_sha256 = (
+            EXPECTED_BACKGROUND_PROTOCOL_CANONICAL_SHA256
+            if protocol_version == "0.2.0"
+            else EXPECTED_BACKGROUND_LOCAL_SUPPORT_PROTOCOL_CANONICAL_SHA256
+        )
+        if canonical_sha256 != expected_canonical_sha256:
             raise ValueError("background protocol differs from its frozen canonical fingerprint")
+        return self
+
+
+class BackgroundLocalSupportConfig(BackgroundConfig):
+    """Independent 0.2.1 preregistration that preserves the 0.2.0 result."""
+
+    protocol_version: Literal["0.2.1"]  # type: ignore[assignment]
+    status: Literal[  # type: ignore[assignment]
+        "preregistered_after_completeness_before_any_background_score"
+    ]
+    frozen_on: Literal["2026-07-14"]
+    freeze_tag: Literal[  # type: ignore[assignment]
+        "v0.2.1-background-local-support-protocol"
+    ]
+    completeness_diagnostics_seen_before_freeze: Literal[True]
+    parent_protocol_version: Literal["0.2.0"]
+    parent_protocol_execution_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    parent_protocol_result: Literal["credible_negative_before_model_fit_or_scoring"]
+    parent_protocol_result_immutable: Literal[True]
+    inputs: LocalSupportInputsConfig
+    completeness: LocalSupportCompletenessConfig
+    uniform_poisson: LocalSupportUniformPoissonConfig
+    spatial_poisson: LocalSupportSpatialPoissonConfig  # type: ignore[assignment]
+    etas: LocalSupportEtasConfig
+    randomness: LocalSupportRandomnessConfig
+    integration: LocalSupportBackgroundIntegrationConfig
+    evaluation: LocalSupportEvaluationConfig
+    local_support: LocalSupportPolicyConfig
+
+    @model_validator(mode="after")
+    def validate_local_support_contract(self) -> Self:
+        if self.parent_protocol_execution_fingerprint != (
+            "f386f0d6abd5b7ca0e31e073ce0f74da812fb561052639d45227e8f339ff9032"
+        ):
+            raise ValueError("local-support parent execution fingerprint differs from v0.2.0")
+        expected_outputs = {
+            "processed_root": "data/processed/stage2R/local_support",
+            "backtest_root": "outputs/backtests/background_local_support",
+            "experiment_root": "outputs/experiments/background_local_support",
+            "model_root": "models/registry/background_local_support",
+            "registry": "data/manifests/background_local_support_model_registry.json",
+            "fold_manifest": "data/manifests/background_local_support_fold_manifest.json",
+            "report": "docs/background_local_support_report.md",
+        }
+        for field_name, expected in expected_outputs.items():
+            if getattr(self.outputs, field_name) != expected:
+                raise ValueError(
+                    f"local-support output path {field_name} is not disjoint and frozen"
+                )
+        if self.inputs.issue_manifest != self.outputs.fold_manifest:
+            raise ValueError("local-support input and output fold-manifest references disagree")
+        if self.inputs.support_manifest != (
+            "data/manifests/background_local_support_manifest.json"
+        ):
+            raise ValueError("local-support manifest path differs from preregistration")
         return self
 
 
@@ -974,6 +1332,11 @@ def _validate_referenced_metadata(config_path: Path, config: BackgroundConfig) -
     earthquake_path = resolve_project_path(config_path, config.inputs.earthquake_dataset_path)
     fixture_path = resolve_project_path(config_path, config.numerical_regression.production_fixture)
     oracle_path = resolve_project_path(config_path, config.numerical_regression.oracle_metadata)
+    support_manifest_path = (
+        resolve_project_path(config_path, config.inputs.support_manifest)
+        if isinstance(config, BackgroundLocalSupportConfig)
+        else None
+    )
 
     _require_equal(
         sha256_file(environment_lock_path),
@@ -1005,6 +1368,68 @@ def _validate_referenced_metadata(config_path: Path, config: BackgroundConfig) -
         config.numerical_regression.oracle_metadata_sha256,
         "oracle metadata SHA-256",
     )
+    if support_manifest_path is not None:
+        local_config = cast(BackgroundLocalSupportConfig, config)
+        _require_file_sha256(
+            support_manifest_path,
+            local_config.inputs.support_manifest_sha256,
+            "local-support manifest",
+        )
+        from seismoflux.background.catalog import load_study_area
+        from seismoflux.background.local_support_manifest import (
+            load_background_local_support_manifest,
+            validate_background_local_support_study_area,
+        )
+
+        support_bundle = load_background_local_support_manifest(support_manifest_path)
+        _require_equal(
+            support_bundle.protocol_version,
+            local_config.protocol_version,
+            "local-support manifest protocol version",
+        )
+        _require_equal(
+            support_bundle.freeze_tag,
+            local_config.freeze_tag,
+            "local-support manifest freeze tag",
+        )
+        _require_equal(
+            support_bundle.gate_name,
+            local_config.local_support.gate_name,
+            "local-support manifest gate name",
+        )
+        _require_equal(
+            support_bundle.parent_protocol_execution_fingerprint,
+            local_config.parent_protocol_execution_fingerprint,
+            "local-support manifest parent fingerprint",
+        )
+        _require_equal(
+            support_bundle.sources.earthquake_dataset.path,
+            local_config.inputs.earthquake_dataset_path,
+            "local-support manifest earthquake path",
+        )
+        _require_equal(
+            support_bundle.sources.earthquake_dataset.sha256,
+            local_config.inputs.earthquake_dataset_sha256,
+            "local-support manifest earthquake SHA-256",
+        )
+        _require_equal(
+            support_bundle.sources.study_area.path,
+            local_config.inputs.study_area,
+            "local-support manifest study-area path",
+        )
+        _require_equal(
+            support_bundle.sources.study_area.sha256,
+            local_config.inputs.study_area_sha256,
+            "local-support manifest study-area SHA-256",
+        )
+        sealed_study_area = load_study_area(
+            study_area_path,
+            local_config.integration.equal_area_crs,
+        )
+        validate_background_local_support_study_area(
+            support_bundle,
+            sealed_study_area.projected,
+        )
 
     catalog = _load_json_mapping(catalog_path)
     manifest = _load_json_mapping(manifest_path)
@@ -1122,7 +1547,13 @@ def load_background_protocol(path: str | Path) -> BackgroundConfig:
     """Parse and validate the frozen stage-2 protocol without opening data inputs."""
 
     config_path = Path(path)
-    return BackgroundConfig.model_validate(load_yaml_mapping(config_path))
+    raw = load_yaml_mapping(config_path)
+    protocol_version = raw.get("protocol_version")
+    if protocol_version == "0.2.0":
+        return BackgroundConfig.model_validate(raw)
+    if protocol_version == "0.2.1":
+        return BackgroundLocalSupportConfig.model_validate(raw)
+    raise ValueError(f"unsupported background protocol_version: {protocol_version!r}")
 
 
 def load_background_config(path: str | Path) -> BackgroundConfig:

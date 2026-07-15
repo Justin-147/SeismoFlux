@@ -101,10 +101,20 @@ def test_runner_seals_before_catalog_and_reseals_before_each_publication_surface
     fixed = cast(RegistryReportPublication, object())
 
     monkeypatch.setattr(runner_module, "load_config", lambda _: project)
+
+    def load_protocol(_: Path) -> BackgroundConfig:
+        order.append("protocol")
+        return background
+
+    def load_bound_config(_: Path) -> BackgroundConfig:
+        order.append("bound_config")
+        return background
+
+    monkeypatch.setattr(runner_module, "load_background_protocol", load_protocol)
     monkeypatch.setattr(
         runner_module,
         "load_project_background_config",
-        lambda _: background,
+        load_bound_config,
     )
 
     def create_seal(*_: object, **__: object) -> ExecutionSeal:
@@ -184,6 +194,8 @@ def test_runner_seals_before_catalog_and_reseals_before_each_publication_surface
     )
 
     assert order == [
+        "protocol",
+        "bound_config",
         "seal",
         "study",
         "catalog",
@@ -215,6 +227,7 @@ def test_runner_unclassified_execution_error_publishes_nothing(
     config_path.parent.mkdir(parents=True)
     config_path.touch()
     monkeypatch.setattr(runner_module, "load_config", lambda _: project)
+    monkeypatch.setattr(runner_module, "load_background_protocol", lambda _: background)
     monkeypatch.setattr(
         runner_module,
         "load_project_background_config",
@@ -261,6 +274,7 @@ def test_runner_reseal_failure_prevents_all_publication(
     config_path.parent.mkdir(parents=True)
     config_path.touch()
     monkeypatch.setattr(runner_module, "load_config", lambda _: project)
+    monkeypatch.setattr(runner_module, "load_background_protocol", lambda _: background)
     monkeypatch.setattr(
         runner_module,
         "load_project_background_config",

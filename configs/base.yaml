@@ -10,6 +10,7 @@ config_files:
   ingestion: configs/ingestion.yaml
   research_protocol: configs/research_protocol.yaml
   background: configs/background.yaml
+  anomaly_increment: configs/anomaly_increment.yaml
   operating_points: configs/operating_points.yaml
 
 time_semantics:

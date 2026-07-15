@@ -1,0 +1,893 @@
+schema_version: 1
+protocol_version: 0.4.0
+stage: 4
+experiment_family: anomaly_increment
+status: preregistered_before_any_stage4_target_score
+frozen_on: '2026-07-15'
+blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
+hypotheses: [H1, H2]
+gates: [G2, G3]
+
+freeze:
+  pre_score_tag: v0.3.0-anomaly-increment-protocol
+  results_tag: v0.3.0-anomaly-increment
+  scores_seen_before_freeze: false
+  target_counts_seen_before_freeze: false
+  locked_test_results_seen: false
+  validation_is_not_a_tuning_partition: true
+  formal_validation_scientific_runs_allowed: 1
+  protocol_tag_authorizes_only_score_free_implementation: true
+  scoring_code_freeze:
+    required: true
+    expected_tag: v0.3.0-anomaly-increment-scoring-code
+    required_seal_path: data/manifests/anomaly_increment_scoring_seal.json
+    required_before_target_read:
+      - scoring_code_commit_pushed
+      - scoring_code_tag_pushed
+      - execution_seal_verified
+      - synthetic_end_to_end_passed
+      - cpu_float64_numerical_regression_passed
+      - restricted_spatial_artifact_hashes_verified
+      - identity_time_mapping_reproduces_accepted_snapshot_and_trajectory_columns
+      - identity_space_mapping_reproduces_accepted_200km_scientific_columns
+      - placebo_coverage_values_and_null_bitmap_exactly_unchanged
+      - fixed_small_permutation_matches_stage3_low_level_reference
+      - worker_count_invariance_passed
+      - formal_attempt_count_equals_zero
+      - target_read_count_equals_zero
+    gpu_if_not_equivalent_at_code_freeze: lock_formal_run_to_cpu_float64
+  invalid_software_or_infrastructure_attempts_must_be_registered: true
+  tuning_after_validation_result_forbidden: true
+  required_before_any_target_read_or_score:
+    - protocol_commit_pushed
+    - pre_score_tag_pushed
+    - generated_manifest_hashes_verified
+    - topology_gate_passed
+    - all_non_target_tests_passed
+    - scoring_code_commit_pushed
+    - scoring_code_tag_pushed
+    - execution_seal_verified
+    - formal_attempt_count_equals_zero
+    - target_read_count_equals_zero
+
+inputs:
+  research_protocol:
+    path: configs/research_protocol.yaml
+    sha256: e488575ef06329fe19ec282224d813f560c575552537abb2b4e227479f443dd5
+  research_protocol_document:
+    path: docs/research_protocol.md
+    sha256: aa7fd98862030da3dc836b67852fc24fc9770015efcd75cfb0b1075088492dcc
+  background_fold_manifest:
+    path: data/manifests/background_fold_manifest.json
+    sha256: 3a06f9fc1527a5b4e943de874fa81bda19d0afb0aeec832fb2e0af95f20f2e92
+    role: authoritative_actual_issue_calendar
+  local_support_fold_manifest:
+    path: data/manifests/background_local_support_fold_manifest.json
+    sha256: d7ae5266c9143ed0a67a9954da52039b2753f108698fb05477466a6d5b934e38
+    role: exact_issue_calendar_cross_check
+  local_support_manifest:
+    path: data/manifests/background_local_support_manifest.json
+    sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    manifest_id: local-support-bundle-69cecbee9093a21d
+  background_registry:
+    path: data/manifests/background_local_support_model_registry.json
+    sha256: 774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b
+    gate_name: G1-LS
+    gate_passed: true
+    scoring_code_commit: 34fa7b4a491a062ff6e86daecf5568539661b42f
+    scoring_code_tag: v0.2.1-background-local-support-scoring-code-r1
+    execution_seal_id: 3f8219ccc9ea68545f99e6d5bfb7cb0553ce6ce9340c10a8a8523fb0f51f08a4
+  background_model_manifest:
+    path: models/registry/background_local_support/5c8fa982bb94b9ad/manifest.json
+    sha256: 1b8c67ac82a83d6885dee06ea32b8907b333c6118c5ec7968f7b779589447acf
+    artifact_id: 5c8fa982bb94b9ad
+  background_model_payload:
+    path: models/registry/background_local_support/5c8fa982bb94b9ad/poisson_kde.json
+    sha256: 63db433a0ea490de2674cb84c485f8efd8215374d70f31f22810da29f0d7b142
+  stage3_registry:
+    path: data/manifests/anomaly_feature_registry.json
+    sha256: 65635e18ab94e5e114948a6a7a5d1533a665fee1f6f862abcc5498394f85ce00
+    required_status: accepted_feature_only_no_target_scoring
+    stage4_allowed_required: true
+  stage3_feature_store:
+    path: data/processed/stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541/anomaly_feature_store.parquet
+    sha256: cd383d52cbb85ebba0e495e58f6e3d50d350f952e5432d5cd21386f6224042ef
+    content_sha256: 9f2f25f3f0d27f435fc6e4ee191538f70b88de959d9b357cef464b6884f8bfc9
+    schema_sha256: 0d7a9eab211324fcf3d03f6a55ef0f5136a6132f0ce0c56a72cb0a92912e6808
+    bundle_id: anomaly-feature-bundle-de7547faa9f87541
+    bundle_identity_sha256: de7547faa9f87541c83f02788fa6e40111f753f232c511758540ba1794d9ce5d
+    bundle_manifest_sha256: 49c4e022f2a08aa0066047e87f04059a0f3d1768a248a036a0f1ae2f730559e9
+    row_count: 3217885
+    query_cell_count: 15697
+  stage3_anomaly_state_history:
+    path: data/processed/stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541/anomaly_state_history.parquet
+    sha256: d948d59851778ad4c73be398e521883520fdd87880b0604628986cee2cb2813a
+    content_sha256: d0dd59071d502c248573415d48d0d2addee5170228d820e0d07af1c1f2af8249
+    schema_sha256: b6986a78912d34ed90e83a6d72fc3dfbf8b4c0edf59217f969ae5e7fb33152d5
+    row_count: 166189
+    role: authoritative_entity_state_for_spatial_placebo_and_multigrid_reconstruction
+  anomaly_observation:
+    path: data/processed/stage1/debc98054172a4a1/anomaly_observation.parquet
+    sha256: a4837a6a865ca0d4939fd45d8d8e9c3e4fd90cf0a78e9bb07d57335d5743b80c
+    content_sha256: 7f6c1d4500c3c930d5cc0f29b3903fe4b831430e9d41ec49cf3f9d2a61dae1b8
+    schema_sha256: 2a80a0e69d499b0544a9d2ba4189c516275c065871b7f16963c8540a6064f6cb
+    row_count: 59904
+    role: read_only_lineage_audit_not_default_time_placebo_input
+  anomaly_report_period:
+    path: data/processed/stage1/debc98054172a4a1/anomaly_report_period.parquet
+    sha256: aac44418994b6b99c633dcf536e452ad315439336bc580a13f719d95a069e176
+    content_sha256: b8ace0064690b15c931e300ffab349a8ca5932a9d3d55fddd4f22261505a986b
+    schema_sha256: 5a1a2361a03f496b2f0375f35312c0f9f4281e0848613bdcf74fdabb8f49e4e7
+    row_count: 205
+    role: authoritative_issue_calendar_and_lineage_audit
+  feature_dictionary:
+    path: data/manifests/anomaly_feature_dictionary.json
+    sha256: 60b08bed829a3e496bdbea14e3c0afa64809d69eb0a81532be88af7c7efbe050
+    dictionary_id: anomaly-feature-dictionary-60b08bed829a3e49
+    interpretation: relative_features_not_absolute_probability
+  earthquake_target:
+    path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+    sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+    content_sha256: 2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404
+    schema_sha256: c88d20b32a2cb599f22d1921764757b617fe19b030a0f58585652e9f7c74f3c5
+    contract_path: data/contracts/earthquake_event.json
+    contract_sha256: 44a35a28d1fe0bd03b5228b0efab4030bbf853fdd3c198fc8404dcae6fb4a70f
+    physical_event_id_column: event_id
+    unavailable_before_protocol_freeze: true
+    human_prediction_fields_forbidden: true
+  study_area:
+    path: data/processed/china_mainland.geojson
+    sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    public_redistribution: forbidden
+  environment_lock:
+    path: uv.lock
+    sha256: 34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5
+  construction_linework_l1:
+    path: PlotBD/CN-block-L1.gmt
+    path_scope: external_locationpred_root
+    external_root_environment_variable: SEISMOFLUX_LOCATIONPRED_ROOT
+    source_inventory_relative_path: PlotBD/CN-block-L1.gmt
+    sha256: 30d7fabbea95040fed596a37dfd07970c6e7699187c27ad064471db25ef5d5cd
+    byte_count: 8957
+    license_status: unknown_no_redistribution
+  construction_linework_l2:
+    path: PlotBD/CN-block-L2.gmt
+    path_scope: external_locationpred_root
+    external_root_environment_variable: SEISMOFLUX_LOCATIONPRED_ROOT
+    source_inventory_relative_path: PlotBD/CN-block-L2.gmt
+    sha256: 189b81655411225ad3d7a1860829835ad23b843c239134529bbad9f2d8d98c33
+    byte_count: 19215
+    license_status: unknown_no_redistribution
+
+generated_manifests:
+  fold:
+    path: data/manifests/anomaly_increment_fold_manifest.json
+    sha256: d700f15837102ab90b2c9038a6d807bd94cf2f5683a7aeb3088dc5ad9ea61788
+  feature_set:
+    path: data/manifests/anomaly_increment_feature_set.json
+    sha256: f4b18c7af27a1f16b2ea7d01f48d9f1f03439860939fc75bcd969ac72313706f
+  randomness:
+    path: data/manifests/anomaly_increment_randomness.json
+    sha256: 78faab7bc6a6f2485e9c3540e63b0446f0d8e4e31d45e1057940f38034998940
+  spatial_strata:
+    path: data/manifests/anomaly_increment_spatial_strata.json
+    sha256: aac273e9ac306568a93063fad0fe0ebc28d161189e0b4f089d657ed8d7ba2654
+
+background:
+  background_variant_id: spatial_poisson/gaussian_kde_bw75km
+  family: spatial_poisson
+  bandwidth_km: 75.0
+  model_reselection_forbidden: true
+  development:
+    snapshot_id: fold_4
+    parameter_snapshot_id: 83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5
+    fit_end_utc: '2019-12-31T16:00:00Z'
+    support_id: local-support-788851371baf0e3b
+    compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55
+    common_mc: 4.0
+    supported_area_fraction: 1.0
+  validation:
+    snapshot_id: final_validation
+    parameter_snapshot_id: 252f14cad07205b10c1a605fdd21613044bc4072c98bcaa74cf357b7d766ed02
+    fit_end_utc: '2023-06-30T16:00:00Z'
+    support_id: local-support-f6816ab6c6581306
+    compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55
+    common_mc: 4.0
+    supported_area_fraction: 1.0
+  final_validation_snapshot_may_not_backfill_development: true
+  etas:
+    required_comparator_status: not_evaluable
+    reason: failed_numerical_stability_no_qualified_parameters
+    numerical_retry_in_stage4: forbidden_without_separate_pre_score_protocol
+    substitution_claim_forbidden: true
+
+forecast:
+  timezone: Asia/Shanghai
+  issue_time_local: '00:00:00'
+  interval: '(T,T+h]'
+  all_horizons_days: [7, 30, 90, 180, 365]
+  primary_horizons_days: [7, 30, 90]
+  insufficient_horizons_days: [180, 365]
+  insufficient_reason: fewer_than_three_calendar_mature_development_rolling_folds
+  same_continuous_model_for_all_horizons: true
+  separate_horizon_models_forbidden: true
+  future_anomaly_updates_forbidden: true
+  anomaly_lead_decay:
+    family: exponential_half_life
+    formula: 2**(-lead_days/half_life_days)
+    half_life_days: 90
+
+split:
+  development_issue_dates:
+    first_actual: '2022-07-21'
+    last_actual: '2023-06-29'
+    count: 50
+  purge:
+    start: '2023-07-02'
+    end: '2024-06-30'
+  validation_issue_dates:
+    first_actual: '2024-07-04'
+    last_actual: '2025-06-26'
+    count: 51
+  validation_maturity_end: '2026-07-01'
+  development_rolling_folds: 3
+  rolling_fold_rule: three_disjoint_90d_target_bands_with_expanding_shared_7d_fit
+  training_target_end_must_be_strictly_before_assessment_target_start: true
+  equality_boundary_exposure_action: purge_from_fold_training
+  validation_role: one_time_confirmatory_holdout_not_tuning
+  random_split_forbidden: true
+  physical_event_sets_across_partitions_must_be_disjoint: true
+  post_validation_stage3_rows_for_training_or_validation_forbidden: true
+
+magnitude:
+  bins:
+    - id: M5_6
+      minimum: 5.0
+      maximum_exclusive: 6.0
+      role: G2_primary
+    - id: M6_plus
+      minimum: 6.0
+      maximum_exclusive: null
+      role: exploratory_when_unique_events_lt_10
+  shared_anomaly_coefficients_across_bins: true
+  bin_specific_rate_intercepts: true
+  separate_anomaly_models_by_magnitude_forbidden: true
+  target_rate_head:
+    family: poisson_intercept_with_frozen_background_spatial_density_offset
+    fit_on_training_partition_only: true
+    shared_by_background_coverage_snapshot_dynamic_and_placebos: true
+    validation_refit_forbidden: true
+
+features:
+  confirmatory_kernel: gaussian
+  confirmatory_scale_km: 200
+  sensitivity_scales_km: [50, 100, 300, 500]
+  sensitivity_may_not_replace_confirmatory_model: true
+  coverage_controls:
+    - current_to_trailing_station_reporting_coverage_proxy
+    - current_to_trailing_measurement_reporting_coverage_proxy
+    - distinct_reporting_station_count_reporting_coverage_proxy
+    - distinct_reporting_measurement_count_reporting_coverage_proxy
+    - days_since_previous_actual_report_reporting_coverage_proxy
+    - missing_expected_period_count_13w_reporting_coverage_proxy
+    - missing_expected_period_count_52w_reporting_coverage_proxy
+    - report_present_reporting_coverage_proxy
+    - report_row_count_reporting_coverage_proxy
+  snapshot_signal:
+    - reliability_weighted_listed_count
+    - first_seen_weighted_count
+    - not_continued_weighted_count
+    - age_mean_days
+    - discipline_shannon_normalized
+    - multidisciplinary_entity_weighted_fraction
+    - concentration
+    - diffusion_radius_km
+  trajectory_kernel: closed_ball
+  trajectory_scale_km: 200
+  trajectory_source_series: [listed_count, first_seen_count]
+  trajectory_signal:
+    - slope_4w_per_week
+    - slope_13w_per_week
+    - acceleration_4v13_per_week2
+    - surge_z_13w
+    - peak_drop_52w
+  model_sets:
+    coverage_only: [coverage_controls]
+    snapshot: [coverage_controls, snapshot_signal]
+    dynamic: [coverage_controls, snapshot_signal, trajectory_signal]
+  fault_interaction:
+    status: deferred_to_stage5
+    forbidden_in_stage4_model: true
+  forbidden:
+    - source_duration
+    - manual_prediction_fields
+    - target_derived_features
+    - earthquake_locations_as_candidate_or_grid_inputs
+    - fault_or_long_term_hazard_features
+
+preprocessing:
+  fit_scope: each_development_training_fold_or_full_development_before_validation
+  validation_statistics_may_not_change_preprocessor: true
+  null_is_not_zero: true
+  transform_by_logical_feature:
+    current_to_trailing_station_reporting_coverage_proxy: identity_finite
+    current_to_trailing_measurement_reporting_coverage_proxy: identity_finite
+    distinct_reporting_station_count_reporting_coverage_proxy: log1p_nonnegative
+    distinct_reporting_measurement_count_reporting_coverage_proxy: log1p_nonnegative
+    days_since_previous_actual_report_reporting_coverage_proxy: log1p_nonnegative
+    missing_expected_period_count_13w_reporting_coverage_proxy: log1p_nonnegative
+    missing_expected_period_count_52w_reporting_coverage_proxy: log1p_nonnegative
+    report_present_reporting_coverage_proxy: identity_binary
+    report_row_count_reporting_coverage_proxy: log1p_nonnegative
+    reliability_weighted_listed_count: log1p_nonnegative
+    first_seen_weighted_count: log1p_nonnegative
+    not_continued_weighted_count: log1p_nonnegative
+    age_mean_days: log1p_nonnegative
+    discipline_shannon_normalized: identity_finite
+    multidisciplinary_entity_weighted_fraction: identity_finite
+    concentration: identity_finite
+    diffusion_radius_km: log1p_nonnegative
+    slope_4w_per_week: asinh_signed
+    slope_13w_per_week: asinh_signed
+    acceleration_4v13_per_week2: asinh_signed
+    surge_z_13w: asinh_signed
+    peak_drop_52w: asinh_signed
+  clipping:
+    method: training_quantiles
+    quantile_algorithm: numpy_linear
+    lower_quantile: 0.005
+    upper_quantile: 0.995
+    identity_binary_and_missing_indicators_are_not_clipped: true
+  standardization:
+    binary: none
+    continuous_center: training_median
+    continuous_scale_fallback_order:
+      - 1.4826_times_training_MAD
+      - training_IQR_divided_by_1.349
+      - training_population_standard_deviation
+    zero_scale_action: coefficient_fixed_zero_only_when_training_min_equals_max
+    chosen_scale_branch_and_statistics_must_be_serialized_and_hashed: true
+  nullable:
+    imputation: training_median_after_transform
+    add_missing_indicator_for_every_value_column: true
+    quality_companions_retained_for_audit_only: true
+    null_reason_validity_and_sample_count_as_predictors_forbidden: true
+    no_finite_training_values:
+      transformed_value_output: fixed_zero
+      value_coefficient: fixed_zero
+      register_reason: no_finite_values_in_fit_scope
+      missing_indicator_still_derived_from_original_null_bitmap: true
+      constant_missing_indicator_coefficient: fixed_zero
+      assessment_or_validation_statistics_may_not_rescue_column: true
+  parameters_must_be_serialized_and_hashed: true
+  exact_operation_order:
+    - validate_source_domain_and_keep_only_finite_for_statistics
+    - apply_frozen_transform
+    - compute_training_quantiles_with_numpy_linear
+    - clip_continuous_transformed_values
+    - impute_transformed_missing_with_training_median
+    - choose_training_scale_by_MAD_then_IQR_then_population_SD
+    - center_and_scale_continuous_values
+    - append_unclipped_unstandardized_binary_missing_indicators
+  every_statistic_uses_only_current_fit_scope: true
+  statistic_row_weighting: unweighted_equal_rows_over_all_fit_issue_x_positive_area_25km_cells
+
+model:
+  background_variant_id: spatial_poisson/gaussian_kde_bw75km
+  family: ridge_regularized_poisson_point_process
+  interpretation: conditional_relative_intensity_not_absolute_probability
+  formula: lambda_background_times_exp_anomaly_increment
+  link: log
+  background_log_intensity_role: fixed_offset
+  cell_area_and_time_exposure_role: fixed_offset
+  anomaly_increment_intercept: fixed_zero
+  disabled_increment_path:
+    bypasses_coverage_and_anomaly_terms: true
+    must_equal_shared_target_rate_head_times_frozen_background: true
+    numerical_test_required: true
+  fixed_hyperparameters:
+    spatial_scale_km: 200
+    anomaly_half_life_days: 90
+    ridge_lambda: 1.0
+  objective:
+    fit_exposures: all_preregistered_shared_7d_fit_exposures_in_current_fit_scope
+    magnitude_bins_joint: [M5_6, M6_plus]
+    anomaly_coefficient_vector: one_shared_beta_across_magnitude_bins_per_model_variant
+    formula: sum_integrated_intensity_minus_sum_event_log_intensity_plus_0.5_times_ridge_lambda_times_sum_penalty_factor_beta_squared
+    likelihood_normalization: none_not_per_row_not_per_event
+    ridge_one_half_factor: true
+    bin_rate_intercepts_excluded_from_ridge: true
+    no_additional_anomaly_intercept: true
+  target_rate_head_fit:
+    parameters: one_log_rate_intercept_per_magnitude_bin
+    fit_once_from_background_no_increment_on_current_shared_7d_fit_scope: true
+    reused_unchanged_by_coverage_snapshot_dynamic_and_all_placebos: true
+    validation_or_assessment_refit_forbidden: true
+    serialized_and_hashed_before_variant_fits: true
+    zero_training_event_policy:
+      M5_6: mark_fit_scope_and_corresponding_gate_evidence_insufficient_without_optimizer_run
+      M6_plus: set_bin_inactive_with_exact_zero_intensity_exclude_bin_from_joint_objective_and_mark_exploratory_result_insufficient
+      negative_infinity_intercept_in_numeric_optimizer_forbidden: true
+      pseudocount_or_post_score_prior_forbidden: true
+  lead_time_linear_predictor:
+    formula: eta_variant_at_lead_u_equals_2_power_minus_u_over_90_times_X_variant_at_issue_T_dot_beta_variant
+    decayed_terms: all_coverage_snapshot_and_dynamic_increment_columns
+    frozen_background_and_bin_rate_head_not_decayed: true
+    future_anomaly_or_coverage_updates_within_horizon_forbidden: true
+    same_rule_for_observed_time_placebo_and_space_placebo: true
+  hyperparameter_selection_from_validation_forbidden: true
+  optimizer: scipy_lbfgsb_float64
+  optimizer_options:
+    maxiter: 2000
+    maxfun: 100000
+    ftol: 1.0e-12
+    gtol: 1.0e-7
+    deterministic_zero_start: true
+  convergence_failure_action: register_failed_model_without_relaxing_thresholds
+  penalty:
+    intercept_factor: 0.0
+    coverage_control_factor: 1.0
+    anomaly_signal_factor: 1.0
+    missing_indicator_factor: 1.0
+  gradient_boosting_allowed: false
+  neural_model_allowed: false
+
+integration:
+  equal_area_crs: '+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs'
+  primary_grid_km: 25.0
+  convergence_grids_km: [50.0, 25.0, 12.5]
+  grid_origin_and_extent: frozen_study_area_grid_contract_from_stage2
+  exact_clipped_area_weights: true
+  target_dependent_refinement_forbidden: true
+  anomaly_feature_evaluation:
+    method: recompute_from_accepted_anomaly_state_history_at_each_grid_cell_center
+    interpolation_from_25km_feature_store_forbidden: true
+    piecewise_constant_25km_reuse_forbidden: true
+    coefficients_and_preprocessor_not_refit_across_grids: true
+    same_200km_snapshot_kernel_and_trajectory_definition_required: true
+    target_or_epicenter_read_for_grid_construction_forbidden: true
+  spatial_total_intensity_relative_tolerance: 0.005
+  spatial_convergence_gate:
+    reference_grid_km: 12.5
+    candidate_grid_km: 25.0
+    formula: abs(I25-I12_5)/max(abs(I12_5),1e-12)
+    relative_tolerance_lte: 0.005
+    near_zero_absolute_tolerance: 1.0e-10
+    grid_50km_role: required_reported_coarse_trend_diagnostic_not_gate_reference
+  lead_time_quadrature:
+    rule: composite_midpoint_on_open_closed_forecast_interval
+    evaluate_anomaly_decay_at_subinterval_midpoint: true
+    final_partial_subinterval_uses_its_own_midpoint: true
+    primary_step_days: 1.0
+    convergence_step_days: 0.5
+    relative_tolerance: 0.005
+    convergence_gate:
+      formula: abs(I_step1d-I_step0_5d)/max(abs(I_step0_5d),1e-12)
+      relative_tolerance_lte: 0.005
+      near_zero_absolute_tolerance: 1.0e-10
+  convergence_failure_action: fail_model_and_forbid_spatial_publication
+
+alarm_area_diagnostic:
+  role: stage4_fixed_cell_diagnostic_not_final_region_optimizer
+  budgets_km2: [300000, 450000, 600000, 750000, 960000]
+  primary_budget_km2: 600000
+  primary_budget_selected_before_scores: true
+  same_recall_budget_grid:
+    start_km2: 0
+    stop_km2: 960000
+    step_km2: 625
+    inclusive: true
+    rule: select_largest_complete_deterministic_cell_prefix_with_exact_area_lte_budget
+    interpolation: forbidden
+  deterministic_cell_order:
+    - conditional_expected_intensity_descending
+    - cell_row_ascending
+    - cell_column_ascending
+    - cell_id_ascending
+  target_locations_may_not_affect_order: true
+  strict_coverage_buffer_km: 0
+  tolerant_coverage_buffer_km: 70
+  final_polygon_or_component_optimization_forbidden_in_stage4: true
+
+evaluation:
+  information_gain:
+    formula: point_process_log_likelihood_difference_including_integrated_compensator_divided_by_unique_physical_events
+    unit: nats_per_physical_event
+    candidate_variant: dynamic
+    comparator_variant: background_no_increment
+  event_log_intensity:
+    spatial_rule: map_target_event_to_frozen_25km_cell_then_use_that_cell_center_intensity
+    cell_membership: frozen_equal_area_cell_polygon_covers_event
+    boundary_tie_break: cell_row_then_cell_column_then_cell_id_ascending
+    anomaly_lead_decay_time: exact_event_time_minus_issue_time
+    target_event_may_not_create_or_refine_grid_cells: true
+    target_event_may_not_change_candidates_regions_or_boundaries: true
+    exact_epicenter_feature_recomputation: forbidden
+    primary_event_grid_km: 25.0
+    event_term_unchanged_during_compensator_grid_convergence_audit: true
+  nonoverlapping_exposures:
+    selection: greedy_earliest_actual_issue_then_next_gte_previous_plus_horizon
+    retain_zero_event_exposures: true
+    event_multiplicity_per_horizon: at_most_one
+  bootstrap:
+    replications: 2000
+    confidence_level: 0.95
+    interval_method: percentile
+    unit: physical_event_cluster_stratified_by_magnitude_and_five_horizon_membership
+    horizons_jointly_resampled_days: [7, 30, 90, 180, 365]
+    membership_signature_bit_order_days: [7, 30, 90, 180, 365]
+    strata: magnitude_bin_x_nonempty_five_bit_membership_signature
+    within_each_stratum: resample_same_number_of_unique_physical_events_with_replacement
+    empty_strata: absent_and_not_created
+    singleton_strata: deterministic_self_resample
+    per_horizon_marginal_event_count_preserved: true
+    same_event_weight_shared_across_variants_horizons_and_metrics: true
+    G2_uses_only_M5_6_and_7_30_90_components: true
+    M6_plus_and_long_horizon_members_may_not_displace_primary_members: true
+    refit_model_each_replication: false
+    integrated_compensator_fixed_from_preregistered_exposures: true
+    denominator:
+      information_gain: original_per_horizon_supported_unique_event_count_preserved_by_strata
+      recall: original_per_horizon_all_study_area_unique_event_count_preserved_by_strata
+    zero_observed_primary_horizon_event_action: G2_evidence_insufficient
+    same_replication_recomputes_information_gain_same_area_and_same_recall: true
+  permutations:
+    time:
+      replications: 1000
+      anomaly_increment_coefficients_and_preprocessor_refit_each_replication: true
+      frozen_background_and_target_rate_head_reused_each_replication: true
+      null_model_role: offline_target_blind_synthetic_timeline_only_never_a_forecast_input
+      source_unit: issue_snapshot_scientific_spatial_field
+      mapping: complete_recipient_issue_to_donor_issue_bijection
+      pools: each_evaluation_fit_and_assessment_pool_separate_no_cross_pool_donors
+      recipient_fixed:
+        - issue_identity_time_and_query_grid
+        - cell_geometry_and_exact_area
+        - reporting_coverage_and_missing_report_calendar
+        - background_support_exposure_and_targets
+      donor_moved_jointly:
+        - snapshot_scientific_values
+        - snapshot_scientific_missingness
+      precomputed_trajectory_columns_may_not_be_moved: true
+      trajectory_reconstruction: recompute_4w_13w_52w_from_destination_pseudo_history
+      coverage_controls_fixed: true
+      background_and_targets_fixed: true
+      shared_mapping_across_model_variants_magnitude_bins_and_all_five_horizons: true
+      donor_later_than_recipient_allowed_only_inside_offline_null_world: true
+      mapping_audit_per_replication:
+        - mapping_sha256
+        - fixed_point_count
+        - donor_and_recipient_count
+        - bijection_verified
+      primary_statistic: M5_6_equal_weight_macro_information_gain_7_30_90
+    space:
+      replications: 1000
+      anomaly_increment_coefficients_and_preprocessor_refit_each_replication: true
+      frozen_background_and_target_rate_head_reused_each_replication: true
+      null_model_role: conditional_marked_anomaly_location_permutation
+      source: accepted_stage3_anomaly_state_history_entity_rows
+      unit: entity_coordinate_pair_bijection_within_issue_and_construction_stratum
+      entity_payload_fixed:
+        - anomaly_identity
+        - reliability
+        - discipline_and_measurement
+        - age_and_state
+        - all_noncoordinate_scientific_attributes
+      coordinate_pair_multiset_and_entity_count_preserved_per_issue_stratum: true
+      duplicate_coordinate_pairing_order: stable_state_id_ascending
+      spatially_ineligible_entities: remain_excluded_and_never_enter_permutation_pool
+      outside_study_area_entities:
+        stratum: nearest_construction_zone_id_x_outside_flag
+        never_swap_with_inside_entities: true
+      zero_query_cell_construction_zones:
+        use_local_restricted_zone_geometry_and_entity_coordinates: true
+        cross_zone_fallback_forbidden: true
+      singleton_or_identical_coordinate_stratum_action: identity_and_report_no_effect
+      identical_scientific_payload_effectiveness: compute_and_report_at_runtime_from_frozen_feature_whitelist
+      reconstruct_after_permutation:
+        snapshot: recompute_selected_200km_scientific_fields
+        trajectory: recompute_4w_13w_52w_from_permuted_issue_fields
+        coverage: join_original_values_exactly_unchanged
+      coverage_controls_fixed: true
+      background_and_targets_fixed: true
+      shared_mapping_across_model_variants_magnitude_bins_and_all_five_horizons: true
+      mapping_audit_per_replication:
+        - mapping_sha256
+        - moved_entity_row_count
+        - fixed_point_count
+        - singleton_stratum_count
+        - no_effect_stratum_fraction
+        - per_issue_zone_coordinate_multiset_verified
+      interpretation_limit: does_not_test_unmarked_station_density_itself
+      linework_or_zone_may_not_enter_model_features: true
+    monte_carlo_p_value: (1+count_null_gte_observed)/(replications+1)
+    failed_replication_policy:
+      scientific_nonconvergence_or_nonfinite_statistic: record_null_statistic_as_positive_infinity_and_count_as_null_gte_observed
+      infrastructure_interruption: resume_same_mapping_from_verified_checkpoint_without_changing_context
+      dropping_or_replacing_a_mapping: forbidden
+      maximum_scientific_failure_fraction: 0.01
+      above_maximum_failure_action: evidence_insufficient
+      p_value_denominator_always: 1001
+    generator: numpy.random.PCG64
+    derivation: typed_canonical_context_sha256_then_first_16_bytes_big_endian_entropy
+    direct_root_seed_plus_index_forbidden: true
+  multiple_comparisons:
+    exploratory_method: holm
+    alpha: 0.05
+    separate_families: [time_horizon_by_magnitude, space_horizon_by_magnitude]
+    G2_primary_macro_endpoint_in_holm_family: false
+  gates:
+    G2:
+      evaluation_partition: formal_validation_once
+      candidate_variant: dynamic
+      comparator_variant: background_no_increment
+      primary_magnitude_bin: M5_6
+      primary_horizons_days: [7, 30, 90]
+      macro_weighting: equal_horizon
+      minimum_evaluable_horizons: 3
+      minimum_unique_independent_events:
+        threshold: 20
+        definition: deduplicated_union_of_physical_event_ids_across_three_primary_horizons
+      every_primary_horizon_must_have_at_least_one_scored_event: true
+      minimum_positive_horizon_information_gain_estimates: 3
+      macro_information_gain_lower_95pct_bound_gt: 0
+      primary_time_permutation_p_lte: 0.05
+      reporting_confound_guard_dynamic_gt_coverage_only: true
+      dynamic_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt: 0
+      practical_improvement_any_of:
+        - metric: same_area_strict_recall_gain_percentage_points
+          evaluation_partition: formal_validation_once
+          candidate_variant: dynamic
+          comparator_variant: background_no_increment
+          magnitude_bin: M5_6
+          horizons_days: [7, 30, 90]
+          macro_weighting: equal_horizon
+          threshold_gte: 5
+          lower_95pct_bound_gt: 0
+          area_budget_km2: 600000
+          per_issue_selection: largest_complete_deterministic_cell_prefix_with_exact_area_lte_budget
+          denominator: all_study_area_targets_unsupported_count_as_misses
+        - metric: same_recall_union_area_relative_reduction
+          evaluation_partition: formal_validation_once
+          candidate_variant: dynamic
+          comparator_variant: background_no_increment
+          magnitude_bin: M5_6
+          horizons_days: [7, 30, 90]
+          macro_weighting: equal_horizon
+          reference_hits_per_horizon: background_strict_hit_count_at_600000km2
+          candidate_search: frozen_625km2_budget_grid_no_interpolation
+          candidate_budget_per_horizon: minimum_budget_reaching_reference_hit_count
+          area_value: exact_selected_complete_cell_prefix_area
+          exposure_area_aggregation: equal_weight_mean_exact_selected_area_across_nonoverlapping_exposures_within_horizon
+          per_horizon_reduction: one_minus_candidate_mean_exact_area_div_background_mean_exact_area
+          macro_reduction: equal_weight_mean_of_three_per_horizon_reductions
+          bootstrap_area_values_fixed_event_weights_only_change_hit_counts_and_selected_budget: true
+          zero_reference_hit_action: branch_not_evaluable_and_not_pass
+          unreachable_at_960000km2_action: branch_not_evaluable_and_not_pass
+          bootstrap_invalid_branch_value_action: retain_numeric_reduction_0.0_as_failure_not_drop
+          threshold_gte: 0.10
+          lower_95pct_bound_gt: 0
+      failure_action: publish_credible_negative_result_and_stop_complex_anomaly_models
+      insufficient_action: publish_evidence_insufficient_without_threshold_relaxation
+    G3:
+      evaluation_partition: development_joint_macro_rolling_folds_only
+      comparison: dynamic_minus_snapshot
+      horizons_days: [7, 30, 90]
+      macro_weighting: equal_horizon
+      per_horizon_statistic: dynamic_minus_snapshot_information_gain_nats_per_event
+      fold_statistic: equal_weight_mean_of_all_three_horizon_statistics
+      outer_fold_count_required: 3
+      minimum_positive_folds: 2
+      median_fold_macro_information_gain_difference_gt: 0
+      any_fold_horizon_with_zero_scored_events_action: G3_evidence_insufficient_no_partial_macro
+      target_bands_must_be_mutually_disjoint: true
+      one_model_fit_per_variant_per_fold_shared_across_horizons: true
+      same_background_coverage_preprocessor_penalty_and_exposures_required: true
+      failure_action: stop_dynamic_complexification_and_apply_preregistered_adoption_matrix
+      insufficient_action: evidence_insufficient_no_random_split
+  adoption_matrix:
+    dynamic_G2_pass_and_G3_pass: adopt_dynamic_for_stage5_comparison
+    dynamic_G2_pass_and_G3_fail_and_snapshot_equivalent_G2_pass: adopt_snapshot_only
+    dynamic_G2_pass_and_G3_fail_and_snapshot_equivalent_G2_not_pass: retain_background_only
+    dynamic_G2_not_pass: retain_background_only_and_stop_complex_anomaly_models
+    coverage_only: reporting_confound_diagnostic_never_an_anomaly_adoption
+    snapshot_equivalent_G2_uses_same_thresholds_placebos_and_practical_metric: true
+    no_post_score_fallback_choice: true
+  target_denominators:
+    information_gain: unique_supported_physical_events_within_horizon
+    strict_recall_molchan_and_alarm_area: all_study_area_targets
+    unsupported_targets_in_main_tables: count_as_misses
+    supported_domain_only_metrics: diagnostic_only
+    same_support_id_targets_area_and_compensator_required: true
+  regional_diagnostics:
+    strata: construction_subzones_from_score_blind_linework_topology
+    required_by_horizon: [information_gain, independent_event_count, strict_recall]
+    improvement_in_only_one_region_action: no_stable_increment_claim
+
+spatial_permutation_topology:
+  role: permutation_and_regional_stratification_only
+  never_model_feature_or_candidate_generator: true
+  sources: [construction_linework_l1, construction_linework_l2]
+  source_crs_assumption: EPSG:4326
+  projected_crs: '+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs'
+  clip_to_frozen_study_area: true
+  endpoint_connector:
+    only_internal_open_endpoints: true
+    target: nearest_other_line_or_study_boundary
+    maximum_distance_km: 100.0
+    target_and_score_blind: true
+  topology_order:
+    - exact_unary_union_noding
+    - set_precision_1m_on_noded_network
+    - polygonize_full
+  topology_gate:
+    cuts_required: 0
+    dangles_required: 0
+    invalid_required: 0
+    precision_sensitivity_m: [0.001, 0.01, 0.1, 1.0, 10.0]
+    zone_count_must_be_invariant: true
+    input_segment_order_must_be_invariant: true
+    every_fixed_query_cell_exactly_one_zone: true
+    all_five_frozen_input_hashes_must_match: true
+    spatial_placebo_implementation_authorized_only_if_topology_and_hash_gates_pass: true
+    target_read_still_requires_scoring_code_tag_and_execution_seal: true
+  zone_id: sha256_of_normalized_1m_precision_polygon_wkb
+  local_restricted_artifacts:
+    directory: data/interim/stage4/anomaly_increment
+    cell_mapping: data/interim/stage4/anomaly_increment/construction_zone_cell_mapping.parquet
+    entity_mapping: data/interim/stage4/anomaly_increment/construction_zone_entity_mapping.parquet
+    connectors: data/interim/stage4/anomaly_increment/construction_zone_connectors.json
+    zone_geometry: data/interim/stage4/anomaly_increment/construction_zones.parquet
+    paths_are_project_relative_and_gitignored: true
+    all_four_hashes_must_match_public_spatial_manifest_before_scoring: true
+    missing_artifact_action: rebuild_score_blind_then_verify_or_stop
+  reproducibility:
+    generate_command: .venv/Scripts/python.exe scripts/build_stage4_preregistration.py generate
+    check_command: .venv/Scripts/python.exe scripts/build_stage4_preregistration.py check
+    target_catalog_read_forbidden: true
+  geometry_available_at_role: evaluation_design_metadata_not_causal_forecast_covariate
+  historical_feature_use_forbidden: true
+  license_status: unknown_no_redistribution
+  public_geometry_or_mapping_forbidden: true
+
+randomness:
+  root_seed: 147
+  generator: numpy.random.PCG64
+  derivation: sha256_stage4_prefix_root_seed_and_canonical_typed_context_then_first_16_bytes
+  frozen_input_seal_components:
+    - normalized_protocol_design
+    - fold_manifest_content_sha256
+    - feature_manifest_content_sha256
+    - spatial_manifest_content_sha256_including_local_artifact_hashes
+    - accepted_background_artifact_identity
+    - accepted_stage3_bundle_identity
+    - expected_scoring_code_tag
+  bootstrap_seed_context:
+    - schema_version
+    - protocol_version
+    - frozen_input_seal_sha256
+    - purpose
+    - evaluation_id
+    - partition_role
+    - pairing_scope
+    - replication_index
+  time_mapping_seed_context:
+    - schema_version
+    - protocol_version
+    - frozen_input_seal_sha256
+    - purpose
+    - evaluation_id
+    - partition_role
+    - pairing_scope
+    - replication_index
+  space_mapping_seed_context:
+    - schema_version
+    - protocol_version
+    - frozen_input_seal_sha256
+    - purpose
+    - evaluation_id
+    - partition_role
+    - issue_id
+    - construction_stratum_id
+    - pairing_scope
+    - replication_index
+  seed_context_forbidden_fields: [model_variant, magnitude_bin, horizon, metric, worker_count]
+  paired_across: [model_variants, magnitude_bins, horizons, metrics]
+  result_identity_may_include: [model_variant, magnitude_bin, horizon, metric]
+  reference_vectors_required_for:
+    evaluation_ids: [development-fold-1, development-fold-2, development-fold-3, formal-validation]
+    replication_indices: [0, 1, last]
+    legal_partition_roles: all_for_each_random_family
+  direct_integer_subseeds_forbidden: true
+  worker_count_invariant: true
+  gather_order: replication_index_ascending
+
+compute:
+  default_backend: cpu_float64
+  physical_cores_expected: 24
+  logical_processors_observed: 48
+  reserve_physical_cores: 2
+  max_workers: 12
+  nested_parallelism: false
+  blas_threads_per_worker: 1
+  gpu_available_reference:
+    device: NVIDIA Quadro M6000
+    memory_mib: 12288
+    compute_capability: '5.2'
+    driver: '531.29'
+    python_gpu_backend_installed_at_freeze: false
+  gpu_equivalence:
+    status: optional_acceleration_blocked_until_equivalence_passes
+    cpu_path_required: true
+    random_permutations_generated_on_cpu_and_transferred_unchanged: true
+    float64_required: true
+    objective_relative_tolerance: 1.0e-10
+    gradient_max_abs_tolerance: 1.0e-8
+    coefficient_max_abs_tolerance: 1.0e-8
+    integrated_intensity_relative_tolerance: 1.0e-8
+    scientific_output_identity_required_within_tolerances: true
+    failure_action: cpu_only
+    gpu_may_not_change_model_features_hyperparameters_or_random_streams: true
+  checkpoint_every_permutation_replications: 25
+  heartbeat_seconds: 30
+  record_cpu_memory_gpu_elapsed_and_parallelism: true
+
+publication:
+  required_registry: data/manifests/anomaly_increment_model_registry.json
+  required_report: docs/anomaly_increment_report.md
+  required_static_svg: docs/anomaly_increment_results.svg
+  required_interactive_local: outputs/visualizations/anomaly_increment_dashboard.html
+  required_model_card: docs/model_cards/anomaly_increment.md
+  register_all_formal_attempts_including_failures: true
+  failure_still_requires_static_and_interactive_outputs: true
+  static_panels:
+    - data_and_model_flow
+    - coefficient_and_effect_curves
+    - distance_and_lead_decay
+    - foldwise_dynamic_vs_snapshot
+    - observed_vs_time_and_space_permutation
+    - information_gain_with_bootstrap_intervals
+    - region_by_horizon_increment_heatmap
+    - molchan_curve
+    - fixed_area_recall_curve
+  interactive_controls:
+    - issue_date
+    - magnitude_bin
+    - horizon
+    - background_vs_background_plus_anomaly
+    - snapshot_vs_dynamic
+    - retrospective_vs_prospective_status
+    - sample_size
+    - model_version
+  retrospective_target_overlay_visually_separate: true
+  retrospective_target_overlay_hidden_in_true_forecast_mode: true
+  absolute_probability_claim_forbidden: true
+  required_terms: [conditional_intensity, expected_event_intensity, relative_strength, rank]
+
+forbidden_result_fields_before_freeze:
+  - target_ids
+  - target_locations
+  - target_count
+  - model_score
+  - information_gain
+  - hit_result
+  - permutation_result
+  - p_value
+  - selected_anomaly_model_id
+  - score_id
+  - locked_test_result
+
+locked_test:
+  action: do_not_run
+  run: false
+  issue_dates_start: null
+  issue_dates_end: null
+  target_count: null
+  target_ids: []
+  score_ids: []
+  artifact_ids: []
+  result: null
+  cohort_manifest_path: null
+  formal_test_execution_forbidden_in_stage4: true
+  formal_test_belongs_to_stage9: true
+  outcomes_must_remain_unread: true

@@ -23,6 +23,7 @@ from seismoflux.background.randomness import SeedContext
 DomainClass = Literal["study", "buffer", "outside"]
 DomainClassifier = Callable[[float, float], DomainClass]
 BackgroundSampler = Callable[[np.random.Generator], tuple[float, float]]
+ACTIVE_FUTURE_PROTOCOL_VERSIONS = ("0.2.0", "0.2.1")
 
 
 def _finite(name: str, value: float) -> float:
@@ -258,19 +259,32 @@ def simulate_future_catalog(
         or maximum_events <= 0
     ):
         raise ValueError("maximum_events must be a positive integer")
+    if not isinstance(seed_context, SeedContext):
+        raise TypeError("future simulation seed_context must be SeedContext")
     if seed_context.namespace != "future_simulation":
         raise ValueError("future simulation requires the future_simulation RNG namespace")
-    if seed_context.root_seed != 147 or seed_context.protocol_version != "0.2.0":
-        raise ValueError("future simulation seed must use the frozen root and protocol version")
+    if seed_context.root_seed != 147:
+        raise ValueError("future simulation seed must use the frozen root seed")
+    if seed_context.protocol_version not in ACTIVE_FUTURE_PROTOCOL_VERSIONS:
+        raise ValueError("future simulation seed must use an active 0.2.0 or 0.2.1 version")
     if seed_context.model_id != "etas/final_validation":
         raise ValueError("future simulation model_id must be etas/final_validation")
-    if seed_context.issue_id is None or not seed_context.issue_id.startswith("validation/"):
+    if not isinstance(seed_context.issue_id, str) or not seed_context.issue_id.startswith(
+        "validation/"
+    ):
         raise ValueError("future simulation issue_id must use validation/YYYY-MM-DD")
+    issue_date_text = seed_context.issue_id.removeprefix("validation/")
     try:
-        date.fromisoformat(seed_context.issue_id.removeprefix("validation/"))
+        parsed_issue_date = date.fromisoformat(issue_date_text)
     except ValueError as error:
         raise ValueError("future simulation issue_id must use validation/YYYY-MM-DD") from error
-    if not 0 <= seed_context.replicate_index <= 127:
+    if parsed_issue_date.isoformat() != issue_date_text:
+        raise ValueError("future simulation issue_id must use validation/YYYY-MM-DD")
+    if (
+        not isinstance(seed_context.replicate_index, int)
+        or isinstance(seed_context.replicate_index, bool)
+        or not 0 <= seed_context.replicate_index <= 127
+    ):
         raise ValueError("future simulation replicate index must be in 0..127")
     if horizon != 365.0:
         raise ValueError("future simulation must run once at the frozen 365-day horizon")

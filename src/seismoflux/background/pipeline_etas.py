@@ -51,6 +51,7 @@ from seismoflux.background.pipeline_poisson import (
     PoissonSnapshotFit,
 )
 from seismoflux.background.poisson import SpatialPoissonModel
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 from seismoflux.background.workflow import (
     CompletenessSnapshot,
     SnapshotDefinition,
@@ -623,6 +624,7 @@ def run_etas_pipeline(
 ) -> ETASPipelineResult:
     """Attempt, gate, and pair all five frozen ETAS snapshots without fail-fast drift."""
 
+    require_background_scoring_authorized(config)
     snapshots_input = _validate_inputs(config, poisson_result, completeness_snapshots)
     protocol_sha256 = _canonical_sha256(config.model_dump(mode="python"))
     uniform_scores = _uniform_scores(poisson_result)

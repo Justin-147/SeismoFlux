@@ -22,7 +22,7 @@ from seismoflux.background.artifacts import (
 def _inputs() -> dict[str, object]:
     lock_hash = "c" * 64
     return {
-        "protocol": {"version": "0.2.0"},
+        "protocol": {"protocol_version": "0.2.0"},
         "input_hashes": {
             "environment_lock": lock_hash,
             "data_catalog": "a" * 64,
@@ -36,6 +36,19 @@ def _inputs() -> dict[str, object]:
         "code_commit": "b" * 40,
         "uv_lock_sha256": lock_hash,
     }
+
+
+def _support_manifest_inputs() -> dict[str, object]:
+    inputs = _inputs()
+    support_digest = "2" * 64
+    protocol = cast(dict[str, object], inputs["protocol"])
+    protocol["protocol_version"] = "0.2.1"
+    protocol["inputs"] = {
+        "support_manifest": "data/manifests/background_support_manifest.json",
+        "support_manifest_sha256": support_digest,
+    }
+    cast(dict[str, str], inputs["input_hashes"])["support_manifest"] = support_digest
+    return inputs
 
 
 def _files(payload: bytes = b"metrics") -> tuple[ArtifactFile, ...]:
@@ -103,6 +116,89 @@ def test_content_address_is_first_16_hex_of_canonical_sha256() -> None:
 
     assert content_address_id(inputs) == expected[:16]
     assert len(content_address_id(inputs)) == 16
+
+
+def test_v020_content_address_bytes_and_id_are_unchanged() -> None:
+    payload = canonical_json_bytes(_inputs())
+
+    assert hashlib.sha256(payload).hexdigest() == (
+        "0b7b0db18bb164dced3e3d108cffe6a117a33470f8f49727d16747ce4b622c90"
+    )
+    assert content_address_id(_inputs()) == "0b7b0db18bb164dc"
+
+
+def test_support_manifest_protocol_requires_exact_sorted_eight_hashes() -> None:
+    inputs = _support_manifest_inputs()
+    canonical = cast(dict[str, object], json.loads(canonical_json_bytes(inputs)))
+    canonical_hashes = cast(dict[str, str], canonical["input_hashes"])
+
+    assert tuple(canonical_hashes) == (
+        "data_catalog",
+        "earthquake_dataset",
+        "environment_lock",
+        "issue_manifest",
+        "oracle_metadata",
+        "production_fixture",
+        "study_area",
+        "support_manifest",
+    )
+    expected = hashlib.sha256(canonical_json_bytes(inputs)).hexdigest()
+    assert content_address_id(inputs) == expected[:16]
+
+    without_support = _support_manifest_inputs()
+    del cast(dict[str, str], without_support["input_hashes"])["support_manifest"]
+    with pytest.raises(ValueError, match="complete frozen key set"):
+        content_address_id(without_support)
+
+    missing_multiple = _support_manifest_inputs()
+    missing_hashes = cast(dict[str, str], missing_multiple["input_hashes"])
+    del missing_hashes["support_manifest"]
+    del missing_hashes["study_area"]
+    with pytest.raises(ValueError, match="complete frozen key set"):
+        content_address_id(missing_multiple)
+
+
+def test_support_manifest_schema_rejects_partial_or_inconsistent_declarations() -> None:
+    old_with_extra_hash = _inputs()
+    cast(dict[str, str], old_with_extra_hash["input_hashes"])["support_manifest"] = "2" * 64
+    with pytest.raises(ValueError, match="complete frozen key set"):
+        content_address_id(old_with_extra_hash)
+
+    partial_protocol = _support_manifest_inputs()
+    protocol = cast(dict[str, object], partial_protocol["protocol"])
+    protocol_inputs = cast(dict[str, str], protocol["inputs"])
+    del protocol_inputs["support_manifest_sha256"]
+    with pytest.raises(ValueError, match="must declare support_manifest"):
+        content_address_id(partial_protocol)
+
+    inconsistent = _support_manifest_inputs()
+    cast(dict[str, str], inconsistent["input_hashes"])["support_manifest"] = "3" * 64
+    with pytest.raises(ValueError, match="frozen protocol digest"):
+        content_address_id(inconsistent)
+
+
+def test_content_address_dispatches_strictly_by_protocol_version() -> None:
+    v020_with_support = _support_manifest_inputs()
+    cast(dict[str, object], v020_with_support["protocol"])["protocol_version"] = "0.2.0"
+    with pytest.raises(ValueError, match="0.2.0 forbids support_manifest"):
+        content_address_id(v020_with_support)
+
+    v021_without_support = _inputs()
+    protocol = cast(dict[str, object], v021_without_support["protocol"])
+    protocol["protocol_version"] = "0.2.1"
+    protocol["inputs"] = {}
+    with pytest.raises(ValueError, match="0.2.1 must declare support_manifest"):
+        content_address_id(v021_without_support)
+
+    unknown = _inputs()
+    cast(dict[str, object], unknown["protocol"])["protocol_version"] = "0.2.2"
+    with pytest.raises(ValueError, match="unsupported background protocol_version"):
+        content_address_id(unknown)
+
+    missing_version = _inputs()
+    del cast(dict[str, object], missing_version["protocol"])["protocol_version"]
+    with pytest.raises(ValueError, match="unsupported background protocol_version"):
+        content_address_id(missing_version)
 
 
 def test_content_address_rejects_missing_or_malformed_required_inputs() -> None:
