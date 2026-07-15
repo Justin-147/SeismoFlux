@@ -47,6 +47,42 @@ class _BackgroundManifestResult(Protocol):
     def to_manifest_details(self) -> dict[str, object]: ...
 
 
+class _Stage3PlanResult(Protocol):
+    @property
+    def planned_inputs(self) -> tuple[str, ...]: ...
+
+    @property
+    def planned_outputs(self) -> tuple[str, ...]: ...
+
+    @property
+    def local_output_root_reference(self) -> str: ...
+
+    @property
+    def public_output_references(self) -> tuple[str, ...]: ...
+
+    def to_manifest_details(self) -> dict[str, object]: ...
+
+
+class _Stage3ManifestResult(Protocol):
+    def to_manifest_details(self) -> dict[str, object]: ...
+
+
+@dataclass(slots=True)
+class _Stage3DeliveryProgress:
+    """Track durable stage-3 delivery boundaries reported by the runner."""
+
+    sink: Callable[[str], None]
+    local_bundle_confirmed: bool = False
+    public_delivery_confirmed: bool = False
+
+    def __call__(self, message: str) -> None:
+        if message.startswith("bundle:done:"):
+            self.local_bundle_confirmed = True
+        elif message.startswith("public_fixed_delivery:done:"):
+            self.public_delivery_confirmed = True
+        self.sink(message)
+
+
 def run_background_stage2(
     config_path: Path,
     *,
@@ -67,13 +103,36 @@ def run_background_stage2(
     return run_background_stage2(config_path, progress=progress)
 
 
+def build_anomaly_history_plan(config_path: Path) -> _Stage3PlanResult:
+    """Lazily import the score-free stage-3 planner for this command only."""
+
+    from seismoflux.features.anomaly.runner import build_stage3_plan
+
+    return build_stage3_plan(config_path)
+
+
+def run_anomaly_history_stage3(
+    config_path: Path,
+    *,
+    progress: Callable[[str], None],
+) -> _Stage3ManifestResult:
+    """Lazily import the target-blind stage-3 scientific runner for execution only."""
+
+    from seismoflux.features.anomaly.runner import run_anomaly_history_stage3
+
+    return run_anomaly_history_stage3(config_path, progress=progress)
+
+
 COMMAND_SPECS: dict[str, CommandSpec] = {
     "inventory": CommandSpec(0, True, ("external raw files",), ("source inventory CSV",)),
     "ingest": CommandSpec(1, True, ("external raw files",), ("standardized data",)),
     "validate-data": CommandSpec(1, True, ("standardized data",), ("data quality report",)),
     "build-background": CommandSpec(2, True, ("earthquake catalog",), ("background registry",)),
     "build-anomaly-history": CommandSpec(
-        3, False, ("anomaly observations",), ("anomaly state history",)
+        3,
+        True,
+        ("registered anomaly observations and report periods",),
+        ("immutable anomaly state and feature bundle",),
     ),
     "train": CommandSpec(4, False, ("feature stores",), ("experiment model",)),
     "backtest": CommandSpec(4, False, ("experiment model",), ("backtest metrics",)),
@@ -398,6 +457,11 @@ def _background_progress(message: str) -> None:
     sys.stderr.flush()
 
 
+def _stage3_progress(message: str) -> None:
+    sys.stderr.write(f"阶段3动态异常特征: {message}\n")
+    sys.stderr.flush()
+
+
 def _stderr_best_effort(message: str) -> None:
     """Report a secondary CLI condition without changing the scientific outcome."""
 
@@ -516,6 +580,108 @@ def _run_background(namespace: argparse.Namespace) -> int:
     return 0
 
 
+def _run_anomaly_history(namespace: argparse.Namespace) -> int:
+    config_path = Path(namespace.config)
+    project = load_config(config_path)
+    plan = build_anomaly_history_plan(config_path)
+    manifest_destination = _validated_manifest_destination(
+        namespace.manifest,
+        config_path=config_path,
+        protected_paths=[
+            *(resolve_project_path(config_path, item) for item in plan.planned_inputs),
+            *(resolve_project_path(config_path, item) for item in plan.public_output_references),
+        ],
+        protected_directories=[
+            resolve_project_path(config_path, plan.local_output_root_reference),
+        ],
+    )
+    details = plan.to_manifest_details()
+    dry_run = bool(namespace.dry_run)
+    if dry_run:
+        manifest = build_run_manifest(
+            command="build-anomaly-history",
+            dry_run=True,
+            implementation_stage=3,
+            implementation_status="implemented",
+            status="planned",
+            arguments=_safe_arguments(namespace),
+            config_path=config_path,
+            config=project,
+            planned_inputs=list(plan.planned_inputs),
+            planned_outputs=list(plan.planned_outputs),
+            details=details,
+        )
+        emit_run_manifest(manifest, manifest_destination)
+        return 0
+
+    delivery_progress = _Stage3DeliveryProgress(_stage3_progress)
+    try:
+        result = run_anomaly_history_stage3(config_path, progress=delivery_progress)
+    except (OSError, RuntimeError, ValueError) as exc:
+        failed_details = {
+            **details,
+            "failure": {
+                "error_type": type(exc).__name__,
+                "message": str(exc),
+                "local_bundle_confirmed": delivery_progress.local_bundle_confirmed,
+                "public_delivery_confirmed": delivery_progress.public_delivery_confirmed,
+                "partial_content_addressed_bundle_may_exist": (
+                    not delivery_progress.local_bundle_confirmed
+                ),
+                "locked_test_run": False,
+            },
+        }
+        reporting_error: Exception | None = None
+        try:
+            manifest = build_run_manifest(
+                command="build-anomaly-history",
+                dry_run=False,
+                implementation_stage=3,
+                implementation_status="implemented",
+                status="failed",
+                arguments=_safe_arguments(namespace),
+                config_path=config_path,
+                config=project,
+                planned_inputs=list(plan.planned_inputs),
+                planned_outputs=list(plan.planned_outputs),
+                details=failed_details,
+            )
+            emit_run_manifest(manifest, manifest_destination)
+        except Exception as manifest_exc:
+            reporting_error = manifest_exc
+        _stderr_best_effort(f"seismoflux: {exc}\n")
+        if reporting_error is not None:
+            _stderr_best_effort(
+                "seismoflux: 阶段3失败运行清单报告也失败"
+                f" ({type(reporting_error).__name__}: {reporting_error}); "
+                "原始阶段3错误保持有效。本地bundle未确认。\n"
+            )
+        return 2
+
+    try:
+        completed_details = result.to_manifest_details()
+        manifest = build_run_manifest(
+            command="build-anomaly-history",
+            dry_run=False,
+            implementation_stage=3,
+            implementation_status="implemented",
+            status="completed",
+            arguments=_safe_arguments(namespace),
+            config_path=config_path,
+            config=project,
+            planned_inputs=list(plan.planned_inputs),
+            planned_outputs=list(plan.planned_outputs),
+            details=completed_details,
+        )
+        emit_run_manifest(manifest, manifest_destination)
+    except Exception as exc:
+        _stderr_best_effort(
+            "seismoflux: 阶段3本地内容寻址交付已确认; 辅助运行清单报告失败"
+            f" ({type(exc).__name__}: {exc})。\n"
+        )
+    return 0
+
+
 def _run_deferred(namespace: argparse.Namespace) -> int:
     command = str(namespace.command)
     spec = COMMAND_SPECS[command]
@@ -569,6 +735,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_stage1(namespace)
         if namespace.command == "build-background":
             return _run_background(namespace)
+        if namespace.command == "build-anomaly-history":
+            return _run_anomaly_history(namespace)
         return _run_deferred(namespace)
     except (OSError, RuntimeError, ValueError) as exc:
         sys.stderr.write(f"seismoflux: {exc}\n")

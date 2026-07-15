@@ -59,16 +59,80 @@ def test_every_command_supports_machine_readable_dry_run(
     assert manifest["status"] == "planned"
 
 
-def test_deferred_command_fails_instead_of_making_placeholder_output(
+def test_anomaly_history_execute_calls_single_stage3_entry(
+    monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    calls: list[tuple[Path, object]] = []
+
+    class _SyntheticStage3Run:
+        def to_manifest_details(self) -> dict[str, object]:
+            return {
+                "bundle_id": "anomaly-feature-bundle-0123456789abcdef",
+                "local_bundle_confirmed": True,
+                "public_delivery_confirmed": True,
+                "locked_test": {"run": False},
+            }
+
+    def execute(
+        config_path: Path,
+        *,
+        progress: Any,
+    ) -> _SyntheticStage3Run:
+        calls.append((config_path, progress))
+        progress("bundle:done:anomaly-feature-bundle-0123456789abcdef")
+        progress("public_fixed_delivery:done:files=4")
+        return _SyntheticStage3Run()
+
+    monkeypatch.setattr(cli_module, "run_anomaly_history_stage3", execute)
     exit_code = main(["build-anomaly-history"])
     captured = capsys.readouterr()
     manifest = cast(dict[str, Any], json.loads(captured.out))
 
+    assert exit_code == 0
+    assert len(calls) == 1
+    assert calls[0][0] == Path("configs/base.yaml")
+    progress = calls[0][1]
+    assert isinstance(progress, cli_module._Stage3DeliveryProgress)
+    assert progress.local_bundle_confirmed is True
+    assert progress.public_delivery_confirmed is True
+    assert "bundle:done:anomaly-feature-bundle-0123456789abcdef" in captured.err
+    assert "public_fixed_delivery:done:files=4" in captured.err
+    assert manifest["status"] == "completed"
+    assert manifest["implementation_stage"] == 3
+    assert manifest["implementation_status"] == "implemented"
+    assert manifest["details"]["local_bundle_confirmed"] is True
+    assert manifest["details"]["public_delivery_confirmed"] is True
+    assert manifest["details"]["locked_test"]["run"] is False
+
+
+def test_anomaly_history_failure_after_local_bundle_records_public_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def fail_after_bundle(
+        config_path: Path,
+        *,
+        progress: Any,
+    ) -> object:
+        assert config_path == Path("configs/base.yaml")
+        progress("bundle:done:anomaly-feature-bundle-0123456789abcdef")
+        progress("public_fixed_delivery:start")
+        raise RuntimeError("synthetic public delivery failure")
+
+    monkeypatch.setattr(cli_module, "run_anomaly_history_stage3", fail_after_bundle)
+    exit_code = main(["build-anomaly-history"])
+    captured = capsys.readouterr()
+    manifest = cast(dict[str, Any], json.loads(captured.out))
+    failure = cast(dict[str, Any], manifest["details"]["failure"])
+
     assert exit_code == 2
-    assert manifest["status"] == "blocked"
-    assert "deferred to stage 3" in captured.err
+    assert manifest["status"] == "failed"
+    assert failure["local_bundle_confirmed"] is True
+    assert failure["public_delivery_confirmed"] is False
+    assert failure["partial_content_addressed_bundle_may_exist"] is False
+    assert "bundle:done:anomaly-feature-bundle-0123456789abcdef" in captured.err
+    assert "synthetic public delivery failure" in captured.err
 
 
 def test_background_dry_run_is_score_free_and_machine_readable(
