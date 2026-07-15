@@ -408,6 +408,32 @@ def render_stage3_audit_svg(
 
     if not aggregate.accepted or not audit.passed:
         raise ValueError("stage-3 audit SVG is published only after all aggregate gates pass")
+    timeline_start_x = 96.0
+    timeline_end_x = 1104.0
+    timeline_days = (aggregate.last_report_date - aggregate.first_report_date).days
+    if timeline_days <= 0:
+        raise ValueError("stage-3 audit SVG requires an increasing report-date range")
+    missing_periods = (
+        (date(2024, 9, 4), "2024 第36期缺报", 246),
+        (date(2025, 10, 29), "2025 第44期缺报", 318),
+    )
+    missing_markers: list[tuple[float, str, int]] = []
+    for missing_date, label, label_y in missing_periods:
+        if not aggregate.first_report_date <= missing_date <= aggregate.last_report_date:
+            raise ValueError(
+                f"known missing period {missing_date.isoformat()} is outside report range"
+            )
+        elapsed_days = (missing_date - aggregate.first_report_date).days
+        marker_x = timeline_start_x + (
+            (timeline_end_x - timeline_start_x) * elapsed_days / timeline_days
+        )
+        missing_markers.append((marker_x, label, label_y))
+    marker_path = " ".join(f"M{marker_x:.3f} 254 v32" for marker_x, _, _ in missing_markers)
+    marker_labels = "".join(
+        f'<text x="{marker_x:.3f}" y="{label_y}" text-anchor="middle" '
+        f'class="muted small">{escape(label)}</text>'
+        for marker_x, label, label_y in missing_markers
+    )
     total = aggregate.entity_state_row_count
     quality = (
         ("高可靠", aggregate.reliability_high_state_row_count, "--viz-series-1", "#2563eb"),
@@ -487,11 +513,10 @@ def render_stage3_audit_svg(
 <line x1="96" y1="270" x2="1104" y2="270" class="accent" opacity="0.62"/>
 <circle cx="96" cy="270" r="7" fill="var(--viz-series-1,#2563eb)"/>
 <circle cx="1104" cy="270" r="7" fill="var(--viz-series-1,#2563eb)"/>
-<path d="M625 254 v32 M866 254 v32" stroke="var(--viz-series-2,#d97706)" stroke-width="4"/>
+<path d="{marker_path}" stroke="var(--viz-series-2,#d97706)" stroke-width="4"/>
 <text x="96" y="304" class="muted small">{aggregate.first_report_date.isoformat()}</text>
 <text x="1104" y="304" text-anchor="end" class="muted small">{aggregate.last_report_date.isoformat()}</text>
-<text x="625" y="246" text-anchor="middle" class="muted small">2024 第36期缺报</text>
-<text x="866" y="318" text-anchor="middle" class="muted small">2025 第44期缺报</text>
+{marker_labels}
 <text x="84" y="344" class="fg section">实体状态可靠性构成（聚合计数）</text>
 {"".join(bar_parts)}
 {"".join(legend_parts)}

@@ -243,6 +243,31 @@ def test_audit_svg_is_valid_and_has_no_spatial_detail() -> None:
         assert forbidden not in text
 
 
+def test_audit_svg_places_missing_periods_on_the_date_axis() -> None:
+    svg = _deliverables().audit_svg_bytes
+    root = ElementTree.fromstring(svg)
+    start = date(2022, 7, 20)
+    end = date(2026, 7, 1)
+    axis_start_x = 96.0
+    axis_width = 1104.0 - axis_start_x
+    expected = {
+        "2024 第36期缺报": axis_start_x
+        + axis_width * (date(2024, 9, 4) - start).days / (end - start).days,
+        "2025 第44期缺报": axis_start_x
+        + axis_width * (date(2025, 10, 29) - start).days / (end - start).days,
+    }
+    marker_path = next(
+        element.attrib["d"]
+        for element in root.iter()
+        if element.tag.endswith("path") and "#d97706" in element.attrib.get("stroke", "")
+    )
+
+    for label, expected_x in expected.items():
+        label_node = next(element for element in root.iter() if element.text == label)
+        assert float(label_node.attrib["x"]) == pytest.approx(expected_x, abs=0.001)
+        assert f"M{expected_x:.3f} 254 v32" in marker_path
+
+
 def test_fixed_publication_is_idempotent_and_refuses_conflict(tmp_path: Path) -> None:
     deliverables = _deliverables()
     first = publish_stage3_public_deliverables(tmp_path, deliverables)
