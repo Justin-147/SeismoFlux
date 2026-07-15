@@ -150,6 +150,34 @@ def test_compute_plan_reserves_cores_and_keeps_current_protocol_cpu_only() -> No
     assert set(plan.workers.blas_environment().values()) == {"1"}
 
 
+def test_compute_plan_caps_configured_physical_cores_at_available_logical_cores() -> None:
+    bundle = load_stage4_protocol_bundle(Path.cwd())
+    plan = build_compute_plan(bundle, detected_logical_processors=4)
+
+    assert plan.workers.physical_cores == 4
+    assert plan.workers.logical_processors == 4
+    assert plan.workers.reserve_physical_cores == 2
+    assert plan.workers.effective_workers == 2
+
+
+def test_compute_plan_rejects_explicitly_inconsistent_detected_core_counts() -> None:
+    bundle = load_stage4_protocol_bundle(Path.cwd())
+
+    with pytest.raises(ValueError, match="logical processor count cannot be below physical"):
+        build_compute_plan(
+            bundle,
+            detected_physical_cores=24,
+            detected_logical_processors=4,
+        )
+
+
+def test_compute_plan_fails_closed_when_two_cores_cannot_be_reserved() -> None:
+    bundle = load_stage4_protocol_bundle(Path.cwd())
+
+    with pytest.raises(ValueError, match="reserved physical cores must be fewer"):
+        build_compute_plan(bundle, detected_logical_processors=2)
+
+
 def test_numpy_float64_backend_rejects_nonfinite_and_shape_drift() -> None:
     backend = NumpyFloat64Backend()
     result = backend.matvec([[1.0, 2.0], [3.0, 4.0]], [0.5, -0.25])

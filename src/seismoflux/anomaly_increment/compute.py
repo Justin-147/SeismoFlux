@@ -247,10 +247,8 @@ def build_compute_plan(
     """Resolve resources without importing or probing an unpinned GPU runtime."""
 
     compute = _mapping(protocol.protocol.get("compute"), label="compute")
-    physical = (
-        _positive_integer(compute.get("physical_cores_expected"), label="physical expected")
-        if detected_physical_cores is None
-        else _positive_integer(detected_physical_cores, label="detected_physical_cores")
+    configured_physical = _positive_integer(
+        compute.get("physical_cores_expected"), label="physical expected"
     )
     detected_logical = (
         os.cpu_count() if detected_logical_processors is None else detected_logical_processors
@@ -259,6 +257,11 @@ def build_compute_plan(
         _positive_integer(compute.get("logical_processors_observed"), label="logical observed")
         if detected_logical is None
         else _positive_integer(detected_logical, label="detected_logical_processors")
+    )
+    physical = (
+        min(configured_physical, logical)
+        if detected_physical_cores is None
+        else _positive_integer(detected_physical_cores, label="detected_physical_cores")
     )
     workers = Stage4WorkerPlan(
         physical_cores=physical,

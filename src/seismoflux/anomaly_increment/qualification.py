@@ -51,7 +51,7 @@ REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "fixed_small_permutation_matches_stage3_low_level_reference",
     "worker_count_invariance_passed",
 )
-FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int] = 1048
+FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int] = 1051
 REQUIRED_TESTS_BY_QUALIFICATION: Final[dict[str, tuple[str, ...]]] = {
     "all_non_target_tests_passed": (),
     "synthetic_end_to_end_passed": (

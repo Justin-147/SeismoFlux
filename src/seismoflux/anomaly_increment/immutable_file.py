@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 import stat
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -102,61 +103,73 @@ def ensure_real_directory_tree(
             require_existing_real_directory(cursor, label=label)
 
 
-def _open_windows_reparse_point(path: Path, flags: int = os.O_RDONLY) -> int:
-    """Open the final path component itself, never a Windows reparse target."""
+if sys.platform == "win32":
 
-    import ctypes
-    import msvcrt
-    from ctypes import wintypes
+    def _open_windows_reparse_point(path: Path, flags: int = os.O_RDONLY) -> int:
+        """Open the final path component itself, never a Windows reparse target."""
 
-    generic_read = 0x80000000
-    generic_write = 0x40000000
-    file_share_read = 0x00000001
-    open_existing = 3
-    file_attribute_normal = 0x00000080
-    file_flag_open_reparse_point = 0x00200000
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    create_file = kernel32.CreateFileW
-    create_file.argtypes = (
-        wintypes.LPCWSTR,
-        wintypes.DWORD,
-        wintypes.DWORD,
-        wintypes.LPVOID,
-        wintypes.DWORD,
-        wintypes.DWORD,
-        wintypes.HANDLE,
-    )
-    create_file.restype = wintypes.HANDLE
-    close_handle = kernel32.CloseHandle
-    close_handle.argtypes = (wintypes.HANDLE,)
-    close_handle.restype = wintypes.BOOL
-    handle = create_file(
-        str(path),
-        generic_read | (generic_write if (flags & os.O_RDWR) or (flags & os.O_WRONLY) else 0),
-        file_share_read,
-        None,
-        open_existing,
-        file_attribute_normal | file_flag_open_reparse_point,
-        None,
-    )
-    if handle == wintypes.HANDLE(-1).value:
-        raise ctypes.WinError(ctypes.get_last_error())
-    raw_handle = cast(int, handle)
-    try:
-        return msvcrt.open_osfhandle(raw_handle, flags | os.O_BINARY)
-    except Exception:
-        close_handle(handle)
-        raise
+        import ctypes
+        import msvcrt
+        from ctypes import wintypes
+
+        generic_read = 0x80000000
+        generic_write = 0x40000000
+        file_share_read = 0x00000001
+        open_existing = 3
+        file_attribute_normal = 0x00000080
+        file_flag_open_reparse_point = 0x00200000
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create_file = kernel32.CreateFileW
+        create_file.argtypes = (
+            wintypes.LPCWSTR,
+            wintypes.DWORD,
+            wintypes.DWORD,
+            wintypes.LPVOID,
+            wintypes.DWORD,
+            wintypes.DWORD,
+            wintypes.HANDLE,
+        )
+        create_file.restype = wintypes.HANDLE
+        close_handle = kernel32.CloseHandle
+        close_handle.argtypes = (wintypes.HANDLE,)
+        close_handle.restype = wintypes.BOOL
+        handle = create_file(
+            str(path),
+            generic_read | (generic_write if (flags & os.O_RDWR) or (flags & os.O_WRONLY) else 0),
+            file_share_read,
+            None,
+            open_existing,
+            file_attribute_normal | file_flag_open_reparse_point,
+            None,
+        )
+        if handle == wintypes.HANDLE(-1).value:
+            raise ctypes.WinError(ctypes.get_last_error())
+        raw_handle = cast(int, handle)
+        try:
+            return msvcrt.open_osfhandle(raw_handle, flags | os.O_BINARY)
+        except Exception:
+            close_handle(handle)
+            raise
+
+else:
+
+    def _open_windows_reparse_point(path: Path, flags: int = os.O_RDONLY) -> int:
+        """Fail closed if a Windows-only primitive is reached on another platform."""
+
+        raise UnsafeImmutableFileError(
+            f"Windows reparse-point open is unavailable for {path} with flags {flags}"
+        )
 
 
 def _open_no_follow(path: Path, flags: int = os.O_RDONLY) -> int:
-    if os.name == "nt":
+    if sys.platform == "win32":
         return _open_windows_reparse_point(path, flags)
-    no_follow = getattr(os, "O_NOFOLLOW", None)
-    if not isinstance(no_follow, int):
-        raise UnsafeImmutableFileError("platform has no race-safe no-follow open")
-    close_on_exec = cast(int, getattr(os, "O_CLOEXEC", 0))
-    return os.open(path, flags | no_follow | close_on_exec)
+    else:
+        no_follow = getattr(os, "O_NOFOLLOW", None)
+        if not isinstance(no_follow, int):
+            raise UnsafeImmutableFileError("platform has no race-safe no-follow open")
+        close_on_exec = cast(int, getattr(os, "O_CLOEXEC", 0))
+        return os.open(path, flags | no_follow | close_on_exec)
 
 
 def open_existing_single_link_descriptor(

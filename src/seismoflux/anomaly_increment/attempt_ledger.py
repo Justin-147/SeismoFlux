@@ -14,6 +14,7 @@ import importlib
 import json
 import os
 import re
+import sys
 import tempfile
 import threading
 from collections.abc import Callable, Iterator, Mapping, Sequence
@@ -354,7 +355,7 @@ def _exclusive_file_lock(path: Path) -> Iterator[None]:
                 os.write(descriptor, b"\0")
                 os.fsync(descriptor)
             os.lseek(descriptor, 0, os.SEEK_SET)
-            if os.name == "nt":
+            if sys.platform == "win32":
                 import msvcrt
 
                 msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
@@ -375,7 +376,7 @@ def _exclusive_file_lock(path: Path) -> Iterator[None]:
                 yield
             finally:
                 os.lseek(descriptor, 0, os.SEEK_SET)
-                if os.name == "nt":
+                if sys.platform == "win32":
                     import msvcrt
 
                     msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
