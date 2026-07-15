@@ -28,11 +28,11 @@ from seismoflux.anomaly_increment.preregistration import (
     verify_content_sha256,
 )
 
-PROTOCOL_PATH = Path("configs/anomaly_increment.yaml")
-FOLD_MANIFEST_PATH = Path("data/manifests/anomaly_increment_fold_manifest.json")
-FEATURE_SET_PATH = Path("data/manifests/anomaly_increment_feature_set.json")
-RANDOMNESS_PATH = Path("data/manifests/anomaly_increment_randomness.json")
-SPATIAL_STRATA_PATH = Path("data/manifests/anomaly_increment_spatial_strata.json")
+PROTOCOL_PATH = Path("configs/anomaly_increment_r1.yaml")
+FOLD_MANIFEST_PATH = Path("data/manifests/anomaly_increment_r1_fold_manifest.json")
+FEATURE_SET_PATH = Path("data/manifests/anomaly_increment_r1_feature_set.json")
+RANDOMNESS_PATH = Path("data/manifests/anomaly_increment_r1_randomness.json")
+SPATIAL_STRATA_PATH = Path("data/manifests/anomaly_increment_r1_spatial_strata.json")
 CLI_PATH = Path(__file__).resolve().parents[2] / "scripts" / "build_stage4_preregistration.py"
 
 
@@ -257,13 +257,16 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.4.0"
+    assert protocol["frozen_on"] == "2026-07-16"
     assert protocol["stage"] == 4
     assert protocol["status"] == "preregistered_before_any_stage4_target_score"
     assert protocol["hypotheses"] == ["H1", "H2"]
     assert protocol["gates"] == ["G2", "G3"]
 
     freeze = protocol["freeze"]
-    assert freeze["pre_score_tag"] == "v0.3.0-anomaly-increment-protocol"
+    assert freeze["execution_revision"] == "r1"
+    assert freeze["pre_score_tag"] == "v0.3.0-anomaly-increment-protocol-r1"
+    assert freeze["results_tag"] == "v0.3.0-anomaly-increment-r1"
     assert freeze["protocol_tag_authorizes_only_score_free_implementation"] is True
     assert freeze["scores_seen_before_freeze"] is False
     assert freeze["target_counts_seen_before_freeze"] is False
@@ -273,10 +276,32 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
 
     scoring_freeze = freeze["scoring_code_freeze"]
     assert scoring_freeze["required"] is True
-    assert scoring_freeze["expected_tag"] == "v0.3.0-anomaly-increment-scoring-code"
+    assert scoring_freeze["expected_tag"] == ("v0.3.0-anomaly-increment-scoring-code-r1")
     assert scoring_freeze["required_seal_path"] == (
-        "data/manifests/anomaly_increment_scoring_seal.json"
+        "data/manifests/anomaly_increment_r1_scoring_seal.json"
     )
+    assert scoring_freeze["selected_table_logical_identity"] == {
+        "method_id": "arrow_ipc_selected_table_logical_identity_r1",
+        "sha256_domain_separator_ascii": ("seismoflux.selected-table-logical-identity.r1"),
+        "sha256_domain_separator_nul_terminated": True,
+        "top_level_schema_metadata": "excluded",
+        "field_name_order_type_nullability_and_metadata": "preserved_exactly",
+        "null_payload": "canonical_type_zero",
+        "validity_bitmap": "preserved_with_length_padding_zeroed",
+        "boolean_value_padding": "zeroed_outside_logical_length",
+        "chunking_and_slice_offsets": "canonicalized",
+        "field_metadata_key_order": "bytewise_ascending",
+        "supported_types": [
+            "boolean",
+            "signed_integer",
+            "unsigned_integer",
+            "floating_point",
+            "timestamp",
+            "utf8_string",
+        ],
+        "valid_payload_bits": "preserved_exactly",
+        "unsupported_types": "fail_closed",
+    }
     assert {
         "scoring_code_commit_pushed",
         "scoring_code_tag_pushed",
@@ -286,6 +311,7 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
         "restricted_spatial_artifact_hashes_verified",
         "formal_attempt_count_equals_zero",
         "target_read_count_equals_zero",
+        "logical_arrow_identity_r1_verified",
     } <= set(scoring_freeze["required_before_target_read"])
     assert scoring_freeze["gpu_if_not_equivalent_at_code_freeze"] == (
         "lock_formal_run_to_cpu_float64"

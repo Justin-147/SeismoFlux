@@ -28,8 +28,8 @@ from seismoflux.anomaly_increment import (
 from seismoflux.config import sha256_file
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL_PATH = PROJECT_ROOT / "configs" / "anomaly_increment.yaml"
-LOCAL_OUTPUT_DIR = PROJECT_ROOT / "data" / "interim" / "stage4" / "anomaly_increment"
+PROTOCOL_PATH = PROJECT_ROOT / "configs" / "anomaly_increment_r1.yaml"
+LOCAL_OUTPUT_DIR = PROJECT_ROOT / "data" / "interim" / "stage4" / "anomaly_increment_r1"
 
 
 def _mapping(value: object, *, label: str) -> dict[str, Any]:
@@ -316,6 +316,9 @@ def main() -> int:
     protocol = _load_yaml(PROTOCOL_PATH)
     if protocol.get("protocol_version") != "0.4.0":
         raise ValueError("stage-4 preregistration builder requires protocol_version 0.4.0")
+    freeze = _mapping(protocol.get("freeze"), label="freeze")
+    if freeze.get("execution_revision") != "r1":
+        raise ValueError("stage-4 preregistration builder requires execution_revision r1")
     result = (
         generate(protocol, _external_root(args.external_root))
         if args.action == "generate"

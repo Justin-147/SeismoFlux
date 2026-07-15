@@ -48,6 +48,9 @@ outputs/visualizations/**
 data/manifests/anomaly_increment_scoring_seal.json
 data/manifests/anomaly_increment_attempt_ledger.json
 data/manifests/anomaly_increment_target_read_ledger.json
+data/manifests/anomaly_increment_r1_scoring_seal.json
+data/manifests/anomaly_increment_r1_attempt_ledger.json
+data/manifests/anomaly_increment_r1_target_read_ledger.json
 
 # Local overrides and secrets
 .env
