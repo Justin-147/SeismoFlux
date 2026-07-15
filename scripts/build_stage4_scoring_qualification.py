@@ -268,7 +268,9 @@ def _build(
         logical_replay_audit_path,
         label="R1 logical replay audit",
     )
-    canonical_preflight = root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts).resolve()
+    # Compare the frozen lexical paths without following a component that could
+    # be swapped after the score-blind guard has inspected it.
+    canonical_preflight = root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     if safe_preflight != canonical_preflight:
         raise ValueError("formal preflight receipt must use its canonical local path")
     for key, safe_path, label in (
@@ -276,7 +278,7 @@ def _build(
         ("full_non_target_junit_path", safe_full_junit, "full non-target JUnit"),
     ):
         relative = stage4_scoring_freeze_relative_path(protocol, key)
-        if safe_path != root.joinpath(*relative.parts).resolve():
+        if safe_path != root.joinpath(*relative.parts):
             raise ValueError(f"{label} must use its frozen R1 path")
     stage4_junit = parse_pytest_junit_evidence(
         _read_stable_bytes(safe_stage4_junit, label="stage-4 JUnit evidence")
@@ -287,9 +289,7 @@ def _build(
     receipt = load_formal_preflight_receipt(canonical_preflight)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
     scoring_code_commit = _current_commit(root, git_runner)
-    canonical_logical_replay = root.joinpath(
-        *STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH.parts
-    ).resolve()
+    canonical_logical_replay = root.joinpath(*STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH.parts)
     if safe_logical_replay != canonical_logical_replay:
         raise ValueError("logical replay audit must use its canonical R1 local path")
     logical_replay_sha256 = _logical_replay_audit_sha256(
