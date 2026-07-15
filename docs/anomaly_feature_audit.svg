@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="690" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+<title id="title">SeismoFlux 阶段 3 动态异常特征审计</title>
+<desc id="desc">展示 2022 年 7 月至 2026 年 7 月的 205 个实际报告快照、两个已知缺报期、可靠性构成和因果重放验收。图中不含空间位置或地震目标。</desc>
+<style>
+  .bg{fill:var(--background,#f8fafc)} .fg{fill:var(--foreground,#0f172a)}
+  .muted{fill:var(--muted-foreground,#475569)} .line{stroke:var(--border,#94a3b8);stroke-width:2}
+  .accent{stroke:var(--viz-series-1,#2563eb);stroke-width:5;stroke-linecap:round}
+  text{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-weight:400}
+  .title{font-size:27px;font-weight:500} .section{font-size:18px;font-weight:500}
+  .metric{font-size:30px;font-weight:500} .label{font-size:15px} .small{font-size:13px}
+  .check{font-size:16px;font-weight:500;fill:var(--foreground,#0f172a)}
+</style>
+<rect class="bg" width="1200" height="690"/>
+<text x="60" y="54" class="fg title">阶段 3：动态异常轨迹特征库</text>
+<text x="60" y="84" class="muted label">仅评估特征构建的因果性与可重放性；此阶段没有训练预测模型，也没有准确率结论</text>
+
+<text x="84" y="142" class="fg metric">205</text>
+<text x="84" y="169" class="muted label">实际报告快照</text>
+<text x="342" y="142" class="fg metric">3,217,885</text>
+<text x="342" y="169" class="muted label">本地特征行</text>
+<text x="660" y="142" class="fg metric">1,637</text>
+<text x="660" y="169" class="muted label">宽表字段</text>
+<text x="930" y="142" class="fg metric">19,644</text>
+<text x="930" y="169" class="muted label">审计比较标量</text>
+
+<text x="84" y="224" class="fg section">报告时间覆盖</text>
+<line x1="96" y1="270" x2="1104" y2="270" class="line"/>
+<line x1="96" y1="270" x2="1104" y2="270" class="accent" opacity="0.62"/>
+<circle cx="96" cy="270" r="7" fill="var(--viz-series-1,#2563eb)"/>
+<circle cx="1104" cy="270" r="7" fill="var(--viz-series-1,#2563eb)"/>
+<path d="M639.146 254 v32 M932.738 254 v32" stroke="var(--viz-series-2,#d97706)" stroke-width="4"/>
+<text x="96" y="304" class="muted small">2022-07-20</text>
+<text x="1104" y="304" text-anchor="end" class="muted small">2026-07-01</text>
+<text x="639.146" y="246" text-anchor="middle" class="muted small">2024 第36期缺报</text><text x="932.738" y="318" text-anchor="middle" class="muted small">2025 第44期缺报</text>
+<text x="84" y="344" class="fg section">实体状态可靠性构成（聚合计数）</text>
+<rect x="84.00" y="362.00" width="478.20" height="38" fill="var(--viz-series-1,#2563eb)"><title>高可靠：76,912 条状态</title></rect><rect x="562.20" y="362.00" width="550.90" height="38" fill="var(--viz-series-2,#d97706)"><title>谨慎：88,605 条状态</title></rect><rect x="1113.10" y="362.00" width="2.90" height="38" fill="var(--viz-series-3,#64748b)"><title>排除：467 条状态</title></rect>
+<rect x="84" y="420" width="14" height="14" rx="2" fill="var(--viz-series-1,#2563eb)"/><text x="108" y="433" class="label">高可靠 76,912（46.337%）</text><rect x="414" y="420" width="14" height="14" rx="2" fill="var(--viz-series-2,#d97706)"/><text x="438" y="433" class="label">谨慎 88,605（53.382%）</text><rect x="744" y="420" width="14" height="14" rx="2" fill="var(--viz-series-3,#64748b)"/><text x="768" y="433" class="label">排除 467（0.281%）</text>
+<text x="84" y="492" class="fg section">因果与交付门控</text>
+<circle cx="97" cy="527" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="97" y="532" text-anchor="middle" class="check">✓</text><text x="120" y="532" class="label">205 个实际报告快照</text><circle cx="441" cy="527" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="441" y="532" text-anchor="middle" class="check">✓</text><text x="464" y="532" class="label">未来来源引用为 0</text><circle cx="785" cy="527" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="785" y="532" text-anchor="middle" class="check">✓</text><text x="808" y="532" class="label">12 个起报日逐字段重放</text><circle cx="97" cy="593" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="97" y="598" text-anchor="middle" class="check">✓</text><text x="120" y="598" class="label">32 组因果前缀性质</text><circle cx="441" cy="593" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="441" y="598" text-anchor="middle" class="check">✓</text><text x="464" y="598" class="label">缺报期未填零</text><circle cx="785" cy="593" r="13" fill="var(--viz-series-1,#2563eb)" opacity="0.18"/><text x="785" y="598" text-anchor="middle" class="check">✓</text><text x="808" y="598" class="label">锁定测试未运行</text>
+<text x="84" y="665" class="muted small">相对强度、评分与顺位均不代表绝对发震概率；图件不含坐标、边界、格网编号或逐点特征值。</text>
+</svg>
