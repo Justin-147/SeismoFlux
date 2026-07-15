@@ -399,15 +399,27 @@ def build_clipped_grid(
     )
 
 
+def build_equal_area_grid_family(
+    study_area_equal_area: BaseGeometry,
+) -> EqualAreaGridFamily:
+    """Build all three fixed grids from an already projected equal-area domain."""
+
+    _validate_polygonal_geometry(study_area_equal_area, label="equal-area study area")
+    grids = tuple(
+        build_clipped_grid(study_area_equal_area, cell_size_km=cell_size_km)
+        for cell_size_km in GRID_CELL_SIZES_KM
+    )
+    return EqualAreaGridFamily(
+        study_area_equal_area=study_area_equal_area,
+        grids=grids,
+    )
+
+
 def build_grid_family(study_area_wgs84: BaseGeometry) -> EqualAreaGridFamily:
     """Project one study polygon and build all three target-independent grids."""
 
     projected = project_study_area_to_equal_area(study_area_wgs84)
-    grids = tuple(
-        build_clipped_grid(projected, cell_size_km=cell_size_km)
-        for cell_size_km in GRID_CELL_SIZES_KM
-    )
-    return EqualAreaGridFamily(study_area_equal_area=projected, grids=grids)
+    return build_equal_area_grid_family(projected)
 
 
 def _validated_ordered_masses(

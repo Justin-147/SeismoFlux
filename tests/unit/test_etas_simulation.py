@@ -40,10 +40,10 @@ def _domain() -> SimulationDomain:
     )
 
 
-def _context(replicate: int = 0) -> SeedContext:
+def _context(replicate: int = 0, *, protocol_version: str = "0.2.0") -> SeedContext:
     return SeedContext(
         root_seed=147,
-        protocol_version="0.2.0",
+        protocol_version=protocol_version,
         namespace="future_simulation",
         model_id="etas/final_validation",
         issue_id="validation/2025-06-26",
@@ -121,6 +121,53 @@ def test_future_catalog_is_deterministic_study_only_and_reused_across_horizons()
     assert horizon_counts == sorted(horizon_counts)
 
 
+def test_local_support_active_seed_is_fixed_and_regression_reference_stays_v020() -> None:
+    active_context = _context(protocol_version="0.2.1")
+    assert active_context.digest().hex() == (
+        "818f625f9af9c5430244f2b9541f4339e4bd2a2efdb25bf26e357645f4a26bd5"
+    )
+    first = simulate_future_catalog(
+        _parameters(background_rate=0.01),
+        _spec(),
+        (),
+        _domain(),
+        horizon_days=365.0,
+        seed_context=active_context,
+    )
+    again = simulate_future_catalog(
+        _parameters(background_rate=0.01),
+        _spec(),
+        (),
+        _domain(),
+        horizon_days=365.0,
+        seed_context=active_context,
+    )
+    assert first == again
+
+    regression_reference = SeedContext(
+        147,
+        "0.2.0",
+        "simulation_regression",
+        "etas_inverse_power_cut300_v1",
+        None,
+        0,
+    )
+    assert regression_reference.digest().hex() == (
+        "ee4831fcb2a99d18069fbb1fe427c2ef8fba0055d8bd2efa26cfdd7d32d36dcb"
+    )
+
+    inactive_context = _context(protocol_version="0.2.2")
+    with pytest.raises(ValueError, match="active 0.2.0 or 0.2.1"):
+        simulate_future_catalog(
+            _parameters(background_rate=0.01),
+            _spec(),
+            (),
+            _domain(),
+            horizon_days=365.0,
+            seed_context=inactive_context,
+        )
+
+
 def test_parent_older_than_3650_days_is_omitted_without_rng_or_kernel_renormalization() -> None:
     no_history = simulate_future_catalog(
         _parameters(background_rate=0.01),
@@ -190,7 +237,7 @@ def test_future_simulation_hard_fails_on_event_cap_and_supercritical_parameters(
         )
 
 
-def test_future_simulation_rejects_future_history_and_wrong_seed_namespace() -> None:
+def test_future_simulation_rejects_future_history_and_wrong_seed_context() -> None:
     future = ETASEvent("future", 0.1, 0.1, 0.0, 0.0, 4.0, True, True)
     with pytest.raises(ValueError, match="at or before"):
         simulate_future_catalog(
@@ -233,3 +280,60 @@ def test_future_simulation_rejects_future_history_and_wrong_seed_namespace() -> 
             horizon_days=365.0,
             seed_context=wrong_context,
         )
+
+    invalid_contexts = (
+        (
+            SeedContext(
+                148,
+                "0.2.0",
+                "future_simulation",
+                "etas/final_validation",
+                "validation/2025-06-26",
+                0,
+            ),
+            "root seed",
+        ),
+        (
+            SeedContext(
+                147,
+                "0.2.0",
+                "future_simulation",
+                "etas/fold_1",
+                "validation/2025-06-26",
+                0,
+            ),
+            "model_id",
+        ),
+        (
+            SeedContext(
+                147,
+                "0.2.0",
+                "future_simulation",
+                "etas/final_validation",
+                "validation/2025-6-26",
+                0,
+            ),
+            "issue_id",
+        ),
+        (
+            SeedContext(
+                147,
+                "0.2.0",
+                "future_simulation",
+                "etas/final_validation",
+                "validation/2025-06-26",
+                128,
+            ),
+            "replicate index",
+        ),
+    )
+    for invalid_context, message in invalid_contexts:
+        with pytest.raises(ValueError, match=message):
+            simulate_future_catalog(
+                _parameters(),
+                _spec(),
+                (),
+                _domain(),
+                horizon_days=365.0,
+                seed_context=invalid_context,
+            )

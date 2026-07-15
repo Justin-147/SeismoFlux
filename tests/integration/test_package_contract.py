@@ -11,6 +11,7 @@ def test_package_version_and_console_contract() -> None:
     assert parser.prog == "seismoflux"
     assert len(COMMAND_SPECS) == 13
     assert {command for command, spec in COMMAND_SPECS.items() if spec.implemented} == {
+        "build-anomaly-history",
         "build-background",
         "inventory",
         "ingest",
@@ -21,5 +22,12 @@ def test_package_version_and_console_contract() -> None:
     assert all(
         not spec.implemented
         for command, spec in COMMAND_SPECS.items()
-        if command not in {"build-background", "inventory", "ingest", "validate-data"}
+        if command
+        not in {
+            "build-anomaly-history",
+            "build-background",
+            "inventory",
+            "ingest",
+            "validate-data",
+        }
     )

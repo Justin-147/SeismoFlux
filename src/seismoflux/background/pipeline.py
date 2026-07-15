@@ -74,6 +74,7 @@ from seismoflux.background.regression import (
     run_analytic_simulation_regression,
     run_production_fixture_regression,
 )
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 from seismoflux.background.visualization import (
     ConditionalIntensityRender,
     render_conditional_intensity_figure,
@@ -1111,6 +1112,7 @@ def run_background_pipeline(
 ) -> BackgroundPipelineOutcome:
     """Run the complete stage-2 production science workflow in frozen order."""
 
+    require_background_scoring_authorized(config)
     regressions = _run_regressions(config, production_fixture_path, progress)
     _validate_spatial_inputs(config, study_area, grid_family)
     integration_grids = _integration_grid_evidence(study_area, grid_family)

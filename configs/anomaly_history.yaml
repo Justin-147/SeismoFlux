@@ -1,0 +1,536 @@
+schema_version: 1
+protocol_version: 0.3.0
+stage: 3
+execution_mode: feature_only_no_target_scoring
+status: preregistered_before_stage3_feature_execution
+frozen_on: '2026-07-15'
+freeze_tag: v0.3.0-anomaly-feature-protocol
+blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
+
+authorization:
+  prerequisite_gate: G1-LS
+  prerequisite_registry: data/manifests/background_local_support_model_registry.json
+  prerequisite_registry_sha256: 774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b
+  required_registry_assertions:
+    stage3_allowed: true
+    locked_test:
+      run: false
+      score_ids: []
+      artifact_ids: []
+      target_count: null
+      result: null
+    science:
+      g1_ls_and_selection:
+        g1_ls:
+          passed: true
+        stage3_allowed: true
+  role: governance_only_not_a_scientific_feature_input
+
+scientific_inputs:
+  exact_dataset_names: [anomaly_observation, anomaly_report_period]
+  every_dataset_must_resolve_from_data_catalog: true
+  unregistered_dataset_paths_forbidden: true
+  data_catalog: data/manifests/data_catalog.json
+  data_catalog_sha256: 0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50
+  expected_stage1_snapshot_id: debc98054172a4a1
+  environment_lock: uv.lock
+  environment_lock_sha256: 34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5
+  anomaly_observation:
+    catalog_dataset_name: anomaly_observation
+    expected_path: data/processed/stage1/debc98054172a4a1/anomaly_observation.parquet
+    expected_row_count: 59904
+    expected_file_sha256: a4837a6a865ca0d4939fd45d8d8e9c3e4fd90cf0a78e9bb07d57335d5743b80c
+    expected_content_sha256: 7f6c1d4500c3c930d5cc0f29b3903fe4b831430e9d41ec49cf3f9d2a61dae1b8
+    expected_schema_sha256: 2a80a0e69d499b0544a9d2ba4189c516275c065871b7f16963c8540a6064f6cb
+    source_column_allowlist:
+      - observation_id
+      - anomaly_id
+      - station_id
+      - report_date
+      - raw_row_report_date
+      - available_at
+      - longitude
+      - latitude
+      - discipline
+      - measurement
+      - instrument_or_method
+      - observation_period
+      - start_time
+      - reported_end_time
+      - end_flag
+      - report_state
+      - anomaly_type
+      - is_listed
+      - right_censored
+      - identity_complete
+      - reliability_flags
+      - source_id
+      - source_file
+      - source_sha256
+      - source_sheet
+      - source_row
+      - source_serial_number
+      - source_period_year
+      - source_period
+  anomaly_report_period:
+    catalog_dataset_name: anomaly_report_period
+    expected_path: data/processed/stage1/debc98054172a4a1/anomaly_report_period.parquet
+    expected_row_count: 205
+    expected_unique_available_at_count: 205
+    expected_file_sha256: aac44418994b6b99c633dcf536e452ad315439336bc580a13f719d95a069e176
+    expected_content_sha256: b8ace0064690b15c931e300ffab349a8ca5932a9d3d55fddd4f22261505a986b
+    expected_schema_sha256: 5a1a2361a03f496b2f0375f35312c0f9f4281e0848613bdcf74fdabb8f49e4e7
+    source_column_allowlist:
+      - report_id
+      - source_id
+      - source_file
+      - source_sha256
+      - report_year
+      - report_period
+      - report_date
+      - available_at
+      - row_count
+      - row_report_date_mismatch_count
+      - row_report_date_before_count
+      - row_report_date_after_count
+      - deformation_row_count
+      - fluid_row_count
+      - electromagnetic_row_count
+      - cross_fault_row_count
+  study_area:
+    role: local_query_grid_only
+    path: data/processed/china_mainland.geojson
+    sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    public_redistribution: forbidden
+  every_other_scientific_dataset_forbidden: true
+  earthquake_catalog_forbidden: true
+  earthquake_target_labels_forbidden: true
+  human_forecast_or_result_dataset_forbidden: true
+
+forbidden_source_semantics:
+  fields:
+    - forecast_efficacy
+    - anomaly_description
+    - annual_anomaly
+    - term_class
+    - r_value
+    - r0_value
+    - source_duration
+    - duration
+    - earthquake_examples
+    - predicted_region
+    - predicted_place
+    - predicted_magnitude
+    - predicted_start_magnitude
+    - predicted_end_magnitude
+    - predicted_time
+    - predicted_start_time
+    - predicted_end_time
+    - analysis_opinion
+    - prediction_strength
+    - confidence
+    - manual_result
+  unexpected_source_column_action: hard_fail
+  raw_free_text_features_forbidden: true
+  manual_prediction_fields_forbidden: true
+  source_duration_must_be_recomputed_causally: true
+
+time_semantics:
+  issue_timezone: Asia/Shanghai
+  issue_clock: anomaly_report_period.available_at
+  actual_report_period_count: 205
+  first_report_date: '2022-07-20'
+  first_available_at_utc: '2022-07-20T16:00:00Z'
+  last_report_date: '2026-07-01'
+  last_available_at_utc: '2026-07-01T16:00:00Z'
+  issue_schedule: all_distinct_actual_report_period_available_at_values
+  fixed_weekly_schedule_assumption_forbidden: true
+  row_availability_rule: available_at_lte_issue_time
+  report_date_alone_never_grants_availability: true
+  later_snapshot_backfill_forbidden: true
+  future_report_absence_use_forbidden: true
+  future_end_backfill_forbidden: true
+  output_snapshot_count_must_equal_actual_report_period_count: true
+  windows:
+    lookback_weeks: [4, 8, 13, 26, 52]
+    interval: '(T - 7 * weeks days, T]'
+    use_actual_elapsed_days: true
+    insert_synthetic_weekly_rows: false
+    slope_method: ordinary_least_squares_on_actual_snapshot_elapsed_days
+    slope_unit: feature_units_per_7_days
+    minimum_observed_snapshots_for_slope: 3
+    insufficient_observations: null_with_explicit_reason
+
+missing_periods:
+  semantics: unknown_not_zero
+  insert_zero_anomaly_period: false
+  infer_entity_end_or_absence_from_missing_period: false
+  known_gaps:
+    - report_year: 2024
+      report_period: 36
+      expected_report_date: '2024-09-04'
+    - report_year: 2025
+      report_period: 44
+      expected_report_date: '2025-10-29'
+  next_actual_snapshot_must_report_gap_count: true
+  slopes_use_actual_time_gaps: true
+
+state_reconstruction:
+  history_scope: all_205_actual_report_periods
+  source_prefix_rule: filter_each_observation_available_at_lte_T_before_any_grouping
+  required_replayable_state_fields:
+    - left_truncated
+    - late_entry_or_gap_unknown
+    - age_days
+    - known_duration_days
+    - right_censored
+    - reliability_grade
+    - reliability_weight
+    - source_observation_ids
+    - source_report_ids
+    - max_source_available_at
+  current_report_rule: latest_actual_report_period_available_at_lte_T
+  current_listed: unique_complete_anomaly_entity_present_in_current_actual_report
+  reported_new: current_entity_with_report_state_new
+  first_seen: first_eligible_observation_of_complete_entity_known_by_T
+  explicit_end: eligible_non_right_censored_consistent_end_known_by_T
+  not_continued: present_in_previous_actual_report_and_absent_from_current_actual_report
+  not_continued_interpretation: reporting_list_absence_not_physical_end
+  missing_report_cannot_create_not_continued: true
+  right_censoring:
+    null_end_time: right_censored
+    future_reported_end_time: ignore_end_and_keep_right_censored
+    later_confirmed_end: visible_only_from_confirming_observation_available_at_forward
+    revisions_or_retractions: affect_only_snapshots_at_or_after_revision_available_at
+  left_truncation:
+    entities_present_in_first_actual_report: left_truncated_prevalent
+    exclude_left_truncated_from_first_seen_rate_numerator: true
+    first_seen_after_a_gap_with_earlier_start: late_entry_or_gap_unknown
+    unknown_prehistory_never_imputed: true
+  duplicate_policy:
+    complete_entity_key: anomaly_id
+    exact_duplicate_same_report: collapse_to_one_entity_state
+    raw_reporting_row_proxy_preserves_duplicate_rows: true
+    provenance_preserves_all_duplicate_observation_ids: true
+    conflicting_same_entity_same_report: cautious_conservative_state
+    conflicting_end_requires_unanimous_consistent_evidence: true
+  temporary_entity_policy:
+    predicate: identity_complete_eq_false
+    identifier_scope: source_observation_only
+    cross_report_linking: forbidden
+    longitudinal_features: excluded
+    raw_unweighted_reporting_proxy: retained
+  age_and_duration:
+    age: T_minus_start_time_after_first_known_observation
+    ended_duration: known_consistent_end_minus_start_time
+    source_duration_field_use: forbidden
+    negative_or_future_duration: null_with_explicit_reason
+
+query_grid:
+  role: target_independent_local_feature_queries
+  source: frozen_local_study_area_only
+  equal_area_crs: '+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs'
+  cell_size_km: 25.0
+  grid_origin_m: [0.0, 0.0]
+  inclusion_rule: positive_area_intersection_with_local_study_area
+  query_point_rule: representative_point_of_exact_clipped_cell_intersection
+  cell_id_rule: signed_row_and_column_from_frozen_origin
+  adaptive_refinement: forbidden
+  earthquake_or_target_derived_cells: forbidden
+  epicenter_derived_boundaries_or_query_points: forbidden
+  local_only_not_public: true
+
+spatial_features:
+  distance_metric: projected_euclidean_metres_in_frozen_equal_area_crs
+  observation_domain: all_coordinate_valid_registered_anomalies_inside_or_outside_study_area
+  clip_observations_to_study_area_before_distance: false
+  outside_anomalies_may_influence_inside_query_cells: true
+  fixed_closed_balls:
+    radii_km: [50.0, 100.0, 200.0, 300.0, 500.0]
+    boundary_rule: distance_lte_radius
+    nested_membership_required: true
+  gaussian_kernels:
+    family: gaussian
+    bandwidths_km: [50.0, 100.0, 200.0, 300.0, 500.0]
+    bandwidth_matches_corresponding_closed_ball_radius: true
+    weight_formula: exp_minus_one_half_times_distance_over_bandwidth_squared
+    truncate_at_sigma: 3.0
+    truncation_boundary_rule: distance_lte_three_times_bandwidth
+    outside_truncation_weight: 0.0
+    report_weighted_sum_and_weight_mass_separately: true
+  maximum_possible_influence_distance_km: 1500.0
+  coordinate_missing_action: exclude_from_spatial_features_with_reason
+
+feature_families:
+  snapshot_state:
+    - current_listed_anomaly_count
+    - reported_new_anomaly_count
+    - first_seen_anomaly_count
+    - first_seen_rate
+    - explicit_end_count
+    - not_continued_count
+    - right_censored_count
+    - left_truncated_count
+    - temporary_entity_count
+  temporal_trajectory:
+    windows_weeks: [4, 8, 13, 26, 52]
+    acceleration_4v13:
+      formula: slope_4w_minus_slope_13w_divided_by_4_5_week_window_centre_separation
+      output_unit: feature_units_per_week_squared
+    surge_z_13w:
+      current_value: feature_value_at_T
+      prior_baseline_interval: '(T - 91 days, T)'
+      prior_baseline_actual_snapshots_only: true
+      mean: arithmetic_mean_of_finite_prior_values
+      standard_deviation: sample_standard_deviation_ddof_1
+      minimum_prior_observations: 3
+      zero_or_undefined_standard_deviation: null_with_explicit_reason
+      formula: current_minus_prior_mean_divided_by_prior_sample_standard_deviation
+    causal_peak_52w:
+      interval: '(T - 364 days, T]'
+      includes_current_value: true
+      minimum_observations: 2
+      peak_drop_formula: causal_peak_including_current_minus_current
+      peak_drop_range: '[0, positive_infinity)'
+      peak_ratio_formula: current_divided_by_causal_peak_including_current
+      peak_ratio_range: '[0, 1]'
+      zero_peak_ratio: null_with_explicit_reason
+    features:
+      - actual_elapsed_day_slope
+      - growth_acceleration_from_nested_slopes
+      - surge_z_13w
+      - peak_drop_52w
+      - peak_ratio_52w
+      - observed_snapshot_count
+      - missing_expected_period_count
+  age_and_duration:
+    - age_days_summary
+    - known_duration_days_summary
+    - right_censor_fraction
+  multidisciplinary:
+    - distinct_discipline_count
+    - distinct_measurement_count
+    - discipline_entropy
+    - multidisciplinary_entity_fraction
+  spatial_pattern:
+    - closed_ball_state_counts
+    - gaussian_state_weighted_sums
+    - spatial_concentration
+    - weighted_spread_radius
+    - principal_direction_strength
+  reporting_coverage_proxy:
+    required_name_suffix: reporting_coverage_proxy
+    absolute_observation_coverage_claim_forbidden: true
+    features:
+      - report_present
+      - report_row_count
+      - distinct_reporting_station_count
+      - distinct_reporting_measurement_count
+      - days_since_previous_actual_report
+      - missing_expected_period_count
+      - current_to_trailing_station_reporting_proxy
+      - current_to_trailing_measurement_reporting_proxy
+    denominator:
+      role: causal_reporting_activity_reference_not_station_roster
+      interval: '[T - 364 days, T]'
+      source: unique_eligible_station_or_measurement_ids_known_by_T
+      denominator_zero: null_with_explicit_reason
+      future_station_or_measurement_use: forbidden
+  fault_features:
+    status: deferred_to_stage_5
+    distance_to_fault: forbidden_in_stage_3
+    along_fault_projection: forbidden_in_stage_3
+    fault_segment_aggregation: forbidden_in_stage_3
+
+reliability:
+  grade_precedence: [excluded, cautious, high]
+  grades:
+    high:
+      weight: 1.0
+    cautious:
+      weight: 0.5
+    excluded:
+      weight: 0.0
+  neutral_flags:
+    - anomaly_time_date_only_assumed_fixed_utc_plus_08_midnight
+    - manual_prediction_fields_excluded
+    - manual_prediction_fields_present
+    - cross_fault_trend_field_is_period
+    - source_duration_ignored
+  cautious_flags:
+    - available_at_conservatively_delayed
+    - row_report_date_mismatch_source
+    - row_report_date_before_source
+    - row_report_date_after_source
+    - exact_duplicate_in_report
+    - natural_key_collision
+    - end_time_retracted
+    - end_time_revised
+    - listed_after_reported_end
+    - cancel_without_end_time
+    - continued_with_end_time
+    - new_with_end_time
+    - end_after_raw_row_report_date
+    - future_reported_end_time
+    - end_before_start
+    - end_flag_inconsistent
+    - start_after_report_date
+  excluded_flags:
+    - identity_incomplete
+    - entity_unresolved
+    - missing_station_name
+    - missing_measurement
+  feature_role_overrides:
+    spatial_requires_finite_longitude_and_latitude: true
+    longitudinal_requires_complete_identity: true
+    explicit_end_requires_consistent_non_right_censored_end: true
+  output_variants:
+    preserve_unweighted_features: true
+    preserve_reliability_weighted_features: true
+    preserve_counts_by_grade: true
+  excluded_grade_still_allowed_in_raw_unweighted_reporting_row_proxy: true
+
+lineage:
+  every_state_row_requires_source_observation_ids: true
+  every_state_row_requires_source_report_ids: true
+  every_state_row_requires_max_source_available_at: true
+  every_feature_row_requires_state_snapshot_id: true
+  every_feature_row_requires_feature_dictionary_sha256: true
+  every_feature_row_requires_lineage_digest: true
+  every_feature_must_be_replayable_from_state_history: true
+  dangling_source_reference_action: hard_fail
+  source_available_after_issue_action: hard_fail
+  null_feature_requires_reason: true
+
+audit:
+  deterministic_issue_sample:
+    algorithm: sha256_ranked_interior_plus_fixed_partition_boundaries_v1
+    namespace: stage3-lineage-audit
+    seed_text: '147'
+    sample_size: 12
+    target_or_score_blind: true
+    issue_dates_local:
+      development:
+        - '2022-07-21'
+        - '2023-05-18'
+        - '2023-03-16'
+        - '2022-08-25'
+        - '2023-04-27'
+        - '2023-06-29'
+      validation:
+        - '2024-07-04'
+        - '2024-10-17'
+        - '2024-11-07'
+        - '2025-02-27'
+        - '2025-04-17'
+        - '2025-06-26'
+    query_cell_sample_rule: sha256_ranked_fixed_cell_ids_without_target_information
+    check_all_scales_and_features_for_selected_rows: true
+    required_checks:
+      - every_source_reference_resolves
+      - every_source_available_at_lte_issue_time
+      - every_feature_has_dictionary_definition
+      - every_feature_replays_from_state_history
+      - every_null_has_explicit_reason
+  synthetic_prefix_property:
+    generator: deterministic_coherent_anomaly_trajectory_v1
+    seed_start_inclusive: 0
+    seed_stop_exclusive: 32
+    seed_count: 32
+    invariants:
+      - full_input_equals_available_prefix_scientific_payload
+      - future_mutations_do_not_change_prior_snapshot
+      - input_permutation_does_not_change_identity_or_values
+      - available_at_equal_issue_is_included
+      - available_at_after_issue_is_excluded
+      - multiscale_closed_ball_counts_are_nested
+      - local_reporting_gap_does_not_mask_unrelated_cells
+
+outputs:
+  identity_algorithm: seismoflux_canonical_json_v1
+  identity_inputs:
+    - protocol_bytes
+    - anomaly_history_config_bytes
+    - environment_lock_sha256
+    - data_catalog_sha256
+    - anomaly_observation_file_content_and_schema_sha256
+    - anomaly_report_period_file_content_and_schema_sha256
+    - study_area_sha256
+    - code_commit
+  bundle_id_prefix: anomaly-feature-bundle
+  local_content_addressed_root: data/processed/stage3/anomaly_history
+  local_bundle_layout:
+    anomaly_state_history: '{bundle_id}/anomaly_state_history.parquet'
+    anomaly_feature_store: '{bundle_id}/anomaly_feature_store.parquet'
+  parquet:
+    compression: zstd
+    compression_level: 9
+    version: '2.6'
+    data_page_version: '1.0'
+    use_dictionary: false
+    timestamp_unit: us
+    deterministic_total_sort_required: true
+  local_outputs_may_contain_spatial_detail: true
+  local_outputs_must_not_be_committed: true
+  public:
+    registry: data/manifests/anomaly_feature_registry.json
+    report: docs/anomaly_feature_report.md
+    audit_svg: docs/anomaly_feature_audit.svg
+    feature_dictionary: data/manifests/anomaly_feature_dictionary.json
+    atomic_fixed_path_publication: true
+    forbidden_detail:
+      - station_or_anomaly_coordinates
+      - station_or_anomaly_identifiers
+      - source_file_sheet_or_row_references
+      - grid_cell_identifiers_or_coordinates
+      - study_area_geometry_or_boundary
+      - clipped_cell_geometry
+      - wkt_wkb_geojson_or_geoparquet_geometry
+      - per_cell_feature_values
+      - earthquake_targets_or_scores
+    allowed_summary:
+      - protocol_and_input_hashes
+      - output_bundle_and_file_hashes
+      - row_counts_and_schema_summaries
+      - aggregate_quality_and_missingness_counts
+      - aggregate_lineage_audit_results
+      - feature_names_units_formulas_and_null_semantics
+      - fixed_scale_and_time_window_definitions
+
+locked_test:
+  action: do_not_run
+  run: false
+  issue_dates_start: null
+  issue_dates_end: null
+  target_count: null
+  target_ids: []
+  score_ids: []
+  artifact_ids: []
+  result: null
+  formal_test_execution_forbidden_in_stage_3: true
+
+stage4_boundary:
+  before_stage3_test_acceptance_commit_and_push: stop
+  earthquake_labels: forbidden
+  target_event_locations: forbidden
+  model_fit: forbidden
+  target_scoring: forbidden
+  information_gain: forbidden
+  hit_or_recall_results: forbidden
+  anomaly_time_shuffle: deferred_to_stage_4
+  anomaly_space_shuffle: deferred_to_stage_4
+  G2_decision: deferred_to_stage_4
+  G3_decision: deferred_to_stage_4
+  fault_fields: deferred_to_stage_5
+
+acceptance:
+  all_205_actual_snapshots_rebuilt: required
+  future_source_reference_count: 0
+  missing_period_zero_imputation_count: 0
+  source_duration_feature_use_count: 0
+  forbidden_source_field_use_count: 0
+  target_or_earthquake_label_read_count: 0
+  deterministic_issue_audit_failures: 0
+  synthetic_prefix_property_failures: 0
+  locked_test_assertion: false_empty_null
+  tests_acceptance_commit_and_push_before_stage4: required

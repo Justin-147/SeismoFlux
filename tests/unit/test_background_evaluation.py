@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from seismoflux.background.evaluation import (
+    BOOTSTRAP_ISSUE_ID,
+    LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
     BackgroundModelEvidence,
     FoldInformationGain,
     InformationGainContributions,
@@ -12,6 +14,7 @@ from seismoflux.background.evaluation import (
     bootstrap_information_gain,
     select_background_model,
 )
+from seismoflux.background.randomness import SeedContext
 
 
 def _evidence(
@@ -123,12 +126,61 @@ def test_bootstrap_is_namespaced_deterministic_and_keeps_fixed_compensator() -> 
         contributions,
         model_seed_id="etas_vs_uniform_poisson",
     )
+    local_support = bootstrap_information_gain(
+        contributions,
+        model_seed_id="spatial_poisson_vs_uniform_poisson",
+        protocol_version="0.2.1",
+        issue_id=LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
+    )
+    local_support_again = bootstrap_information_gain(
+        contributions,
+        model_seed_id="spatial_poisson_vs_uniform_poisson",
+        protocol_version="0.2.1",
+        issue_id=LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
+    )
 
     assert first.point_estimate == pytest.approx(2.0)
     assert first.replicate_values == second.replicate_values
     assert first.replicate_values != etas.replicate_values
+    assert local_support.replicate_values == local_support_again.replicate_values
+    assert local_support.replicate_values != first.replicate_values
     assert first.lower <= first.point_estimate <= first.upper
     assert len(first.replicate_values) == 2000
+    frozen_context = SeedContext(
+        147,
+        "0.2.0",
+        "bootstrap",
+        "spatial_poisson_vs_uniform_poisson",
+        BOOTSTRAP_ISSUE_ID,
+        0,
+    )
+    assert frozen_context.digest().hex() == (
+        "3d61629241dd14f5b9fcaca593efa5d796ae3b21fc9c8d3991c5e0cb5df9c3a6"
+    )
+    local_context = SeedContext(
+        147,
+        "0.2.1",
+        "bootstrap",
+        "spatial_poisson_vs_uniform_poisson",
+        LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
+        0,
+    )
+    assert local_context.digest().hex() == (
+        "23ffa44cd7b1dbae40b2d2c71cfaf7d48a2e46991ac708929be841e0d235250b"
+    )
+
+    with pytest.raises(ValueError, match="issue_id for protocol 0.2.1"):
+        bootstrap_information_gain(
+            contributions,
+            model_seed_id="spatial_poisson_vs_uniform_poisson",
+            protocol_version="0.2.1",
+        )
+    with pytest.raises(ValueError, match="issue_id for protocol 0.2.0"):
+        bootstrap_information_gain(
+            contributions,
+            model_seed_id="spatial_poisson_vs_uniform_poisson",
+            issue_id=LOCAL_SUPPORT_BOOTSTRAP_ISSUE_ID,
+        )
 
 
 def test_bootstrap_rejects_duplicate_physical_events() -> None:
