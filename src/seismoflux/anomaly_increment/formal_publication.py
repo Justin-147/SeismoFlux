@@ -36,7 +36,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import PipelineResult
 from seismoflux.data.common import canonical_json_bytes
 
 FORMAL_PUBLICATION_SCHEMA_VERSION: Final[int] = 1
-FORMAL_BUNDLE_ROOT: Final[PurePosixPath] = PurePosixPath("models/registry/anomaly_increment")
+FORMAL_BUNDLE_ROOT: Final[PurePosixPath] = PurePosixPath("models/registry/anomaly_increment_r1")
 
 PublicationStatus: TypeAlias = Literal["succeeded", "failed"]
 CreateFile: TypeAlias = Callable[[Path, Path], bool]
@@ -367,7 +367,7 @@ def _success_report(
                 "",
                 "## 图件与下一步",
                 "",
-                "![阶段4方法效果](anomaly_increment_results.svg)",
+                f"![阶段4方法效果]({PurePosixPath(publication.public_static_svg).name})",
                 "",
                 f"- 本地交互图：`{publication.local_interactive_html}`",
                 *(f"- 本地扩展图：`{item.relative_path}`" for item in extensions),
@@ -638,12 +638,13 @@ def _verify_bundle(
 def _finalize_bundle(
     root: Path,
     *,
+    bundle_root_relative: str,
     bundle_id: str,
     payloads: Mapping[str, bytes],
 ) -> tuple[Path, str]:
     bundle_root = _project_path(
         root,
-        FORMAL_BUNDLE_ROOT.as_posix(),
+        bundle_root_relative,
         label="formal bundle root",
     )
     _ensure_real_directory_tree(root, bundle_root, label="formal bundle root")
@@ -955,6 +956,7 @@ def _publish(
     payloads["bundle_manifest.json"] = manifest
     bundle_directory, manifest_sha256 = _finalize_bundle(
         root,
+        bundle_root_relative=publication.bundle_root,
         bundle_id=bundle_id,
         payloads=payloads,
     )

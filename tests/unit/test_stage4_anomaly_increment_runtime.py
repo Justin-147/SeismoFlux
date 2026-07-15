@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -18,9 +19,12 @@ from seismoflux.anomaly_increment.compute import (
     qualify_worker_invariance,
 )
 from seismoflux.anomaly_increment.config import (
+    STAGE4_PROTOCOL_PATH,
     STAGE4_PROTOCOL_TAG,
+    STAGE4_RESULT_TAG,
     STAGE4_SCORING_CODE_TAG,
     load_stage4_protocol_bundle,
+    validate_stage4_r1_execution_contract,
 )
 from seismoflux.anomaly_increment.grid_features import (
     assert_selected_columns_exact,
@@ -88,6 +92,39 @@ def test_score_free_bundle_identity_is_complete_and_unobserved() -> None:
     assert target["observed"] is False
     assert len(identity["manifest_file_sha256"]) == 4  # type: ignore[arg-type]
     assert len(identity["manifest_content_sha256"]) == 4  # type: ignore[arg-type]
+
+
+def test_runtime_defaults_and_machine_contract_are_locked_to_execution_r1() -> None:
+    bundle = load_stage4_protocol_bundle(Path.cwd())
+    freeze = bundle.protocol["freeze"]
+    assert isinstance(freeze, dict)
+    assert STAGE4_PROTOCOL_PATH.as_posix() == "configs/anomaly_increment_r1.yaml"
+    assert STAGE4_PROTOCOL_TAG.endswith("-protocol-r1")
+    assert STAGE4_SCORING_CODE_TAG.endswith("-scoring-code-r1")
+    assert STAGE4_RESULT_TAG.endswith("-increment-r1")
+    assert freeze["execution_revision"] == "r1"
+    validate_stage4_r1_execution_contract(bundle.protocol)
+
+
+@pytest.mark.parametrize(
+    ("field", "legacy_value"),
+    (
+        ("execution_revision", "r0"),
+        ("pre_score_tag", "v0.3.0-anomaly-increment-protocol"),
+        ("results_tag", "v0.3.0-anomaly-increment"),
+    ),
+)
+def test_runtime_machine_contract_rejects_r0_freeze_identity(
+    field: str,
+    legacy_value: str,
+) -> None:
+    protocol = deepcopy(dict(load_stage4_protocol_bundle(Path.cwd()).protocol))
+    freeze = protocol["freeze"]
+    assert isinstance(freeze, dict)
+    freeze[field] = legacy_value
+
+    with pytest.raises(ValueError, match="stage-4"):
+        validate_stage4_r1_execution_contract(protocol)
 
 
 def test_target_blind_scoring_plan_freezes_all_fit_scopes_and_counts() -> None:

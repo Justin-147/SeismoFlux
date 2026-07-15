@@ -32,9 +32,10 @@ from seismoflux.anomaly_increment.feature_adapter import (
     concatenate_source_columns,
 )
 from seismoflux.anomaly_increment.grid_features import (
+    SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1,
     Stage4GridFamily,
-    assert_selected_columns_exact,
-    selected_table_identity_sha256,
+    assert_selected_columns_logically_exact_r1,
+    selected_table_logical_identity_sha256_r1,
 )
 from seismoflux.anomaly_increment.integration import (
     INTEGRATION_NEAR_ZERO_ABSOLUTE_TOLERANCE,
@@ -299,7 +300,7 @@ class TargetBlindGridFeatures:
 
 @dataclass(frozen=True, slots=True)
 class PrimaryGridReproductionReceipt:
-    """Exact accepted-versus-recomputed proof for one causal 25 km issue."""
+    """R1 logical-bit accepted-versus-recomputed proof for one causal 25 km issue."""
 
     issue_id: str
     issue_index: int
@@ -325,7 +326,7 @@ class PrimaryGridReproductionReceipt:
             label="recomputed primary reproduction table",
         )
         if accepted != recomputed:
-            raise ValueError("25 km issue reconstruction is not byte-exact")
+            raise ValueError("25 km issue reconstruction is not R1-logically exact")
 
     def as_mapping(self) -> dict[str, object]:
         return {
@@ -335,6 +336,108 @@ class PrimaryGridReproductionReceipt:
             "issue_report_id": self.issue_report_id,
             "recomputed_table_sha256": self.recomputed_table_sha256,
         }
+
+
+@dataclass(frozen=True, slots=True)
+class PrimaryGridLogicalReplayAuditR1:
+    """Target-blind 153-issue proof that 1/2 workers preserve every R1 identity."""
+
+    grid_id: str
+    source_columns: tuple[str, ...]
+    source_input_sha256: str
+    query_chunk_size: int
+    worker_counts: tuple[int, int]
+    receipts_by_worker: tuple[
+        tuple[PrimaryGridReproductionReceipt, ...],
+        tuple[PrimaryGridReproductionReceipt, ...],
+    ] = field(repr=False)
+    target_bytes_read: Literal[False] = False
+    target_path_observed: Literal[False] = False
+    role: Literal["stage4_r1_primary_grid_logical_identity_worker_replay"] = (
+        "stage4_r1_primary_grid_logical_identity_worker_replay"
+    )
+
+    def __post_init__(self) -> None:
+        _identifier(self.grid_id, label="R1 replay grid_id")
+        sources = tuple(self.source_columns)
+        if not sources or len(sources) != len(set(sources)):
+            raise ValueError("R1 replay source columns must be non-empty and unique")
+        for source in sources:
+            _assert_target_blind_name(source, label="R1 replay source column")
+        _sha256_digest(self.source_input_sha256, label="R1 replay source input")
+        if (
+            not isinstance(self.query_chunk_size, int)
+            or isinstance(self.query_chunk_size, bool)
+            or self.query_chunk_size <= 0
+        ):
+            raise ValueError("R1 replay query chunk size must be positive")
+        if self.worker_counts != (1, 2):
+            raise ValueError("R1 replay must use the frozen 1/2-worker matrix")
+        replays = tuple(tuple(items) for items in self.receipts_by_worker)
+        if len(replays) != 2:
+            raise ValueError("R1 replay must contain exactly two worker results")
+        expected_indices = tuple(range(FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT))
+        for receipts in replays:
+            if (
+                len(receipts) != FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT
+                or tuple(item.issue_index for item in receipts) != expected_indices
+                or len({item.issue_id for item in receipts}) != len(receipts)
+            ):
+                raise ValueError("R1 replay must cover all 153 issues exactly once in order")
+        if replays[0] != replays[1]:
+            raise ValueError("R1 logical identities differ between 1 and 2 workers")
+        if self.target_bytes_read or self.target_path_observed:
+            raise ValueError("R1 logical replay crossed the target boundary")
+        if self.role != "stage4_r1_primary_grid_logical_identity_worker_replay":
+            raise ValueError("R1 logical replay role changed")
+        object.__setattr__(self, "source_columns", sources)
+        object.__setattr__(self, "receipts_by_worker", replays)
+
+    @property
+    def reproduction_identity_sha256(self) -> str:
+        return canonical_mapping_sha256(
+            {
+                "grid_id": self.grid_id,
+                "identity_method": SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1,
+                "issues": [item.as_mapping() for item in self.receipts_by_worker[0]],
+                "query_chunk_size": self.query_chunk_size,
+                "source_columns": list(self.source_columns),
+                "source_input_sha256": self.source_input_sha256,
+            }
+        )
+
+    def _payload_mapping(self) -> dict[str, object]:
+        return {
+            "grid_id": self.grid_id,
+            "identity_method": SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1,
+            "issue_count": FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT,
+            "query_chunk_size": self.query_chunk_size,
+            "reproduction_identity_sha256": self.reproduction_identity_sha256,
+            "role": self.role,
+            "source_columns": list(self.source_columns),
+            "source_input_sha256": self.source_input_sha256,
+            "target_bytes_read": self.target_bytes_read,
+            "target_path_observed": self.target_path_observed,
+            "worker_replays": [
+                {
+                    "receipts": [item.as_mapping() for item in receipts],
+                    "reproduction_identity_sha256": self.reproduction_identity_sha256,
+                    "spatial_workers": workers,
+                }
+                for workers, receipts in zip(
+                    self.worker_counts,
+                    self.receipts_by_worker,
+                    strict=True,
+                )
+            ],
+        }
+
+    @property
+    def content_sha256(self) -> str:
+        return canonical_mapping_sha256(self._payload_mapping())
+
+    def as_mapping(self) -> dict[str, object]:
+        return {**self._payload_mapping(), "content_sha256": self.content_sha256}
 
 
 @dataclass(frozen=True, slots=True)
@@ -693,6 +796,107 @@ class CompensatorConvergenceAudit:
         return {**self._payload_mapping(), "content_sha256": self.content_sha256}
 
 
+def audit_primary_grid_logical_replay_r1(
+    *,
+    issue_ids: Sequence[str],
+    snapshots: Sequence[Stage3IssueSnapshot],
+    grid_family: Stage4GridFamily,
+    accepted_primary_issue_tables: Mapping[str, pa.Table],
+    source_columns: Sequence[str],
+    source_input_sha256: str,
+    query_chunk_size: int = 256,
+    worker_counts: tuple[int, int] = (1, 2),
+) -> PrimaryGridLogicalReplayAuditR1:
+    """Replay all formal 25 km issues with the frozen 1/2-worker R1 matrix.
+
+    This audit is deliberately narrower than compensator convergence: it proves
+    the final versioned Arrow identity across worker counts before the scoring
+    tag, without rebuilding the unrelated 50 km and 12.5 km integration grids.
+    """
+
+    frozen_issue_ids = tuple(_identifier(item, label="R1 replay issue_id") for item in issue_ids)
+    history = tuple(snapshots)
+    if (
+        len(history) != FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT
+        or len(frozen_issue_ids) != FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT
+        or len(set(frozen_issue_ids)) != len(frozen_issue_ids)
+        or tuple(item.issue_index for item in history)
+        != tuple(range(FORMAL_CONVERGENCE_HISTORY_ISSUE_COUNT))
+    ):
+        raise ValueError("R1 replay must retain all 153 causal issues in order")
+    if not isinstance(grid_family, Stage4GridFamily):
+        raise TypeError("R1 replay grid family must be Stage4GridFamily")
+    accepted_tables = dict(accepted_primary_issue_tables)
+    if tuple(accepted_tables) != frozen_issue_ids or any(
+        not isinstance(item, pa.Table) for item in accepted_tables.values()
+    ):
+        raise TypeError("R1 accepted tables must cover all 153 issues in order")
+    sources = tuple(source_columns)
+    if not sources or len(sources) != len(set(sources)):
+        raise ValueError("R1 replay source columns must be non-empty and unique")
+    for source in sources:
+        _assert_target_blind_name(source, label="R1 replay source column")
+    _sha256_digest(source_input_sha256, label="R1 replay source input")
+    if (
+        not isinstance(query_chunk_size, int)
+        or isinstance(query_chunk_size, bool)
+        or query_chunk_size <= 0
+    ):
+        raise ValueError("R1 replay query chunk size must be positive")
+    if worker_counts != (1, 2):
+        raise ValueError("R1 replay must use exactly 1 and 2 workers")
+
+    primary = grid_family.primary_25km
+    selected_columns = (*FEATURE_IDENTITY_COLUMNS, *sources)
+    worker_receipts: list[tuple[PrimaryGridReproductionReceipt, ...]] = []
+    for spatial_workers in worker_counts:
+        engine = Stage3FeatureEngine(
+            history,
+            primary.as_stage3_query_grid(),
+            query_chunk_size=query_chunk_size,
+            spatial_workers=spatial_workers,
+        )
+        receipts: list[PrimaryGridReproductionReceipt] = []
+        for issue_id, snapshot in zip(frozen_issue_ids, history, strict=True):
+            recomputed = engine.build_next_issue().table
+            accepted = accepted_tables[issue_id]
+            assert_issue_table_matches_frozen_grid(
+                accepted,
+                issue_time_utc=snapshot.issue_time_utc,
+                grid=primary,
+            )
+            report_ids = accepted["issue_report_id"].combine_chunks().unique().to_pylist()
+            if report_ids != [snapshot.summary.issue_report_id]:
+                raise ValueError("accepted R1 replay issue report identity changed")
+            accepted_sha256 = selected_table_logical_identity_sha256_r1(
+                accepted,
+                selected_columns,
+            )
+            recomputed_sha256 = assert_selected_columns_logically_exact_r1(
+                accepted,
+                recomputed,
+                columns=selected_columns,
+            )
+            receipts.append(
+                PrimaryGridReproductionReceipt(
+                    issue_id=issue_id,
+                    issue_index=snapshot.issue_index,
+                    issue_report_id=snapshot.summary.issue_report_id,
+                    accepted_table_sha256=accepted_sha256,
+                    recomputed_table_sha256=recomputed_sha256,
+                )
+            )
+        worker_receipts.append(tuple(receipts))
+    return PrimaryGridLogicalReplayAuditR1(
+        grid_id=primary.grid_id,
+        source_columns=sources,
+        source_input_sha256=source_input_sha256,
+        query_chunk_size=query_chunk_size,
+        worker_counts=worker_counts,
+        receipts_by_worker=(worker_receipts[0], worker_receipts[1]),
+    )
+
+
 def build_target_blind_convergence_inputs(
     *,
     issue_ids: Sequence[str],
@@ -771,11 +975,11 @@ def build_target_blind_convergence_inputs(
                 report_ids = accepted["issue_report_id"].combine_chunks().unique().to_pylist()
                 if report_ids != [snapshot.summary.issue_report_id]:
                     raise ValueError("accepted convergence issue report identity changed")
-                accepted_sha256 = selected_table_identity_sha256(
+                accepted_sha256 = selected_table_logical_identity_sha256_r1(
                     accepted,
                     selected_columns,
                 )
-                recomputed_sha256 = assert_selected_columns_exact(
+                recomputed_sha256 = assert_selected_columns_logically_exact_r1(
                     accepted,
                     latest,
                     columns=selected_columns,
@@ -791,7 +995,7 @@ def build_target_blind_convergence_inputs(
                 )
         if latest is None:  # pragma: no cover - history is non-empty by construction
             raise AssertionError("convergence reconstruction produced no issue table")
-        table_sha256 = selected_table_identity_sha256(latest, selected_columns)
+        table_sha256 = selected_table_logical_identity_sha256_r1(latest, selected_columns)
         frozen_grids.append(
             TargetBlindGridFeatures(
                 grid_id=grid.grid_id,
@@ -1046,12 +1250,14 @@ __all__ = [
     "GateStatus",
     "MagnitudeBin",
     "ModelVariant",
+    "PrimaryGridLogicalReplayAuditR1",
     "PrimaryGridReproductionReceipt",
     "PublicationAction",
     "RecomputedGridInputs",
     "TargetBlindGridFeatures",
     "audit_compensator_convergence",
     "audit_frozen_compensator_convergence",
+    "audit_primary_grid_logical_replay_r1",
     "bind_target_blind_convergence_background",
     "build_target_blind_convergence_inputs",
     "coarse_relative_difference",

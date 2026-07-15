@@ -19,8 +19,6 @@ import numpy as np
 import pyarrow.parquet as pq
 
 from seismoflux.anomaly_increment.authorization import (
-    STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
-    STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH,
     Stage4ScoringSeal,
     Stage4TargetReadinessEvidence,
     authorize_stage4_target_access,
@@ -30,8 +28,10 @@ from seismoflux.anomaly_increment.authorization import (
 from seismoflux.anomaly_increment.background_adapter import BackgroundDomainBinding
 from seismoflux.anomaly_increment.compute import Stage4ComputePlan, build_compute_plan
 from seismoflux.anomaly_increment.config import (
+    STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH,
     Stage4ProtocolBundle,
     load_stage4_protocol_bundle,
+    stage4_scoring_freeze_relative_path,
 )
 from seismoflux.anomaly_increment.convergence import (
     build_target_blind_convergence_inputs,
@@ -47,7 +47,6 @@ from seismoflux.anomaly_increment.formal_execution import (
     VerifiedFormalProtocol,
 )
 from seismoflux.anomaly_increment.formal_preflight import (
-    FORMAL_PREFLIGHT_RECEIPT_PATH,
     FormalPreflightBundle,
     FormalPreflightReceipt,
     load_formal_preflight,
@@ -77,7 +76,7 @@ from seismoflux.anomaly_increment.score_blind_path import (
 from seismoflux.background.execution import detect_physical_core_count
 
 FORMAL_CHECKPOINT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
-    "data/interim/stage4/anomaly_increment/checkpoints"
+    STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH
 )
 _CELL_MAPPING_COLUMNS: Final[tuple[str, ...]] = (
     "grid_id",
@@ -121,21 +120,26 @@ def _same_path(left: Path, right: Path) -> bool:
 
 
 def _scoring_seal_path(protocol: Stage4ProtocolBundle) -> Path:
-    freeze = _mapping(protocol.protocol.get("freeze"), label="freeze")
-    scoring = _mapping(
-        freeze.get("scoring_code_freeze"),
-        label="freeze.scoring_code_freeze",
+    return _frozen_scoring_path(
+        protocol,
+        key="required_seal_path",
+        label="canonical stage-4 scoring seal",
     )
-    path = _project_path(
-        protocol.repository_root.resolve(),
-        scoring.get("required_seal_path"),
-        label="freeze.scoring_code_freeze.required_seal_path",
-    )
+
+
+def _frozen_scoring_path(
+    protocol: Stage4ProtocolBundle,
+    *,
+    key: str,
+    label: str,
+) -> Path:
+    relative = stage4_scoring_freeze_relative_path(protocol.protocol, key)
+    path = protocol.repository_root.resolve().joinpath(*relative.parts)
     return require_score_blind_project_path(
         protocol.repository_root,
         protocol.protocol,
         path,
-        label="canonical stage-4 scoring seal",
+        label=label,
     )
 
 
@@ -162,12 +166,9 @@ def _cell_mapping_path(protocol: Stage4ProtocolBundle) -> Path:
 
 
 def _formal_preflight_receipt_path(protocol: Stage4ProtocolBundle) -> Path:
-    root = protocol.repository_root.resolve()
-    path = root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
-    return require_score_blind_project_path(
-        root,
-        protocol.protocol,
-        path,
+    return _frozen_scoring_path(
+        protocol,
+        key="formal_preflight_receipt_path",
         label="canonical stage-4 formal preflight receipt",
     )
 
@@ -410,17 +411,18 @@ class FormalProductionReadiness:
     def as_mapping(self) -> dict[str, object]:
         resource = self.preflight.receipt.space_placebo_resource_observation
         convergence = self.preflight.convergence_inputs
+        publication = self.preflight.context.scoring_plan.publication
         return {
             "formal_backend": self.scoring_seal.qualification.formal_backend,
             "formal_preflight_receipt_sha256": self.preflight.receipt.content_sha256,
             "gpu_requested": self.scoring_seal.qualification.gpu_requested,
             "gpu_status": self.scoring_seal.qualification.gpu_status,
-            "interactive_output": ("outputs/visualizations/anomaly_increment_spatial.html"),
+            "interactive_output": publication.local_spatial_interactive,
             "locked_test_run": False,
             "protocol_design_sha256": self.protocol.design_sha256,
             "scoring_code_commit": self.scoring_seal.qualification.scoring_code_commit,
             "space_placebo_recommended_max_in_flight": (resource.recommended_max_in_flight),
-            "static_output": "outputs/visualizations/anomaly_increment_spatial.svg",
+            "static_output": publication.local_spatial_static,
             "target_blind_convergence_grid_sizes_km": [
                 item.cell_size_km for item in convergence.grids
             ],
@@ -492,25 +494,37 @@ def authorize_stage4_formal_readiness(
         root,
         readiness.protocol.protocol,
         scoring_seal_path=readiness.scoring_seal_path,
-        attempt_ledger_path=root.joinpath(
-            *PurePosixPath(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts
+        attempt_ledger_path=_frozen_scoring_path(
+            readiness.protocol,
+            key="formal_attempt_ledger_path",
+            label="canonical stage-4 R1 formal-attempt ledger",
         ),
-        target_read_ledger_path=root.joinpath(
-            *PurePosixPath(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts
+        target_read_ledger_path=_frozen_scoring_path(
+            readiness.protocol,
+            key="target_read_ledger_path",
+            label="canonical stage-4 R1 target-read ledger",
         ),
     )
     preflight = readiness.preflight
+    publication = preflight.context.scoring_plan.publication
     return FormalRunInputs(
         project_root=root,
         authorization=authorization,
         preflight=preflight,
-        checkpoint_directory=root.joinpath(*FORMAL_CHECKPOINT_RELATIVE_PATH.parts),
+        checkpoint_directory=_frozen_scoring_path(
+            readiness.protocol,
+            key="checkpoint_root",
+            label="canonical stage-4 R1 checkpoint root",
+        ),
         concurrency=PlaceboConcurrencyPlan.from_preflight_receipt(
             preflight.context.scoring_plan.compute.workers,
             preflight.receipt,
         ),
         same_process_resume_limit=1,
-        local_artifact_hook=Stage4SpatialArtifactHook(),
+        local_artifact_hook=Stage4SpatialArtifactHook(
+            static_relative_path=publication.local_spatial_static,
+            interactive_relative_path=publication.local_spatial_interactive,
+        ),
     )
 
 
@@ -526,11 +540,15 @@ def verify_stage4_formal_readiness(
         root,
         readiness.protocol.protocol,
         scoring_seal_path=readiness.scoring_seal_path,
-        attempt_ledger_path=root.joinpath(
-            *PurePosixPath(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts
+        attempt_ledger_path=_frozen_scoring_path(
+            readiness.protocol,
+            key="formal_attempt_ledger_path",
+            label="canonical stage-4 R1 formal-attempt ledger",
         ),
-        target_read_ledger_path=root.joinpath(
-            *PurePosixPath(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts
+        target_read_ledger_path=_frozen_scoring_path(
+            readiness.protocol,
+            key="target_read_ledger_path",
+            label="canonical stage-4 R1 target-read ledger",
         ),
     )
     if evidence.scoring_seal.as_mapping() != readiness.scoring_seal.as_mapping():

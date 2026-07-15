@@ -37,7 +37,7 @@ from seismoflux.anomaly_increment.feature_adapter import (
 )
 from seismoflux.anomaly_increment.grid_features import (
     Stage4IntegrationGrid,
-    selected_table_identity_sha256,
+    selected_table_logical_identity_sha256_r1,
 )
 from seismoflux.anomaly_increment.integration import (
     composite_midpoint_quadrature,
@@ -397,7 +397,7 @@ class VerifiedStage3Issue:
         if set(names) & set(FEATURE_IDENTITY_COLUMNS):
             raise ValueError("source_columns overlap frozen feature identity columns")
         selected = (*FEATURE_IDENTITY_COLUMNS, *names)
-        table_sha256 = selected_table_identity_sha256(table, selected)
+        table_sha256 = selected_table_logical_identity_sha256_r1(table, selected)
         binding_sha256 = _issue_binding_sha256(
             issue_time_utc=issue_time,
             issue_report_id=report_id,
@@ -438,7 +438,7 @@ class VerifiedStage3Issue:
         report_ids = tuple(self.table["issue_report_id"].combine_chunks().to_pylist())
         if not report_ids or set(report_ids) != {self.issue_report_id}:
             raise ValueError("verified issue report identity changed")
-        table_sha256 = selected_table_identity_sha256(
+        table_sha256 = selected_table_logical_identity_sha256_r1(
             self.table,
             (*FEATURE_IDENTITY_COLUMNS, *names),
         )
@@ -482,7 +482,7 @@ class VerifiedStage3Issue:
         report_ids = tuple(table["issue_report_id"].combine_chunks().to_pylist())
         if not report_ids or set(report_ids) != {self.issue_report_id}:
             raise ValueError("rebuilt feature table changed its recipient report identity")
-        table_sha256 = selected_table_identity_sha256(
+        table_sha256 = selected_table_logical_identity_sha256_r1(
             table,
             (*FEATURE_IDENTITY_COLUMNS, *names),
         )

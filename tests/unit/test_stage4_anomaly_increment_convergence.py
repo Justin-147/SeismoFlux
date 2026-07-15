@@ -24,6 +24,7 @@ from seismoflux.anomaly_increment.convergence import (
     FrozenVariantCoefficients,
     RecomputedGridInputs,
     audit_compensator_convergence,
+    audit_primary_grid_logical_replay_r1,
     build_target_blind_convergence_inputs,
 )
 from seismoflux.anomaly_increment.grid_features import (
@@ -353,15 +354,17 @@ def test_pretarget_builder_proves_all_153_primary_issues_exact(
         )
         for index, (issue_id, snapshot) in enumerate(zip(issue_ids, snapshots, strict=True))
     }
+    observed_worker_counts: list[int] = []
 
     class FakeEngine:
         def __init__(
             self,
             history: Sequence[Stage3IssueSnapshot],
             query_grid: Stage3QueryGrid,
-            **_kwargs: object,
+            **kwargs: object,
         ) -> None:
             assert tuple(history) == snapshots
+            observed_worker_counts.append(cast(int, kwargs["spatial_workers"]))
             self.grid = next(item for item in grids.grids() if item.grid_id == query_grid.grid_id)
             self.index = 0
 
@@ -396,6 +399,24 @@ def test_pretarget_builder_proves_all_153_primary_issues_exact(
     assert frozen.grids[1].feature_columns["signal"].tolist() == [152.0]
     assert frozen.target_bytes_read is False
     assert frozen.target_path_observed is False
+
+    replay = audit_primary_grid_logical_replay_r1(
+        issue_ids=issue_ids,
+        snapshots=snapshots,
+        grid_family=grids,
+        accepted_primary_issue_tables=accepted,
+        source_columns=("signal",),
+        source_input_sha256="a" * 64,
+    )
+    assert replay.worker_counts == (1, 2)
+    assert observed_worker_counts[-2:] == [1, 2]
+    assert len(replay.receipts_by_worker[0]) == 153
+    assert replay.receipts_by_worker[0] == replay.receipts_by_worker[1]
+    assert replay.target_bytes_read is False
+    assert replay.target_path_observed is False
+    assert replay.as_mapping()["reproduction_identity_sha256"] == (
+        replay.reproduction_identity_sha256
+    )
 
     changed = dict(accepted)
     changed[issue_ids[75]] = _one_cell_issue_table(

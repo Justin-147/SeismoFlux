@@ -44,7 +44,9 @@ class ConfigFiles(StrictModel):
     ingestion: str
     research_protocol: str
     background: str
-    anomaly_increment: str = "configs/anomaly_increment.yaml"
+    anomaly_increment: Literal["configs/anomaly_increment_r1.yaml"] = (
+        "configs/anomaly_increment_r1.yaml"
+    )
     operating_points: str
 
     _data_sources_relative = field_validator("data_sources")(normalize_relative_path)

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -84,8 +85,9 @@ from seismoflux.anomaly_increment.target_access import (
 )
 from seismoflux.background.execution import CommandResult
 
-PROTOCOL_TAG = "v0.3.0-anomaly-increment-protocol"
-SCORING_TAG = "v0.3.0-anomaly-increment-scoring-code"
+PROTOCOL_TAG = "v0.3.0-anomaly-increment-protocol-r1"
+SCORING_TAG = "v0.3.0-anomaly-increment-scoring-code-r1"
+RESULT_TAG = "v0.3.0-anomaly-increment-r1"
 CODE_COMMIT = "2" * 40
 PROTOCOL_COMMIT = "1" * 40
 PROTOCOL_TAG_OBJECT = "3" * 40
@@ -142,7 +144,12 @@ def _protocol(
         "protocol_version": "0.4.0",
         "generated_manifests": {},
         "freeze": {
+            "execution_revision": "r1",
+            "corrects_execution_revision": "r0",
+            "execution_revision_document": "docs/anomaly_increment_protocol_r1.md",
+            "readiness_incident_document": ("docs/phase4_scoring_readiness_incident_r0.md"),
             "pre_score_tag": PROTOCOL_TAG,
+            "results_tag": RESULT_TAG,
             "protocol_tag_authorizes_only_score_free_implementation": True,
             "required_before_any_target_read_or_score": [
                 "protocol_commit_pushed",
@@ -158,7 +165,51 @@ def _protocol(
             ],
             "scoring_code_freeze": {
                 "expected_tag": SCORING_TAG,
-                "required_seal_path": "data/manifests/anomaly_increment_scoring_seal.json",
+                "required_seal_path": ("data/manifests/anomaly_increment_r1_scoring_seal.json"),
+                "formal_preflight_receipt_path": (
+                    "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+                ),
+                "qualification_path": (
+                    "data/interim/stage4/anomaly_increment_r1/scoring_qualification.json"
+                ),
+                "stage4_junit_path": (
+                    "data/interim/stage4/anomaly_increment_r1/qualification_stage4.junit.xml"
+                ),
+                "full_non_target_junit_path": (
+                    "data/interim/stage4/anomaly_increment_r1/"
+                    "qualification_full_non_target.junit.xml"
+                ),
+                "formal_attempt_ledger_path": (
+                    "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+                ),
+                "target_read_ledger_path": (
+                    "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+                ),
+                "checkpoint_root": ("data/interim/stage4/anomaly_increment_r1/checkpoints"),
+                "selected_table_logical_identity": {
+                    "method_id": "arrow_ipc_selected_table_logical_identity_r1",
+                    "sha256_domain_separator_ascii": (
+                        "seismoflux.selected-table-logical-identity.r1"
+                    ),
+                    "sha256_domain_separator_nul_terminated": True,
+                    "top_level_schema_metadata": "excluded",
+                    "field_name_order_type_nullability_and_metadata": "preserved_exactly",
+                    "null_payload": "canonical_type_zero",
+                    "validity_bitmap": "preserved_with_length_padding_zeroed",
+                    "boolean_value_padding": "zeroed_outside_logical_length",
+                    "chunking_and_slice_offsets": "canonicalized",
+                    "field_metadata_key_order": "bytewise_ascending",
+                    "supported_types": [
+                        "boolean",
+                        "signed_integer",
+                        "unsigned_integer",
+                        "floating_point",
+                        "timestamp",
+                        "utf8_string",
+                    ],
+                    "valid_payload_bits": "preserved_exactly",
+                    "unsupported_types": "fail_closed",
+                },
                 "gpu_if_not_equivalent_at_code_freeze": ("lock_formal_run_to_cpu_float64"),
                 "required_before_target_read": [
                     "scoring_code_commit_pushed",
@@ -172,6 +223,7 @@ def _protocol(
                     "placebo_coverage_values_and_null_bitmap_exactly_unchanged",
                     "fixed_small_permutation_matches_stage3_low_level_reference",
                     "worker_count_invariance_passed",
+                    "logical_arrow_identity_r1_verified",
                     "formal_attempt_count_equals_zero",
                     "target_read_count_equals_zero",
                 ],
@@ -311,10 +363,65 @@ def _qualification(
         scoring_code_commit=CODE_COMMIT,
         score_blind_input_evidence=inputs,
         formal_preflight_receipt=_preflight_receipt(protocol, inputs),
+        logical_identity_replay_audit_sha256="c" * 64,
         stage4_pytest=_pytest_evidence(full=False),
         full_pytest=_pytest_evidence(full=True),
         gpu_requested=gpu_requested,
         gpu_equivalence=gpu_evidence,
+    )
+
+
+def _logical_replay_audit_document(
+    protocol: dict[str, Any],
+    inputs: ScoreBlindInputEvidence,
+) -> dict[str, object]:
+    receipts = [
+        {
+            "accepted_table_sha256": hashlib.sha256(f"logical-replay:{index}".encode()).hexdigest(),
+            "issue_id": f"anomaly-issue-{index:03d}",
+            "issue_index": index,
+            "issue_report_id": f"report-{index:03d}",
+            "recomputed_table_sha256": hashlib.sha256(
+                f"logical-replay:{index}".encode()
+            ).hexdigest(),
+        }
+        for index in range(153)
+    ]
+    reproduction_sha256 = "d" * 64
+    audit = with_content_sha256(
+        {
+            "grid_id": "stage4-grid-25km",
+            "identity_method": "arrow_ipc_selected_table_logical_identity_r1",
+            "issue_count": 153,
+            "query_chunk_size": 256,
+            "reproduction_identity_sha256": reproduction_sha256,
+            "role": "stage4_r1_primary_grid_logical_identity_worker_replay",
+            "source_columns": ["signal"],
+            "source_input_sha256": inputs.content_sha256,
+            "target_bytes_read": False,
+            "target_path_observed": False,
+            "worker_replays": [
+                {
+                    "receipts": receipts,
+                    "reproduction_identity_sha256": reproduction_sha256,
+                    "spatial_workers": workers,
+                }
+                for workers in (1, 2)
+            ],
+        }
+    )
+    return with_content_sha256(
+        {
+            "audit": audit,
+            "locked_test_run": False,
+            "protocol_design_sha256": protocol_design_sha256(protocol),
+            "random_input_seal_sha256": inputs.random_input_seal_sha256,
+            "schema_version": 1,
+            "scoring_code_commit": CODE_COMMIT,
+            "target_bytes_read": False,
+            "target_path_observed": False,
+            "worktree_clean_before_and_after": True,
+        }
     )
 
 
@@ -356,7 +463,7 @@ def _seal_fixture(
         attempt_ledger=attempt,
         target_read_ledger=target,
     )
-    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_scoring_seal.json"
+    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
     write_stage4_scoring_seal_atomic(seal_path, seal)
     preflight_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     preflight_path.parent.mkdir(parents=True, exist_ok=True)
@@ -423,6 +530,73 @@ def test_expected_target_identity_is_metadata_only_and_never_requires_target_pat
 
     assert identity["path"] == "synthetic/target.bin"
     assert not missing.exists()
+
+
+def test_r1_authorization_paths_are_disjoint_from_the_retired_r0_namespace() -> None:
+    assert STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH == (
+        "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+    )
+    assert STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH == (
+        "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+    )
+    assert FORMAL_PREFLIGHT_RECEIPT_PATH.as_posix() == (
+        "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+    )
+    assert STAGE4_FROZEN_PROTOCOL_PATHS == (
+        "configs/anomaly_increment_r1.yaml",
+        "data/manifests/anomaly_increment_r1_feature_set.json",
+        "data/manifests/anomaly_increment_r1_fold_manifest.json",
+        "data/manifests/anomaly_increment_r1_randomness.json",
+        "data/manifests/anomaly_increment_r1_spatial_strata.json",
+        "docs/anomaly_increment_protocol.md",
+        "docs/anomaly_increment_protocol_r1.md",
+        "docs/phase4_scoring_readiness_incident_r0.md",
+        "docs/phase4_protocol_r1_acceptance.md",
+    )
+
+
+@pytest.mark.parametrize(
+    ("section", "key", "value"),
+    (
+        ("freeze", "execution_revision", "r0"),
+        ("freeze", "pre_score_tag", "v0.3.0-anomaly-increment-protocol"),
+        ("freeze", "results_tag", "v0.3.0-anomaly-increment"),
+        (
+            "scoring",
+            "expected_tag",
+            "v0.3.0-anomaly-increment-scoring-code",
+        ),
+        (
+            "scoring",
+            "formal_attempt_ledger_path",
+            "data/manifests/anomaly_increment_attempt_ledger.json",
+        ),
+        ("logical", "top_level_schema_metadata", "included"),
+    ),
+)
+def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r0_or_drift(
+    section: str,
+    key: str,
+    value: object,
+) -> None:
+    protocol = deepcopy(_protocol("0" * 64))
+    freeze = cast(dict[str, Any], protocol["freeze"])
+    scoring = cast(dict[str, Any], freeze["scoring_code_freeze"])
+    if section == "freeze":
+        freeze[key] = value
+    elif section == "scoring":
+        scoring[key] = value
+    else:
+        logical = cast(dict[str, Any], scoring["selected_table_logical_identity"])
+        logical[key] = value
+
+    with pytest.raises(
+        Stage4ScoringNotAuthorizedError,
+        match="R1 execution freeze",
+    ):
+        authorization_module._freeze_tags(protocol)
+    with pytest.raises(ValueError, match="stage-4"):
+        seal_script._freeze_tags(protocol)
 
 
 def test_scoring_seal_and_qualification_round_trip_are_content_addressed(
@@ -665,6 +839,7 @@ def test_incomplete_or_tampered_qualification_fails_closed(tmp_path: Path) -> No
             scoring_code_commit=CODE_COMMIT,
             score_blind_input_evidence=inputs,
             formal_preflight_receipt=_preflight_receipt(protocol, inputs),
+            logical_identity_replay_audit_sha256="c" * 64,
             stage4_pytest=incomplete,
             full_pytest=_pytest_evidence(full=True),
         )
@@ -683,6 +858,7 @@ def test_incomplete_or_tampered_qualification_fails_closed(tmp_path: Path) -> No
                 changed_protocol,
                 changed_inputs,
             ),
+            logical_identity_replay_audit_sha256="c" * 64,
             stage4_pytest=_pytest_evidence(full=False),
             full_pytest=_pytest_evidence(full=True),
         )
@@ -1028,7 +1204,7 @@ def test_shadow_empty_ledger_cannot_reauthorize_after_canonical_consumption(
         kind="target_read",
         execution_binding_id=authorization.execution_binding_id,
     )
-    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_scoring_seal.json"
+    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
 
     with pytest.raises(Stage4ScoringNotAuthorizedError, match="sole repository-root path"):
         authorize_stage4_target_access(
@@ -1337,7 +1513,31 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
     inputs = _score_blind_inputs(protocol)
     qualification = _qualification(protocol, inputs)
     preflight_receipt = _preflight_receipt(protocol, inputs)
-    qualification_path = tmp_path / "data" / "interim" / "qualification.json"
+    qualification_path = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "scoring_qualification.json"
+    )
+    logical_replay_path = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "logical_identity_worker_replay.json"
+    )
+    logical_replay_path.parent.mkdir(parents=True, exist_ok=True)
+    logical_replay_path.write_text(
+        json.dumps(
+            _logical_replay_audit_document(protocol, inputs),
+            ensure_ascii=False,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     write_stage4_qualification_evidence_atomic(qualification_path, qualification)
     preflight_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     preflight_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1372,6 +1572,23 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
     assert generated["target_read_count"] == 0
     assert checked["verified"] is True
     assert not (tmp_path / "synthetic" / "target.bin").exists()
+    with pytest.raises(ValueError, match="frozen R1 path"):
+        seal_script.check(
+            tmp_path,
+            protocol,
+            qualification_path=(
+                tmp_path
+                / "data"
+                / "interim"
+                / "stage4"
+                / "anomaly_increment"
+                / "scoring_qualification.json"
+            ),
+            preflight_receipt_path=preflight_path,
+            attempt_ledger_path=attempt_path,
+            target_read_ledger_path=target_path,
+            repository_adapter=adapter,
+        )
     binding = stage4_execution_binding_id(_repository(), inputs, qualification)
     reserve_stage4_operation(
         target_path,
@@ -1406,12 +1623,49 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         json.dumps(receipt.as_mapping(), sort_keys=True),
         encoding="utf-8",
     )
-    stage4_junit = tmp_path / "data" / "interim" / "stage4.junit.xml"
-    full_junit = tmp_path / "data" / "interim" / "full.junit.xml"
+    stage4_junit = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "qualification_stage4.junit.xml"
+    )
+    full_junit = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "qualification_full_non_target.junit.xml"
+    )
     stage4_junit.parent.mkdir(parents=True, exist_ok=True)
     stage4_junit.write_bytes(_pytest_xml(full=False))
     full_junit.write_bytes(_pytest_xml(full=True))
-    qualification_path = tmp_path / "data" / "interim" / "qualification.json"
+    qualification_path = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "scoring_qualification.json"
+    )
+    logical_replay_path = (
+        tmp_path
+        / "data"
+        / "interim"
+        / "stage4"
+        / "anomaly_increment_r1"
+        / "logical_identity_worker_replay.json"
+    )
+    logical_replay_path.write_text(
+        json.dumps(
+            _logical_replay_audit_document(protocol, inputs),
+            ensure_ascii=False,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(
         qualification_script,
         "observe_score_blind_inputs",
@@ -1428,6 +1682,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         full_junit_path=full_junit,
         preflight_receipt_path=preflight_path,
         qualification_path=qualification_path,
+        logical_replay_audit_path=logical_replay_path,
         git_runner=git_head,
     )
     checked = qualification_script.check(
@@ -1437,6 +1692,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         full_junit_path=full_junit,
         preflight_receipt_path=preflight_path,
         qualification_path=qualification_path,
+        logical_replay_audit_path=logical_replay_path,
         git_runner=git_head,
     )
 
@@ -1446,3 +1702,25 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
     assert generated["formal_preflight_receipt_sha256"] == receipt.content_sha256
     assert checked["verified"] is True
     assert not (tmp_path / "synthetic" / "target.bin").exists()
+    with pytest.raises(ValueError, match="frozen R1 path"):
+        qualification_script.generate(
+            tmp_path,
+            protocol,
+            stage4_junit_path=(tmp_path / "data" / "interim" / "stage4.junit.xml"),
+            full_junit_path=full_junit,
+            preflight_receipt_path=preflight_path,
+            qualification_path=qualification_path,
+            logical_replay_audit_path=logical_replay_path,
+            git_runner=git_head,
+        )
+    with pytest.raises(ValueError, match="frozen R1 path"):
+        qualification_script.generate(
+            tmp_path,
+            protocol,
+            stage4_junit_path=stage4_junit,
+            full_junit_path=full_junit,
+            preflight_receipt_path=preflight_path,
+            qualification_path=(tmp_path / "data" / "interim" / "qualification.json"),
+            logical_replay_audit_path=logical_replay_path,
+            git_runner=git_head,
+        )

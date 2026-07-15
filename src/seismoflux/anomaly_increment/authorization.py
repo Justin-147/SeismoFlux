@@ -24,8 +24,19 @@ from seismoflux.anomaly_increment.attempt_ledger import (
     Stage4LedgerError,
     read_stage4_ledger,
 )
+from seismoflux.anomaly_increment.config import (
+    STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH as R1_ATTEMPT_LEDGER_RELATIVE_PATH,
+)
+from seismoflux.anomaly_increment.config import (
+    STAGE4_PROTOCOL_TAG,
+    STAGE4_SCORING_CODE_TAG,
+    stage4_scoring_freeze_relative_path,
+    validate_stage4_r1_execution_contract,
+)
+from seismoflux.anomaly_increment.config import (
+    STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH as R1_TARGET_READ_LEDGER_RELATIVE_PATH,
+)
 from seismoflux.anomaly_increment.formal_preflight import (
-    FORMAL_PREFLIGHT_RECEIPT_PATH,
     FormalPreflightReceipt,
     load_formal_preflight_receipt,
 )
@@ -61,19 +72,18 @@ from seismoflux.data.common import canonical_json_bytes
 
 STAGE4_SCORING_SEAL_SCHEMA_VERSION: Final[int] = 2
 STAGE4_PUBLIC_REPOSITORY: Final[str] = "github.com/Justin-147/SeismoFlux"
-STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH: Final[str] = (
-    "data/manifests/anomaly_increment_attempt_ledger.json"
-)
-STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH: Final[str] = (
-    "data/manifests/anomaly_increment_target_read_ledger.json"
-)
+STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH: Final[str] = R1_ATTEMPT_LEDGER_RELATIVE_PATH.as_posix()
+STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH: Final[str] = R1_TARGET_READ_LEDGER_RELATIVE_PATH.as_posix()
 STAGE4_FROZEN_PROTOCOL_PATHS: Final[tuple[str, ...]] = (
-    "configs/anomaly_increment.yaml",
-    "data/manifests/anomaly_increment_feature_set.json",
-    "data/manifests/anomaly_increment_fold_manifest.json",
-    "data/manifests/anomaly_increment_randomness.json",
-    "data/manifests/anomaly_increment_spatial_strata.json",
+    "configs/anomaly_increment_r1.yaml",
+    "data/manifests/anomaly_increment_r1_feature_set.json",
+    "data/manifests/anomaly_increment_r1_fold_manifest.json",
+    "data/manifests/anomaly_increment_r1_randomness.json",
+    "data/manifests/anomaly_increment_r1_spatial_strata.json",
     "docs/anomaly_increment_protocol.md",
+    "docs/anomaly_increment_protocol_r1.md",
+    "docs/phase4_scoring_readiness_incident_r0.md",
+    "docs/phase4_protocol_r1_acceptance.md",
 )
 
 _GIT_OID_PATTERN = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
@@ -937,15 +947,16 @@ class Stage4TargetReadinessEvidence:
 
 
 def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
+    try:
+        validate_stage4_r1_execution_contract(protocol)
+    except (TypeError, ValueError) as exc:
+        raise Stage4ScoringNotAuthorizedError(
+            "stage-4 R1 execution freeze is missing or changed"
+        ) from exc
     freeze = _mapping(protocol.get("freeze"), label="freeze")
-    scoring = _mapping(freeze.get("scoring_code_freeze"), label="scoring_code_freeze")
-    protocol_tag = freeze.get("pre_score_tag")
-    scoring_tag = scoring.get("expected_tag")
-    if not isinstance(protocol_tag, str) or not isinstance(scoring_tag, str):
-        raise Stage4ScoringNotAuthorizedError("stage-4 freeze tags are missing")
     if freeze.get("protocol_tag_authorizes_only_score_free_implementation") is not True:
         raise Stage4ScoringNotAuthorizedError("protocol-tag score-free boundary changed")
-    return protocol_tag, scoring_tag
+    return STAGE4_PROTOCOL_TAG, STAGE4_SCORING_CODE_TAG
 
 
 def build_stage4_scoring_seal(
@@ -1205,6 +1216,21 @@ def _relative_to_root(root: Path, path: Path) -> str:
     return lexical.relative_to(resolved_root).as_posix()
 
 
+def _canonical_execution_path(
+    root: Path,
+    protocol: Mapping[str, object],
+    *,
+    key: str,
+) -> Path:
+    try:
+        relative = stage4_scoring_freeze_relative_path(protocol, key)
+    except (TypeError, ValueError) as exc:
+        raise Stage4ScoringNotAuthorizedError(
+            f"stage-4 R1 execution path is missing or changed: {key}"
+        ) from exc
+    return Path(os.path.abspath(os.fspath(root.joinpath(*relative.parts))))
+
+
 def _require_canonical_ledger_path(root: Path, path: Path, *, kind: str) -> Path:
     relative = {
         "formal_attempt": STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
@@ -1249,6 +1275,16 @@ def verify_stage4_target_readiness(
         target_read_ledger_path,
         label="stage-4 target-read audit ledger",
     )
+    protocol_tag, scoring_tag = _freeze_tags(protocol)
+    canonical_seal_path = _canonical_execution_path(
+        root,
+        protocol,
+        key="required_seal_path",
+    )
+    if os.path.normcase(os.fspath(seal_path)) != os.path.normcase(os.fspath(canonical_seal_path)):
+        raise Stage4ScoringNotAuthorizedError(
+            "stage-4 scoring seal must use its sole R1 repository-root path"
+        )
     canonical_attempt_ledger = _require_canonical_ledger_path(
         root,
         safe_attempt_ledger,
@@ -1260,10 +1296,14 @@ def verify_stage4_target_readiness(
         kind="target_read",
     )
     loaded = load_stage4_scoring_seal(seal_path)
+    canonical_preflight_relative = stage4_scoring_freeze_relative_path(
+        protocol,
+        "formal_preflight_receipt_path",
+    )
     preflight_receipt_path = require_score_blind_project_path(
         root,
         protocol,
-        root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts),
+        root.joinpath(*canonical_preflight_relative.parts),
         label="formal preflight receipt",
     )
     try:
@@ -1276,7 +1316,6 @@ def verify_stage4_target_readiness(
         raise Stage4ScoringNotAuthorizedError(
             "formal preflight receipt is missing, altered, or belongs to another qualification"
         ) from exc
-    protocol_tag, scoring_tag = _freeze_tags(protocol)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
     adapter = repository_adapter or GitStage4RepositoryAdapter()
     repository = adapter.observe(

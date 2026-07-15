@@ -44,12 +44,94 @@ def _load_script(name: str) -> ModuleType:
 
 def _protocol() -> dict[str, object]:
     return {
+        "protocol_version": "0.4.0",
         "inputs": {
             "earthquake_target": {
                 "path": "synthetic/target.bin",
             }
-        }
+        },
+        "freeze": {
+            "execution_revision": "r1",
+            "corrects_execution_revision": "r0",
+            "execution_revision_document": "docs/anomaly_increment_protocol_r1.md",
+            "readiness_incident_document": ("docs/phase4_scoring_readiness_incident_r0.md"),
+            "pre_score_tag": "v0.3.0-anomaly-increment-protocol-r1",
+            "results_tag": "v0.3.0-anomaly-increment-r1",
+            "protocol_tag_authorizes_only_score_free_implementation": True,
+            "scoring_code_freeze": {
+                "expected_tag": "v0.3.0-anomaly-increment-scoring-code-r1",
+                "required_seal_path": ("data/manifests/anomaly_increment_r1_scoring_seal.json"),
+                "formal_preflight_receipt_path": (
+                    "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+                ),
+                "qualification_path": (
+                    "data/interim/stage4/anomaly_increment_r1/scoring_qualification.json"
+                ),
+                "stage4_junit_path": (
+                    "data/interim/stage4/anomaly_increment_r1/qualification_stage4.junit.xml"
+                ),
+                "full_non_target_junit_path": (
+                    "data/interim/stage4/anomaly_increment_r1/"
+                    "qualification_full_non_target.junit.xml"
+                ),
+                "formal_attempt_ledger_path": (
+                    "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+                ),
+                "target_read_ledger_path": (
+                    "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+                ),
+                "checkpoint_root": ("data/interim/stage4/anomaly_increment_r1/checkpoints"),
+                "selected_table_logical_identity": {
+                    "method_id": "arrow_ipc_selected_table_logical_identity_r1",
+                    "sha256_domain_separator_ascii": (
+                        "seismoflux.selected-table-logical-identity.r1"
+                    ),
+                    "sha256_domain_separator_nul_terminated": True,
+                    "top_level_schema_metadata": "excluded",
+                    "field_name_order_type_nullability_and_metadata": "preserved_exactly",
+                    "null_payload": "canonical_type_zero",
+                    "validity_bitmap": "preserved_with_length_padding_zeroed",
+                    "boolean_value_padding": "zeroed_outside_logical_length",
+                    "chunking_and_slice_offsets": "canonicalized",
+                    "field_metadata_key_order": "bytewise_ascending",
+                    "supported_types": [
+                        "boolean",
+                        "signed_integer",
+                        "unsigned_integer",
+                        "floating_point",
+                        "timestamp",
+                        "utf8_string",
+                    ],
+                    "valid_payload_bits": "preserved_exactly",
+                    "unsupported_types": "fail_closed",
+                },
+            },
+        },
     }
+
+
+def test_stage4_pretarget_cli_defaults_use_only_the_r1_execution_namespace() -> None:
+    qualification = _load_script("build_stage4_scoring_qualification.py")
+    seal = _load_script("build_stage4_scoring_seal.py")
+    preflight = _load_script("build_stage4_formal_preflight.py")
+
+    assert qualification.PROTOCOL_PATH == ROOT / "configs" / "anomaly_increment_r1.yaml"
+    assert seal.PROTOCOL_PATH == ROOT / "configs" / "anomaly_increment_r1.yaml"
+    assert (
+        ROOT.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts) == qualification.PREFLIGHT_RECEIPT_PATH
+    )
+    assert ROOT.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts) == seal.PREFLIGHT_RECEIPT_PATH
+    assert ROOT.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts) == preflight.OUTPUT
+    for path in (
+        qualification.QUALIFICATION_PATH,
+        qualification.STAGE4_JUNIT_PATH,
+        qualification.FULL_JUNIT_PATH,
+        seal.QUALIFICATION_PATH,
+        seal.ATTEMPT_LEDGER_PATH,
+        seal.TARGET_READ_LEDGER_PATH,
+        preflight.OUTPUT,
+    ):
+        assert "anomaly_increment_r1" in path.as_posix()
 
 
 def _forbid_target_lstat(
@@ -196,7 +278,7 @@ def test_protocol_loader_rejects_hardlink_before_parsing_any_bytes(
     target = root / "synthetic-target.bin"
     payload = b"target bytes are not a stage-4 protocol"
     target.write_bytes(payload)
-    protocol_path = root / "configs" / "anomaly_increment.yaml"
+    protocol_path = root / "configs" / "anomaly_increment_r1.yaml"
     protocol_path.parent.mkdir()
     os.link(target, protocol_path)
 
@@ -217,7 +299,7 @@ def test_scoring_seal_cli_protocol_loader_rejects_hardlink_before_open(
     target = tmp_path / "synthetic-target.bin"
     payload = b"target bytes must not enter the seal protocol loader"
     target.write_bytes(payload)
-    protocol_path = tmp_path / "configs" / "anomaly_increment.yaml"
+    protocol_path = tmp_path / "configs" / "anomaly_increment_r1.yaml"
     protocol_path.parent.mkdir()
     os.link(target, protocol_path)
 
@@ -238,7 +320,7 @@ def test_scoring_qualification_protocol_loader_rejects_hardlink_before_open(
     target = tmp_path / "synthetic-target.bin"
     payload = b"target bytes must not enter the qualification protocol loader"
     target.write_bytes(payload)
-    protocol_path = tmp_path / "configs" / "anomaly_increment.yaml"
+    protocol_path = tmp_path / "configs" / "anomaly_increment_r1.yaml"
     protocol_path.parent.mkdir()
     os.link(target, protocol_path)
 
@@ -261,9 +343,11 @@ def test_qualification_junit_swap_after_guard_fails_before_parse_or_target_read(
 ) -> None:
     module = _load_script("build_stage4_scoring_qualification.py")
     protocol = _protocol()
-    stage4_junit = tmp_path / "data" / "interim" / "stage4.junit.xml"
-    full_junit = tmp_path / "data" / "interim" / "full.junit.xml"
-    preflight = tmp_path / "data" / "interim" / "preflight.json"
+    r1_root = tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r1"
+    stage4_junit = r1_root / "qualification_stage4.junit.xml"
+    full_junit = r1_root / "qualification_full_non_target.junit.xml"
+    preflight = r1_root / "formal_preflight_receipt.json"
+    logical_replay = r1_root / "logical_identity_worker_replay.json"
     stage4_junit.parent.mkdir(parents=True)
     passing_xml = (
         b'<testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1">'
@@ -345,6 +429,7 @@ def test_qualification_junit_swap_after_guard_fails_before_parse_or_target_read(
             stage4_junit_path=stage4_junit,
             full_junit_path=full_junit,
             preflight_receipt_path=preflight,
+            logical_replay_audit_path=logical_replay,
             git_runner=cast(Any, None),
         )
     assert target.read_bytes() == target_payload
@@ -448,7 +533,7 @@ def test_production_readiness_rejects_internal_hard_link_alias_before_loading(
     target.parent.mkdir()
     target.write_bytes(b"synthetic target that must not be loaded")
     if artifact == "scoring_seal":
-        alias = root / "data" / "interim" / "stage4" / "scoring_seal.json"
+        alias = root / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
     else:
         alias = root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     alias.parent.mkdir(parents=True, exist_ok=True)
@@ -457,16 +542,7 @@ def test_production_readiness_rejects_internal_hard_link_alias_before_loading(
         Any,
         SimpleNamespace(
             repository_root=root,
-            protocol={
-                "inputs": {
-                    "earthquake_target": {"path": "synthetic/target.bin"},
-                },
-                "freeze": {
-                    "scoring_code_freeze": {
-                        "required_seal_path": ("data/interim/stage4/scoring_seal.json"),
-                    }
-                },
-            },
+            protocol=_protocol(),
         ),
     )
     with pytest.raises(ScoreBlindPathError, match="multiply-linked"):
@@ -506,15 +582,9 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
     _forbid_target_lstat(monkeypatch, target)
     safe_stage4 = tmp_path / "data" / "interim" / "stage4.xml"
     safe_full = tmp_path / "data" / "interim" / "full.xml"
-    safe_preflight = (
-        tmp_path
-        / "data"
-        / "interim"
-        / "stage4"
-        / "anomaly_increment"
-        / "formal_preflight_receipt.json"
-    )
+    safe_preflight = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     safe_qualification = tmp_path / "data" / "interim" / "qualification.json"
+    safe_logical_replay = tmp_path / "data" / "interim" / "logical-replay.json"
 
     with pytest.raises(ScoreBlindPathError, match="frozen earthquake target"):
         if call_kind == "qualification_input":
@@ -524,6 +594,7 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
                 stage4_junit_path=target,
                 full_junit_path=safe_full,
                 preflight_receipt_path=safe_preflight,
+                logical_replay_audit_path=safe_logical_replay,
                 git_runner=cast(Any, None),
             )
         elif call_kind == "qualification_output":
@@ -534,6 +605,7 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
                 full_junit_path=safe_full,
                 preflight_receipt_path=safe_preflight,
                 qualification_path=target,
+                logical_replay_audit_path=safe_logical_replay,
                 git_runner=cast(Any, None),
             )
         else:
@@ -549,15 +621,12 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
                 attempt_ledger_path=(
                     target
                     if call_kind == "seal_attempt_ledger"
-                    else tmp_path / "data" / "manifests" / "anomaly_increment_attempt_ledger.json"
+                    else tmp_path.joinpath(*Path(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts)
                 ),
                 target_read_ledger_path=(
                     target
                     if call_kind == "seal_target_read_ledger"
-                    else tmp_path
-                    / "data"
-                    / "manifests"
-                    / "anomaly_increment_target_read_ledger.json"
+                    else tmp_path.joinpath(*Path(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts)
                 ),
                 repository_adapter=cast(Any, None),
             )
@@ -574,7 +643,7 @@ def test_read_only_formal_proof_rejects_target_path_arguments_before_lstat(
 ) -> None:
     target = tmp_path / "synthetic" / "target.bin"
     _forbid_target_lstat(monkeypatch, target)
-    safe_seal = tmp_path / "data" / "interim" / "stage4" / "scoring_seal.json"
+    safe_seal = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
     safe_attempt = tmp_path.joinpath(*Path(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts)
     safe_target_ledger = tmp_path.joinpath(*Path(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts)
     with pytest.raises(ScoreBlindPathError, match="frozen earthquake target"):

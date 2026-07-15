@@ -21,6 +21,7 @@ from test_stage4_anomaly_increment_formal_execution import (
 
 import seismoflux.anomaly_increment.formal_production as formal_production
 from seismoflux.anomaly_increment.compute import Stage4ComputePlan, Stage4WorkerPlan
+from seismoflux.anomaly_increment.config import load_stage4_protocol_bundle
 from seismoflux.anomaly_increment.convergence import (
     FrozenTargetBlindConvergenceInputs,
     PrimaryGridReproductionReceipt,
@@ -380,7 +381,7 @@ def test_local_cell_mapping_uses_the_authenticated_stage3_to_stage4_id_bridge(
     stage3_grid_id = "3" * 64
     all_zones = tuple(f"zone-{index:02d}" for index in range(39))
     zones = tuple(all_zones[index % 39] for index in range(primary.cell_count))
-    relative = Path("data/interim/stage4/anomaly_increment/cells.parquet")
+    relative = Path("data/interim/stage4/anomaly_increment_r1/cells.parquet")
     path = tmp_path / relative
     path.parent.mkdir(parents=True)
     pq.write_table(
@@ -474,17 +475,14 @@ def test_authorization_freezes_canonical_paths_and_official_spatial_hook(
     tmp_path: Path,
 ) -> None:
     receipt = make_formal_preflight_receipt()
-    seal_path = tmp_path / "data" / "manifests" / "seal.json"
+    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
     receipt_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
+    frozen_protocol = load_stage4_protocol_bundle(ROOT).protocol
     protocol = cast(
         Any,
         SimpleNamespace(
             repository_root=tmp_path,
-            protocol={
-                "inputs": {
-                    "earthquake_target": {"path": "synthetic/target.bin"},
-                }
-            },
+            protocol=frozen_protocol,
             design_sha256="a" * 64,
         ),
     )
@@ -516,12 +514,19 @@ def test_authorization_freezes_canonical_paths_and_official_spatial_hook(
                         workers=worker,
                         gpu_equivalence_sha256=None,
                         gpu_fallback_reason=("project_environment_has_no_frozen_gpu_backend"),
-                    )
+                    ),
+                    publication=SimpleNamespace(
+                        local_spatial_static=(
+                            "outputs/visualizations/anomaly_increment_r1_spatial.svg"
+                        ),
+                        local_spatial_interactive=(
+                            "outputs/visualizations/anomaly_increment_r1_spatial.html"
+                        ),
+                    ),
                 )
             ),
         ),
     )
-    monkeypatch.setattr(formal_production, "_scoring_seal_path", lambda value: seal_path)
     readiness = FormalProductionReadiness(
         project_root=tmp_path,
         protocol=protocol,
@@ -547,8 +552,14 @@ def test_authorization_freezes_canonical_paths_and_official_spatial_hook(
     inputs = cast(Any, authorize_stage4_formal_readiness(readiness))
     run_inputs = cast(dict[str, object], captured["run_inputs"])
     assert inputs.authorization is authorization
-    assert isinstance(run_inputs["local_artifact_hook"], Stage4SpatialArtifactHook)
+    hook = run_inputs["local_artifact_hook"]
+    assert isinstance(hook, Stage4SpatialArtifactHook)
+    assert hook.static_relative_path.endswith("anomaly_increment_r1_spatial.svg")
+    assert hook.interactive_relative_path.endswith("anomaly_increment_r1_spatial.html")
     assert run_inputs["same_process_resume_limit"] == 1
+    assert cast(Path, run_inputs["checkpoint_directory"]) == (
+        tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r1" / "checkpoints"
+    )
     authorization_kwargs = cast(dict[str, object], captured["authorization_kwargs"])
     assert cast(Path, authorization_kwargs["attempt_ledger_path"]).is_relative_to(tmp_path)
     assert cast(Path, authorization_kwargs["target_read_ledger_path"]).is_relative_to(tmp_path)

@@ -10,8 +10,9 @@ The only target byte access lives in :mod:`seismoflux.anomaly_increment.target_a
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Final, cast
 
@@ -27,10 +28,72 @@ from seismoflux.anomaly_increment.preregistration import (
     validate_stage4_protocol_bundle,
 )
 
-STAGE4_PROTOCOL_PATH: Final = Path("configs/anomaly_increment.yaml")
-STAGE4_PROTOCOL_TAG: Final = "v0.3.0-anomaly-increment-protocol"
-STAGE4_SCORING_CODE_TAG: Final = "v0.3.0-anomaly-increment-scoring-code"
-STAGE4_RESULT_TAG: Final = "v0.3.0-anomaly-increment"
+STAGE4_EXECUTION_REVISION: Final = "r1"
+STAGE4_PROTOCOL_PATH: Final = Path("configs/anomaly_increment_r1.yaml")
+STAGE4_PROTOCOL_TAG: Final = "v0.3.0-anomaly-increment-protocol-r1"
+STAGE4_SCORING_CODE_TAG: Final = "v0.3.0-anomaly-increment-scoring-code-r1"
+STAGE4_RESULT_TAG: Final = "v0.3.0-anomaly-increment-r1"
+STAGE4_SCORING_SEAL_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/manifests/anomaly_increment_r1_scoring_seal.json"
+)
+STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+)
+STAGE4_QUALIFICATION_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/scoring_qualification.json"
+)
+STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/logical_identity_worker_replay.json"
+)
+STAGE4_JUNIT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/qualification_stage4.junit.xml"
+)
+STAGE4_FULL_NON_TARGET_JUNIT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/qualification_full_non_target.junit.xml"
+)
+STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+)
+STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+)
+STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH: Final[PurePosixPath] = PurePosixPath(
+    "data/interim/stage4/anomaly_increment_r1/checkpoints"
+)
+
+_STAGE4_SCORING_FREEZE_PATHS: Final[tuple[tuple[str, PurePosixPath], ...]] = (
+    ("required_seal_path", STAGE4_SCORING_SEAL_RELATIVE_PATH),
+    ("formal_preflight_receipt_path", STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH),
+    ("qualification_path", STAGE4_QUALIFICATION_RELATIVE_PATH),
+    ("stage4_junit_path", STAGE4_JUNIT_RELATIVE_PATH),
+    ("full_non_target_junit_path", STAGE4_FULL_NON_TARGET_JUNIT_RELATIVE_PATH),
+    ("formal_attempt_ledger_path", STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH),
+    ("target_read_ledger_path", STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH),
+    ("checkpoint_root", STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH),
+)
+
+_STAGE4_LOGICAL_IDENTITY_CONTRACT: Final[dict[str, object]] = {
+    "method_id": "arrow_ipc_selected_table_logical_identity_r1",
+    "sha256_domain_separator_ascii": "seismoflux.selected-table-logical-identity.r1",
+    "sha256_domain_separator_nul_terminated": True,
+    "top_level_schema_metadata": "excluded",
+    "field_name_order_type_nullability_and_metadata": "preserved_exactly",
+    "null_payload": "canonical_type_zero",
+    "validity_bitmap": "preserved_with_length_padding_zeroed",
+    "boolean_value_padding": "zeroed_outside_logical_length",
+    "chunking_and_slice_offsets": "canonicalized",
+    "field_metadata_key_order": "bytewise_ascending",
+    "supported_types": [
+        "boolean",
+        "signed_integer",
+        "unsigned_integer",
+        "floating_point",
+        "timestamp",
+        "utf8_string",
+    ],
+    "valid_payload_bits": "preserved_exactly",
+    "unsupported_types": "fail_closed",
+}
 
 JsonObject = dict[str, object]
 
@@ -66,6 +129,67 @@ def _read_json_mapping(path: Path) -> JsonObject:
 
 def _file_sha256(path: Path) -> str:
     return sha256_existing_immutable_file(path, label=str(path))
+
+
+def validate_stage4_r1_execution_contract(protocol: Mapping[str, object]) -> None:
+    """Require the exact R1 execution namespace before any scoring authorization."""
+
+    if protocol.get("protocol_version") != "0.4.0":
+        raise ValueError("stage-4 scientific protocol_version must remain 0.4.0")
+    freeze = _mapping(protocol.get("freeze"), label="freeze")
+    if freeze.get("execution_revision") != STAGE4_EXECUTION_REVISION:
+        raise ValueError("stage-4 execution revision must be r1")
+    if freeze.get("corrects_execution_revision") != "r0":
+        raise ValueError("stage-4 R1 must identify the corrected r0 execution")
+    if freeze.get("execution_revision_document") != "docs/anomaly_increment_protocol_r1.md":
+        raise ValueError("stage-4 R1 execution-revision document path changed")
+    if freeze.get("readiness_incident_document") != (
+        "docs/phase4_scoring_readiness_incident_r0.md"
+    ):
+        raise ValueError("stage-4 R1 readiness-incident document path changed")
+    if freeze.get("pre_score_tag") != STAGE4_PROTOCOL_TAG:
+        raise ValueError("stage-4 R1 protocol tag changed")
+    if freeze.get("results_tag") != STAGE4_RESULT_TAG:
+        raise ValueError("stage-4 R1 results tag changed")
+
+    scoring = _mapping(
+        freeze.get("scoring_code_freeze"),
+        label="freeze.scoring_code_freeze",
+    )
+    if scoring.get("expected_tag") != STAGE4_SCORING_CODE_TAG:
+        raise ValueError("stage-4 R1 scoring-code tag changed")
+    for key, expected in _STAGE4_SCORING_FREEZE_PATHS:
+        if scoring.get(key) != expected.as_posix():
+            raise ValueError(f"stage-4 R1 scoring freeze path changed: {key}")
+    logical_identity = _mapping(
+        scoring.get("selected_table_logical_identity"),
+        label="freeze.scoring_code_freeze.selected_table_logical_identity",
+    )
+    if logical_identity != _STAGE4_LOGICAL_IDENTITY_CONTRACT:
+        raise ValueError("stage-4 R1 selected-table logical identity contract changed")
+
+
+def stage4_scoring_freeze_relative_path(
+    protocol: Mapping[str, object],
+    key: str,
+) -> PurePosixPath:
+    """Return one validated R1 scoring path from the frozen machine contract."""
+
+    validate_stage4_r1_execution_contract(protocol)
+    paths = dict(_STAGE4_SCORING_FREEZE_PATHS)
+    try:
+        expected = paths[key]
+    except KeyError as exc:
+        raise ValueError(f"unknown stage-4 R1 scoring freeze path: {key}") from exc
+    scoring = _mapping(
+        _mapping(protocol.get("freeze"), label="freeze").get("scoring_code_freeze"),
+        label="freeze.scoring_code_freeze",
+    )
+    raw = _string(scoring.get(key), label=f"freeze.scoring_code_freeze.{key}")
+    relative = PurePosixPath(raw)
+    if relative != expected or relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"stage-4 R1 scoring freeze path changed: {key}")
+    return relative
 
 
 @dataclass(frozen=True, slots=True)
@@ -252,6 +376,8 @@ def load_stage4_protocol_bundle(
     )
     if protocol_relative_path.is_absolute():
         raise ValueError("the stage-4 protocol path must be repository-relative")
+    if protocol_relative_path != STAGE4_PROTOCOL_PATH:
+        raise ValueError("stage-4 execution must use the sole R1 protocol path")
     protocol_path = root / protocol_relative_path
     require_existing_real_directory_tree(
         root,
@@ -259,14 +385,7 @@ def load_stage4_protocol_bundle(
         label="stage-4 protocol directory",
     )
     protocol = _read_yaml_mapping(protocol_path)
-    freeze = _mapping(protocol.get("freeze"), label="freeze")
-    scoring_freeze = _mapping(freeze.get("scoring_code_freeze"), label="freeze.scoring_code_freeze")
-    if freeze.get("pre_score_tag") != STAGE4_PROTOCOL_TAG:
-        raise ValueError("stage-4 protocol tag changed")
-    if freeze.get("results_tag") != STAGE4_RESULT_TAG:
-        raise ValueError("stage-4 results tag changed")
-    if scoring_freeze.get("expected_tag") != STAGE4_SCORING_CODE_TAG:
-        raise ValueError("stage-4 scoring-code tag changed")
+    validate_stage4_r1_execution_contract(protocol)
 
     generated = _mapping(protocol.get("generated_manifests"), label="generated_manifests")
     fold = _load_manifest(root, manifest_id="fold", declaration=generated.get("fold"))
@@ -308,12 +427,24 @@ def load_stage4_protocol_bundle(
 
 
 __all__ = [
+    "STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH",
+    "STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH",
+    "STAGE4_EXECUTION_REVISION",
+    "STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH",
+    "STAGE4_FULL_NON_TARGET_JUNIT_RELATIVE_PATH",
+    "STAGE4_JUNIT_RELATIVE_PATH",
+    "STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH",
     "STAGE4_PROTOCOL_PATH",
     "STAGE4_PROTOCOL_TAG",
+    "STAGE4_QUALIFICATION_RELATIVE_PATH",
     "STAGE4_RESULT_TAG",
     "STAGE4_SCORING_CODE_TAG",
+    "STAGE4_SCORING_SEAL_RELATIVE_PATH",
+    "STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH",
     "ExpectedTargetIdentity",
     "FrozenManifest",
     "Stage4ProtocolBundle",
     "load_stage4_protocol_bundle",
+    "stage4_scoring_freeze_relative_path",
+    "validate_stage4_r1_execution_contract",
 ]

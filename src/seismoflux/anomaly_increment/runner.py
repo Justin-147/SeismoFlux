@@ -13,6 +13,7 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
+from pathlib import PurePosixPath
 from typing import Literal, cast
 
 from seismoflux.anomaly_increment.compute import Stage4ComputePlan, build_compute_plan
@@ -180,6 +181,10 @@ class Stage4PublicationPlan:
     public_static_svg: str
     local_interactive_html: str
     public_model_card: str
+    bundle_root: str
+    local_convergence_audit: str
+    local_spatial_static: str
+    local_spatial_interactive: str
 
     def __post_init__(self) -> None:
         public_paths = (
@@ -188,10 +193,34 @@ class Stage4PublicationPlan:
             self.public_static_svg,
             self.public_model_card,
         )
-        if any(not value or value.startswith(("/", "\\")) for value in public_paths):
+        all_paths = (
+            *public_paths,
+            self.bundle_root,
+            self.local_interactive_html,
+            self.local_convergence_audit,
+            self.local_spatial_static,
+            self.local_spatial_interactive,
+        )
+        if any(
+            not value
+            or value.startswith(("/", "\\"))
+            or "\\" in value
+            or ".." in PurePosixPath(value).parts
+            for value in all_paths
+        ):
             raise ValueError("stage-4 publication paths must be non-empty and relative")
-        if not self.local_interactive_html.startswith("outputs/visualizations/"):
-            raise ValueError("interactive stage-4 output must remain a local visualization")
+        if not self.bundle_root.startswith("models/registry/"):
+            raise ValueError("stage-4 bundle root must remain in the model registry")
+        local_paths = (
+            self.local_interactive_html,
+            self.local_convergence_audit,
+            self.local_spatial_static,
+            self.local_spatial_interactive,
+        )
+        if any(not value.startswith("outputs/visualizations/") for value in local_paths):
+            raise ValueError("stage-4 local outputs must remain local visualizations")
+        if len(set(all_paths)) != len(all_paths):
+            raise ValueError("stage-4 publication paths must be unique")
 
 
 @dataclass(frozen=True, slots=True)
@@ -291,7 +320,11 @@ class Stage4ScoringPlan:
             "primary_horizons_days": list(self.primary_horizons_days),
             "protocol_design_sha256": self.protocol_design_sha256,
             "publication": {
+                "bundle_root": self.publication.bundle_root,
+                "local_convergence_audit": self.publication.local_convergence_audit,
                 "local_interactive_html": self.publication.local_interactive_html,
+                "local_spatial_interactive": self.publication.local_spatial_interactive,
+                "local_spatial_static": self.publication.local_spatial_static,
                 "public_model_card": self.publication.public_model_card,
                 "public_registry": self.publication.public_registry,
                 "public_report": self.publication.public_report,
@@ -415,6 +448,10 @@ def build_stage4_scoring_plan(
             public_static_svg=cast(str, publication["required_static_svg"]),
             local_interactive_html=cast(str, publication["required_interactive_local"]),
             public_model_card=cast(str, publication["required_model_card"]),
+            bundle_root=cast(str, publication["bundle_root"]),
+            local_convergence_audit=cast(str, publication["local_convergence_audit"]),
+            local_spatial_static=cast(str, publication["local_spatial_static"]),
+            local_spatial_interactive=cast(str, publication["local_spatial_interactive"]),
         ),
     )
 

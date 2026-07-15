@@ -25,6 +25,15 @@ from seismoflux.anomaly_increment.authorization import (
     stage4_execution_binding_id,
     write_stage4_scoring_seal_atomic,
 )
+from seismoflux.anomaly_increment.config import (
+    STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH,
+    STAGE4_PROTOCOL_PATH,
+    STAGE4_PROTOCOL_TAG,
+    STAGE4_QUALIFICATION_RELATIVE_PATH,
+    STAGE4_SCORING_CODE_TAG,
+    stage4_scoring_freeze_relative_path,
+    validate_stage4_r1_execution_contract,
+)
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
     load_formal_preflight_receipt,
@@ -44,22 +53,15 @@ from seismoflux.anomaly_increment.score_blind_path import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL_PATH = PROJECT_ROOT / "configs" / "anomaly_increment.yaml"
-QUALIFICATION_PATH = (
-    PROJECT_ROOT
-    / "data"
-    / "interim"
-    / "stage4"
-    / "anomaly_increment"
-    / "scoring_qualification.json"
-)
+PROTOCOL_PATH = PROJECT_ROOT / STAGE4_PROTOCOL_PATH
+QUALIFICATION_PATH = PROJECT_ROOT.joinpath(*STAGE4_QUALIFICATION_RELATIVE_PATH.parts)
 ATTEMPT_LEDGER_PATH = PROJECT_ROOT.joinpath(
     *PurePosixPath(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts
 )
 TARGET_READ_LEDGER_PATH = PROJECT_ROOT.joinpath(
     *PurePosixPath(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts
 )
-PREFLIGHT_RECEIPT_PATH = PROJECT_ROOT.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
+PREFLIGHT_RECEIPT_PATH = PROJECT_ROOT.joinpath(*STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH.parts)
 
 
 def _mapping(value: object, *, label: str) -> dict[str, Any]:
@@ -80,9 +82,11 @@ def _load_protocol(path: Path) -> dict[str, Any]:
     except UnsafeImmutableFileError as exc:
         raise ValueError("stage-4 protocol cannot be read safely") from exc
     try:
-        return _mapping(yaml.safe_load(payload.decode("utf-8")), label="protocol")
+        protocol = _mapping(yaml.safe_load(payload.decode("utf-8")), label="protocol")
     except UnicodeError as exc:
         raise ValueError("stage-4 protocol is not valid UTF-8") from exc
+    validate_stage4_r1_execution_contract(protocol)
+    return protocol
 
 
 def _lexical_absolute(path: Path) -> Path:
@@ -106,13 +110,8 @@ def _relative_output_path(project_root: Path, protocol: Mapping[str, object]) ->
 
 
 def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
-    freeze = _mapping(protocol.get("freeze"), label="freeze")
-    scoring = _mapping(freeze.get("scoring_code_freeze"), label="scoring_code_freeze")
-    protocol_tag = freeze.get("pre_score_tag")
-    scoring_tag = scoring.get("expected_tag")
-    if not isinstance(protocol_tag, str) or not isinstance(scoring_tag, str):
-        raise ValueError("stage-4 freeze tags are missing")
-    return protocol_tag, scoring_tag
+    validate_stage4_r1_execution_contract(protocol)
+    return STAGE4_PROTOCOL_TAG, STAGE4_SCORING_CODE_TAG
 
 
 def _require_canonical_ledgers(
@@ -173,16 +172,21 @@ def generate(
     canonical_preflight = _lexical_absolute(root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts))
     if safe_preflight_receipt_path != canonical_preflight:
         raise ValueError("formal preflight receipt must use its canonical local path")
-    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
-        root,
-        safe_attempt_ledger_path,
-        safe_target_read_ledger_path,
-    )
     output_path = require_score_blind_project_path(
         root,
         protocol,
         _relative_output_path(root, protocol),
         label="stage-4 scoring seal output",
+    )
+    canonical_qualification = _lexical_absolute(
+        root.joinpath(*stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts)
+    )
+    if safe_qualification_path != canonical_qualification:
+        raise ValueError("qualification evidence must use its frozen R1 path")
+    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
+        root,
+        safe_attempt_ledger_path,
+        safe_target_read_ledger_path,
     )
     protocol_tag, scoring_tag = _freeze_tags(protocol)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
@@ -270,16 +274,21 @@ def check(
     canonical_preflight = _lexical_absolute(root.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts))
     if safe_preflight_receipt_path != canonical_preflight:
         raise ValueError("formal preflight receipt must use its canonical local path")
-    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
-        root,
-        safe_attempt_ledger_path,
-        safe_target_read_ledger_path,
-    )
     output_path = require_score_blind_project_path(
         root,
         protocol,
         _relative_output_path(root, protocol),
         label="stage-4 scoring seal output",
+    )
+    canonical_qualification = _lexical_absolute(
+        root.joinpath(*stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts)
+    )
+    if safe_qualification_path != canonical_qualification:
+        raise ValueError("qualification evidence must use its frozen R1 path")
+    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
+        root,
+        safe_attempt_ledger_path,
+        safe_target_read_ledger_path,
     )
     loaded = load_stage4_scoring_seal(output_path)
     protocol_tag, scoring_tag = _freeze_tags(protocol)

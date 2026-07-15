@@ -132,11 +132,15 @@ def _install_lstat_fallback(
 
 def _publication() -> Stage4PublicationPlan:
     return Stage4PublicationPlan(
-        public_registry="data/manifests/anomaly_increment_model_registry.json",
-        public_report="docs/anomaly_increment_report.md",
-        public_static_svg="docs/anomaly_increment_results.svg",
-        local_interactive_html="outputs/visualizations/anomaly_increment_dashboard.html",
-        public_model_card="docs/model_cards/anomaly_increment.md",
+        public_registry="data/manifests/anomaly_increment_r1_model_registry.json",
+        public_report="docs/anomaly_increment_r1_report.md",
+        public_static_svg="docs/anomaly_increment_r1_results.svg",
+        local_interactive_html="outputs/visualizations/anomaly_increment_r1_dashboard.html",
+        public_model_card="docs/model_cards/anomaly_increment_r1.md",
+        bundle_root="models/registry/anomaly_increment_r1",
+        local_convergence_audit=FORMAL_CONVERGENCE_OUTPUT_PATH,
+        local_spatial_static="outputs/visualizations/anomaly_increment_r1_spatial.svg",
+        local_spatial_interactive="outputs/visualizations/anomaly_increment_r1_spatial.html",
     )
 
 
@@ -375,7 +379,7 @@ def _inputs(
         authorization=authorization,
         preflight=preflight,
         checkpoint_directory=(
-            tmp_path / "data" / "interim" / "stage4" / "anomaly_increment" / "checkpoints"
+            tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r1" / "checkpoints"
         ),
         concurrency=PlaceboConcurrencyPlan.from_preflight_receipt(
             preflight.context.scoring_plan.compute.workers,
@@ -578,8 +582,8 @@ def test_official_spatial_hook_receives_only_explicit_authorized_session_context
     assert study_area.source_content_sha256 == (
         preflight.context.protocol.development_snapshot.study_area_sha256
     )
-    assert (tmp_path / "outputs/visualizations/anomaly_increment_spatial.svg").is_file()
-    assert (tmp_path / "outputs/visualizations/anomaly_increment_spatial.html").is_file()
+    assert (tmp_path / hook.static_relative_path).is_file()
+    assert (tmp_path / hook.interactive_relative_path).is_file()
     registry_text = (tmp_path / _publication().public_registry).read_text("utf-8")
     assert "longitude" not in registry_text
     assert "latitude" not in registry_text
@@ -640,7 +644,7 @@ def test_convergence_failure_is_a_hard_stop_before_success_or_spatial_publicatio
     )
     assert audit["status"] == "failed"
     assert not (tmp_path / FORMAL_CONVERGENCE_OUTPUT_PATH).exists()
-    assert not (tmp_path / "outputs/visualizations/anomaly_increment_spatial.svg").exists()
+    assert not (tmp_path / _publication().local_spatial_static).exists()
     registry = json.loads((tmp_path / _publication().public_registry).read_text("utf-8"))
     assert registry["status"] == "failed"
     assert registry["scientific_values_available"] is False

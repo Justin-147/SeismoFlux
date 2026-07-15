@@ -32,11 +32,11 @@ from types import MappingProxyType
 from typing import Any, Final, Literal, cast
 
 import pyarrow as pa
-import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
 from seismoflux.anomaly_increment.compute import Stage4ComputePlan
 from seismoflux.anomaly_increment.config import (
+    STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH,
     STAGE4_SCORING_CODE_TAG,
     Stage4ProtocolBundle,
 )
@@ -50,10 +50,12 @@ from seismoflux.anomaly_increment.formal_assembly import (
     VerifiedStage3Issue,
 )
 from seismoflux.anomaly_increment.grid_features import (
+    SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1,
     Stage4GridFamily,
     Stage4IntegrationGrid,
+    assert_selected_columns_logically_exact_r1,
     build_stage4_grid_family,
-    selected_table_identity_sha256,
+    selected_table_logical_identity_sha256_r1,
 )
 from seismoflux.anomaly_increment.immutable_file import (
     UnsafeImmutableFileError,
@@ -103,7 +105,7 @@ FORMAL_ASSESSMENT_ISSUE_COUNT = 103
 FORMAL_POOL_ISSUE_COUNT = FORMAL_FIT_ISSUE_COUNT + FORMAL_ASSESSMENT_ISSUE_COUNT
 EXPECTED_STAGE3_ISSUE_COUNT = 205
 FORMAL_PREFLIGHT_RECEIPT_PATH: Final[PurePosixPath] = PurePosixPath(
-    "data/interim/stage4/anomaly_increment/formal_preflight_receipt.json"
+    STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH
 )
 AS_IF_SHADOW_STATUS: Final[
     Literal["as_if_shadow_retrospective_target_blind_not_true_prospective"]
@@ -113,9 +115,7 @@ GRID_BRIDGE_METHOD: Final[
         "verify_stage3_exact_grid_then_replace_only_grid_id_in_memory_no_reorder_no_interpolation"
     ]
 ] = "verify_stage3_exact_grid_then_replace_only_grid_id_in_memory_no_reorder_no_interpolation"
-IDENTITY_REBUILD_HASH_METHOD: Final[
-    Literal["arrow_logical_values_validity_types_order_null_payload_zero_canonicalized"]
-] = "arrow_logical_values_validity_types_order_null_payload_zero_canonicalized"
+IDENTITY_REBUILD_HASH_METHOD: Final[str] = SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1
 _SHANGHAI = timezone(timedelta(hours=8), name="Asia/Shanghai")
 _ISSUE_ID = re.compile(r"anomaly-issue-(\d{4}-\d{2}-\d{2})\Z")
 _GIT_OID = re.compile(r"[0-9a-f]{40}\Z")
@@ -334,7 +334,7 @@ def _combined_issue_hash(
             "issues": [
                 {
                     "issue_id": issue_id,
-                    "table_identity_sha256": selected_table_identity_sha256(
+                    "table_identity_sha256": selected_table_logical_identity_sha256_r1(
                         tables[issue_id], names
                     ),
                 }
@@ -345,53 +345,13 @@ def _combined_issue_hash(
     )
 
 
-def _canonicalize_null_payload(array: pa.ChunkedArray) -> pa.Array:
-    """Zero undefined primitive value bits while retaining the exact validity bitmap."""
-
-    combined = array.combine_chunks()
-    if combined.null_count == 0:
-        return combined
-    if pa.types.is_boolean(combined.type):
-        replacement: object = False
-    elif pa.types.is_integer(combined.type):
-        replacement = 0
-    elif pa.types.is_floating(combined.type):
-        replacement = 0.0
-    else:
-        raise TypeError(f"logical identity does not support nullable type {combined.type}")
-    filled = pc.fill_null(combined, pa.scalar(replacement, type=combined.type))
-    if not isinstance(filled, pa.Array):
-        raise TypeError("null-payload canonicalization returned a non-Array")
-    buffers = list(filled.buffers())
-    buffers[0] = combined.buffers()[0]
-    return pa.Array.from_buffers(
-        combined.type,
-        len(combined),
-        buffers,
-        null_count=combined.null_count,
-    )
-
-
 def _logical_selected_table_identity_sha256(
     table: pa.Table,
     columns: Sequence[str],
 ) -> str:
-    """Hash logical Arrow values/validity, ignoring undefined payload bits under nulls."""
+    """Compatibility wrapper for the frozen R1 logical Arrow identity."""
 
-    names = tuple(columns)
-    if not names or len(names) != len(set(names)):
-        raise ValueError("logical identity columns must be non-empty and unique")
-    if missing := sorted(set(names) - set(table.column_names)):
-        raise ValueError(f"logical identity table is missing columns: {missing}")
-    selected = table.select(list(names))
-    canonical = pa.Table.from_arrays(
-        [_canonicalize_null_payload(selected[name]) for name in names],
-        schema=selected.schema,
-    )
-    sink = pa.BufferOutputStream()
-    with pa.ipc.new_stream(sink, canonical.schema) as writer:
-        writer.write_table(canonical)
-    return hashlib.sha256(sink.getvalue().to_pybytes()).hexdigest()
+    return selected_table_logical_identity_sha256_r1(table, columns)
 
 
 def _combined_logical_identity_hashes(
@@ -430,18 +390,15 @@ def _assert_columns_exact(
     label: str,
 ) -> tuple[str, str]:
     names = tuple(columns)
-    accepted_schema = accepted.select(list(names)).schema
-    candidate_schema = candidate.select(list(names)).schema
-    if not accepted_schema.equals(candidate_schema, check_metadata=True):
-        raise ValueError(f"{label} changed Arrow types, fields, metadata, or column order")
-    accepted_hash = _logical_selected_table_identity_sha256(accepted, names)
-    candidate_hash = _logical_selected_table_identity_sha256(candidate, names)
-    if accepted_hash != candidate_hash:
-        raise ValueError(f"{label} changed Arrow values, validity, type, or column order")
-    for name in names:
-        if not accepted[name].combine_chunks().equals(candidate[name].combine_chunks()):
-            raise ValueError(f"{label} changed column {name}")
-    return accepted_hash, candidate_hash
+    try:
+        accepted_hash = assert_selected_columns_logically_exact_r1(
+            accepted,
+            candidate,
+            columns=names,
+        )
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} changed R1 logical Arrow identity: {error}") from error
+    return accepted_hash, accepted_hash
 
 
 def resolve_score_blind_input_path(
@@ -624,13 +581,13 @@ class GridIdentityBridge:
             clipped_area_km2=stage4_grid.clipped_area_km2,
         )
         _assert_table_grid(table, issue_time=issue_time, grid=accepted_grid)
-        stage3_hash = selected_table_identity_sha256(table, GRID_BRIDGE_COLUMNS)
-        unchanged_hash = selected_table_identity_sha256(
+        stage3_hash = selected_table_logical_identity_sha256_r1(table, GRID_BRIDGE_COLUMNS)
+        unchanged_hash = selected_table_logical_identity_sha256_r1(
             table, tuple(column for column in GRID_BRIDGE_COLUMNS if column != "grid_id")
         )
         projected = _replace_text_column(table, "grid_id", stage4_grid.grid_id)
         _assert_table_grid(projected, issue_time=issue_time, grid=stage4_grid)
-        projected_hash = selected_table_identity_sha256(projected, GRID_BRIDGE_COLUMNS)
+        projected_hash = selected_table_logical_identity_sha256_r1(projected, GRID_BRIDGE_COLUMNS)
         bridge_hash = canonical_mapping_sha256(
             {
                 "cell_count": stage4_grid.cell_count,
@@ -658,14 +615,14 @@ class GridIdentityBridge:
         _validate_formal_feature_table_schema(table)
         expected_time = _utc(issue_time, label="bridge issue time")
         _assert_table_grid(table, issue_time=expected_time, grid=self.stage3_grid)
-        if selected_table_identity_sha256(table, GRID_BRIDGE_COLUMNS) != (
+        if selected_table_logical_identity_sha256_r1(table, GRID_BRIDGE_COLUMNS) != (
             self.stage3_grid_identity_sha256
         ):
             raise ValueError("accepted stage-3 grid identity changed across issues")
-        before = selected_table_identity_sha256(table, GRID_BRIDGE_UNCHANGED_COLUMNS)
+        before = selected_table_logical_identity_sha256_r1(table, GRID_BRIDGE_UNCHANGED_COLUMNS)
         projected = _replace_text_column(table, "grid_id", self.stage4_grid.grid_id)
         _assert_table_grid(projected, issue_time=expected_time, grid=self.stage4_grid)
-        after = selected_table_identity_sha256(projected, GRID_BRIDGE_UNCHANGED_COLUMNS)
+        after = selected_table_logical_identity_sha256_r1(projected, GRID_BRIDGE_UNCHANGED_COLUMNS)
         if before != after:
             raise ValueError("grid bridge changed a value other than grid_id")
         return projected
@@ -1946,7 +1903,9 @@ def _load_feature_tables(
         issue_index = _one_value(table, "issue_index", label=f"feature issue {issue_id}")
         if issue_index != position:
             raise ValueError("formal feature issue index differs from causal 0..152 order")
-        accepted_hashes[issue_id] = selected_table_identity_sha256(table, FORMAL_FEATURE_COLUMNS)
+        accepted_hashes[issue_id] = selected_table_logical_identity_sha256_r1(
+            table, FORMAL_FEATURE_COLUMNS
+        )
         projected[issue_id] = bridge.project(table, issue_time=issue_time)
 
     shadow = parquet.read_row_group(
@@ -2680,7 +2639,7 @@ def load_formal_preflight(
                 issue_time_utc=snapshot.issue_time_utc,
                 issue_index=snapshot.issue_index,
                 accepted_table_sha256=accepted_hashes[issue_id],
-                projected_table_sha256=selected_table_identity_sha256(
+                projected_table_sha256=selected_table_logical_identity_sha256_r1(
                     table, FORMAL_FEATURE_COLUMNS
                 ),
                 verified_binding_sha256=bound.binding_sha256,
@@ -2731,10 +2690,10 @@ def load_formal_preflight(
         issue_time_utc=latest_issue_time,
         issue_report_id=bound_shadow.issue_report_id,
         issue_index=shadow_index,
-        accepted_table_sha256=selected_table_identity_sha256(
+        accepted_table_sha256=selected_table_logical_identity_sha256_r1(
             accepted_shadow_table, FORMAL_FEATURE_COLUMNS
         ),
-        projected_table_sha256=selected_table_identity_sha256(
+        projected_table_sha256=selected_table_logical_identity_sha256_r1(
             projected_shadow_table, FORMAL_FEATURE_COLUMNS
         ),
         verified_binding_sha256=bound_shadow.binding_sha256,

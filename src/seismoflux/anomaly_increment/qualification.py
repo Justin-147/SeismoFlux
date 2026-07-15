@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from seismoflux.anomaly_increment.formal_preflight import FormalPreflightReceipt
 
 STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.0"
-STAGE4_QUALIFICATION_SCHEMA_VERSION: Final[int] = 3
+STAGE4_QUALIFICATION_SCHEMA_VERSION: Final[int] = 4
 REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "generated_manifest_hashes_verified",
     "topology_gate_passed",
@@ -50,8 +50,9 @@ REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "placebo_coverage_values_and_null_bitmap_exactly_unchanged",
     "fixed_small_permutation_matches_stage3_low_level_reference",
     "worker_count_invariance_passed",
+    "logical_arrow_identity_r1_verified",
 )
-FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int] = 1051
+FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int] = 1078
 REQUIRED_TESTS_BY_QUALIFICATION: Final[dict[str, tuple[str, ...]]] = {
     "all_non_target_tests_passed": (),
     "synthetic_end_to_end_passed": (
@@ -121,6 +122,36 @@ REQUIRED_TESTS_BY_QUALIFICATION: Final[dict[str, tuple[str, ...]]] = {
     "worker_count_invariance_passed": (
         "tests.unit.test_stage4_anomaly_increment_runtime::"
         "test_worker_count_qualification_preserves_result_order_and_bytes",
+    ),
+    "logical_arrow_identity_r1_verified": (
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_selected_table_logical_identity_r1_covers_frozen_canonicalization_contract",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_zeroes_only_null_fixed_width_payload[signed-int8]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_zeroes_only_null_fixed_width_payload[unsigned-int32]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_zeroes_only_null_fixed_width_payload[float64]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_zeroes_only_null_fixed_width_payload[timestamp-ns-utc]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_canonicalizes_boolean_null_payload_and_padding",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_canonicalizes_utf8_null_payload_but_preserves_valid_bytes",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_preserves_valid_float_payload_bits",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_excludes_top_metadata_but_preserves_fields_exactly",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_fails_closed_for_unsupported_arrow_types[nested-list]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_fails_closed_for_unsupported_arrow_types[binary]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_fails_closed_for_unsupported_arrow_types[date32]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_fails_closed_for_unsupported_arrow_types[dictionary]",
+        "tests.unit.test_stage4_anomaly_increment_logical_identity_r1::"
+        "test_r1_identity_fails_closed_for_unsupported_arrow_types[extension]",
     ),
 }
 
@@ -831,6 +862,7 @@ class Stage4QualificationEvidence:
     checks: tuple[QualificationCheckReceipt, ...]
     score_blind_input_evidence_sha256: str
     formal_preflight_receipt_sha256: str
+    logical_identity_replay_audit_sha256: str
     stage4_pytest: PytestRunEvidence
     full_pytest: PytestRunEvidence
     gpu_requested: bool
@@ -848,6 +880,10 @@ class Stage4QualificationEvidence:
         _sha256(
             self.formal_preflight_receipt_sha256,
             label="formal_preflight_receipt_sha256",
+        )
+        _sha256(
+            self.logical_identity_replay_audit_sha256,
+            label="logical_identity_replay_audit_sha256",
         )
         _sha256(
             self.space_placebo_resource_observation_sha256,
@@ -885,6 +921,7 @@ class Stage4QualificationEvidence:
                     "status": self.gpu_status,
                 },
                 "locked_test_contacted": False,
+                "logical_identity_replay_audit_sha256": (self.logical_identity_replay_audit_sha256),
                 "protocol_design_sha256": self.protocol_design_sha256,
                 "protocol_version": STAGE4_PROTOCOL_VERSION,
                 "schema_version": STAGE4_QUALIFICATION_SCHEMA_VERSION,
@@ -915,6 +952,7 @@ class Stage4QualificationEvidence:
             "full_pytest",
             "gpu",
             "locked_test_contacted",
+            "logical_identity_replay_audit_sha256",
             "protocol_design_sha256",
             "protocol_version",
             "schema_version",
@@ -979,6 +1017,9 @@ class Stage4QualificationEvidence:
                     str, value["score_blind_input_evidence_sha256"]
                 ),
                 formal_preflight_receipt_sha256=cast(str, value["formal_preflight_receipt_sha256"]),
+                logical_identity_replay_audit_sha256=cast(
+                    str, value["logical_identity_replay_audit_sha256"]
+                ),
                 stage4_pytest=stage4_pytest,
                 full_pytest=full_pytest,
                 gpu_requested=cast(bool, gpu["requested"]),
@@ -1088,6 +1129,7 @@ def build_stage4_qualification_evidence(
     scoring_code_commit: str,
     score_blind_input_evidence: ScoreBlindInputEvidence,
     formal_preflight_receipt: FormalPreflightReceipt,
+    logical_identity_replay_audit_sha256: str,
     stage4_pytest: PytestRunEvidence,
     full_pytest: PytestRunEvidence,
     gpu_requested: bool = False,
@@ -1103,6 +1145,10 @@ def build_stage4_qualification_evidence(
 
     if not isinstance(formal_preflight_receipt, FormalPreflightReceipt):
         raise TypeError("formal_preflight_receipt must be FormalPreflightReceipt")
+    _sha256(
+        logical_identity_replay_audit_sha256,
+        label="logical_identity_replay_audit_sha256",
+    )
     if not isinstance(stage4_pytest, PytestRunEvidence) or not isinstance(
         full_pytest, PytestRunEvidence
     ):
@@ -1157,6 +1203,7 @@ def build_stage4_qualification_evidence(
         checks=tuple(receipts),
         score_blind_input_evidence_sha256=score_blind_input_evidence.content_sha256,
         formal_preflight_receipt_sha256=formal_preflight_receipt.content_sha256,
+        logical_identity_replay_audit_sha256=logical_identity_replay_audit_sha256,
         stage4_pytest=stage4_pytest,
         full_pytest=full_pytest,
         gpu_requested=gpu_requested,

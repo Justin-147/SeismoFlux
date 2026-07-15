@@ -36,6 +36,7 @@ from seismoflux.anomaly_increment.authorization import (
     require_stage4_target_authorization,
 )
 from seismoflux.anomaly_increment.compute import Stage4WorkerPlan
+from seismoflux.anomaly_increment.config import STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH
 from seismoflux.anomaly_increment.contracts import (
     FeatureColumnContract,
     canonical_mapping_sha256,
@@ -116,7 +117,7 @@ FORMAL_RUN_SESSION_SCHEMA_VERSION: Final[int] = 3
 FORMAL_SESSION_SEAL_FILENAME: Final[str] = "formal_run_session_seal.json"
 FORMAL_CONVERGENCE_AUDIT_FILENAME: Final[str] = "formal_convergence_audit.json"
 FORMAL_CONVERGENCE_OUTPUT_PATH: Final[str] = (
-    "outputs/visualizations/anomaly_increment_convergence_audit.json"
+    "outputs/visualizations/anomaly_increment_r1_convergence_audit.json"
 )
 FORMAL_TERMINALIZATION_INCIDENT_FILENAME: Final[str] = "formal_run_terminalization_incident.json"
 _SESSION_SENTINEL = object()
@@ -211,8 +212,8 @@ class Stage4SpatialArtifactHook:
 
     display_context_layers: tuple[DisplayContextLayer, ...] = ()
     genuine_prospective_archive: GenuineProspectiveArchive | None = None
-    static_relative_path: str = "outputs/visualizations/anomaly_increment_spatial.svg"
-    interactive_relative_path: str = "outputs/visualizations/anomaly_increment_spatial.html"
+    static_relative_path: str = "outputs/visualizations/anomaly_increment_r1_spatial.svg"
+    interactive_relative_path: str = "outputs/visualizations/anomaly_increment_r1_spatial.html"
 
     def __post_init__(self) -> None:
         layers = tuple(self.display_context_layers)
@@ -588,7 +589,7 @@ class FormalRunInputs:
             self.checkpoint_directory,
             label="checkpoint_directory",
         )
-        allowed = (root / "data" / "interim" / "stage4" / "anomaly_increment").resolve()
+        allowed = root.joinpath(*STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH.parts).resolve()
         if not checkpoint.is_relative_to(allowed):
             raise ValueError("formal checkpoints must stay under the local stage-4 interim root")
         if (
@@ -671,7 +672,7 @@ def _session_seal_payload(inputs: FormalRunInputs) -> dict[str, object]:
             "consistency_incident_file": FORMAL_TERMINALIZATION_INCIDENT_FILENAME,
             "convergence": {
                 "audit_file": FORMAL_CONVERGENCE_AUDIT_FILENAME,
-                "output_path": FORMAL_CONVERGENCE_OUTPUT_PATH,
+                "output_path": publication.local_convergence_audit,
                 "policy": "all_variant_bin_horizon_spatial_and_temporal_gate_before_publication",
                 "target_blind_inputs_sha256": (inputs.preflight.convergence_inputs.content_sha256),
             },
@@ -691,7 +692,11 @@ def _session_seal_payload(inputs: FormalRunInputs) -> dict[str, object]:
             "placebo_source_input_sha256": (inputs.preflight.placebo_inputs.source_input_sha256),
             "protocol_design_sha256": context.protocol.protocol_design_sha256,
             "publication": {
+                "bundle_root": publication.bundle_root,
+                "local_convergence_audit": publication.local_convergence_audit,
                 "local_interactive_html": publication.local_interactive_html,
+                "local_spatial_interactive": publication.local_spatial_interactive,
+                "local_spatial_static": publication.local_spatial_static,
                 "public_model_card": publication.public_model_card,
                 "public_registry": publication.public_registry,
                 "public_report": publication.public_report,
@@ -1189,7 +1194,9 @@ class FormalRunSession:
                         "formal compensator convergence failed; spatial publication forbidden"
                     )
                 convergence_artifact = AdditionalLocalArtifact(
-                    relative_path=FORMAL_CONVERGENCE_OUTPUT_PATH,
+                    relative_path=(
+                        self.inputs.preflight.context.scoring_plan.publication.local_convergence_audit
+                    ),
                     bundle_filename="convergence-audit.json",
                     payload=convergence_payload,
                 )

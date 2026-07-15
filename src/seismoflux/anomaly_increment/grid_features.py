@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import hashlib
 import math
+import struct
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Literal, cast
+from typing import Final, Literal, cast
 
 import numpy as np
 import pyarrow as pa
@@ -37,6 +38,13 @@ FeatureVariant = Literal["coverage_only", "snapshot", "dynamic"]
 FloatArray = NDArray[np.float64]
 BoolArray = NDArray[np.bool_]
 IntArray = NDArray[np.int64]
+
+SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1: Final[str] = (
+    "arrow_ipc_selected_table_logical_identity_r1"
+)
+SELECTED_TABLE_LOGICAL_IDENTITY_DOMAIN_R1: Final[bytes] = (
+    b"seismoflux.selected-table-logical-identity.r1\x00"
+)
 
 
 def _mapping(value: object, *, label: str) -> Mapping[str, object]:
@@ -348,7 +356,7 @@ def extract_raw_feature_matrix(
 
 
 def selected_table_identity_sha256(table: pa.Table, columns: Sequence[str]) -> str:
-    """Hash Arrow values and null bitmaps in a stable IPC stream."""
+    """Legacy R0 physical IPC identity; retained only for historical replay."""
 
     names = tuple(columns)
     if not names or len(set(names)) != len(names):
@@ -360,6 +368,263 @@ def selected_table_identity_sha256(table: pa.Table, columns: Sequence[str]) -> s
     with pa.ipc.new_stream(sink, selected.schema) as writer:
         writer.write_table(selected)
     return hashlib.sha256(sink.getvalue().to_pybytes()).hexdigest()
+
+
+def _logical_identity_column_names(
+    table: pa.Table,
+    columns: Sequence[str],
+) -> tuple[str, ...]:
+    if not isinstance(table, pa.Table):
+        raise TypeError("logical identity input must be an Arrow table")
+    if isinstance(columns, str | bytes):
+        raise TypeError("logical identity columns must be a sequence of names")
+    names = tuple(columns)
+    if (
+        not names
+        or not all(isinstance(name, str) and name for name in names)
+        or len(names) != len(set(names))
+    ):
+        raise ValueError("logical identity columns must be non-empty unique names")
+    if missing := sorted(set(names) - set(table.column_names)):
+        raise ValueError(f"logical identity table is missing columns: {missing}")
+    return names
+
+
+def _logical_identity_type_width(data_type: pa.DataType) -> int | None:
+    """Return the fixed-width payload size, or ``None`` for supported variable types."""
+
+    if pa.types.is_boolean(data_type) or pa.types.is_string(data_type):
+        return None
+    if (
+        pa.types.is_signed_integer(data_type)
+        or pa.types.is_unsigned_integer(data_type)
+        or pa.types.is_floating(data_type)
+        or pa.types.is_timestamp(data_type)
+    ):
+        bit_width = getattr(data_type, "bit_width", None)
+        if not isinstance(bit_width, int) or bit_width <= 0 or bit_width % 8:
+            raise TypeError(f"logical identity has invalid fixed-width type {data_type}")
+        return bit_width // 8
+    raise TypeError(f"logical identity does not support Arrow type {data_type}")
+
+
+def _buffer_view(buffer: pa.Buffer | None, *, label: str) -> memoryview:
+    if buffer is None:
+        raise ValueError(f"logical identity array is missing its {label} buffer")
+    return memoryview(buffer)
+
+
+def _logical_validity_bits_r1(chunk: pa.Array) -> BoolArray:
+    source = chunk.buffers()[0]
+    if source is None:
+        return np.ones(len(chunk), dtype=np.bool_)
+    raw = np.frombuffer(source, dtype=np.uint8)
+    required_bits = chunk.offset + len(chunk)
+    if raw.size * 8 < required_bits:
+        raise ValueError("logical identity validity bitmap is truncated")
+    unpacked = np.unpackbits(raw, bitorder="little")
+    return np.asarray(
+        unpacked[chunk.offset : required_bits],
+        dtype=np.bool_,
+    )
+
+
+def _canonical_validity_buffer_r1(validity: BoolArray) -> pa.Buffer | None:
+    if bool(np.all(validity)):
+        return None
+    return pa.py_buffer(np.packbits(validity, bitorder="little").tobytes())
+
+
+def _canonical_fixed_width_array_r1(
+    array: pa.ChunkedArray,
+    *,
+    byte_width: int,
+) -> pa.Array:
+    length = len(array)
+    validity = np.empty(length, dtype=np.bool_)
+    values = np.zeros((length, byte_width), dtype=np.uint8)
+    output_index = 0
+    for chunk in array.chunks:
+        chunk_length = len(chunk)
+        chunk_validity = _logical_validity_bits_r1(chunk)
+        validity[output_index : output_index + chunk_length] = chunk_validity
+        value_source = _buffer_view(chunk.buffers()[1], label="value")
+        required = (chunk.offset + len(chunk)) * byte_width
+        if len(value_source) < required:
+            raise ValueError("logical identity fixed-width value buffer is truncated")
+        source_start = chunk.offset * byte_width
+        source_end = source_start + chunk_length * byte_width
+        block = values[output_index : output_index + chunk_length]
+        block[:, :] = np.frombuffer(
+            value_source[source_start:source_end],
+            dtype=np.uint8,
+        ).reshape(chunk_length, byte_width)
+        block[~chunk_validity, :] = 0
+        output_index += chunk_length
+    null_count = int(np.count_nonzero(~validity))
+    return pa.Array.from_buffers(
+        array.type,
+        length,
+        [_canonical_validity_buffer_r1(validity), pa.py_buffer(values.tobytes())],
+        null_count=null_count,
+        offset=0,
+    )
+
+
+def _canonical_boolean_array_r1(array: pa.ChunkedArray) -> pa.Array:
+    length = len(array)
+    validity = np.empty(length, dtype=np.bool_)
+    values = np.zeros(length, dtype=np.bool_)
+    output_index = 0
+    for chunk in array.chunks:
+        chunk_length = len(chunk)
+        chunk_validity = _logical_validity_bits_r1(chunk)
+        validity[output_index : output_index + chunk_length] = chunk_validity
+        value_source = _buffer_view(chunk.buffers()[1], label="boolean value")
+        required_bits = chunk.offset + len(chunk)
+        if len(value_source) * 8 < required_bits:
+            raise ValueError("logical identity boolean value buffer is truncated")
+        source_values = np.unpackbits(
+            np.frombuffer(value_source, dtype=np.uint8),
+            bitorder="little",
+        )[chunk.offset : required_bits].astype(np.bool_, copy=False)
+        values[output_index : output_index + chunk_length] = source_values & chunk_validity
+        output_index += chunk_length
+    null_count = int(np.count_nonzero(~validity))
+    return pa.Array.from_buffers(
+        array.type,
+        length,
+        [
+            _canonical_validity_buffer_r1(validity),
+            pa.py_buffer(np.packbits(values, bitorder="little").tobytes()),
+        ],
+        null_count=null_count,
+        offset=0,
+    )
+
+
+def _canonical_string_array_r1(array: pa.ChunkedArray) -> pa.Array:
+    length = len(array)
+    validity = np.empty(length, dtype=np.bool_)
+    offsets = bytearray((length + 1) * 4)
+    data = bytearray()
+    output_index = 0
+    struct.pack_into("<i", offsets, 0, 0)
+    for chunk in array.chunks:
+        buffers = chunk.buffers()
+        chunk_length = len(chunk)
+        chunk_validity = _logical_validity_bits_r1(chunk)
+        validity[output_index : output_index + chunk_length] = chunk_validity
+        offset_source = _buffer_view(buffers[1], label="string offset")
+        data_source = memoryview(buffers[2]) if buffers[2] is not None else memoryview(b"")
+        required_offsets = (chunk.offset + len(chunk) + 1) * 4
+        if len(offset_source) < required_offsets:
+            raise ValueError("logical identity string offset buffer is truncated")
+        for local_index in range(len(chunk)):
+            source_index = chunk.offset + local_index
+            if bool(chunk_validity[local_index]):
+                start = struct.unpack_from("<i", offset_source, source_index * 4)[0]
+                end = struct.unpack_from("<i", offset_source, (source_index + 1) * 4)[0]
+                if start < 0 or end < start or end > len(data_source):
+                    raise ValueError("logical identity string offsets are invalid")
+                data.extend(data_source[start:end])
+            output_index += 1
+            if len(data) > 2_147_483_647:
+                raise OverflowError("logical identity utf8 payload exceeds int32 offsets")
+            struct.pack_into("<i", offsets, output_index * 4, len(data))
+    null_count = int(np.count_nonzero(~validity))
+    return pa.Array.from_buffers(
+        array.type,
+        length,
+        [
+            _canonical_validity_buffer_r1(validity),
+            pa.py_buffer(bytes(offsets)),
+            pa.py_buffer(bytes(data)),
+        ],
+        null_count=null_count,
+        offset=0,
+    )
+
+
+def _canonical_logical_array_r1(array: pa.ChunkedArray) -> pa.Array:
+    byte_width = _logical_identity_type_width(array.type)
+    if pa.types.is_boolean(array.type):
+        return _canonical_boolean_array_r1(array)
+    if pa.types.is_string(array.type):
+        return _canonical_string_array_r1(array)
+    if byte_width is None:  # pragma: no cover - supported variable types return above
+        raise AssertionError("logical identity type classification is incomplete")
+    return _canonical_fixed_width_array_r1(array, byte_width=byte_width)
+
+
+def _canonical_logical_field_r1(field: pa.Field) -> pa.Field:
+    _logical_identity_type_width(field.type)
+    metadata = field.metadata
+    ordered_metadata = (
+        None if metadata is None else {key: metadata[key] for key in sorted(metadata)}
+    )
+    return pa.field(
+        field.name,
+        field.type,
+        nullable=field.nullable,
+        metadata=ordered_metadata,
+    )
+
+
+def _canonical_selected_logical_table_r1(
+    table: pa.Table,
+    columns: Sequence[str],
+) -> pa.Table:
+    names = _logical_identity_column_names(table, columns)
+    fields = tuple(_canonical_logical_field_r1(table.schema.field(name)) for name in names)
+    schema = pa.schema(fields, metadata=None)
+    arrays = tuple(_canonical_logical_array_r1(table[name]) for name in names)
+    return pa.Table.from_arrays(arrays, schema=schema)
+
+
+def selected_table_logical_identity_sha256_r1(
+    table: pa.Table,
+    columns: Sequence[str],
+) -> str:
+    """Hash the frozen R1 logical Arrow identity under its explicit SHA-256 domain."""
+
+    canonical = _canonical_selected_logical_table_r1(table, columns)
+    return _canonical_logical_table_identity_sha256_r1(canonical)
+
+
+def _canonical_logical_table_identity_sha256_r1(canonical: pa.Table) -> str:
+    sink = pa.BufferOutputStream()
+    options = pa.ipc.IpcWriteOptions(metadata_version=pa.MetadataVersion.V5)
+    with pa.ipc.new_stream(sink, canonical.schema, options=options) as writer:
+        writer.write_table(canonical)
+    digest = hashlib.sha256()
+    digest.update(SELECTED_TABLE_LOGICAL_IDENTITY_DOMAIN_R1)
+    digest.update(sink.getvalue().to_pybytes())
+    return digest.hexdigest()
+
+
+def assert_selected_columns_logically_exact_r1(
+    accepted: pa.Table,
+    recomputed: pa.Table,
+    *,
+    columns: Sequence[str],
+) -> str:
+    """Fail unless every R1-preserved field, validity bit, and valid payload bit matches."""
+
+    accepted_canonical = _canonical_selected_logical_table_r1(accepted, columns)
+    recomputed_canonical = _canonical_selected_logical_table_r1(recomputed, columns)
+    if not accepted_canonical.schema.equals(recomputed_canonical.schema, check_metadata=True):
+        raise ValueError(
+            "identity reconstruction differs: fields, types, nullability, metadata, or "
+            "column order changed"
+        )
+    accepted_hash = _canonical_logical_table_identity_sha256_r1(accepted_canonical)
+    recomputed_hash = _canonical_logical_table_identity_sha256_r1(recomputed_canonical)
+    if accepted_hash != recomputed_hash:
+        raise ValueError(
+            "identity reconstruction differs: values, validity, or valid payload bits changed"
+        )
+    return accepted_hash
 
 
 def assert_selected_columns_exact(
@@ -388,16 +653,20 @@ def relative_total_intensity_error(candidate: float, reference: float) -> float:
 
 
 __all__ = [
+    "SELECTED_TABLE_LOGICAL_IDENTITY_DOMAIN_R1",
+    "SELECTED_TABLE_LOGICAL_IDENTITY_METHOD_R1",
     "FeatureVariant",
     "RawFeatureMatrix",
     "Stage4GridFamily",
     "Stage4IntegrationGrid",
     "assert_selected_columns_exact",
+    "assert_selected_columns_logically_exact_r1",
     "build_stage4_grid_family",
     "build_stage4_integration_grid",
     "extract_raw_feature_matrix",
     "recompute_stage4_features",
     "relative_total_intensity_error",
     "selected_table_identity_sha256",
+    "selected_table_logical_identity_sha256_r1",
     "source_columns_for_variant",
 ]
