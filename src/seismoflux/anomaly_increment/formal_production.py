@@ -497,12 +497,12 @@ def authorize_stage4_formal_readiness(
         attempt_ledger_path=_frozen_scoring_path(
             readiness.protocol,
             key="formal_attempt_ledger_path",
-            label="canonical stage-4 R1 formal-attempt ledger",
+            label="canonical stage-4 R2 formal-attempt ledger",
         ),
         target_read_ledger_path=_frozen_scoring_path(
             readiness.protocol,
             key="target_read_ledger_path",
-            label="canonical stage-4 R1 target-read ledger",
+            label="canonical stage-4 R2 target-read ledger",
         ),
     )
     preflight = readiness.preflight
@@ -514,7 +514,7 @@ def authorize_stage4_formal_readiness(
         checkpoint_directory=_frozen_scoring_path(
             readiness.protocol,
             key="checkpoint_root",
-            label="canonical stage-4 R1 checkpoint root",
+            label="canonical stage-4 R2 checkpoint root",
         ),
         concurrency=PlaceboConcurrencyPlan.from_preflight_receipt(
             preflight.context.scoring_plan.compute.workers,
@@ -543,12 +543,12 @@ def verify_stage4_formal_readiness(
         attempt_ledger_path=_frozen_scoring_path(
             readiness.protocol,
             key="formal_attempt_ledger_path",
-            label="canonical stage-4 R1 formal-attempt ledger",
+            label="canonical stage-4 R2 formal-attempt ledger",
         ),
         target_read_ledger_path=_frozen_scoring_path(
             readiness.protocol,
             key="target_read_ledger_path",
-            label="canonical stage-4 R1 target-read ledger",
+            label="canonical stage-4 R2 target-read ledger",
         ),
     )
     if evidence.scoring_seal.as_mapping() != readiness.scoring_seal.as_mapping():

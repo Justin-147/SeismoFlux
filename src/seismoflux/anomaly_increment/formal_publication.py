@@ -36,7 +36,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import PipelineResult
 from seismoflux.data.common import canonical_json_bytes
 
 FORMAL_PUBLICATION_SCHEMA_VERSION: Final[int] = 1
-FORMAL_BUNDLE_ROOT: Final[PurePosixPath] = PurePosixPath("models/registry/anomaly_increment_r1")
+FORMAL_BUNDLE_ROOT: Final[PurePosixPath] = PurePosixPath("models/registry/anomaly_increment_r2")
 
 PublicationStatus: TypeAlias = Literal["succeeded", "failed"]
 CreateFile: TypeAlias = Callable[[Path, Path], bool]

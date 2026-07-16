@@ -40,7 +40,7 @@ RateHeadStatus: TypeAlias = Literal[
     "primary_evidence_insufficient_zero_training_events",
 ]
 
-STAGE4_MATHEMATICS_PROTOCOL_VERSION = "0.4.0"
+STAGE4_MATHEMATICS_PROTOCOL_VERSION = "0.4.1"
 STAGE4_MAGNITUDE_BIN_IDS = ("M5_6", "M6_plus")
 
 
@@ -281,7 +281,7 @@ class FrozenTargetRateHead:
         if tuple(item.magnitude_bin_id for item in bins) != STAGE4_MAGNITUDE_BIN_IDS:
             raise ValueError("rate heads must use the frozen M5_6, M6_plus order")
         if self.protocol_version != STAGE4_MATHEMATICS_PROTOCOL_VERSION:
-            raise ValueError("rate head protocol version must be 0.4.0")
+            raise ValueError("rate head protocol version must be 0.4.1")
         if self.fit_family != "background_only_poisson_mle_no_pseudocount":
             raise ValueError("rate head family must forbid pseudocounts")
         object.__setattr__(self, "bins", bins)

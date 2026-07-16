@@ -318,7 +318,7 @@ class FrozenPreprocessor:
         if self.fit_row_count <= 0:
             raise ValueError("fit_row_count must be positive")
         if self.protocol_version != STAGE4_MATHEMATICS_PROTOCOL_VERSION:
-            raise ValueError("preprocessor protocol version must be 0.4.0")
+            raise ValueError("preprocessor protocol version must be 0.4.1")
         source_columns = tuple(item.source_column for item in contracts)
         output_columns = tuple(
             name

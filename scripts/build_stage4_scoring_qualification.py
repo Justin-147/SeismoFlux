@@ -27,7 +27,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_PROTOCOL_PATH,
     STAGE4_QUALIFICATION_RELATIVE_PATH,
     stage4_scoring_freeze_relative_path,
-    validate_stage4_r1_execution_contract,
+    validate_stage4_r2_execution_contract,
 )
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
@@ -81,7 +81,7 @@ def _load_protocol(path: Path) -> dict[str, Any]:
     except UnicodeError as exc:
         raise ValueError("stage-4 protocol is not valid UTF-8") from exc
     protocol = _mapping(yaml.safe_load(text), label="protocol")
-    validate_stage4_r1_execution_contract(protocol)
+    validate_stage4_r2_execution_contract(protocol)
     return protocol
 
 
@@ -279,7 +279,7 @@ def _build(
     ):
         relative = stage4_scoring_freeze_relative_path(protocol, key)
         if safe_path != root.joinpath(*relative.parts):
-            raise ValueError(f"{label} must use its frozen R1 path")
+            raise ValueError(f"{label} must use its frozen R2 path")
     stage4_junit = parse_pytest_junit_evidence(
         _read_stable_bytes(safe_stage4_junit, label="stage-4 JUnit evidence")
     )
@@ -362,7 +362,7 @@ def generate(
         *stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts
     )
     if output != canonical_output:
-        raise ValueError("qualification output must use its frozen R1 path")
+        raise ValueError("qualification output must use its frozen R2 path")
     evidence = _build(
         project_root,
         protocol,
@@ -401,7 +401,7 @@ def check(
         *stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts
     )
     if output != canonical_output:
-        raise ValueError("qualification output must use its frozen R1 path")
+        raise ValueError("qualification output must use its frozen R2 path")
     expected = _build(
         project_root,
         protocol,
@@ -436,8 +436,8 @@ def main() -> int:
     )
     args = parser.parse_args()
     protocol = _load_protocol(PROTOCOL_PATH)
-    if protocol.get("protocol_version") != "0.4.0":
-        raise ValueError("stage-4 qualification requires protocol_version 0.4.0")
+    if protocol.get("protocol_version") != "0.4.1":
+        raise ValueError("stage-4 qualification requires protocol_version 0.4.1")
     function = generate if args.action == "generate" else check
     result = function(
         PROJECT_ROOT,

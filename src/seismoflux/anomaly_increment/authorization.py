@@ -25,16 +25,16 @@ from seismoflux.anomaly_increment.attempt_ledger import (
     read_stage4_ledger,
 )
 from seismoflux.anomaly_increment.config import (
-    STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH as R1_ATTEMPT_LEDGER_RELATIVE_PATH,
+    STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH as R2_ATTEMPT_LEDGER_RELATIVE_PATH,
 )
 from seismoflux.anomaly_increment.config import (
     STAGE4_PROTOCOL_TAG,
     STAGE4_SCORING_CODE_TAG,
     stage4_scoring_freeze_relative_path,
-    validate_stage4_r1_execution_contract,
+    validate_stage4_r2_execution_contract,
 )
 from seismoflux.anomaly_increment.config import (
-    STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH as R1_TARGET_READ_LEDGER_RELATIVE_PATH,
+    STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH as R2_TARGET_READ_LEDGER_RELATIVE_PATH,
 )
 from seismoflux.anomaly_increment.formal_preflight import (
     FormalPreflightReceipt,
@@ -72,18 +72,20 @@ from seismoflux.data.common import canonical_json_bytes
 
 STAGE4_SCORING_SEAL_SCHEMA_VERSION: Final[int] = 2
 STAGE4_PUBLIC_REPOSITORY: Final[str] = "github.com/Justin-147/SeismoFlux"
-STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH: Final[str] = R1_ATTEMPT_LEDGER_RELATIVE_PATH.as_posix()
-STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH: Final[str] = R1_TARGET_READ_LEDGER_RELATIVE_PATH.as_posix()
+STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH: Final[str] = R2_ATTEMPT_LEDGER_RELATIVE_PATH.as_posix()
+STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH: Final[str] = R2_TARGET_READ_LEDGER_RELATIVE_PATH.as_posix()
 STAGE4_FROZEN_PROTOCOL_PATHS: Final[tuple[str, ...]] = (
-    "configs/anomaly_increment_r1.yaml",
-    "data/manifests/anomaly_increment_r1_feature_set.json",
-    "data/manifests/anomaly_increment_r1_fold_manifest.json",
-    "data/manifests/anomaly_increment_r1_randomness.json",
-    "data/manifests/anomaly_increment_r1_spatial_strata.json",
+    "configs/anomaly_increment_r2.yaml",
+    "data/manifests/anomaly_increment_r2_feature_set.json",
+    "data/manifests/anomaly_increment_r2_fold_manifest.json",
+    "data/manifests/anomaly_increment_r2_randomness.json",
+    "data/manifests/anomaly_increment_r2_spatial_strata.json",
     "docs/anomaly_increment_protocol.md",
     "docs/anomaly_increment_protocol_r1.md",
+    "docs/anomaly_increment_protocol_r2.md",
     "docs/phase4_scoring_readiness_incident_r0.md",
     "docs/phase4_protocol_r1_acceptance.md",
+    "docs/phase4_protocol_r2_acceptance.md",
 )
 
 _GIT_OID_PATTERN = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
@@ -948,10 +950,10 @@ class Stage4TargetReadinessEvidence:
 
 def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
     try:
-        validate_stage4_r1_execution_contract(protocol)
+        validate_stage4_r2_execution_contract(protocol)
     except (TypeError, ValueError) as exc:
         raise Stage4ScoringNotAuthorizedError(
-            "stage-4 R1 execution freeze is missing or changed"
+            "stage-4 R2 execution freeze is missing or changed"
         ) from exc
     freeze = _mapping(protocol.get("freeze"), label="freeze")
     if freeze.get("protocol_tag_authorizes_only_score_free_implementation") is not True:
@@ -1226,7 +1228,7 @@ def _canonical_execution_path(
         relative = stage4_scoring_freeze_relative_path(protocol, key)
     except (TypeError, ValueError) as exc:
         raise Stage4ScoringNotAuthorizedError(
-            f"stage-4 R1 execution path is missing or changed: {key}"
+            f"stage-4 R2 execution path is missing or changed: {key}"
         ) from exc
     return Path(os.path.abspath(os.fspath(root.joinpath(*relative.parts))))
 
@@ -1283,7 +1285,7 @@ def verify_stage4_target_readiness(
     )
     if os.path.normcase(os.fspath(seal_path)) != os.path.normcase(os.fspath(canonical_seal_path)):
         raise Stage4ScoringNotAuthorizedError(
-            "stage-4 scoring seal must use its sole R1 repository-root path"
+            "stage-4 scoring seal must use its sole R2 repository-root path"
         )
     canonical_attempt_ledger = _require_canonical_ledger_path(
         root,

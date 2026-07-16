@@ -25,11 +25,12 @@ from seismoflux.anomaly_increment import (
     verify_content_sha256,
     write_public_manifest_atomic,
 )
+from seismoflux.anomaly_increment.config import STAGE4_PROTOCOL_PATH
 from seismoflux.config import sha256_file
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL_PATH = PROJECT_ROOT / "configs" / "anomaly_increment_r1.yaml"
-LOCAL_OUTPUT_DIR = PROJECT_ROOT / "data" / "interim" / "stage4" / "anomaly_increment_r1"
+PROTOCOL_PATH = PROJECT_ROOT / STAGE4_PROTOCOL_PATH
+LOCAL_OUTPUT_DIR = PROJECT_ROOT / "data" / "interim" / "stage4" / "anomaly_increment_r2"
 
 
 def _mapping(value: object, *, label: str) -> dict[str, Any]:
@@ -192,6 +193,20 @@ def _update_protocol_manifest_hashes(file_hashes: dict[str, str]) -> None:
 def generate(protocol: dict[str, Any], external_root: Path) -> dict[str, Any]:
     paths, entries = _source_paths(protocol, external_root)
     output_paths = _generated_paths(protocol)
+    topology = _mapping(
+        protocol["spatial_permutation_topology"],
+        label="spatial_permutation_topology",
+    )
+    local_artifacts = _mapping(
+        topology["local_restricted_artifacts"],
+        label="spatial_permutation_topology.local_restricted_artifacts",
+    )
+    configured_local_output = _project_path(
+        local_artifacts["directory"],
+        label="local_restricted_artifacts.directory",
+    )
+    if configured_local_output != LOCAL_OUTPUT_DIR:
+        raise ValueError("R2 local restricted output directory changed")
 
     fold = build_exposure_preregistration(
         _load_json(paths["background_fold_manifest"]),
@@ -207,7 +222,7 @@ def generate(protocol: dict[str, Any], external_root: Path) -> dict[str, Any]:
         study_area_path=paths["study_area"],
         stage3_feature_store_path=paths["stage3_feature_store"],
         stage3_state_history_path=paths["stage3_anomaly_state_history"],
-        local_output_dir=LOCAL_OUTPUT_DIR,
+        local_output_dir=configured_local_output,
         project_root=PROJECT_ROOT,
         expected_l1_sha256=cast(str, entries["construction_linework_l1"]["sha256"]),
         expected_l2_sha256=cast(str, entries["construction_linework_l2"]["sha256"]),
@@ -314,11 +329,11 @@ def main() -> int:
     parser.add_argument("--external-root")
     args = parser.parse_args()
     protocol = _load_yaml(PROTOCOL_PATH)
-    if protocol.get("protocol_version") != "0.4.0":
-        raise ValueError("stage-4 preregistration builder requires protocol_version 0.4.0")
+    if protocol.get("protocol_version") != "0.4.1":
+        raise ValueError("stage-4 preregistration builder requires protocol_version 0.4.1")
     freeze = _mapping(protocol.get("freeze"), label="freeze")
-    if freeze.get("execution_revision") != "r1":
-        raise ValueError("stage-4 preregistration builder requires execution_revision r1")
+    if freeze.get("execution_revision") != "r2":
+        raise ValueError("stage-4 preregistration builder requires execution_revision r2")
     result = (
         generate(protocol, _external_root(args.external_root))
         if args.action == "generate"

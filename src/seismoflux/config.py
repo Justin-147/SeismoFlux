@@ -44,8 +44,8 @@ class ConfigFiles(StrictModel):
     ingestion: str
     research_protocol: str
     background: str
-    anomaly_increment: Literal["configs/anomaly_increment_r1.yaml"] = (
-        "configs/anomaly_increment_r1.yaml"
+    anomaly_increment: Literal["configs/anomaly_increment_r2.yaml"] = (
+        "configs/anomaly_increment_r2.yaml"
     )
     operating_points: str
 

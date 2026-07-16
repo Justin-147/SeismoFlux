@@ -36,7 +36,7 @@ from seismoflux.data.common import canonical_json_bytes
 if TYPE_CHECKING:
     from seismoflux.anomaly_increment.formal_preflight import FormalPreflightReceipt
 
-STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.0"
+STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.1"
 STAGE4_QUALIFICATION_SCHEMA_VERSION: Final[int] = 4
 REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "generated_manifest_hashes_verified",

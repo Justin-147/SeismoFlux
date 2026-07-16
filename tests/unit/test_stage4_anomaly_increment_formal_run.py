@@ -132,15 +132,17 @@ def _install_lstat_fallback(
 
 def _publication() -> Stage4PublicationPlan:
     return Stage4PublicationPlan(
-        public_registry="data/manifests/anomaly_increment_r1_model_registry.json",
-        public_report="docs/anomaly_increment_r1_report.md",
-        public_static_svg="docs/anomaly_increment_r1_results.svg",
-        local_interactive_html="outputs/visualizations/anomaly_increment_r1_dashboard.html",
-        public_model_card="docs/model_cards/anomaly_increment_r1.md",
-        bundle_root="models/registry/anomaly_increment_r1",
+        public_registry="data/manifests/anomaly_increment_r2_model_registry.json",
+        public_report="docs/anomaly_increment_r2_report.md",
+        public_static_svg="docs/anomaly_increment_r2_results.svg",
+        local_interactive_html="outputs/visualizations/anomaly_increment_r2_dashboard.html",
+        public_model_card="docs/model_cards/anomaly_increment_r2.md",
+        bundle_root="models/registry/anomaly_increment_r2",
         local_convergence_audit=FORMAL_CONVERGENCE_OUTPUT_PATH,
-        local_spatial_static="outputs/visualizations/anomaly_increment_r1_spatial.svg",
-        local_spatial_interactive="outputs/visualizations/anomaly_increment_r1_spatial.html",
+        local_spatial_static=("outputs/visualizations/anomaly_increment_r2_forecast_spatial.svg"),
+        local_spatial_interactive=(
+            "outputs/visualizations/anomaly_increment_r2_forecast_spatial.html"
+        ),
     )
 
 
@@ -234,8 +236,8 @@ def scientific_inputs() -> tuple[
         physical_cores=16,
         logical_processors=32,
         reserve_physical_cores=2,
-        configured_max_workers=12,
-        effective_workers=12,
+        configured_max_workers=6,
+        effective_workers=6,
         blas_threads_per_worker=1,
         nested_parallelism=False,
     )
@@ -379,7 +381,7 @@ def _inputs(
         authorization=authorization,
         preflight=preflight,
         checkpoint_directory=(
-            tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r1" / "checkpoints"
+            tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r2" / "checkpoints"
         ),
         concurrency=PlaceboConcurrencyPlan.from_preflight_receipt(
             preflight.context.scoring_plan.compute.workers,
@@ -488,7 +490,7 @@ def test_same_process_resume_reuses_session_without_second_target_ingress(
         "requested": True,
         "status": "blocked_no_frozen_backend",
     }
-    assert seal["concurrency"]["time_max_in_flight"] == 12
+    assert seal["concurrency"]["time_max_in_flight"] == 6
     assert seal["concurrency"]["space_max_in_flight"] == 2
     assert seal["concurrency"]["space_memory_evidence_sha256"] == (
         preflight.receipt.space_placebo_resource_observation.content_sha256
@@ -754,7 +756,7 @@ def test_session_seal_rejects_changed_checkpoint_concurrency_before_target(
             inputs,
             concurrency=PlaceboConcurrencyPlan(
                 worker_plan=inputs.concurrency.worker_plan,
-                time_max_in_flight=12,
+                time_max_in_flight=inputs.concurrency.time_max_in_flight,
                 space_max_in_flight=1,
                 space_memory_evidence_sha256="7" * 64,
             ),

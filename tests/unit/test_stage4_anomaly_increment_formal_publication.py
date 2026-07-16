@@ -37,7 +37,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
 
 BINDING = "a" * 64
 AUTHORIZATION = "b" * 64
-CONVERGENCE_PATH = "outputs/visualizations/anomaly_increment_r1_convergence_audit.json"
+CONVERGENCE_PATH = "outputs/visualizations/anomaly_increment_r2_convergence_audit.json"
 _CONVERGENCE_FIXTURES = importlib.import_module("test_stage4_anomaly_increment_convergence")
 _model = cast(
     Callable[..., FrozenConvergenceModel],
@@ -88,15 +88,17 @@ def _publish_successful(
 
 def _publication() -> Stage4PublicationPlan:
     return Stage4PublicationPlan(
-        public_registry="data/manifests/anomaly_increment_r1_model_registry.json",
-        public_report="docs/anomaly_increment_r1_report.md",
-        public_static_svg="docs/anomaly_increment_r1_results.svg",
-        local_interactive_html="outputs/visualizations/anomaly_increment_r1_dashboard.html",
-        public_model_card="docs/model_cards/anomaly_increment_r1.md",
-        bundle_root="models/registry/anomaly_increment_r1",
+        public_registry="data/manifests/anomaly_increment_r2_model_registry.json",
+        public_report="docs/anomaly_increment_r2_report.md",
+        public_static_svg="docs/anomaly_increment_r2_results.svg",
+        local_interactive_html="outputs/visualizations/anomaly_increment_r2_dashboard.html",
+        public_model_card="docs/model_cards/anomaly_increment_r2.md",
+        bundle_root="models/registry/anomaly_increment_r2",
         local_convergence_audit=CONVERGENCE_PATH,
-        local_spatial_static="outputs/visualizations/anomaly_increment_r1_spatial.svg",
-        local_spatial_interactive="outputs/visualizations/anomaly_increment_r1_spatial.html",
+        local_spatial_static=("outputs/visualizations/anomaly_increment_r2_forecast_spatial.svg"),
+        local_spatial_interactive=(
+            "outputs/visualizations/anomaly_increment_r2_forecast_spatial.html"
+        ),
     )
 
 
@@ -169,7 +171,7 @@ def test_success_bundle_is_immutable_content_addressed_and_registry_is_last(
     model_card = (tmp_path / _publication().public_model_card).read_text("utf-8")
     assert "Passed checks: `40/40`" in model_card
     assert "near-zero absolute tolerance: `1e-10`" in model_card
-    assert "![阶段4方法效果](anomaly_increment_r1_results.svg)" in report
+    assert "![阶段4方法效果](anomaly_increment_r2_results.svg)" in report
     assert f"`{_publication().local_interactive_html}`" in report
     assert "ETAS 数值拟合当前不可用" in report
     assert "M6+ 与 180/365 天窗口始终按证据不足解释" in report

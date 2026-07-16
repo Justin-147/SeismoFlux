@@ -45,7 +45,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
 from seismoflux.data.common import canonical_json_bytes
 
 STAGE4_PLACEBO_CHECKPOINT_SCHEMA_VERSION: Final[int] = 1
-STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.0"
+STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.1"
 CHECKPOINT_EVERY_REPLICATIONS: Final[int] = 25
 HEARTBEAT_SECONDS: Final[int] = 30
 HEARTBEAT_STALE_AFTER_SECONDS: Final[int] = 90

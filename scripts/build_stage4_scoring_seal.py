@@ -32,7 +32,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_QUALIFICATION_RELATIVE_PATH,
     STAGE4_SCORING_CODE_TAG,
     stage4_scoring_freeze_relative_path,
-    validate_stage4_r1_execution_contract,
+    validate_stage4_r2_execution_contract,
 )
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
@@ -85,7 +85,7 @@ def _load_protocol(path: Path) -> dict[str, Any]:
         protocol = _mapping(yaml.safe_load(payload.decode("utf-8")), label="protocol")
     except UnicodeError as exc:
         raise ValueError("stage-4 protocol is not valid UTF-8") from exc
-    validate_stage4_r1_execution_contract(protocol)
+    validate_stage4_r2_execution_contract(protocol)
     return protocol
 
 
@@ -110,7 +110,7 @@ def _relative_output_path(project_root: Path, protocol: Mapping[str, object]) ->
 
 
 def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
-    validate_stage4_r1_execution_contract(protocol)
+    validate_stage4_r2_execution_contract(protocol)
     return STAGE4_PROTOCOL_TAG, STAGE4_SCORING_CODE_TAG
 
 
@@ -182,7 +182,7 @@ def generate(
         root.joinpath(*stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts)
     )
     if safe_qualification_path != canonical_qualification:
-        raise ValueError("qualification evidence must use its frozen R1 path")
+        raise ValueError("qualification evidence must use its frozen R2 path")
     attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
         root,
         safe_attempt_ledger_path,
@@ -284,7 +284,7 @@ def check(
         root.joinpath(*stage4_scoring_freeze_relative_path(protocol, "qualification_path").parts)
     )
     if safe_qualification_path != canonical_qualification:
-        raise ValueError("qualification evidence must use its frozen R1 path")
+        raise ValueError("qualification evidence must use its frozen R2 path")
     attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
         root,
         safe_attempt_ledger_path,
@@ -354,8 +354,8 @@ def main() -> int:
     )
     args = parser.parse_args()
     protocol = _load_protocol(PROTOCOL_PATH)
-    if protocol.get("protocol_version") != "0.4.0":
-        raise ValueError("stage-4 scoring seal requires protocol_version 0.4.0")
+    if protocol.get("protocol_version") != "0.4.1":
+        raise ValueError("stage-4 scoring seal requires protocol_version 0.4.1")
     function = generate if args.action == "generate" else check
     result = function(
         PROJECT_ROOT,

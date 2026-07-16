@@ -37,7 +37,7 @@ from seismoflux.background.grid import EQUAL_AREA_CRS
 from seismoflux.config import sha256_file
 from seismoflux.data.common import canonical_json_bytes
 
-STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.0"
+STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.1"
 STAGE4_ROOT_SEED: Final[int] = 147
 STAGE4_HORIZONS_DAYS: Final[tuple[int, ...]] = (7, 30, 90, 180, 365)
 PRIMARY_MACRO_HORIZONS_DAYS: Final[tuple[int, ...]] = (7, 30, 90)
@@ -241,7 +241,7 @@ def validate_stage4_protocol_bundle(
     if set(protocol) != expected_root_keys:
         raise ValueError("stage-4 protocol root keys changed without a protocol revision")
     if protocol.get("protocol_version") != STAGE4_PROTOCOL_VERSION:
-        raise ValueError("stage-4 protocol version is not 0.4.0")
+        raise ValueError("stage-4 protocol version is not 0.4.1")
     if protocol.get("status") != "preregistered_before_any_stage4_target_score":
         raise ValueError("stage-4 protocol is not score-blind preregistration")
 
@@ -1996,7 +1996,7 @@ def _write_mapping_parquet(
     assignments: _CellAssignments,
 ) -> None:
     metadata = {
-        b"seismoflux_contract": b"0.4.0-local-construction-zone-cell-mapping",
+        b"seismoflux_contract": b"0.4.1-local-construction-zone-cell-mapping",
         b"seismoflux_license": CONSTRUCTION_SOURCE_LICENSE.encode("ascii"),
         b"seismoflux_publication": b"forbidden_contains_coordinates_and_per_cell_mapping",
     }
@@ -2041,7 +2041,7 @@ def _write_mapping_parquet(
 
 def _write_entity_mapping_parquet(path: Path, assignments: _EntityAssignments) -> None:
     metadata = {
-        b"seismoflux_contract": b"0.4.0-local-construction-zone-entity-mapping",
+        b"seismoflux_contract": b"0.4.1-local-construction-zone-entity-mapping",
         b"seismoflux_license": CONSTRUCTION_SOURCE_LICENSE.encode("ascii"),
         b"seismoflux_publication": b"forbidden_contains_per-entity-stratification",
     }
@@ -2095,7 +2095,7 @@ def _write_entity_mapping_parquet(path: Path, assignments: _EntityAssignments) -
 def _write_zones_parquet(path: Path, zones: Sequence[BaseGeometry]) -> None:
     ordered = tuple(sorted(((_geometry_sha256(zone), zone) for zone in zones), key=lambda x: x[0]))
     metadata = {
-        b"seismoflux_contract": b"0.4.0-local-construction-zone-geometry",
+        b"seismoflux_contract": b"0.4.1-local-construction-zone-geometry",
         b"seismoflux_license": CONSTRUCTION_SOURCE_LICENSE.encode("ascii"),
         b"seismoflux_publication": b"forbidden_contains_restricted_geometry",
     }

@@ -42,7 +42,7 @@ LedgerStatus: TypeAlias = Literal["started", "succeeded", "failed"]
 Clock: TypeAlias = Callable[[], datetime]
 
 STAGE4_LEDGER_SCHEMA_VERSION: Final[int] = 1
-STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.0"
+STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.1"
 STAGE4_ATTEMPT_SCOPES: Final[tuple[str, ...]] = (
     "development-fold-1",
     "development-fold-2",

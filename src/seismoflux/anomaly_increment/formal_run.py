@@ -117,7 +117,7 @@ FORMAL_RUN_SESSION_SCHEMA_VERSION: Final[int] = 3
 FORMAL_SESSION_SEAL_FILENAME: Final[str] = "formal_run_session_seal.json"
 FORMAL_CONVERGENCE_AUDIT_FILENAME: Final[str] = "formal_convergence_audit.json"
 FORMAL_CONVERGENCE_OUTPUT_PATH: Final[str] = (
-    "outputs/visualizations/anomaly_increment_r1_convergence_audit.json"
+    "outputs/visualizations/anomaly_increment_r2_convergence_audit.json"
 )
 FORMAL_TERMINALIZATION_INCIDENT_FILENAME: Final[str] = "formal_run_terminalization_incident.json"
 _SESSION_SENTINEL = object()
@@ -212,8 +212,10 @@ class Stage4SpatialArtifactHook:
 
     display_context_layers: tuple[DisplayContextLayer, ...] = ()
     genuine_prospective_archive: GenuineProspectiveArchive | None = None
-    static_relative_path: str = "outputs/visualizations/anomaly_increment_r1_spatial.svg"
-    interactive_relative_path: str = "outputs/visualizations/anomaly_increment_r1_spatial.html"
+    static_relative_path: str = "outputs/visualizations/anomaly_increment_r2_forecast_spatial.svg"
+    interactive_relative_path: str = (
+        "outputs/visualizations/anomaly_increment_r2_forecast_spatial.html"
+    )
 
     def __post_init__(self) -> None:
         layers = tuple(self.display_context_layers)

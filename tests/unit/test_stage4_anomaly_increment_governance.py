@@ -85,9 +85,9 @@ from seismoflux.anomaly_increment.target_access import (
 )
 from seismoflux.background.execution import CommandResult
 
-PROTOCOL_TAG = "v0.3.0-anomaly-increment-protocol-r1"
-SCORING_TAG = "v0.3.0-anomaly-increment-scoring-code-r1"
-RESULT_TAG = "v0.3.0-anomaly-increment-r1"
+PROTOCOL_TAG = "v0.3.1-anomaly-increment-protocol-r2"
+SCORING_TAG = "v0.3.1-anomaly-increment-scoring-code-r2"
+RESULT_TAG = "v0.3.1-anomaly-increment-r2"
 CODE_COMMIT = "2" * 40
 PROTOCOL_COMMIT = "1" * 40
 PROTOCOL_TAG_OBJECT = "3" * 40
@@ -141,13 +141,44 @@ def _protocol(
     gpu_backend_frozen: bool = False,
 ) -> dict[str, Any]:
     return {
-        "protocol_version": "0.4.0",
+        "protocol_version": "0.4.1",
         "generated_manifests": {},
         "freeze": {
-            "execution_revision": "r1",
-            "corrects_execution_revision": "r0",
-            "execution_revision_document": "docs/anomaly_increment_protocol_r1.md",
+            "execution_revision": "r2",
+            "corrects_execution_revision": "r1",
+            "execution_revision_document": "docs/anomaly_increment_protocol_r2.md",
             "readiness_incident_document": ("docs/phase4_scoring_readiness_incident_r0.md"),
+            "r1_retirement": {
+                "reason": (
+                    "scientific_gate_and_publication_contract_corrected_before_any_target_read"
+                ),
+                "protocol_design_sha256": (
+                    "c15d3bbca5cef4b363a79e183d715124256a12088873d81cd77de489766b32de"
+                ),
+                "scoring_seal_file_sha256": (
+                    "a6e8dc9ac283813edb62e301114d4985ae332b9c607584c987a4297efe5978f3"
+                ),
+                "formal_attempt_ledger": {
+                    "file_sha256": (
+                        "9ac5e5e080c1d5425f985cb3091b94c0da69d211469589d26ae8bfc314088142"
+                    ),
+                    "content_sha256": (
+                        "cadc80e5a0f00ffce241f910409750b01e3f410d910dda5d5aad0ff3033d2448"
+                    ),
+                    "operation_count": 0,
+                },
+                "target_read_ledger": {
+                    "file_sha256": (
+                        "0a49450cc1006ccd0ced26fba30330417f1ec8667c5cedf0bf04242f158210c8"
+                    ),
+                    "content_sha256": (
+                        "4c1fb843edfa8f59f37f137d8d68962cbdae5991cc8809302d39d240f0b395b6"
+                    ),
+                    "operation_count": 0,
+                },
+                "target_bytes_observed": False,
+                "reusable_for_r2_authorization": False,
+            },
             "pre_score_tag": PROTOCOL_TAG,
             "results_tag": RESULT_TAG,
             "protocol_tag_authorizes_only_score_free_implementation": True,
@@ -165,27 +196,27 @@ def _protocol(
             ],
             "scoring_code_freeze": {
                 "expected_tag": SCORING_TAG,
-                "required_seal_path": ("data/manifests/anomaly_increment_r1_scoring_seal.json"),
+                "required_seal_path": ("data/manifests/anomaly_increment_r2_scoring_seal.json"),
                 "formal_preflight_receipt_path": (
-                    "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+                    "data/interim/stage4/anomaly_increment_r2/formal_preflight_receipt.json"
                 ),
                 "qualification_path": (
-                    "data/interim/stage4/anomaly_increment_r1/scoring_qualification.json"
+                    "data/interim/stage4/anomaly_increment_r2/scoring_qualification.json"
                 ),
                 "stage4_junit_path": (
-                    "data/interim/stage4/anomaly_increment_r1/qualification_stage4.junit.xml"
+                    "data/interim/stage4/anomaly_increment_r2/qualification_stage4.junit.xml"
                 ),
                 "full_non_target_junit_path": (
-                    "data/interim/stage4/anomaly_increment_r1/"
+                    "data/interim/stage4/anomaly_increment_r2/"
                     "qualification_full_non_target.junit.xml"
                 ),
                 "formal_attempt_ledger_path": (
-                    "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+                    "data/manifests/anomaly_increment_r2_attempt_ledger.json"
                 ),
                 "target_read_ledger_path": (
-                    "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+                    "data/manifests/anomaly_increment_r2_target_read_ledger.json"
                 ),
-                "checkpoint_root": ("data/interim/stage4/anomaly_increment_r1/checkpoints"),
+                "checkpoint_root": ("data/interim/stage4/anomaly_increment_r2/checkpoints"),
                 "selected_table_logical_identity": {
                     "method_id": "arrow_ipc_selected_table_logical_identity_r1",
                     "sha256_domain_separator_ascii": (
@@ -230,6 +261,13 @@ def _protocol(
             },
         },
         "compute": {
+            "max_workers": 6,
+            "logical_cpu_affinity_limit": 6,
+            "process_priority": "below_normal",
+            "nested_parallelism": False,
+            "blas_threads_per_worker": 1,
+            "blas_environment_must_be_set_before_numpy_or_scipy_import": True,
+            "resource_control_receipt_required_before_target_read": True,
             "gpu_available_reference": {
                 "python_gpu_backend_installed_at_freeze": gpu_backend_frozen,
             },
@@ -251,7 +289,173 @@ def _protocol(
                 "physical_event_id_column": "event_id",
                 "unavailable_before_protocol_freeze": True,
                 "human_prediction_fields_forbidden": True,
+                "frozen_catalog_coverage": {
+                    "basis_document": "docs/data_quality_report.md",
+                    "basis_document_sha256": (
+                        "f4bf6633ce433b2c8d85d9d6d36cecd4c6824889f80e4528eeaae4de055ee9de"
+                    ),
+                    "observed_origin_time_max_utc": "2026-07-09T04:25:56Z",
+                    "observed_available_at_max_utc": "2026-07-09T04:25:56Z",
+                    "frozen_validation_window_end_max_utc": "2025-07-18T16:00:00Z",
+                    "all_frozen_validation_window_endpoints_must_be_lte_both_catalog_maxima": True,
+                    "verify_after_authorized_target_open_before_first_score": True,
+                    "missing_or_short_coverage_action": (
+                        "fail_closed_register_invalid_attempt_and_do_not_score"
+                    ),
+                    "available_at_equals_origin_time_is_optimistic_timeliness_assumption": True,
+                },
             }
+        },
+        "evaluation": {
+            "permutations": {
+                "formal_requests": [
+                    {"kind": "time", "model_variant": "dynamic"},
+                    {"kind": "space", "model_variant": "dynamic"},
+                    {"kind": "time", "model_variant": "snapshot"},
+                    {"kind": "space", "model_variant": "snapshot"},
+                ],
+                "formal_checkpoint_request_identities": [
+                    "time-dynamic",
+                    "space-dynamic",
+                    "time-snapshot",
+                    "space-snapshot",
+                ],
+                "checkpoint_identity_pattern": "kind-model_variant",
+                "exact_request_set_required": True,
+                "mappings_paired_across_dynamic_and_snapshot": True,
+            },
+            "gates": {
+                "G2": {
+                    "candidate_variant": "dynamic",
+                    "snapshot_equivalent_candidate_variant": "snapshot",
+                    "evaluated_model_variants": ["dynamic", "snapshot"],
+                    "required_primary_placebos_by_variant": {
+                        "dynamic": ["time", "space"],
+                        "snapshot": ["time", "space"],
+                    },
+                    "primary_time_permutation_p_lte": 0.05,
+                    "primary_space_permutation_p_lte": 0.05,
+                    "both_primary_p_values_required_for_each_evaluated_variant": True,
+                    "same_practical_improvement_thresholds_apply_per_evaluated_variant": True,
+                    "reporting_confound_guard_each_evaluated_candidate_gt_coverage_only": True,
+                    "reporting_confound_guard_applies_independently_to_variants": [
+                        "dynamic",
+                        "snapshot",
+                    ],
+                    "candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt": 0,
+                    "practical_improvement_any_of": [
+                        {"candidate_variant": "current_evaluated_candidate_variant"},
+                        {"candidate_variant": "current_evaluated_candidate_variant"},
+                    ],
+                }
+            },
+        },
+        "publication": {
+            "spatial_output_isolation": {
+                "physical_file_count": 4,
+                "forecast_target_free_files": [
+                    "outputs/visualizations/anomaly_increment_r2_forecast_spatial.svg",
+                    "outputs/visualizations/anomaly_increment_r2_forecast_spatial.html",
+                ],
+                "retrospective_target_bearing_local_restricted_files": [
+                    "outputs/visualizations/anomaly_increment_r2_retrospective_target_local.svg",
+                    "outputs/visualizations/anomaly_increment_r2_retrospective_target_local.html",
+                ],
+                "target_payload_in_forecast_files_forbidden": True,
+                "automatic_cross_file_target_loading_forbidden": True,
+                "public_forecast_artifact_validator": {
+                    "reject_artifact_classifications": [
+                        "local_restricted",
+                        "target_bearing",
+                    ],
+                    "forbidden_payload_fields": [
+                        "event_id",
+                        "target_coordinates",
+                        "target_longitude",
+                        "target_latitude",
+                        "epicenter_longitude",
+                        "epicenter_latitude",
+                        "hit_status",
+                        "target_marker",
+                    ],
+                    "validation_scope": (
+                        "parsed_static_dom_and_recursively_deserialized_interactive_payload"
+                    ),
+                    "keyword_scan_or_ui_hiding_sufficient": False,
+                    "failure_action": "fail_closed_forbid_publication",
+                },
+            },
+            "result_identity_requires": [
+                "dynamic_G2",
+                "snapshot_equivalent_G2",
+                "time_dynamic_placebo_result_distribution",
+                "space_dynamic_placebo_result_distribution",
+                "time_snapshot_placebo_result_distribution",
+                "space_snapshot_placebo_result_distribution",
+                "dynamic_G3",
+                "adoption_decision",
+                "adopted_variant_metrics_table",
+            ],
+            "spatial_rendering_contract": {
+                "center_point_fallback_warning_text": (
+                    "中心点示意，非面积几何；报警面积以数值为准"  # noqa: RUF001
+                ),
+            },
+            "plot_axis_contract": {
+                "numeric_ticks_required": True,
+                "molchan_x_domain": [0.0, 1.0],
+                "fixed_area_x_domain_km2": [0, 960000],
+            },
+            "limitations": {
+                "earthquake_available_at_assumption": (
+                    "available_at_equals_origin_time_is_an_optimistic_timeliness_assumption"
+                ),
+                "bootstrap_interval_scope": (
+                    "conditional_on_fixed_fitted_model_and_excludes_refit_uncertainty"
+                ),
+                "etas_comparator_status": "not_evaluable",
+                "allowed_increment_claim": "relative_to_frozen_kde_background_only",
+                "incremental_value_over_etas_claim_forbidden": True,
+            },
+            "display_semantics": {
+                "coverage_only_option_required": True,
+                "aggregate_retrospective_view": {
+                    "issue_and_model_controls": "hidden_or_disabled",
+                    "required_summary_label_template_zh": "全部{N}个起报日汇总",
+                    "issue_count_source": "frozen_issue_calendar",
+                },
+                "peak_value_100pct": {
+                    "required_label_zh": "峰值网格百分位",
+                    "prediction_accuracy_term_forbidden": True,
+                },
+                "relative_strength": {
+                    "formula": ("peak_integrated_grid_intensity/mean_integrated_grid_intensity"),
+                    "absolute_probability_interpretation_forbidden": True,
+                },
+                "adoption": {
+                    "adoption_card_required": True,
+                    "adopted_variant_required": True,
+                },
+                "latest_retrospective_landmark": {
+                    "required_label_zh": "最新冻结日历地标",
+                    "current_forecast_implication_forbidden": True,
+                },
+                "forecast_spatial": {
+                    "rendered_variant": "adopted_variant",
+                    "unadopted_dynamic_required_label": "research_candidate",
+                    "unadopted_dynamic_may_not_be_current_forecast": True,
+                },
+                "placebo_static_panel_layout": {
+                    "required_panels": [
+                        "time_dynamic",
+                        "space_dynamic",
+                        "time_snapshot",
+                        "space_snapshot",
+                    ],
+                    "all_panels_within_render_bounds_required": True,
+                    "render_boundary_test_required": True,
+                },
+            },
         },
     }
 
@@ -463,7 +667,7 @@ def _seal_fixture(
         attempt_ledger=attempt,
         target_read_ledger=target,
     )
-    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
+    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r2_scoring_seal.json"
     write_stage4_scoring_seal_atomic(seal_path, seal)
     preflight_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     preflight_path.parent.mkdir(parents=True, exist_ok=True)
@@ -532,39 +736,41 @@ def test_expected_target_identity_is_metadata_only_and_never_requires_target_pat
     assert not missing.exists()
 
 
-def test_r1_authorization_paths_are_disjoint_from_the_retired_r0_namespace() -> None:
+def test_r2_authorization_paths_are_disjoint_from_retired_execution_namespaces() -> None:
     assert STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH == (
-        "data/manifests/anomaly_increment_r1_attempt_ledger.json"
+        "data/manifests/anomaly_increment_r2_attempt_ledger.json"
     )
     assert STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH == (
-        "data/manifests/anomaly_increment_r1_target_read_ledger.json"
+        "data/manifests/anomaly_increment_r2_target_read_ledger.json"
     )
     assert FORMAL_PREFLIGHT_RECEIPT_PATH.as_posix() == (
-        "data/interim/stage4/anomaly_increment_r1/formal_preflight_receipt.json"
+        "data/interim/stage4/anomaly_increment_r2/formal_preflight_receipt.json"
     )
     assert STAGE4_FROZEN_PROTOCOL_PATHS == (
-        "configs/anomaly_increment_r1.yaml",
-        "data/manifests/anomaly_increment_r1_feature_set.json",
-        "data/manifests/anomaly_increment_r1_fold_manifest.json",
-        "data/manifests/anomaly_increment_r1_randomness.json",
-        "data/manifests/anomaly_increment_r1_spatial_strata.json",
+        "configs/anomaly_increment_r2.yaml",
+        "data/manifests/anomaly_increment_r2_feature_set.json",
+        "data/manifests/anomaly_increment_r2_fold_manifest.json",
+        "data/manifests/anomaly_increment_r2_randomness.json",
+        "data/manifests/anomaly_increment_r2_spatial_strata.json",
         "docs/anomaly_increment_protocol.md",
         "docs/anomaly_increment_protocol_r1.md",
+        "docs/anomaly_increment_protocol_r2.md",
         "docs/phase4_scoring_readiness_incident_r0.md",
         "docs/phase4_protocol_r1_acceptance.md",
+        "docs/phase4_protocol_r2_acceptance.md",
     )
 
 
 @pytest.mark.parametrize(
     ("section", "key", "value"),
     (
-        ("freeze", "execution_revision", "r0"),
-        ("freeze", "pre_score_tag", "v0.3.0-anomaly-increment-protocol"),
-        ("freeze", "results_tag", "v0.3.0-anomaly-increment"),
+        ("freeze", "execution_revision", "r1"),
+        ("freeze", "pre_score_tag", "v0.3.0-anomaly-increment-protocol-r1"),
+        ("freeze", "results_tag", "v0.3.0-anomaly-increment-r1"),
         (
             "scoring",
             "expected_tag",
-            "v0.3.0-anomaly-increment-scoring-code",
+            "v0.3.0-anomaly-increment-scoring-code-r1",
         ),
         (
             "scoring",
@@ -574,7 +780,7 @@ def test_r1_authorization_paths_are_disjoint_from_the_retired_r0_namespace() -> 
         ("logical", "top_level_schema_metadata", "included"),
     ),
 )
-def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r0_or_drift(
+def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r1_or_drift(
     section: str,
     key: str,
     value: object,
@@ -592,7 +798,7 @@ def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r0_or_drift(
 
     with pytest.raises(
         Stage4ScoringNotAuthorizedError,
-        match="R1 execution freeze",
+        match="R2 execution freeze",
     ):
         authorization_module._freeze_tags(protocol)
     with pytest.raises(ValueError, match="stage-4"):
@@ -1204,7 +1410,7 @@ def test_shadow_empty_ledger_cannot_reauthorize_after_canonical_consumption(
         kind="target_read",
         execution_binding_id=authorization.execution_binding_id,
     )
-    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r1_scoring_seal.json"
+    seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r2_scoring_seal.json"
 
     with pytest.raises(Stage4ScoringNotAuthorizedError, match="sole repository-root path"):
         authorize_stage4_target_access(
@@ -1518,7 +1724,7 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "scoring_qualification.json"
     )
     logical_replay_path = (
@@ -1526,7 +1732,7 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "logical_identity_worker_replay.json"
     )
     logical_replay_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1572,7 +1778,7 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
     assert generated["target_read_count"] == 0
     assert checked["verified"] is True
     assert not (tmp_path / "synthetic" / "target.bin").exists()
-    with pytest.raises(ValueError, match="frozen R1 path"):
+    with pytest.raises(ValueError, match="frozen R2 path"):
         seal_script.check(
             tmp_path,
             protocol,
@@ -1628,7 +1834,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "qualification_stage4.junit.xml"
     )
     full_junit = (
@@ -1636,7 +1842,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "qualification_full_non_target.junit.xml"
     )
     stage4_junit.parent.mkdir(parents=True, exist_ok=True)
@@ -1647,7 +1853,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "scoring_qualification.json"
     )
     logical_replay_path = (
@@ -1655,7 +1861,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
         / "data"
         / "interim"
         / "stage4"
-        / "anomaly_increment_r1"
+        / "anomaly_increment_r2"
         / "logical_identity_worker_replay.json"
     )
     logical_replay_path.write_text(
@@ -1702,7 +1908,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
     assert generated["formal_preflight_receipt_sha256"] == receipt.content_sha256
     assert checked["verified"] is True
     assert not (tmp_path / "synthetic" / "target.bin").exists()
-    with pytest.raises(ValueError, match="frozen R1 path"):
+    with pytest.raises(ValueError, match="frozen R2 path"):
         qualification_script.generate(
             tmp_path,
             protocol,
@@ -1713,7 +1919,7 @@ def test_qualification_script_derives_real_junit_preflight_and_gpu_cpu_fallback(
             logical_replay_audit_path=logical_replay_path,
             git_runner=git_head,
         )
-    with pytest.raises(ValueError, match="frozen R1 path"):
+    with pytest.raises(ValueError, match="frozen R2 path"):
         qualification_script.generate(
             tmp_path,
             protocol,

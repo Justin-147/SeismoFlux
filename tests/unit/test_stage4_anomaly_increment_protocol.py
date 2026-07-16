@@ -28,11 +28,11 @@ from seismoflux.anomaly_increment.preregistration import (
     verify_content_sha256,
 )
 
-PROTOCOL_PATH = Path("configs/anomaly_increment_r1.yaml")
-FOLD_MANIFEST_PATH = Path("data/manifests/anomaly_increment_r1_fold_manifest.json")
-FEATURE_SET_PATH = Path("data/manifests/anomaly_increment_r1_feature_set.json")
-RANDOMNESS_PATH = Path("data/manifests/anomaly_increment_r1_randomness.json")
-SPATIAL_STRATA_PATH = Path("data/manifests/anomaly_increment_r1_spatial_strata.json")
+PROTOCOL_PATH = Path("configs/anomaly_increment_r2.yaml")
+FOLD_MANIFEST_PATH = Path("data/manifests/anomaly_increment_r2_fold_manifest.json")
+FEATURE_SET_PATH = Path("data/manifests/anomaly_increment_r2_feature_set.json")
+RANDOMNESS_PATH = Path("data/manifests/anomaly_increment_r2_randomness.json")
+SPATIAL_STRATA_PATH = Path("data/manifests/anomaly_increment_r2_spatial_strata.json")
 CLI_PATH = Path(__file__).resolve().parents[2] / "scripts" / "build_stage4_preregistration.py"
 
 
@@ -256,7 +256,7 @@ def _independent_seed_reference(context: dict[str, Any]) -> dict[str, Any]:
 def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes() -> None:
     protocol = _load_yaml(PROTOCOL_PATH)
 
-    assert protocol["protocol_version"] == "0.4.0"
+    assert protocol["protocol_version"] == "0.4.1"
     assert protocol["frozen_on"] == "2026-07-16"
     assert protocol["stage"] == 4
     assert protocol["status"] == "preregistered_before_any_stage4_target_score"
@@ -264,9 +264,10 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
     assert protocol["gates"] == ["G2", "G3"]
 
     freeze = protocol["freeze"]
-    assert freeze["execution_revision"] == "r1"
-    assert freeze["pre_score_tag"] == "v0.3.0-anomaly-increment-protocol-r1"
-    assert freeze["results_tag"] == "v0.3.0-anomaly-increment-r1"
+    assert freeze["execution_revision"] == "r2"
+    assert freeze["corrects_execution_revision"] == "r1"
+    assert freeze["pre_score_tag"] == "v0.3.1-anomaly-increment-protocol-r2"
+    assert freeze["results_tag"] == "v0.3.1-anomaly-increment-r2"
     assert freeze["protocol_tag_authorizes_only_score_free_implementation"] is True
     assert freeze["scores_seen_before_freeze"] is False
     assert freeze["target_counts_seen_before_freeze"] is False
@@ -276,9 +277,9 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
 
     scoring_freeze = freeze["scoring_code_freeze"]
     assert scoring_freeze["required"] is True
-    assert scoring_freeze["expected_tag"] == ("v0.3.0-anomaly-increment-scoring-code-r1")
+    assert scoring_freeze["expected_tag"] == ("v0.3.1-anomaly-increment-scoring-code-r2")
     assert scoring_freeze["required_seal_path"] == (
-        "data/manifests/anomaly_increment_r1_scoring_seal.json"
+        "data/manifests/anomaly_increment_r2_scoring_seal.json"
     )
     assert scoring_freeze["selected_table_logical_identity"] == {
         "method_id": "arrow_ipc_selected_table_logical_identity_r1",
@@ -359,6 +360,154 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
             "path": path.as_posix(),
             "sha256": _file_sha256(path),
         }
+
+
+def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publication() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+
+    retirement = protocol["freeze"]["r1_retirement"]
+    assert retirement["formal_attempt_ledger"]["operation_count"] == 0
+    assert retirement["target_read_ledger"]["operation_count"] == 0
+    assert retirement["target_bytes_observed"] is False
+    assert retirement["reusable_for_r2_authorization"] is False
+
+    permutations = protocol["evaluation"]["permutations"]
+    assert permutations["formal_requests"] == [
+        {"kind": "time", "model_variant": "dynamic"},
+        {"kind": "space", "model_variant": "dynamic"},
+        {"kind": "time", "model_variant": "snapshot"},
+        {"kind": "space", "model_variant": "snapshot"},
+    ]
+    assert permutations["formal_checkpoint_request_identities"] == [
+        "time-dynamic",
+        "space-dynamic",
+        "time-snapshot",
+        "space-snapshot",
+    ]
+    assert permutations["checkpoint_identity_pattern"] == "kind-model_variant"
+    assert permutations["exact_request_set_required"] is True
+    assert permutations["mappings_paired_across_dynamic_and_snapshot"] is True
+    g2 = protocol["evaluation"]["gates"]["G2"]
+    assert g2["evaluated_model_variants"] == ["dynamic", "snapshot"]
+    assert g2["required_primary_placebos_by_variant"] == {
+        "dynamic": ["time", "space"],
+        "snapshot": ["time", "space"],
+    }
+    assert g2["primary_time_permutation_p_lte"] == 0.05
+    assert g2["primary_space_permutation_p_lte"] == 0.05
+    assert g2["both_primary_p_values_required_for_each_evaluated_variant"] is True
+    assert g2["reporting_confound_guard_applies_independently_to_variants"] == [
+        "dynamic",
+        "snapshot",
+    ]
+    assert g2["candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt"] == 0
+    assert {branch["candidate_variant"] for branch in g2["practical_improvement_any_of"]} == {
+        "current_evaluated_candidate_variant"
+    }
+
+    compute = protocol["compute"]
+    assert compute["max_workers"] == 6
+    assert compute["logical_cpu_affinity_limit"] == 6
+    assert compute["process_priority"] == "below_normal"
+    assert compute["nested_parallelism"] is False
+    assert compute["blas_threads_per_worker"] == 1
+
+    coverage = protocol["inputs"]["earthquake_target"]["frozen_catalog_coverage"]
+    assert coverage["observed_origin_time_max_utc"] == "2026-07-09T04:25:56Z"
+    assert coverage["observed_available_at_max_utc"] == "2026-07-09T04:25:56Z"
+    assert coverage["frozen_validation_window_end_max_utc"] == "2025-07-18T16:00:00Z"
+    assert (
+        coverage["all_frozen_validation_window_endpoints_must_be_lte_both_catalog_maxima"] is True
+    )
+    assert coverage["missing_or_short_coverage_action"].startswith("fail_closed")
+
+    publication = protocol["publication"]
+    assert publication["result_identity_requires"] == [
+        "dynamic_G2",
+        "snapshot_equivalent_G2",
+        "time_dynamic_placebo_result_distribution",
+        "space_dynamic_placebo_result_distribution",
+        "time_snapshot_placebo_result_distribution",
+        "space_snapshot_placebo_result_distribution",
+        "dynamic_G3",
+        "adoption_decision",
+        "adopted_variant_metrics_table",
+    ]
+    isolation = publication["spatial_output_isolation"]
+    spatial_files = (
+        isolation["forecast_target_free_files"]
+        + isolation["retrospective_target_bearing_local_restricted_files"]
+    )
+    assert isolation["physical_file_count"] == 4
+    assert len(spatial_files) == len(set(spatial_files)) == 4
+    assert isolation["target_payload_in_forecast_files_forbidden"] is True
+    assert isolation["automatic_cross_file_target_loading_forbidden"] is True
+    assert isolation["public_forecast_artifact_validator"] == {
+        "reject_artifact_classifications": ["local_restricted", "target_bearing"],
+        "forbidden_payload_fields": [
+            "event_id",
+            "target_coordinates",
+            "target_longitude",
+            "target_latitude",
+            "epicenter_longitude",
+            "epicenter_latitude",
+            "hit_status",
+            "target_marker",
+        ],
+        "validation_scope": ("parsed_static_dom_and_recursively_deserialized_interactive_payload"),
+        "keyword_scan_or_ui_hiding_sufficient": False,
+        "failure_action": "fail_closed_forbid_publication",
+    }
+    assert publication["limitations"] == {
+        "earthquake_available_at_assumption": (
+            "available_at_equals_origin_time_is_an_optimistic_timeliness_assumption"
+        ),
+        "bootstrap_interval_scope": (
+            "conditional_on_fixed_fitted_model_and_excludes_refit_uncertainty"
+        ),
+        "etas_comparator_status": "not_evaluable",
+        "allowed_increment_claim": "relative_to_frozen_kde_background_only",
+        "incremental_value_over_etas_claim_forbidden": True,
+    }
+    assert publication["display_semantics"] == {
+        "coverage_only_option_required": True,
+        "aggregate_retrospective_view": {
+            "issue_and_model_controls": "hidden_or_disabled",
+            "required_summary_label_template_zh": "全部{N}个起报日汇总",
+            "issue_count_source": "frozen_issue_calendar",
+        },
+        "peak_value_100pct": {
+            "required_label_zh": "峰值网格百分位",
+            "prediction_accuracy_term_forbidden": True,
+        },
+        "relative_strength": {
+            "formula": "peak_integrated_grid_intensity/mean_integrated_grid_intensity",
+            "absolute_probability_interpretation_forbidden": True,
+        },
+        "adoption": {
+            "adoption_card_required": True,
+            "adopted_variant_required": True,
+        },
+        "latest_retrospective_landmark": {
+            "required_label_zh": "最新冻结日历地标",
+            "current_forecast_implication_forbidden": True,
+        },
+        "forecast_spatial": {
+            "rendered_variant": "adopted_variant",
+            "unadopted_dynamic_required_label": "research_candidate",
+            "unadopted_dynamic_may_not_be_current_forecast": True,
+        },
+        "placebo_static_panel_layout": {
+            "required_panels": [
+                "time_dynamic",
+                "space_dynamic",
+                "time_snapshot",
+                "space_snapshot",
+            ],
+            "all_panels_within_render_bounds_required": True,
+            "render_boundary_test_required": True,
+        },
+    }
 
 
 def test_all_four_public_manifests_are_content_addressed_and_score_free() -> None:
@@ -863,7 +1012,7 @@ def test_model_gates_placebos_gpu_and_locked_test_remain_frozen() -> None:
     }
     assert g2["macro_information_gain_lower_95pct_bound_gt"] == 0
     assert g2["primary_time_permutation_p_lte"] == 0.05
-    assert g2["dynamic_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt"] == 0
+    assert g2["candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt"] == 0
     g3 = evaluation["gates"]["G3"]
     assert g3["evaluation_partition"] == "development_joint_macro_rolling_folds_only"
     assert g3["target_bands_must_be_mutually_disjoint"] is True

@@ -24,7 +24,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_RESULT_TAG,
     STAGE4_SCORING_CODE_TAG,
     load_stage4_protocol_bundle,
-    validate_stage4_r1_execution_contract,
+    validate_stage4_r2_execution_contract,
 )
 from seismoflux.anomaly_increment.grid_features import (
     assert_selected_columns_exact,
@@ -94,27 +94,27 @@ def test_score_free_bundle_identity_is_complete_and_unobserved() -> None:
     assert len(identity["manifest_content_sha256"]) == 4  # type: ignore[arg-type]
 
 
-def test_runtime_defaults_and_machine_contract_are_locked_to_execution_r1() -> None:
+def test_runtime_defaults_and_machine_contract_are_locked_to_execution_r2() -> None:
     bundle = load_stage4_protocol_bundle(Path.cwd())
     freeze = bundle.protocol["freeze"]
     assert isinstance(freeze, dict)
-    assert STAGE4_PROTOCOL_PATH.as_posix() == "configs/anomaly_increment_r1.yaml"
-    assert STAGE4_PROTOCOL_TAG.endswith("-protocol-r1")
-    assert STAGE4_SCORING_CODE_TAG.endswith("-scoring-code-r1")
-    assert STAGE4_RESULT_TAG.endswith("-increment-r1")
-    assert freeze["execution_revision"] == "r1"
-    validate_stage4_r1_execution_contract(bundle.protocol)
+    assert STAGE4_PROTOCOL_PATH.as_posix() == "configs/anomaly_increment_r2.yaml"
+    assert STAGE4_PROTOCOL_TAG.endswith("-protocol-r2")
+    assert STAGE4_SCORING_CODE_TAG.endswith("-scoring-code-r2")
+    assert STAGE4_RESULT_TAG.endswith("-increment-r2")
+    assert freeze["execution_revision"] == "r2"
+    validate_stage4_r2_execution_contract(bundle.protocol)
 
 
 @pytest.mark.parametrize(
     ("field", "legacy_value"),
     (
-        ("execution_revision", "r0"),
-        ("pre_score_tag", "v0.3.0-anomaly-increment-protocol"),
-        ("results_tag", "v0.3.0-anomaly-increment"),
+        ("execution_revision", "r1"),
+        ("pre_score_tag", "v0.3.0-anomaly-increment-protocol-r1"),
+        ("results_tag", "v0.3.0-anomaly-increment-r1"),
     ),
 )
-def test_runtime_machine_contract_rejects_r0_freeze_identity(
+def test_runtime_machine_contract_rejects_r1_freeze_identity(
     field: str,
     legacy_value: str,
 ) -> None:
@@ -124,7 +124,62 @@ def test_runtime_machine_contract_rejects_r0_freeze_identity(
     freeze[field] = legacy_value
 
     with pytest.raises(ValueError, match="stage-4"):
-        validate_stage4_r1_execution_contract(protocol)
+        validate_stage4_r2_execution_contract(protocol)
+
+
+@pytest.mark.parametrize(
+    ("path", "drifted_value"),
+    (
+        (("compute", "max_workers"), 7),
+        (("evaluation", "permutations", "formal_requests"), []),
+        (("evaluation", "permutations", "exact_request_set_required"), False),
+        (("evaluation", "gates", "G2", "primary_space_permutation_p_lte"), 0.10),
+        (
+            (
+                "inputs",
+                "earthquake_target",
+                "frozen_catalog_coverage",
+                "observed_available_at_max_utc",
+            ),
+            "2025-07-01T00:00:00Z",
+        ),
+        (("publication", "result_identity_requires"), ["dynamic_G2"]),
+        (("publication", "display_semantics", "coverage_only_option_required"), False),
+        (("publication", "spatial_output_isolation", "physical_file_count"), 2),
+        (
+            (
+                "publication",
+                "spatial_output_isolation",
+                "public_forecast_artifact_validator",
+                "keyword_scan_or_ui_hiding_sufficient",
+            ),
+            True,
+        ),
+        (
+            (
+                "evaluation",
+                "gates",
+                "G2",
+                "reporting_confound_guard_applies_independently_to_variants",
+            ),
+            ["dynamic"],
+        ),
+    ),
+)
+def test_runtime_machine_contract_rejects_r2_critical_drift(
+    path: tuple[str, ...],
+    drifted_value: object,
+) -> None:
+    protocol = deepcopy(dict(load_stage4_protocol_bundle(Path.cwd()).protocol))
+    node: dict[str, Any] = protocol
+    for key in path[:-1]:
+        child = node[key]
+        assert isinstance(child, dict)
+        node = child
+    node[path[-1]] = drifted_value
+
+    with pytest.raises(ValueError, match="stage-4 R2"):
+        validate_stage4_r2_execution_contract(protocol)
 
 
 def test_target_blind_scoring_plan_freezes_all_fit_scopes_and_counts() -> None:
@@ -182,7 +237,7 @@ def test_compute_plan_reserves_cores_and_keeps_current_protocol_cpu_only() -> No
 
     assert plan.backend == "cpu_float64"
     assert plan.gpu_fallback_reason == "project_environment_has_no_frozen_gpu_backend"
-    assert plan.workers.effective_workers == 12
+    assert plan.workers.effective_workers == 6
     assert plan.workers.reserve_physical_cores == 2
     assert set(plan.workers.blas_environment().values()) == {"1"}
 
