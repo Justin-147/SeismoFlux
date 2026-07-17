@@ -14,6 +14,7 @@ from pyproj import CRS, Transformer
 from shapely.geometry import box
 
 import seismoflux.anomaly_increment.formal_execution as formal_execution
+from seismoflux.anomaly_increment.authorization import Stage4TargetAuthorization
 from seismoflux.anomaly_increment.background_adapter import (
     FROZEN_COMPENSATOR_DOMAIN_ID,
     FROZEN_STUDY_AREA_SHA256,
@@ -21,6 +22,7 @@ from seismoflux.anomaly_increment.background_adapter import (
     Stage4BackgroundFit,
     resolve_frozen_background_snapshot,
 )
+from seismoflux.anomaly_increment.config import Stage4R2ExecutionBlockedError
 from seismoflux.anomaly_increment.contracts import FeatureColumnContract, FloatArray
 from seismoflux.anomaly_increment.formal_assembly import (
     FrozenCellSupport,
@@ -366,7 +368,7 @@ def materialized(
     formal_inputs: tuple[TargetBlindFormalContext, Stage4TargetCatalog],
 ) -> AuthorizedFormalMaterialization:
     context, catalog = formal_inputs
-    return materialize_after_authorized_target(context, catalog)
+    return formal_execution._materialize_in_memory_core(context, catalog)
 
 
 def test_target_blind_context_and_bridge_source_have_no_file_or_locked_test_capability() -> None:
@@ -394,6 +396,8 @@ def test_target_blind_context_and_bridge_source_have_no_file_or_locked_test_capa
     assert tuple(inspect.signature(materialize_after_authorized_target).parameters) == (
         "context",
         "catalog",
+        "execution_protocol",
+        "authorization",
     )
     source = inspect.getsource(formal_execution)
     assert "locked_test" not in source.casefold()
@@ -415,6 +419,31 @@ def test_target_blind_context_and_bridge_source_have_no_file_or_locked_test_capa
             assert node.func.id not in forbidden_calls
         elif isinstance(node.func, ast.Attribute):
             assert node.func.attr not in forbidden_calls
+
+
+def test_formal_materialization_checks_r2_guard_before_caller_objects(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[object, str]] = []
+    protocol = {"protocol": "blocked-r2"}
+
+    def block(value: object, *, action: str) -> None:
+        calls.append((value, action))
+        raise Stage4R2ExecutionBlockedError("synthetic blocked R2")
+
+    class ExplodesOnAccess:
+        def __getattribute__(self, name: str) -> object:
+            raise AssertionError(f"caller object inspected before guard: {name}")
+
+    monkeypatch.setattr(formal_execution, "require_stage4_r2_execution_action", block)
+    with pytest.raises(Stage4R2ExecutionBlockedError, match="blocked R2"):
+        materialize_after_authorized_target(
+            cast(TargetBlindFormalContext, ExplodesOnAccess()),
+            cast(Stage4TargetCatalog, ExplodesOnAccess()),
+            execution_protocol=protocol,
+            authorization=cast(Stage4TargetAuthorization, ExplodesOnAccess()),
+        )
+    assert calls == [(protocol, "formal_scoring")]
 
 
 def test_context_rejects_scope_reordering_and_cell_zone_receipt_tampering(

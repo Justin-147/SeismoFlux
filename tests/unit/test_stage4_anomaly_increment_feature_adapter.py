@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import MappingProxyType
@@ -23,6 +24,12 @@ from seismoflux.anomaly_increment.feature_adapter import (
 )
 from seismoflux.anomaly_increment.grid_features import Stage4IntegrationGrid
 from seismoflux.anomaly_increment.qualification import ScoreBlindInputEvidence
+from seismoflux.anomaly_increment.restricted_access import (
+    RESTRICTED_ARTIFACT_IDS,
+    RestrictedLocalArtifactAccessControlEvidence,
+    RestrictedPathAccessObservation,
+    canonical_permission_descriptor,
+)
 
 
 def _grid() -> Stage4IntegrationGrid:
@@ -102,13 +109,77 @@ def _bundle(root: Path) -> Stage4ProtocolBundle:
 
 def _evidence() -> ScoreBlindInputEvidence:
     digest = "a" * 64
+    directory = "restricted"
+    artifacts = tuple(
+        (artifact_id, f"{directory}/{artifact_id}.bin", digest)
+        for artifact_id in RESTRICTED_ARTIFACT_IDS
+    )
+    observations = [
+        RestrictedPathAccessObservation(
+            relative_path=directory,
+            path_kind="directory",
+            verified_sha256=None,
+            owner_principal="uid:1000",
+            link_count=1,
+            reparse_point=False,
+            permission_descriptor_json=canonical_permission_descriptor(
+                {
+                    "acl_model": "classic_mode_bits_without_acl_xattrs",
+                    "acl_related_xattrs": [],
+                    "filesystem_locality": "local",
+                    "filesystem_magic_hex": "0x0000ef53",
+                    "filesystem_type": "ext2_ext3_ext4",
+                    "mode_octal": "0700",
+                    "owner_uid": 1000,
+                    "platform_family": "linux",
+                    "queried_by_handle": True,
+                }
+            ),
+        ),
+        *(
+            RestrictedPathAccessObservation(
+                relative_path=path,
+                path_kind="regular_file",
+                verified_sha256=file_sha256,
+                owner_principal="uid:1000",
+                link_count=1,
+                reparse_point=False,
+                permission_descriptor_json=canonical_permission_descriptor(
+                    {
+                        "acl_model": "classic_mode_bits_without_acl_xattrs",
+                        "acl_related_xattrs": [],
+                        "filesystem_locality": "local",
+                        "filesystem_magic_hex": "0x0000ef53",
+                        "filesystem_type": "ext2_ext3_ext4",
+                        "mode_octal": "0600",
+                        "owner_uid": 1000,
+                        "platform_family": "linux",
+                        "queried_by_handle": True,
+                    }
+                ),
+            )
+            for _, path, file_sha256 in artifacts
+        ),
+    ]
+    access = RestrictedLocalArtifactAccessControlEvidence(
+        protocol_design_sha256=digest,
+        access_contract_sha256=digest,
+        platform="posix",
+        current_principal="uid:1000",
+        directory_relative_path=directory,
+        file_artifacts=artifacts,
+        observations=tuple(sorted(observations, key=lambda item: item.relative_path)),
+    )
     return ScoreBlindInputEvidence(
         protocol_design_sha256=digest,
         random_input_seal_sha256=digest,
         protocol_validation_sha256=digest,
         observed_project_input_hashes=(("stage3_feature_store", digest),),
         generated_manifest_hashes=(),
-        restricted_spatial_artifact_hashes=(),
+        restricted_spatial_artifact_hashes=tuple(
+            (artifact_id, file_sha256) for artifact_id, _, file_sha256 in artifacts
+        ),
+        restricted_access_control=access,
     )
 
 
@@ -161,13 +232,9 @@ def test_verified_reader_selects_only_the_requested_score_blind_row_group(
     assert tuple(output) == (issue_time,)
     assert output[issue_time].column_names[-1] == "signal"
 
-    wrong = ScoreBlindInputEvidence(
-        protocol_design_sha256="a" * 64,
-        random_input_seal_sha256="a" * 64,
-        protocol_validation_sha256="a" * 64,
+    wrong = replace(
+        _evidence(),
         observed_project_input_hashes=(("stage3_feature_store", "f" * 64),),
-        generated_manifest_hashes=(),
-        restricted_spatial_artifact_hashes=(),
     )
     with pytest.raises(ValueError, match="does not verify"):
         load_verified_issue_feature_tables(

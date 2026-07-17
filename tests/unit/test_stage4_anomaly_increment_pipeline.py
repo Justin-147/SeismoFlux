@@ -4,7 +4,9 @@ import ast
 import dataclasses
 import hashlib
 import inspect
+import os
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any, Literal, cast
 
 import numpy as np
@@ -50,6 +52,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
     EvaluationScope,
     ExposureVariantScore,
     FeatureLayout,
+    PipelineResult,
     PlaceboExecution,
     PlaceboInjection,
     PlaceboReplicateInput,
@@ -58,8 +61,8 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
     PlaceboSource,
     RefitPrimaryMacroResult,
     Stage4InMemoryPlan,
+    _run_stage4_in_memory_pipeline_core,
     fit_and_primary_macro_statistic,
-    run_stage4_in_memory_pipeline,
 )
 
 HORIZONS = (7, 30, 90, 180, 365)
@@ -73,6 +76,19 @@ FEATURES = {
     "snapshot": np.asarray([0.0, 0.0, 0.0], dtype=np.float64),
     "trend": np.asarray([-1.0, 0.0, 1.0], dtype=np.float64),
 }
+
+
+def run_stage4_synthetic_test_pipeline(
+    plan: Stage4InMemoryPlan,
+    *,
+    placebo_injection: PlaceboInjection | None,
+) -> PipelineResult:
+    """Test-only entrance for synthetic, target-free pipeline fixtures."""
+
+    return _run_stage4_in_memory_pipeline_core(
+        plan,
+        placebo_injection=placebo_injection,
+    )
 
 
 def _contracts() -> tuple[FeatureColumnContract, ...]:
@@ -325,7 +341,7 @@ def test_positive_synthetic_e2e_passes_gates_and_builds_separate_outputs(
         capture_rate_head,
     )
     plan = _plan("positive")
-    result = run_stage4_in_memory_pipeline(
+    result = run_stage4_synthetic_test_pipeline(
         plan,
         placebo_injection=_null_placebo_injection(plan),
     )
@@ -450,7 +466,7 @@ def test_dynamic_g2_hard_stops_when_space_placebo_failures_exceed_one_percent(
         "_permutation_result",
         controlled_permutation,
     )
-    result = run_stage4_in_memory_pipeline(
+    result = run_stage4_synthetic_test_pipeline(
         _plan("positive"),
         placebo_injection=cast(PlaceboInjection, object()),
     )
@@ -469,8 +485,8 @@ def test_dynamic_g2_hard_stops_when_space_placebo_failures_exceed_one_percent(
 
 def test_pipeline_is_deterministic_and_no_anomaly_variants_degenerate_to_background() -> None:
     plan = _plan("positive")
-    first = run_stage4_in_memory_pipeline(plan, placebo_injection=None)
-    second = run_stage4_in_memory_pipeline(plan, placebo_injection=None)
+    first = run_stage4_synthetic_test_pipeline(plan, placebo_injection=None)
+    second = run_stage4_synthetic_test_pipeline(plan, placebo_injection=None)
 
     assert first.result_fingerprint_sha256 == second.result_fingerprint_sha256
     assert first.static_svg == second.static_svg
@@ -523,7 +539,7 @@ def test_negative_and_insufficient_synthetic_e2e_stop_conservatively(
 ) -> None:
     plan = _plan(scenario)
     injection = _null_placebo_injection(plan) if scenario == "negative" else None
-    result = run_stage4_in_memory_pipeline(plan, placebo_injection=injection)
+    result = run_stage4_synthetic_test_pipeline(plan, placebo_injection=injection)
 
     assert result.dynamic_g2.status == g2_status
     assert result.dynamic_g3.status == g3_status
@@ -539,7 +555,7 @@ def test_negative_and_insufficient_synthetic_e2e_stop_conservatively(
 def test_placebo_refit_reuses_rate_head_and_prospective_type_is_physically_target_blind() -> None:
     plan = _plan("positive")
     formal_rate_head = (
-        run_stage4_in_memory_pipeline(
+        run_stage4_synthetic_test_pipeline(
             plan,
             placebo_injection=None,
         )
@@ -617,6 +633,83 @@ def test_pipeline_module_has_no_path_io_or_target_loader() -> None:
 
     assert not imported_roots & forbidden_import_roots
     assert not call_names & forbidden_calls
+
+
+def test_scoring_core_is_private_and_formal_guard_precedes_its_only_production_call() -> None:
+    from seismoflux.anomaly_increment import formal_run, scoring_pipeline
+
+    pipeline_tree = ast.parse(inspect.getsource(scoring_pipeline))
+    top_level_functions = {
+        node.name for node in pipeline_tree.body if isinstance(node, ast.FunctionDef)
+    }
+    exports = set(scoring_pipeline.__all__)
+    assert "run_stage4_in_memory_pipeline" not in top_level_functions
+    assert "run_stage4_in_memory_pipeline" not in exports
+    assert "_run_stage4_in_memory_pipeline_core" in top_level_functions
+    assert "_run_stage4_in_memory_pipeline_core" not in exports
+    assert "Stage4InMemoryPlan" in exports
+
+    core_name = "_run_stage4_in_memory_pipeline_core"
+    package_root = Path(inspect.getfile(scoring_pipeline)).resolve().parents[1]
+    package_calls: list[tuple[Path, ast.Call]] = []
+    for source_path in package_root.rglob("*.py"):
+        source = source_path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=os.fspath(source_path))
+        package_calls.extend(
+            (source_path, node)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and (
+                (isinstance(node.func, ast.Name) and node.func.id == core_name)
+                or (isinstance(node.func, ast.Attribute) and node.func.attr == core_name)
+            )
+        )
+    assert len(package_calls) == 1
+    assert package_calls[0][0].name == "formal_run.py"
+
+    formal_tree = ast.parse(inspect.getsource(formal_run))
+    session_class = next(
+        node
+        for node in formal_tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "FormalRunSession"
+    )
+    execute = next(
+        node
+        for node in session_class.body
+        if isinstance(node, ast.FunctionDef) and node.name == "execute"
+    )
+    executable_body = list(execute.body)
+    if (
+        executable_body
+        and isinstance(executable_body[0], ast.Expr)
+        and isinstance(executable_body[0].value, ast.Constant)
+        and isinstance(executable_body[0].value.value, str)
+    ):
+        executable_body = executable_body[1:]
+    assert executable_body
+    first = executable_body[0]
+    assert isinstance(first, ast.Expr)
+    assert isinstance(first.value, ast.Call)
+    guard = first.value
+    assert isinstance(guard.func, ast.Name)
+    assert guard.func.id == "require_stage4_r2_execution_action"
+    assert len(guard.args) == 1
+    assert ast.unparse(guard.args[0]) == "self.inputs.execution_protocol"
+    assert len(guard.keywords) == 1
+    assert guard.keywords[0].arg == "action"
+    assert isinstance(guard.keywords[0].value, ast.Constant)
+    assert guard.keywords[0].value.value == "formal_scoring"
+    core_calls = [
+        node
+        for node in ast.walk(formal_tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "_run_stage4_in_memory_pipeline_core"
+    ]
+    assert len(core_calls) == 1
+    assert guard.lineno < core_calls[0].lineno
+    assert execute.lineno <= core_calls[0].lineno <= cast(int, execute.end_lineno)
+    assert "_run_stage4_in_memory_pipeline_core" not in formal_run.__all__
 
 
 def test_evaluation_region_receipts_fail_closed_without_full_formal_coverage() -> None:
@@ -781,7 +874,7 @@ def test_streaming_placebo_results_are_identical_for_one_two_and_four_workers(
 
     for workers in (1, 2, 4):
         callback_rows: list[tuple[str, str, int, str]] = []
-        result = run_stage4_in_memory_pipeline(
+        result = run_stage4_synthetic_test_pipeline(
             plan,
             placebo_injection=make_injection(workers, callback_rows),
         )
@@ -848,7 +941,7 @@ def test_scientific_failure_is_checkpointable_but_infrastructure_error_stops_str
         )
 
     with pytest.raises(OSError, match="infrastructure interruption"):
-        run_stage4_in_memory_pipeline(plan, placebo_injection=inject)
+        run_stage4_synthetic_test_pipeline(plan, placebo_injection=inject)
 
     assert len(completed) == 2
     assert completed[0].converged is False
@@ -894,7 +987,7 @@ def test_recovered_mapping_identity_mismatch_fails_before_any_refit(
         )
 
     with pytest.raises(InfrastructureInterruption, match="mapping differs"):
-        run_stage4_in_memory_pipeline(plan, placebo_injection=inject)
+        run_stage4_synthetic_test_pipeline(plan, placebo_injection=inject)
 
 
 def _bootstrap_scores() -> tuple[ExposureVariantScore, ...]:

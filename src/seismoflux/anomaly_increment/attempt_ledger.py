@@ -18,12 +18,18 @@ import sys
 import tempfile
 import threading
 from collections.abc import Callable, Iterator, Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final, Literal, TypeAlias, cast
 
+from seismoflux.anomaly_increment.config import (
+    STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
+    STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH,
+    Stage4R2ExecutionBlockedError,
+    require_stage4_r2_execution_action,
+)
 from seismoflux.anomaly_increment.immutable_file import (
     UnsafeImmutableFileError,
     ensure_real_directory_tree,
@@ -60,6 +66,33 @@ _THREAD_LOCKS: dict[str, threading.Lock] = {}
 
 class Stage4LedgerError(RuntimeError):
     """Raised when a ledger is missing, altered, or used outside its binding."""
+
+
+def _require_r2_ledger_action(
+    protocol: Mapping[str, object],
+    *,
+    action: str,
+) -> None:
+    """Translate the central fail-closed decision without observing a path."""
+
+    try:
+        require_stage4_r2_execution_action(protocol, action=action)
+    except (Stage4R2ExecutionBlockedError, TypeError, ValueError) as exc:
+        raise Stage4LedgerError(
+            "stage-4 R2 canonical ledger I/O is blocked before target read because "
+            "the required frozen ETAS comparator is not evaluable"
+        ) from exc
+
+
+def _canonical_r2_ledger_path(project_root: Path, kind: LedgerKind) -> Path:
+    """Bind production I/O to one frozen relative path without resolving it."""
+
+    relative = (
+        STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH
+        if kind == "formal_attempt"
+        else STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH
+    )
+    return Path(project_root).joinpath(*relative.parts)
 
 
 class Stage4OperationAlreadyConsumedError(Stage4LedgerError):
@@ -455,16 +488,20 @@ def _write_unlocked(
         raise Stage4LedgerError("updated stage-4 ledger bytes changed after replacement")
 
 
-def initialize_stage4_ledger(
+def _initialize_stage4_ledger_generic(
     path: Path,
     *,
     kind: LedgerKind,
     execution_binding_id: str,
 ) -> Stage4AuditLedger:
-    """Create one empty ledger, or idempotently verify the existing empty binding."""
+    """Internal ledger serialization core behind the guarded production wrapper.
 
-    expected = Stage4AuditLedger(kind=kind, execution_binding_id=execution_binding_id)
+    Unit tests exercise this private core directly to validate ledger mechanics;
+    repository production callers must use :func:`initialize_stage4_ledger`.
+    """
+
     target = Path(path)
+    expected = Stage4AuditLedger(kind=kind, execution_binding_id=execution_binding_id)
     with _exclusive_file_lock(target):
         try:
             os.lstat(target)
@@ -481,13 +518,17 @@ def initialize_stage4_ledger(
         return expected
 
 
-def read_stage4_ledger(
+def _read_stage4_ledger_generic(
     path: Path,
     *,
     expected_kind: LedgerKind | None = None,
     expected_binding_id: str | None = None,
 ) -> Stage4AuditLedger:
-    """Read and verify an atomic ledger snapshot."""
+    """Internal ledger read core behind the guarded production wrapper.
+
+    Unit tests exercise this private core directly to validate ledger mechanics;
+    repository production callers must use :func:`read_stage4_ledger`.
+    """
 
     target = Path(path)
     with _exclusive_file_lock(target):
@@ -499,7 +540,7 @@ def read_stage4_ledger(
     return ledger
 
 
-def reserve_stage4_operation(
+def _reserve_stage4_operation_generic(
     path: Path,
     *,
     kind: LedgerKind,
@@ -511,10 +552,10 @@ def reserve_stage4_operation(
 ) -> Stage4LedgerMutation:
     """Durably reserve a one-shot scope before any target or score-bearing work."""
 
+    target = Path(path)
     _identifier(operation_id, label="operation_id")
     _identifier(scope, label="scope")
     _sha256(authorization_id, label="authorization_id")
-    target = Path(path)
     with _exclusive_file_lock(target):
         ledger = _read_unlocked(target)
         if ledger.kind != kind or ledger.execution_binding_id != execution_binding_id:
@@ -541,7 +582,7 @@ def reserve_stage4_operation(
         return Stage4LedgerMutation(ledger=updated, record=record, changed=True)
 
 
-def reserve_stage4_attempt_scopes(
+def _reserve_stage4_attempt_scopes_generic(
     path: Path,
     *,
     execution_binding_id: str,
@@ -551,6 +592,7 @@ def reserve_stage4_attempt_scopes(
 ) -> Stage4AuditLedger:
     """Atomically reserve all four frozen scientific scopes before target ingress."""
 
+    target = Path(path)
     operations = dict(operation_ids_by_scope)
     if set(operations) != set(STAGE4_ATTEMPT_SCOPES):
         raise ValueError("formal attempt reservation must cover exactly all four scopes")
@@ -559,7 +601,6 @@ def reserve_stage4_attempt_scopes(
     for scope in STAGE4_ATTEMPT_SCOPES:
         _identifier(operations[scope], label=f"operation_id for {scope}")
     _sha256(authorization_id, label="authorization_id")
-    target = Path(path)
     with _exclusive_file_lock(target):
         ledger = _read_unlocked(target)
         if ledger.kind != "formal_attempt" or ledger.execution_binding_id != (execution_binding_id):
@@ -585,7 +626,7 @@ def reserve_stage4_attempt_scopes(
         return updated
 
 
-def complete_stage4_operation(
+def _complete_stage4_operation_generic(
     path: Path,
     *,
     kind: LedgerKind,
@@ -598,6 +639,7 @@ def complete_stage4_operation(
 ) -> Stage4LedgerMutation:
     """Atomically complete one reservation; an identical completion is idempotent."""
 
+    target = Path(path)
     if status == "succeeded":
         if failure_code is not None:
             raise ValueError("successful completion cannot include failure_code")
@@ -609,7 +651,6 @@ def complete_stage4_operation(
         if result_sha256 is not None:
             raise ValueError("failed completion cannot include result_sha256")
 
-    target = Path(path)
     with _exclusive_file_lock(target):
         ledger = _read_unlocked(target)
         if ledger.kind != kind or ledger.execution_binding_id != execution_binding_id:
@@ -640,7 +681,7 @@ def complete_stage4_operation(
         return Stage4LedgerMutation(ledger=updated, record=completed, changed=True)
 
 
-def complete_stage4_attempt_scopes(
+def _complete_stage4_attempt_scopes_generic(
     path: Path,
     *,
     execution_binding_id: str,
@@ -653,6 +694,7 @@ def complete_stage4_attempt_scopes(
 ) -> Stage4AuditLedger:
     """Atomically place all four formal-scope reservations in one terminal state."""
 
+    target = Path(path)
     operations = dict(operation_ids_by_scope)
     if set(operations) != set(STAGE4_ATTEMPT_SCOPES):
         raise ValueError("formal attempt completion must cover exactly all four scopes")
@@ -673,7 +715,6 @@ def complete_stage4_attempt_scopes(
         if result_sha256 is not None:
             raise ValueError("failed batch completion cannot include result_sha256")
 
-    target = Path(path)
     with _exclusive_file_lock(target):
         ledger = _read_unlocked(target)
         if ledger.kind != "formal_attempt" or ledger.execution_binding_id != (execution_binding_id):
@@ -713,7 +754,7 @@ def complete_stage4_attempt_scopes(
         return updated
 
 
-def recover_interrupted_stage4_operations(
+def _recover_interrupted_stage4_operations_generic(
     path: Path,
     *,
     kind: LedgerKind,
@@ -742,7 +783,7 @@ def recover_interrupted_stage4_operations(
 
 
 @contextmanager
-def registered_stage4_attempt(
+def _registered_stage4_attempt_generic(
     path: Path,
     *,
     execution_binding_id: str,
@@ -753,7 +794,7 @@ def registered_stage4_attempt(
 ) -> Iterator[None]:
     """Register one fold/validation attempt and retain failures without error text."""
 
-    mutation = reserve_stage4_operation(
+    mutation = _reserve_stage4_operation_generic(
         path,
         kind="formal_attempt",
         execution_binding_id=execution_binding_id,
@@ -773,7 +814,7 @@ def registered_stage4_attempt(
         failure_code = re.sub(r"[^a-z0-9_]", "_", failure_name)[:96]
         if _FAILURE_PATTERN.fullmatch(failure_code) is None:
             failure_code = "unclassified_execution_failure"
-        complete_stage4_operation(
+        _complete_stage4_operation_generic(
             path,
             kind="formal_attempt",
             execution_binding_id=execution_binding_id,
@@ -784,7 +825,7 @@ def registered_stage4_attempt(
         )
         raise
     else:
-        complete_stage4_operation(
+        _complete_stage4_operation_generic(
             path,
             kind="formal_attempt",
             execution_binding_id=execution_binding_id,
@@ -802,6 +843,205 @@ def registered_stage4_attempt(
             ).hexdigest(),
             clock=clock,
         )
+
+
+def _ledger_action(kind: LedgerKind, *, creation: bool) -> str:
+    if kind == "formal_attempt":
+        return "formal_attempt_ledger_creation" if creation else "formal_scoring"
+    if kind == "target_read":
+        return "target_read_ledger_creation" if creation else "formal_target_read"
+    raise ValueError("unknown stage-4 ledger kind")
+
+
+def initialize_stage4_ledger(
+    project_root: Path,
+    *,
+    kind: LedgerKind,
+    execution_binding_id: str,
+    protocol: Mapping[str, object],
+) -> Stage4AuditLedger:
+    """Initialize the sole canonical ledger selected by ``kind``.
+
+    The protocol decision intentionally precedes conversion or inspection of
+    ``project_root``.  The caller cannot substitute a filename alias because
+    the frozen relative path is selected internally only after authorization.
+    """
+
+    _require_r2_ledger_action(protocol, action=_ledger_action(kind, creation=True))
+    target = _canonical_r2_ledger_path(project_root, kind)
+    return _initialize_stage4_ledger_generic(
+        target,
+        kind=kind,
+        execution_binding_id=execution_binding_id,
+    )
+
+
+def read_stage4_ledger(
+    project_root: Path,
+    *,
+    kind: LedgerKind,
+    expected_binding_id: str | None = None,
+    protocol: Mapping[str, object],
+) -> Stage4AuditLedger:
+    """Read the sole canonical ledger selected by ``kind`` after its guard."""
+
+    _require_r2_ledger_action(protocol, action=_ledger_action(kind, creation=False))
+    target = _canonical_r2_ledger_path(project_root, kind)
+    return _read_stage4_ledger_generic(
+        target,
+        expected_kind=kind,
+        expected_binding_id=expected_binding_id,
+    )
+
+
+def reserve_stage4_operation(
+    project_root: Path,
+    *,
+    kind: LedgerKind,
+    execution_binding_id: str,
+    operation_id: str,
+    scope: str,
+    authorization_id: str,
+    protocol: Mapping[str, object],
+    clock: Clock = _utc_now,
+) -> Stage4LedgerMutation:
+    """Reserve one operation in a canonical production ledger, guard first."""
+
+    _require_r2_ledger_action(protocol, action=_ledger_action(kind, creation=False))
+    target = _canonical_r2_ledger_path(project_root, kind)
+    return _reserve_stage4_operation_generic(
+        target,
+        kind=kind,
+        execution_binding_id=execution_binding_id,
+        operation_id=operation_id,
+        scope=scope,
+        authorization_id=authorization_id,
+        clock=clock,
+    )
+
+
+def reserve_stage4_attempt_scopes(
+    project_root: Path,
+    *,
+    execution_binding_id: str,
+    operation_ids_by_scope: Mapping[str, str],
+    authorization_id: str,
+    protocol: Mapping[str, object],
+    clock: Clock = _utc_now,
+) -> Stage4AuditLedger:
+    """Reserve all canonical formal-attempt scopes, guard first."""
+
+    _require_r2_ledger_action(protocol, action="formal_scoring")
+    target = _canonical_r2_ledger_path(project_root, "formal_attempt")
+    return _reserve_stage4_attempt_scopes_generic(
+        target,
+        execution_binding_id=execution_binding_id,
+        operation_ids_by_scope=operation_ids_by_scope,
+        authorization_id=authorization_id,
+        clock=clock,
+    )
+
+
+def complete_stage4_operation(
+    project_root: Path,
+    *,
+    kind: LedgerKind,
+    execution_binding_id: str,
+    operation_id: str,
+    status: Literal["succeeded", "failed"],
+    protocol: Mapping[str, object],
+    result_sha256: str | None = None,
+    failure_code: str | None = None,
+    clock: Clock = _utc_now,
+) -> Stage4LedgerMutation:
+    """Complete one operation in a canonical production ledger, guard first."""
+
+    _require_r2_ledger_action(protocol, action=_ledger_action(kind, creation=False))
+    target = _canonical_r2_ledger_path(project_root, kind)
+    return _complete_stage4_operation_generic(
+        target,
+        kind=kind,
+        execution_binding_id=execution_binding_id,
+        operation_id=operation_id,
+        status=status,
+        result_sha256=result_sha256,
+        failure_code=failure_code,
+        clock=clock,
+    )
+
+
+def complete_stage4_attempt_scopes(
+    project_root: Path,
+    *,
+    execution_binding_id: str,
+    operation_ids_by_scope: Mapping[str, str],
+    authorization_id: str,
+    status: Literal["succeeded", "failed"],
+    protocol: Mapping[str, object],
+    result_sha256: str | None = None,
+    failure_code: str | None = None,
+    clock: Clock = _utc_now,
+) -> Stage4AuditLedger:
+    """Complete the canonical formal-attempt batch, guard first."""
+
+    _require_r2_ledger_action(protocol, action="formal_scoring")
+    target = _canonical_r2_ledger_path(project_root, "formal_attempt")
+    return _complete_stage4_attempt_scopes_generic(
+        target,
+        execution_binding_id=execution_binding_id,
+        operation_ids_by_scope=operation_ids_by_scope,
+        authorization_id=authorization_id,
+        status=status,
+        result_sha256=result_sha256,
+        failure_code=failure_code,
+        clock=clock,
+    )
+
+
+def recover_interrupted_stage4_operations(
+    project_root: Path,
+    *,
+    kind: LedgerKind,
+    execution_binding_id: str,
+    protocol: Mapping[str, object],
+    clock: Clock = _utc_now,
+) -> Stage4AuditLedger:
+    """Inspect the canonical ledger without automatic recovery, guard first."""
+
+    _require_r2_ledger_action(protocol, action=_ledger_action(kind, creation=False))
+    target = _canonical_r2_ledger_path(project_root, kind)
+    return _recover_interrupted_stage4_operations_generic(
+        target,
+        kind=kind,
+        execution_binding_id=execution_binding_id,
+        clock=clock,
+    )
+
+
+def registered_stage4_attempt(
+    project_root: Path,
+    *,
+    execution_binding_id: str,
+    operation_id: str,
+    scope: str,
+    authorization_id: str,
+    protocol: Mapping[str, object],
+    clock: Clock = _utc_now,
+) -> AbstractContextManager[None]:
+    """Return a guarded context for one canonical formal attempt."""
+
+    # This is deliberately a regular function rather than a decorated generator:
+    # the guard executes when the public API is called, not only at ``__enter__``.
+    _require_r2_ledger_action(protocol, action="formal_scoring")
+    target = _canonical_r2_ledger_path(project_root, "formal_attempt")
+    return _registered_stage4_attempt_generic(
+        target,
+        execution_binding_id=execution_binding_id,
+        operation_id=operation_id,
+        scope=scope,
+        authorization_id=authorization_id,
+        clock=clock,
+    )
 
 
 __all__ = [

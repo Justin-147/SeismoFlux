@@ -11,15 +11,21 @@ from typing import Any, cast
 import pytest
 import yaml
 
+import seismoflux.anomaly_increment.authorization as authorization_module
 import seismoflux.anomaly_increment.formal_production as formal_production
 import seismoflux.anomaly_increment.immutable_file as immutable_file_module
 import seismoflux.anomaly_increment.qualification as qualification_module
 from seismoflux.anomaly_increment.authorization import (
     STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
     STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH,
+    Stage4ScoringNotAuthorizedError,
     verify_stage4_target_readiness,
 )
-from seismoflux.anomaly_increment.config import load_stage4_protocol_bundle
+from seismoflux.anomaly_increment.config import (
+    STAGE4_SCORING_SEAL_RELATIVE_PATH,
+    Stage4R2ExecutionBlockedError,
+    load_stage4_protocol_bundle,
+)
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
     resolve_score_blind_input_path,
@@ -31,6 +37,15 @@ from seismoflux.anomaly_increment.score_blind_path import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+class _ForbiddenPathLike:
+    def __init__(self) -> None:
+        self.conversion_count = 0
+
+    def __fspath__(self) -> str:
+        self.conversion_count += 1
+        raise AssertionError("blocked R2 dereferenced a project-root path")
 
 
 def _load_script(name: str) -> ModuleType:
@@ -52,6 +67,15 @@ def _protocol() -> dict[str, object]:
     target = cast(dict[str, object], inputs["earthquake_target"])
     target["path"] = "synthetic/target.bin"
     return protocol
+
+
+def _current_protocol() -> dict[str, object]:
+    """Return the exact blocked R2 machine protocol without test mutations."""
+
+    loaded = yaml.safe_load(
+        (ROOT / "configs" / "anomaly_increment_r2.yaml").read_text(encoding="utf-8")
+    )
+    return cast(dict[str, object], loaded)
 
 
 def test_stage4_pretarget_cli_defaults_use_only_the_r2_execution_namespace() -> None:
@@ -286,7 +310,15 @@ def test_qualification_junit_swap_after_guard_fails_before_parse_or_target_read(
     alias_kind: str,
 ) -> None:
     module = _load_script("build_stage4_scoring_qualification.py")
-    protocol = _protocol()
+    # This is a downstream path-integrity unit test for a future authorized
+    # execution revision.  Bypass only the script's central action decision;
+    # all real path and immutable-file guards remain active.
+    monkeypatch.setattr(
+        module,
+        "require_stage4_r2_execution_action",
+        lambda *_args, **_kwargs: None,
+    )
+    protocol = _current_protocol()
     r2_root = tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r2"
     stage4_junit = r2_root / "qualification_stage4.junit.xml"
     full_junit = r2_root / "qualification_full_non_target.junit.xml"
@@ -470,6 +502,7 @@ def test_formal_preflight_allowlisted_input_rejects_target_hardlink_alias(
 @pytest.mark.parametrize("artifact", ("scoring_seal", "preflight_receipt"))
 def test_production_readiness_rejects_internal_hard_link_alias_before_loading(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     artifact: str,
 ) -> None:
     root = tmp_path.resolve()
@@ -488,6 +521,26 @@ def test_production_readiness_rejects_internal_hard_link_alias_before_loading(
             repository_root=root,
             protocol=_protocol(),
         ),
+    )
+    expected_key = (
+        "required_seal_path" if artifact == "scoring_seal" else "formal_preflight_receipt_path"
+    )
+    expected_relative = (
+        STAGE4_SCORING_SEAL_RELATIVE_PATH
+        if artifact == "scoring_seal"
+        else FORMAL_PREFLIGHT_RECEIPT_PATH
+    )
+
+    def frozen_path(_protocol: dict[str, object], key: str) -> Any:
+        assert key == expected_key
+        return expected_relative
+
+    # Exercise the private post-authorization path algorithm without asking the
+    # current blocked R2 protocol to authorize artifact loading.
+    monkeypatch.setattr(
+        formal_production,
+        "stage4_scoring_freeze_relative_path",
+        frozen_path,
     )
     with pytest.raises(ScoreBlindPathError, match="multiply-linked"):
         if artifact == "scoring_seal":
@@ -508,32 +561,39 @@ def test_production_readiness_rejects_internal_hard_link_alias_before_loading(
         ("build_stage4_scoring_seal.py", "seal_output"),
     ),
 )
-def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
+def test_current_r2_hard_stops_every_pretarget_cli_boundary_before_path_probe(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     script_name: str,
     call_kind: str,
 ) -> None:
     module = _load_script(script_name)
-    protocol = _protocol()
+    protocol = _current_protocol()
+    blocked_root = _ForbiddenPathLike()
     target = tmp_path / "synthetic" / "target.bin"
-    if call_kind == "seal_output":
-        protocol["freeze"] = {
-            "scoring_code_freeze": {
-                "required_seal_path": "synthetic/target.bin",
-            }
-        }
     _forbid_target_lstat(monkeypatch, target)
+    path_guard_calls = 0
+
+    def forbidden_path_guard(*_args: object, **_kwargs: object) -> Path:
+        nonlocal path_guard_calls
+        path_guard_calls += 1
+        raise AssertionError("blocked R2 reached a score-blind path guard")
+
+    monkeypatch.setattr(
+        module,
+        "require_score_blind_project_path",
+        forbidden_path_guard,
+    )
     safe_stage4 = tmp_path / "data" / "interim" / "stage4.xml"
     safe_full = tmp_path / "data" / "interim" / "full.xml"
     safe_preflight = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     safe_qualification = tmp_path / "data" / "interim" / "qualification.json"
     safe_logical_replay = tmp_path / "data" / "interim" / "logical-replay.json"
 
-    with pytest.raises(ScoreBlindPathError, match="frozen earthquake target"):
+    with pytest.raises(Stage4R2ExecutionBlockedError, match="ETAS comparator"):
         if call_kind == "qualification_input":
             module._build(
-                tmp_path,
+                cast(Path, blocked_root),
                 protocol,
                 stage4_junit_path=target,
                 full_junit_path=safe_full,
@@ -543,7 +603,7 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
             )
         elif call_kind == "qualification_output":
             module.generate(
-                tmp_path,
+                cast(Path, blocked_root),
                 protocol,
                 stage4_junit_path=safe_stage4,
                 full_junit_path=safe_full,
@@ -554,7 +614,7 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
             )
         else:
             module.generate(
-                tmp_path,
+                cast(Path, blocked_root),
                 protocol,
                 qualification_path=(
                     target if call_kind == "seal_qualification_input" else safe_qualification
@@ -574,29 +634,46 @@ def test_target_path_override_is_rejected_by_every_pretarget_cli_boundary(
                 ),
                 repository_adapter=cast(Any, None),
             )
+    assert path_guard_calls == 0
+    assert blocked_root.conversion_count == 0
 
 
 @pytest.mark.parametrize(
     "override",
     ("scoring_seal", "attempt_ledger", "target_read_ledger"),
 )
-def test_read_only_formal_proof_rejects_target_path_arguments_before_lstat(
+def test_current_r2_readiness_hard_stops_before_any_supplied_path_is_inspected(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     override: str,
 ) -> None:
     target = tmp_path / "synthetic" / "target.bin"
     _forbid_target_lstat(monkeypatch, target)
+    blocked_root = _ForbiddenPathLike()
+    path_guard_calls = 0
+
+    def forbidden_path_guard(*_args: object, **_kwargs: object) -> Path:
+        nonlocal path_guard_calls
+        path_guard_calls += 1
+        raise AssertionError("blocked R2 readiness reached a path guard")
+
+    monkeypatch.setattr(
+        authorization_module,
+        "require_score_blind_project_path",
+        forbidden_path_guard,
+    )
     safe_seal = tmp_path / "data" / "manifests" / "anomaly_increment_r2_scoring_seal.json"
     safe_attempt = tmp_path.joinpath(*Path(STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH).parts)
     safe_target_ledger = tmp_path.joinpath(*Path(STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH).parts)
-    with pytest.raises(ScoreBlindPathError, match="frozen earthquake target"):
+    with pytest.raises(Stage4ScoringNotAuthorizedError, match="ETAS comparator"):
         verify_stage4_target_readiness(
-            tmp_path,
-            _protocol(),
+            cast(Path, blocked_root),
+            _current_protocol(),
             scoring_seal_path=target if override == "scoring_seal" else safe_seal,
             attempt_ledger_path=(target if override == "attempt_ledger" else safe_attempt),
             target_read_ledger_path=(
                 target if override == "target_read_ledger" else safe_target_ledger
             ),
         )
+    assert path_guard_calls == 0
+    assert blocked_root.conversion_count == 0

@@ -4,7 +4,9 @@ The content-addressed bundle is finalized before any fixed public path changes.
 Fixed report, model-card, SVG, local HTML, and optional local extension paths are
 then created transactionally and may only be replayed with identical bytes.  No
 historical formal result is overwritten.  The public registry is created last
-and is the sole fixed-path completion marker.
+and is the sole fixed-path completion marker.  Both formal publication entrances
+require the full execution protocol and the sentinel-protected target authorization
+before reaching this I/O core.
 """
 
 # ruff: noqa: E501, RUF001
@@ -22,6 +24,11 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Final, Literal, TypeAlias, cast
 
+from seismoflux.anomaly_increment.authorization import (
+    Stage4TargetAuthorization,
+    require_stage4_target_authorization,
+)
+from seismoflux.anomaly_increment.config import require_stage4_r2_execution_action
 from seismoflux.anomaly_increment.convergence import CompensatorConvergenceAudit
 from seismoflux.anomaly_increment.immutable_file import (
     ImmutableFileSnapshot,
@@ -987,8 +994,8 @@ def publish_successful_formal_result(
     project_root: Path,
     publication: Stage4PublicationPlan,
     *,
-    execution_binding_id: str,
-    authorization_id: str,
+    execution_protocol: Mapping[str, object],
+    authorization: Stage4TargetAuthorization,
     result: PipelineResult,
     convergence_audit: CompensatorConvergenceAudit,
     additional_local_artifacts: Sequence[AdditionalLocalArtifact] = (),
@@ -996,13 +1003,21 @@ def publish_successful_formal_result(
 ) -> FormalPublicationReceipt:
     """Publish a real pipeline result; the registry is the last fixed path replaced."""
 
+    require_stage4_r2_execution_action(
+        execution_protocol,
+        action="formal_scoring",
+    )
+    provenance = require_stage4_target_authorization(
+        authorization,
+        project_root=project_root,
+    )
     if not isinstance(result, PipelineResult):
         raise TypeError("successful formal publication requires PipelineResult")
     return _publish(
         project_root,
         publication,
-        execution_binding_id=execution_binding_id,
-        authorization_id=authorization_id,
+        execution_binding_id=provenance.execution_binding_id,
+        authorization_id=provenance.authorization_id,
         model_version=result.retrospective.protocol.model_version,
         status="succeeded",
         result=result,
@@ -1017,19 +1032,27 @@ def publish_failed_formal_result(
     project_root: Path,
     publication: Stage4PublicationPlan,
     *,
-    execution_binding_id: str,
-    authorization_id: str,
+    execution_protocol: Mapping[str, object],
+    authorization: Stage4TargetAuthorization,
     model_version: str,
     failure_code: str,
     create_file: CreateFile = _atomic_create_only,
 ) -> FormalPublicationReceipt:
     """Publish explicit value-free failure pages without fake points or curves."""
 
+    require_stage4_r2_execution_action(
+        execution_protocol,
+        action="formal_scoring",
+    )
+    provenance = require_stage4_target_authorization(
+        authorization,
+        project_root=project_root,
+    )
     return _publish(
         project_root,
         publication,
-        execution_binding_id=execution_binding_id,
-        authorization_id=authorization_id,
+        execution_binding_id=provenance.execution_binding_id,
+        authorization_id=provenance.authorization_id,
         model_version=model_version,
         status="failed",
         result=None,

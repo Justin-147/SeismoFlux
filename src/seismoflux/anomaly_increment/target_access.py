@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Generic, TypeAlias, TypeVar
@@ -26,6 +26,7 @@ from seismoflux.anomaly_increment.authorization import (
     Stage4TargetAuthorization,
     require_stage4_target_authorization,
 )
+from seismoflux.anomaly_increment.config import require_stage4_r2_execution_action
 
 T = TypeVar("T")
 TargetBytesConsumer: TypeAlias = Callable[[bytes], T]
@@ -118,11 +119,18 @@ def consume_authorized_stage4_target(
     project_root: Path,
     authorization: Stage4TargetAuthorization,
     *,
+    protocol: Mapping[str, object],
     operation_id: str,
     consumer: TargetBytesConsumer[T],
 ) -> ConsumedStage4Target[T]:
     """Consume the sole target entrance after atomically recording the reservation."""
 
+    # A Python caller can import module-private objects, so the capability
+    # sentinel alone is not an execution authorization boundary.  Revalidate
+    # the complete frozen machine protocol before inspecting the capability,
+    # reserving a ledger operation, resolving a target path, or hashing bytes.
+    require_stage4_r2_execution_action(protocol, action="formal_target_read")
+    require_stage4_r2_execution_action(protocol, action="formal_scoring")
     capability = require_stage4_target_authorization(
         authorization,
         project_root=project_root,
@@ -130,12 +138,13 @@ def consume_authorized_stage4_target(
     if not callable(consumer):
         raise TypeError("consumer must be callable")
     reservation = reserve_stage4_operation(
-        capability.target_read_ledger_path,
+        project_root,
         kind="target_read",
         execution_binding_id=capability.execution_binding_id,
         operation_id=operation_id,
         scope=STAGE4_TARGET_SCOPE,
         authorization_id=capability.authorization_id,
+        protocol=protocol,
     )
     if not reservation.changed:
         raise Stage4OperationAlreadyConsumedError(
@@ -153,21 +162,23 @@ def consume_authorized_stage4_target(
         value = consumer(payload)
     except BaseException as exc:
         complete_stage4_operation(
-            capability.target_read_ledger_path,
+            project_root,
             kind="target_read",
             execution_binding_id=capability.execution_binding_id,
             operation_id=operation_id,
             status="failed",
             failure_code=_safe_failure_code(exc),
+            protocol=protocol,
         )
         raise
     complete_stage4_operation(
-        capability.target_read_ledger_path,
+        project_root,
         kind="target_read",
         execution_binding_id=capability.execution_binding_id,
         operation_id=operation_id,
         status="succeeded",
         result_sha256=actual_sha256,
+        protocol=protocol,
     )
     return ConsumedStage4Target(
         value=value,

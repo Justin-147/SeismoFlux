@@ -39,6 +39,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_FORMAL_PREFLIGHT_RECEIPT_RELATIVE_PATH,
     STAGE4_SCORING_CODE_TAG,
     Stage4ProtocolBundle,
+    require_stage4_r2_execution_action,
 )
 from seismoflux.anomaly_increment.contracts import canonical_mapping_sha256
 from seismoflux.anomaly_increment.feature_adapter import (
@@ -1687,8 +1688,12 @@ class FormalPreflightReceipt:
         return receipt
 
 
-def load_formal_preflight_receipt(path: Path) -> FormalPreflightReceipt:
-    """Strictly load the deterministic preflight receipt plus its resource sidecars."""
+def _load_formal_preflight_receipt_generic(path: Path) -> FormalPreflightReceipt:
+    """Internal receipt parser behind the guarded production loader.
+
+    Unit tests exercise this private parser directly; repository production
+    callers must use :func:`load_formal_preflight_receipt`.
+    """
 
     target = Path(os.path.abspath(os.fspath(path)))
     try:
@@ -1707,12 +1712,30 @@ def load_formal_preflight_receipt(path: Path) -> FormalPreflightReceipt:
     return FormalPreflightReceipt.from_mapping(document)
 
 
+def load_formal_preflight_receipt(
+    path: Path,
+    *,
+    protocol: Mapping[str, object],
+) -> FormalPreflightReceipt:
+    """Strictly load the production receipt after the R2 preflight hard stop."""
+
+    # This call must precede every path conversion, directory probe, open, JSON
+    # decode, and digest validation performed by the generic loader.
+    require_stage4_r2_execution_action(protocol, action="formal_preflight")
+    return _load_formal_preflight_receipt_generic(path)
+
+
 def load_space_placebo_resource_observation(
     path: Path,
+    *,
+    protocol: Mapping[str, object],
 ) -> SpacePlaceboResourceObservationReceipt:
     """Load and authenticate the separately hashed machine resource observation."""
 
-    return load_formal_preflight_receipt(path).space_placebo_resource_observation
+    # Keep this public convenience entry point independently guard-first rather
+    # than relying on a downstream public wrapper.
+    require_stage4_r2_execution_action(protocol, action="formal_preflight")
+    return _load_formal_preflight_receipt_generic(path).space_placebo_resource_observation
 
 
 @dataclass(frozen=True, slots=True)
@@ -2555,6 +2578,7 @@ def load_formal_preflight(
     input and is never inserted into either formal pool.
     """
 
+    require_stage4_r2_execution_action(protocol.protocol, action="formal_preflight")
     commit = _git_oid(scoring_code_commit)
     if compute_plan.backend != "cpu_float64":
         raise ValueError("formal preflight must use the frozen CPU float64 backend")

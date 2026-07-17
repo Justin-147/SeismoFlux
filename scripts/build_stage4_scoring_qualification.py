@@ -26,6 +26,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH,
     STAGE4_PROTOCOL_PATH,
     STAGE4_QUALIFICATION_RELATIVE_PATH,
+    require_stage4_r2_execution_action,
     stage4_scoring_freeze_relative_path,
     validate_stage4_r2_execution_contract,
 )
@@ -243,6 +244,7 @@ def _build(
     logical_replay_audit_path: Path,
     git_runner: GitCommandRunner,
 ) -> Stage4QualificationEvidence:
+    require_stage4_r2_execution_action(protocol, action="qualification")
     root = Path(project_root).resolve()
     safe_stage4_junit = require_score_blind_project_path(
         root,
@@ -286,7 +288,7 @@ def _build(
     full_junit = parse_pytest_junit_evidence(
         _read_stable_bytes(safe_full_junit, label="full JUnit evidence")
     )
-    receipt = load_formal_preflight_receipt(canonical_preflight)
+    receipt = load_formal_preflight_receipt(canonical_preflight, protocol=protocol)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
     scoring_code_commit = _current_commit(root, git_runner)
     canonical_logical_replay = root.joinpath(*STAGE4_LOGICAL_REPLAY_AUDIT_RELATIVE_PATH.parts)
@@ -331,6 +333,9 @@ def _summary(action: str, evidence: Stage4QualificationEvidence) -> dict[str, ob
         "gpu_status": evidence.gpu_status,
         "logical_identity_replay_audit_sha256": (evidence.logical_identity_replay_audit_sha256),
         "qualification_evidence_sha256": evidence.content_sha256,
+        "restricted_local_artifact_access_control_evidence_sha256": (
+            evidence.restricted_local_artifact_access_control_evidence_sha256
+        ),
         "scoring_code_commit": evidence.scoring_code_commit,
         "space_placebo_resource_observation_sha256": (
             evidence.space_placebo_resource_observation_sha256
@@ -352,6 +357,7 @@ def generate(
     logical_replay_audit_path: Path = LOGICAL_REPLAY_AUDIT_PATH,
     git_runner: GitCommandRunner = subprocess_git_runner,
 ) -> dict[str, object]:
+    require_stage4_r2_execution_action(protocol, action="qualification")
     output = require_score_blind_project_path(
         project_root,
         protocol,
@@ -373,10 +379,13 @@ def generate(
         git_runner=git_runner,
     )
     if output.is_file():
-        if load_stage4_qualification_evidence(output).as_mapping() != evidence.as_mapping():
+        if (
+            load_stage4_qualification_evidence(output, protocol=protocol).as_mapping()
+            != evidence.as_mapping()
+        ):
             raise ValueError("existing stage-4 qualification differs; refusing to overwrite")
     else:
-        write_stage4_qualification_evidence_atomic(output, evidence)
+        write_stage4_qualification_evidence_atomic(output, evidence, protocol=protocol)
     return _summary("generate", evidence)
 
 
@@ -391,6 +400,7 @@ def check(
     logical_replay_audit_path: Path = LOGICAL_REPLAY_AUDIT_PATH,
     git_runner: GitCommandRunner = subprocess_git_runner,
 ) -> dict[str, object]:
+    require_stage4_r2_execution_action(protocol, action="qualification")
     output = require_score_blind_project_path(
         project_root,
         protocol,
@@ -411,7 +421,10 @@ def check(
         logical_replay_audit_path=logical_replay_audit_path,
         git_runner=git_runner,
     )
-    if load_stage4_qualification_evidence(output).as_mapping() != expected.as_mapping():
+    if (
+        load_stage4_qualification_evidence(output, protocol=protocol).as_mapping()
+        != expected.as_mapping()
+    ):
         raise ValueError("stage-4 qualification is stale or altered")
     result = _summary("check", expected)
     result["verified"] = True

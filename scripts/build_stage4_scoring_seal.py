@@ -31,6 +31,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_PROTOCOL_TAG,
     STAGE4_QUALIFICATION_RELATIVE_PATH,
     STAGE4_SCORING_CODE_TAG,
+    require_stage4_r2_execution_action,
     stage4_scoring_freeze_relative_path,
     validate_stage4_r2_execution_contract,
 )
@@ -110,7 +111,7 @@ def _relative_output_path(project_root: Path, protocol: Mapping[str, object]) ->
 
 
 def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
-    validate_stage4_r2_execution_contract(protocol)
+    require_stage4_r2_execution_action(protocol, action="scoring_seal")
     return STAGE4_PROTOCOL_TAG, STAGE4_SCORING_CODE_TAG
 
 
@@ -144,6 +145,7 @@ def generate(
 ) -> dict[str, object]:
     """Generate the seal from target-blind evidence and empty ledgers only."""
 
+    require_stage4_r2_execution_action(protocol, action="scoring_seal")
     root = Path(project_root).resolve()
     safe_qualification_path = require_score_blind_project_path(
         root,
@@ -183,15 +185,21 @@ def generate(
     )
     if safe_qualification_path != canonical_qualification:
         raise ValueError("qualification evidence must use its frozen R2 path")
-    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
+    _require_canonical_ledgers(
         root,
         safe_attempt_ledger_path,
         safe_target_read_ledger_path,
     )
     protocol_tag, scoring_tag = _freeze_tags(protocol)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
-    qualification = load_stage4_qualification_evidence(safe_qualification_path)
-    preflight_receipt = load_formal_preflight_receipt(safe_preflight_receipt_path)
+    qualification = load_stage4_qualification_evidence(
+        safe_qualification_path,
+        protocol=protocol,
+    )
+    preflight_receipt = load_formal_preflight_receipt(
+        safe_preflight_receipt_path,
+        protocol=protocol,
+    )
     repository = repository_adapter.observe(
         root,
         protocol_tag=protocol_tag,
@@ -200,14 +208,16 @@ def generate(
     )
     binding = stage4_execution_binding_id(repository, score_blind_inputs, qualification)
     attempt_ledger = initialize_stage4_ledger(
-        attempt_ledger_path,
+        root,
         kind="formal_attempt",
         execution_binding_id=binding,
+        protocol=protocol,
     )
     target_read_ledger = initialize_stage4_ledger(
-        target_read_ledger_path,
+        root,
         kind="target_read",
         execution_binding_id=binding,
+        protocol=protocol,
     )
     seal = build_stage4_scoring_seal(
         protocol,
@@ -218,7 +228,11 @@ def generate(
         attempt_ledger=attempt_ledger,
         target_read_ledger=target_read_ledger,
     )
-    file_sha256 = write_stage4_scoring_seal_atomic(output_path, seal)
+    file_sha256 = write_stage4_scoring_seal_atomic(
+        output_path,
+        seal,
+        protocol=protocol,
+    )
     return {
         "action": "generate",
         "formal_attempt_count": 0,
@@ -246,6 +260,7 @@ def check(
 ) -> dict[str, object]:
     """Rebuild the target-unread seal and require byte-for-byte identity."""
 
+    require_stage4_r2_execution_action(protocol, action="scoring_seal")
     root = Path(project_root).resolve()
     safe_qualification_path = require_score_blind_project_path(
         root,
@@ -285,16 +300,22 @@ def check(
     )
     if safe_qualification_path != canonical_qualification:
         raise ValueError("qualification evidence must use its frozen R2 path")
-    attempt_ledger_path, target_read_ledger_path = _require_canonical_ledgers(
+    _require_canonical_ledgers(
         root,
         safe_attempt_ledger_path,
         safe_target_read_ledger_path,
     )
-    loaded = load_stage4_scoring_seal(output_path)
+    loaded = load_stage4_scoring_seal(output_path, protocol=protocol)
     protocol_tag, scoring_tag = _freeze_tags(protocol)
     score_blind_inputs = observe_score_blind_inputs(root, protocol)
-    qualification = load_stage4_qualification_evidence(safe_qualification_path)
-    preflight_receipt = load_formal_preflight_receipt(safe_preflight_receipt_path)
+    qualification = load_stage4_qualification_evidence(
+        safe_qualification_path,
+        protocol=protocol,
+    )
+    preflight_receipt = load_formal_preflight_receipt(
+        safe_preflight_receipt_path,
+        protocol=protocol,
+    )
     repository = repository_adapter.observe(
         root,
         protocol_tag=protocol_tag,
@@ -305,14 +326,16 @@ def check(
         raise ValueError("qualification evidence differs from the local scoring seal")
     binding = stage4_execution_binding_id(repository, score_blind_inputs, qualification)
     attempt_ledger = read_stage4_ledger(
-        attempt_ledger_path,
-        expected_kind="formal_attempt",
+        root,
+        kind="formal_attempt",
         expected_binding_id=binding,
+        protocol=protocol,
     )
     target_read_ledger = read_stage4_ledger(
-        target_read_ledger_path,
-        expected_kind="target_read",
+        root,
+        kind="target_read",
         expected_binding_id=binding,
+        protocol=protocol,
     )
     rebuilt = build_stage4_scoring_seal(
         protocol,

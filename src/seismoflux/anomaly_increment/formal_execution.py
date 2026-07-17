@@ -3,9 +3,10 @@
 The context type deliberately cannot hold an earthquake catalogue, an event-cell
 assignment, a filesystem location, or an I/O capability.  Only
 ``materialize_after_authorized_target`` accepts the already authorized in-memory
-catalogue.  Construction-zone strata are joined after authorization and remain a
-separate, local-only evaluation receipt; they never enter fitting, ranking, or
-prospective inputs.
+catalogue only together with the full execution protocol and its sentinel-protected
+authorization capability.  Construction-zone strata are joined after authorization
+and remain a separate, local-only evaluation receipt; they never enter fitting,
+ranking, or prospective inputs.
 """
 
 from __future__ import annotations
@@ -19,6 +20,10 @@ from zoneinfo import ZoneInfo
 
 import pyarrow as pa
 
+from seismoflux.anomaly_increment.authorization import (
+    Stage4TargetAuthorization,
+    require_stage4_target_authorization,
+)
 from seismoflux.anomaly_increment.background_adapter import (
     FROZEN_BACKGROUND_VARIANT_ID,
     FROZEN_KDE_BANDWIDTH_KM,
@@ -28,7 +33,10 @@ from seismoflux.anomaly_increment.background_adapter import (
     rebuild_stage4_background,
     resolve_frozen_background_snapshot,
 )
-from seismoflux.anomaly_increment.config import Stage4ProtocolBundle
+from seismoflux.anomaly_increment.config import (
+    Stage4ProtocolBundle,
+    require_stage4_r2_execution_action,
+)
 from seismoflux.anomaly_increment.contracts import (
     FeatureColumnContract,
     canonical_mapping_sha256,
@@ -47,6 +55,7 @@ from seismoflux.anomaly_increment.grid_features import (
     Stage4GridFamily,
     Stage4IntegrationGrid,
 )
+from seismoflux.anomaly_increment.preregistration import protocol_design_sha256
 from seismoflux.anomaly_increment.runner import FitScopePlan, Stage4ScoringPlan
 from seismoflux.anomaly_increment.scoring_pipeline import (
     EvaluationRegionBinding,
@@ -959,11 +968,11 @@ def build_stage4_in_memory_plan(
     )
 
 
-def materialize_after_authorized_target(
+def _materialize_in_memory_core(
     context: TargetBlindFormalContext,
     catalog: Stage4TargetCatalog,
 ) -> AuthorizedFormalMaterialization:
-    """Build all formal inputs after the sole entrance supplied an in-memory catalogue."""
+    """Synthetic-capable, I/O-free core used only behind a guarded formal boundary."""
 
     context.verify()
     protocol = context.protocol.background_protocol()
@@ -1024,6 +1033,32 @@ def materialize_after_authorized_target(
         evaluation_region_binding=region_binding,
         placebo_scope_assembler=placebo_assembler,
     )
+
+
+def materialize_after_authorized_target(
+    context: TargetBlindFormalContext,
+    catalog: Stage4TargetCatalog,
+    *,
+    execution_protocol: Mapping[str, object],
+    authorization: Stage4TargetAuthorization,
+) -> AuthorizedFormalMaterialization:
+    """Materialize formal inputs only with the current protocol and real capability.
+
+    The R2 execution guard deliberately runs before either caller-supplied object is
+    inspected.  Consequently the currently blocked protocol cannot trigger catalogue
+    mapping, background rebuilding, or any other target-derived work.  Unit tests for
+    the scientific in-memory transformation use the private core above; it is not a
+    formal execution entrance.
+    """
+
+    require_stage4_r2_execution_action(
+        execution_protocol,
+        action="formal_scoring",
+    )
+    require_stage4_target_authorization(authorization)
+    if protocol_design_sha256(execution_protocol) != (context.protocol.protocol_design_sha256):
+        raise ValueError("formal materialization protocol differs from its verified context")
+    return _materialize_in_memory_core(context, catalog)
 
 
 __all__ = [

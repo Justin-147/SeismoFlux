@@ -25,7 +25,10 @@ from seismoflux.anomaly_increment import (
     verify_content_sha256,
     write_public_manifest_atomic,
 )
-from seismoflux.anomaly_increment.config import STAGE4_PROTOCOL_PATH
+from seismoflux.anomaly_increment.config import (
+    STAGE4_PROTOCOL_PATH,
+    validate_stage4_r2_execution_contract,
+)
 from seismoflux.config import sha256_file
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -334,6 +337,7 @@ def main() -> int:
     freeze = _mapping(protocol.get("freeze"), label="freeze")
     if freeze.get("execution_revision") != "r2":
         raise ValueError("stage-4 preregistration builder requires execution_revision r2")
+    validate_stage4_r2_execution_contract(protocol)
     result = (
         generate(protocol, _external_root(args.external_root))
         if args.action == "generate"

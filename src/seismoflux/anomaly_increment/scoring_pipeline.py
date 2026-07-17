@@ -3005,12 +3005,18 @@ def _build_publication_diagnostics(
     )
 
 
-def run_stage4_in_memory_pipeline(
+def _run_stage4_in_memory_pipeline_core(
     plan: Stage4InMemoryPlan,
     *,
     placebo_injection: PlaceboInjection | None,
 ) -> PipelineResult:
-    """Fit each scope once, score five windows, gate, and render target-safe outputs."""
+    """Private scoring core for an already-authorized formal in-memory session.
+
+    This function deliberately has no protocol or authorization parameters.  The
+    production caller in ``formal_run`` must complete its central execution guard
+    before entering this core.  Synthetic tests use a test-module wrapper instead
+    of exposing this implementation as a public scoring entry point.
+    """
 
     scope_inputs = (*plan.development_scopes, plan.formal_scope)
     fitted_scopes = tuple(
@@ -3212,5 +3218,4 @@ __all__ = [
     "Stage4InMemoryPlan",
     "VariantId",
     "fit_and_primary_macro_statistic",
-    "run_stage4_in_memory_pipeline",
 ]

@@ -36,7 +36,10 @@ from seismoflux.anomaly_increment.authorization import (
     require_stage4_target_authorization,
 )
 from seismoflux.anomaly_increment.compute import Stage4WorkerPlan
-from seismoflux.anomaly_increment.config import STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH
+from seismoflux.anomaly_increment.config import (
+    STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH,
+    require_stage4_r2_execution_action,
+)
 from seismoflux.anomaly_increment.contracts import (
     FeatureColumnContract,
     canonical_mapping_sha256,
@@ -83,6 +86,7 @@ from seismoflux.anomaly_increment.placebo_source import (
     build_placebo_source,
 )
 from seismoflux.anomaly_increment.preregistration import (
+    protocol_design_sha256,
     verify_content_sha256,
     with_content_sha256,
 )
@@ -91,7 +95,7 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
     PlaceboExecution,
     PlaceboRequest,
     Stage4InMemoryPlan,
-    run_stage4_in_memory_pipeline,
+    _run_stage4_in_memory_pipeline_core,
 )
 from seismoflux.anomaly_increment.spatial_dashboard import (
     DisplayContextLayer,
@@ -535,6 +539,7 @@ class FormalRunInputs:
     project_root: Path
     authorization: Stage4TargetAuthorization
     preflight: FormalPreflightArtifacts
+    execution_protocol: Mapping[str, object] = field(repr=False, compare=False)
     checkpoint_directory: Path
     concurrency: PlaceboConcurrencyPlan
     same_process_resume_limit: int = 1
@@ -545,6 +550,14 @@ class FormalRunInputs:
     )
 
     def __post_init__(self) -> None:
+        require_stage4_r2_execution_action(
+            self.execution_protocol,
+            action="formal_scoring",
+        )
+        if protocol_design_sha256(self.execution_protocol) != (
+            self.preflight.context.protocol.protocol_design_sha256
+        ):
+            raise ValueError("formal run inputs belong to another protocol design")
         root = Path(self.project_root).resolve()
         if not root.is_dir():
             raise ValueError("project_root must be an existing directory")
@@ -952,13 +965,14 @@ def _terminalize_attempts(
     failure_code: str | None,
 ) -> None:
     complete_stage4_attempt_scopes(
-        inputs.authorization.attempt_ledger_path,
+        inputs.project_root,
         execution_binding_id=inputs.authorization.execution_binding_id,
         operation_ids_by_scope=_operation_ids(inputs.authorization.authorization_id),
         authorization_id=inputs.authorization.authorization_id,
         status=status,
         result_sha256=result_sha256,
         failure_code=failure_code,
+        protocol=inputs.execution_protocol,
     )
 
 
@@ -973,9 +987,10 @@ def _confirmed_terminal_ledger(
 
     try:
         ledger = read_stage4_ledger(
-            inputs.authorization.attempt_ledger_path,
-            expected_kind="formal_attempt",
+            inputs.project_root,
+            kind="formal_attempt",
             expected_binding_id=inputs.authorization.execution_binding_id,
+            protocol=inputs.execution_protocol,
         )
     except Exception:
         return None
@@ -1026,9 +1041,10 @@ def _write_terminalization_incident(
 
     try:
         observed = read_stage4_ledger(
-            inputs.authorization.attempt_ledger_path,
-            expected_kind="formal_attempt",
+            inputs.project_root,
+            kind="formal_attempt",
             expected_binding_id=inputs.authorization.execution_binding_id,
+            protocol=inputs.execution_protocol,
         )
     except Exception:
         observed_mapping: dict[str, object] = {
@@ -1093,8 +1109,8 @@ def _publish_failure_and_terminalize(
         publication = publish_failed_formal_result(
             inputs.project_root,
             inputs.preflight.context.scoring_plan.publication,
-            execution_binding_id=inputs.authorization.execution_binding_id,
-            authorization_id=inputs.authorization.authorization_id,
+            execution_protocol=inputs.execution_protocol,
+            authorization=inputs.authorization,
             model_version=inputs.preflight.model_version,
             failure_code=failure_code,
         )
@@ -1171,12 +1187,20 @@ class FormalRunSession:
     def execute(self) -> FormalRunOutcome:
         """Run once, resuming only the same in-process session and checkpoint identities."""
 
+        require_stage4_r2_execution_action(
+            self.inputs.execution_protocol,
+            action="formal_scoring",
+        )
+        if protocol_design_sha256(self.inputs.execution_protocol) != (
+            self.inputs.preflight.context.protocol.protocol_design_sha256
+        ):
+            raise ValueError("formal session belongs to another protocol design")
         if self._terminal:
             raise FormalRunError("formal session is already terminal")
         resume_count = 0
         while True:
             try:
-                result = run_stage4_in_memory_pipeline(
+                result = _run_stage4_in_memory_pipeline_core(
                     self.plan,
                     placebo_injection=self.placebo_router,
                 )
@@ -1238,8 +1262,8 @@ class FormalRunSession:
                 receipt = publish_successful_formal_result(
                     self.inputs.project_root,
                     self.inputs.preflight.context.scoring_plan.publication,
-                    execution_binding_id=self.inputs.authorization.execution_binding_id,
-                    authorization_id=self.inputs.authorization.authorization_id,
+                    execution_protocol=self.inputs.execution_protocol,
+                    authorization=self.inputs.authorization,
                     result=result,
                     convergence_audit=convergence_audit,
                     additional_local_artifacts=extensions,
@@ -1325,12 +1349,21 @@ def prepare_formal_run_session(inputs: FormalRunInputs) -> FormalRunSession:
 
     if not isinstance(inputs, FormalRunInputs):
         raise TypeError("formal run preparation requires FormalRunInputs")
+    require_stage4_r2_execution_action(
+        inputs.execution_protocol,
+        action="formal_scoring",
+    )
+    if protocol_design_sha256(inputs.execution_protocol) != (
+        inputs.preflight.context.protocol.protocol_design_sha256
+    ):
+        raise ValueError("formal run inputs belong to another protocol design")
     operations = _operation_ids(inputs.authorization.authorization_id)
     reserve_stage4_attempt_scopes(
-        inputs.authorization.attempt_ledger_path,
+        inputs.project_root,
         execution_binding_id=inputs.authorization.execution_binding_id,
         operation_ids_by_scope=operations,
         authorization_id=inputs.authorization.authorization_id,
+        protocol=inputs.execution_protocol,
     )
     session_seal_sha256 = cast(str, _session_seal_payload(inputs)["content_sha256"])
     try:
@@ -1347,11 +1380,14 @@ def prepare_formal_run_session(inputs: FormalRunInputs) -> FormalRunSession:
             return catalog, materialize_after_authorized_target(
                 inputs.preflight.context,
                 catalog,
+                execution_protocol=inputs.execution_protocol,
+                authorization=inputs.authorization,
             )
 
         consumed = consume_authorized_stage4_target(
             inputs.project_root,
             inputs.authorization,
+            protocol=inputs.execution_protocol,
             operation_id=f"stage4-target-{inputs.authorization.authorization_id[:20]}",
             consumer=consume,
         )
@@ -1380,6 +1416,16 @@ def prepare_formal_run_session(inputs: FormalRunInputs) -> FormalRunSession:
 def run_formal_stage4(inputs: FormalRunInputs) -> FormalRunOutcome:
     """Run the sole stage-4 production chain and always return normal terminal failures."""
 
+    if not isinstance(inputs, FormalRunInputs):
+        raise TypeError("formal stage-4 execution requires FormalRunInputs")
+    require_stage4_r2_execution_action(
+        inputs.execution_protocol,
+        action="formal_scoring",
+    )
+    if protocol_design_sha256(inputs.execution_protocol) != (
+        inputs.preflight.context.protocol.protocol_design_sha256
+    ):
+        raise ValueError("formal run inputs belong to another protocol design")
     try:
         session = prepare_formal_run_session(inputs)
     except FormalRunPreparationError as exc:

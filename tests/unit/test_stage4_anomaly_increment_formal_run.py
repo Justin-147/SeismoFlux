@@ -13,19 +13,28 @@ from typing import Any, Literal, TypeAlias, cast
 import numpy as np
 import pytest
 from stage4_formal_preflight_fixture import make_formal_preflight_receipt
-from test_stage4_anomaly_increment_pipeline import _plan
+from test_stage4_anomaly_increment_pipeline import (
+    _plan,
+    run_stage4_synthetic_test_pipeline,
+)
 
+import seismoflux.anomaly_increment.attempt_ledger as attempt_ledger_module
 import seismoflux.anomaly_increment.authorization as authorization_module
+import seismoflux.anomaly_increment.formal_publication as formal_publication_module
 import seismoflux.anomaly_increment.formal_run as formal_run
 import seismoflux.anomaly_increment.immutable_file as immutable_file_module
 import seismoflux.anomaly_increment.target_access as target_access_module
 from seismoflux.anomaly_increment.attempt_ledger import (
-    complete_stage4_attempt_scopes as _complete_stage4_attempt_scopes,
+    _complete_stage4_attempt_scopes_generic as _complete_stage4_attempt_scopes,
 )
 from seismoflux.anomaly_increment.attempt_ledger import (
-    initialize_stage4_ledger,
-    read_stage4_ledger,
-    recover_interrupted_stage4_operations,
+    _initialize_stage4_ledger_generic as initialize_stage4_ledger,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _read_stage4_ledger_generic as read_stage4_ledger,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _recover_interrupted_stage4_operations_generic as recover_interrupted_stage4_operations,
 )
 from seismoflux.anomaly_increment.authorization import (
     STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
@@ -44,8 +53,8 @@ from seismoflux.anomaly_increment.convergence import (
 )
 from seismoflux.anomaly_increment.formal_execution import (
     AuthorizedFormalMaterialization,
+    _materialize_in_memory_core,
     build_stage4_in_memory_plan,
-    materialize_after_authorized_target,
 )
 from seismoflux.anomaly_increment.formal_run import (
     FORMAL_CONVERGENCE_AUDIT_FILENAME,
@@ -68,7 +77,6 @@ from seismoflux.anomaly_increment.scoring_pipeline import (
     PlaceboExecution,
     PlaceboRequest,
     Stage4InMemoryPlan,
-    run_stage4_in_memory_pipeline,
 )
 from seismoflux.anomaly_increment.spatial_dashboard import DisplayStudyArea
 from seismoflux.features.anomaly.snapshot import Stage3IssueSnapshot
@@ -82,6 +90,40 @@ _context_and_catalog = _FORMAL_EXECUTION_TEST_MODULE._context_and_catalog
 _contracts = _FORMAL_EXECUTION_TEST_MODULE._contracts
 
 _WINDOWS_REPARSE_POINT = 0x0400
+
+
+@pytest.fixture(autouse=True)
+def _allow_future_ledger_creation_for_structural_tests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def allow_future_execution(*args: object, **kwargs: object) -> None:
+        return None
+
+    monkeypatch.setattr(
+        attempt_ledger_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        formal_run,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        formal_publication_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        formal_run,
+        "protocol_design_sha256",
+        lambda protocol: cast(str, protocol["_synthetic_protocol_design_sha256"]),
+    )
+    monkeypatch.setattr(
+        target_access_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
 
 
 def _install_lstat_fallback(
@@ -304,7 +346,7 @@ def scientific_inputs() -> tuple[
         ),
         model_version="synthetic-stage4-v1",
     )
-    materialization = materialize_after_authorized_target(context, catalog)
+    materialization = _materialize_in_memory_core(context, catalog)
     plan = build_stage4_in_memory_plan(
         materialization,
         feature_contracts=preflight.feature_contracts,
@@ -317,7 +359,7 @@ def scientific_inputs() -> tuple[
 
 @pytest.fixture(scope="module")
 def pipeline_result() -> PipelineResult:
-    return run_stage4_in_memory_pipeline(_plan("positive"), placebo_injection=None)
+    return run_stage4_synthetic_test_pipeline(_plan("positive"), placebo_injection=None)
 
 
 def _inputs(
@@ -380,6 +422,9 @@ def _inputs(
         project_root=tmp_path,
         authorization=authorization,
         preflight=preflight,
+        execution_protocol={
+            "_synthetic_protocol_design_sha256": (preflight.context.protocol.protocol_design_sha256)
+        },
         checkpoint_directory=(
             tmp_path / "data" / "interim" / "stage4" / "anomaly_increment_r2" / "checkpoints"
         ),
@@ -453,7 +498,7 @@ def test_same_process_resume_reuses_session_without_second_target_ingress(
         return pipeline_result
 
     monkeypatch.setattr(target_access_module, "_read_target_bytes_once", counted_read)
-    monkeypatch.setattr(formal_run, "run_stage4_in_memory_pipeline", interrupted_once)
+    monkeypatch.setattr(formal_run, "_run_stage4_in_memory_pipeline_core", interrupted_once)
     outcome = run_formal_stage4(inputs)
 
     assert outcome.status == "succeeded"
@@ -536,7 +581,7 @@ def test_official_spatial_hook_receives_only_explicit_authorized_session_context
     _patch_scientific_preparation(monkeypatch, scientific_inputs)
     monkeypatch.setattr(
         formal_run,
-        "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
         lambda *_args, **_kwargs: pipeline_result,
     )
     observed: dict[str, object] = {}
@@ -616,7 +661,7 @@ def test_convergence_failure_is_a_hard_stop_before_success_or_spatial_publicatio
     _patch_scientific_preparation(monkeypatch, scientific_inputs)
     monkeypatch.setattr(
         formal_run,
-        "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
         lambda *_args, **_kwargs: pipeline_result,
     )
     monkeypatch.setattr(
@@ -669,7 +714,7 @@ def test_normal_scientific_or_software_failure_publishes_value_free_output_and_f
     def fail(*_args: object, **_kwargs: object) -> PipelineResult:
         raise ValueError("synthetic formal scientific failure")
 
-    monkeypatch.setattr(formal_run, "run_stage4_in_memory_pipeline", fail)
+    monkeypatch.setattr(formal_run, "_run_stage4_in_memory_pipeline_core", fail)
     outcome = run_formal_stage4(inputs)
 
     assert outcome.status == "failed"
@@ -725,7 +770,7 @@ def test_hard_crash_leaves_all_four_started_and_session_retains_authorized_memor
     def hard_crash(*_args: object, **_kwargs: object) -> PipelineResult:
         raise KeyboardInterrupt
 
-    monkeypatch.setattr(formal_run, "run_stage4_in_memory_pipeline", hard_crash)
+    monkeypatch.setattr(formal_run, "_run_stage4_in_memory_pipeline_core", hard_crash)
     with pytest.raises(KeyboardInterrupt):
         session.execute()
 
@@ -1095,7 +1140,7 @@ def test_success_publication_with_unconfirmed_attempt_terminalization_is_explici
     _patch_scientific_preparation(monkeypatch, scientific_inputs)
     monkeypatch.setattr(
         formal_run,
-        "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
         lambda *_args, **_kwargs: pipeline_result,
     )
 
@@ -1146,13 +1191,13 @@ def test_post_replace_terminalization_exception_is_read_back_not_retried(
     _patch_scientific_preparation(monkeypatch, scientific_inputs)
     monkeypatch.setattr(
         formal_run,
-        "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
         lambda *_args, **_kwargs: pipeline_result,
     )
     calls = 0
 
     def complete_then_raise(
-        path: Path,
+        project_root: Path,
         *,
         execution_binding_id: str,
         operation_ids_by_scope: Mapping[str, str],
@@ -1160,11 +1205,13 @@ def test_post_replace_terminalization_exception_is_read_back_not_retried(
         status: Literal["succeeded", "failed"],
         result_sha256: str | None = None,
         failure_code: str | None = None,
+        protocol: Mapping[str, object],
     ) -> None:
+        del project_root, protocol
         nonlocal calls
         calls += 1
         _complete_stage4_attempt_scopes(
-            path,
+            inputs.authorization.attempt_ledger_path,
             execution_binding_id=execution_binding_id,
             operation_ids_by_scope=operation_ids_by_scope,
             authorization_id=authorization_id,
@@ -1209,7 +1256,7 @@ def test_failed_publication_with_unconfirmed_attempt_terminalization_is_audited(
 
     monkeypatch.setattr(
         formal_run,
-        "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
         scientific_failure,
     )
     monkeypatch.setattr(

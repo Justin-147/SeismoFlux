@@ -30,8 +30,9 @@ from seismoflux.anomaly_increment.config import (
 from seismoflux.anomaly_increment.config import (
     STAGE4_PROTOCOL_TAG,
     STAGE4_SCORING_CODE_TAG,
+    Stage4R2ExecutionBlockedError,
+    require_stage4_r2_execution_action,
     stage4_scoring_freeze_relative_path,
-    validate_stage4_r2_execution_contract,
 )
 from seismoflux.anomaly_increment.config import (
     STAGE4_TARGET_READ_LEDGER_RELATIVE_PATH as R2_TARGET_READ_LEDGER_RELATIVE_PATH,
@@ -59,6 +60,9 @@ from seismoflux.anomaly_increment.qualification import (
     observe_score_blind_inputs,
     validate_stage4_qualification_against_formal_preflight,
     validate_stage4_qualification_against_protocol,
+)
+from seismoflux.anomaly_increment.restricted_access import (
+    validate_restricted_access_against_protocol,
 )
 from seismoflux.anomaly_increment.score_blind_path import (
     require_score_blind_project_path,
@@ -695,6 +699,12 @@ def stage4_execution_binding_id(
         raise Stage4ScoringNotAuthorizedError(
             "qualification evidence belongs to different score-blind inputs"
         )
+    if qualification.restricted_local_artifact_access_control_evidence_sha256 != (
+        score_blind_inputs.restricted_access_control.content_sha256
+    ):
+        raise Stage4ScoringNotAuthorizedError(
+            "qualification evidence belongs to a different restricted-access receipt"
+        )
     return hashlib.sha256(
         canonical_json_bytes(
             {
@@ -948,12 +958,17 @@ class Stage4TargetReadinessEvidence:
         }
 
 
-def _freeze_tags(protocol: Mapping[str, object]) -> tuple[str, str]:
+def _freeze_tags(
+    protocol: Mapping[str, object],
+    *,
+    action: str,
+) -> tuple[str, str]:
     try:
-        validate_stage4_r2_execution_contract(protocol)
-    except (TypeError, ValueError) as exc:
+        require_stage4_r2_execution_action(protocol, action=action)
+    except (Stage4R2ExecutionBlockedError, TypeError, ValueError) as exc:
         raise Stage4ScoringNotAuthorizedError(
-            "stage-4 R2 execution freeze is missing or changed"
+            "stage-4 R2 execution is blocked before target read because the "
+            "required frozen ETAS comparator is not evaluable"
         ) from exc
     freeze = _mapping(protocol.get("freeze"), label="freeze")
     if freeze.get("protocol_tag_authorizes_only_score_free_implementation") is not True:
@@ -973,7 +988,7 @@ def build_stage4_scoring_seal(
 ) -> Stage4ScoringSeal:
     """Build a target-unread scoring seal from fresh score-blind evidence."""
 
-    protocol_tag, scoring_tag = _freeze_tags(protocol)
+    protocol_tag, scoring_tag = _freeze_tags(protocol, action="scoring_seal")
     if repository.protocol_tag != protocol_tag or repository.scoring_code_tag != scoring_tag:
         raise Stage4ScoringNotAuthorizedError("repository tags differ from the frozen protocol")
     design_sha256 = protocol_design_sha256(protocol)
@@ -982,6 +997,10 @@ def build_stage4_scoring_seal(
     if qualification.protocol_design_sha256 != design_sha256:
         raise Stage4ScoringNotAuthorizedError("qualification uses another protocol design")
     try:
+        validate_restricted_access_against_protocol(
+            protocol,
+            score_blind_inputs.restricted_access_control,
+        )
         validate_stage4_qualification_against_protocol(protocol, qualification)
         validate_stage4_qualification_against_formal_preflight(
             qualification,
@@ -1016,9 +1035,15 @@ def build_stage4_scoring_seal(
     )
 
 
-def write_stage4_scoring_seal_atomic(path: Path, seal: Stage4ScoringSeal) -> str:
+def write_stage4_scoring_seal_atomic(
+    path: Path,
+    seal: Stage4ScoringSeal,
+    *,
+    protocol: Mapping[str, object],
+) -> str:
     """Create the frozen scoring seal once; only identical replay is permitted."""
 
+    _freeze_tags(protocol, action="scoring_seal")
     if not isinstance(seal, Stage4ScoringSeal):
         raise TypeError("seal must be Stage4ScoringSeal")
     target = Path(path)
@@ -1085,7 +1110,12 @@ def write_stage4_scoring_seal_atomic(path: Path, seal: Stage4ScoringSeal) -> str
     return serialized_sha256
 
 
-def load_stage4_scoring_seal(path: Path) -> Stage4ScoringSeal:
+def load_stage4_scoring_seal(
+    path: Path,
+    *,
+    protocol: Mapping[str, object],
+) -> Stage4ScoringSeal:
+    _freeze_tags(protocol, action="scoring_seal")
     target = Path(os.path.abspath(os.fspath(path)))
     try:
         require_existing_real_directory_tree(
@@ -1258,6 +1288,7 @@ def verify_stage4_target_readiness(
 ) -> Stage4TargetReadinessEvidence:
     """Reprove seal, tags, public remote, inputs, and empty ledgers without authorization."""
 
+    protocol_tag, scoring_tag = _freeze_tags(protocol, action="formal_target_read")
     root = Path(project_root).resolve()
     seal_path = require_score_blind_project_path(
         root,
@@ -1277,7 +1308,6 @@ def verify_stage4_target_readiness(
         target_read_ledger_path,
         label="stage-4 target-read audit ledger",
     )
-    protocol_tag, scoring_tag = _freeze_tags(protocol)
     canonical_seal_path = _canonical_execution_path(
         root,
         protocol,
@@ -1297,7 +1327,7 @@ def verify_stage4_target_readiness(
         safe_target_ledger,
         kind="target_read",
     )
-    loaded = load_stage4_scoring_seal(seal_path)
+    loaded = load_stage4_scoring_seal(seal_path, protocol=protocol)
     canonical_preflight_relative = stage4_scoring_freeze_relative_path(
         protocol,
         "formal_preflight_receipt_path",
@@ -1309,7 +1339,10 @@ def verify_stage4_target_readiness(
         label="formal preflight receipt",
     )
     try:
-        preflight_receipt = load_formal_preflight_receipt(preflight_receipt_path)
+        preflight_receipt = load_formal_preflight_receipt(
+            preflight_receipt_path,
+            protocol=protocol,
+        )
         validate_stage4_qualification_against_formal_preflight(
             loaded.qualification,
             preflight_receipt,
@@ -1332,14 +1365,16 @@ def verify_stage4_target_readiness(
         raise Stage4ScoringNotAuthorizedError("score-blind inputs changed after seal generation")
     try:
         attempt_ledger = read_stage4_ledger(
-            canonical_attempt_ledger,
-            expected_kind="formal_attempt",
+            root,
+            kind="formal_attempt",
             expected_binding_id=loaded.execution_binding_id,
+            protocol=protocol,
         )
         target_ledger = read_stage4_ledger(
-            canonical_target_ledger,
-            expected_kind="target_read",
+            root,
+            kind="target_read",
             expected_binding_id=loaded.execution_binding_id,
+            protocol=protocol,
         )
     except Stage4LedgerError as exc:
         raise Stage4ScoringNotAuthorizedError("stage-4 local ledger verification failed") from exc

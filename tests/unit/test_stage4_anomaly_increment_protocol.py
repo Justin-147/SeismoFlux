@@ -257,9 +257,9 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.4.1"
-    assert protocol["frozen_on"] == "2026-07-16"
+    assert protocol["frozen_on"] == "2026-07-17"
     assert protocol["stage"] == 4
-    assert protocol["status"] == "preregistered_before_any_stage4_target_score"
+    assert protocol["status"] == "target_blind_protocol_frozen_execution_blocked_before_target_read"
     assert protocol["hypotheses"] == ["H1", "H2"]
     assert protocol["gates"] == ["G2", "G3"]
 
@@ -273,9 +273,32 @@ def test_score_free_protocol_binds_exact_inputs_four_manifests_and_two_freezes()
     assert freeze["target_counts_seen_before_freeze"] is False
     assert freeze["locked_test_results_seen"] is False
     assert freeze["validation_is_not_a_tuning_partition"] is True
-    assert freeze["formal_validation_scientific_runs_allowed"] == 1
+    assert freeze["formal_validation_scientific_runs_allowed"] == 0
+    assert (
+        freeze["future_new_execution_revision_maximum_formal_validation_scientific_runs_allowed"]
+        == 1
+    )
+    assert freeze["execution_authorization_status"] == (
+        "blocked_before_target_read_etas_comparator_not_evaluable"
+    )
+    assert freeze["current_execution_authorizations"] == {
+        "protocol_tag_allowed": True,
+        "target_blind_protocol_manifest_restricted_input_and_test_hardening_allowed": True,
+        "scientific_scoring_implementation_allowed": False,
+        "scientific_scoring_code_commit_allowed": False,
+        "scientific_scoring_code_tag_allowed": False,
+        "formal_preflight_allowed": False,
+        "qualification_allowed": False,
+        "scoring_seal_allowed": False,
+        "formal_attempt_ledger_creation_allowed": False,
+        "target_read_ledger_creation_allowed": False,
+        "formal_target_read_allowed": False,
+        "formal_scoring_allowed": False,
+        "result_tag_allowed": False,
+    }
 
     scoring_freeze = freeze["scoring_code_freeze"]
+    assert scoring_freeze["current_r2_status"] == "reserved_not_authorized_not_created"
     assert scoring_freeze["required"] is True
     assert scoring_freeze["expected_tag"] == ("v0.3.1-anomaly-increment-scoring-code-r2")
     assert scoring_freeze["required_seal_path"] == (
@@ -370,8 +393,31 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
     assert retirement["target_read_ledger"]["operation_count"] == 0
     assert retirement["target_bytes_observed"] is False
     assert retirement["reusable_for_r2_authorization"] is False
+    scoring_freeze = protocol["freeze"]["scoring_code_freeze"]
+    assert (
+        "restricted_local_artifact_access_control_verified"
+        in scoring_freeze["required_before_target_read"]
+    )
+    assert (
+        "frozen_full_non_target_junit_count_matches_actual_scoring_freeze_suite"
+        in scoring_freeze["required_before_target_read"]
+    )
+    assert scoring_freeze["test_count_binding"] == {
+        "freeze_time": "after_scoring_implementation_and_all_non_target_tests_are_final",
+        "expected_test_count": "UNFROZEN",
+        "actual_junit_count_must_equal_frozen_count": True,
+        "protocol_acceptance_snapshot_count_may_not_be_reused": True,
+    }
 
     permutations = protocol["evaluation"]["permutations"]
+    assert permutations["primary_statistic_comparator_variant"] == ("etas_background_no_increment")
+    assert (
+        permutations[
+            "every_observed_and_null_result_object_binds_etas_artifact_parameter_"
+            "and_qualification_sha256"
+        ]
+        is True
+    )
     assert permutations["formal_requests"] == [
         {"kind": "time", "model_variant": "dynamic"},
         {"kind": "space", "model_variant": "dynamic"},
@@ -387,7 +433,143 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
     assert permutations["checkpoint_identity_pattern"] == "kind-model_variant"
     assert permutations["exact_request_set_required"] is True
     assert permutations["mappings_paired_across_dynamic_and_snapshot"] is True
+    assert protocol["evaluation"]["machine_status_vocabularies"] == {
+        "scientific_gate_status": {
+            "allowed": ["passed", "failed", "evidence_insufficient", "not_reached"],
+            "legacy_fail_status_forbidden": True,
+        },
+        "comparator_evaluability": {"allowed": ["evaluable", "not_evaluable"]},
+        "execution_artifact_state": {
+            "allowed": ["not_authorized_not_computed", "not_authorized_not_created"],
+            "distinct_from_scientific_gate_status": True,
+        },
+    }
+    multiple_comparisons = protocol["evaluation"]["multiple_comparisons"]
+    assert multiple_comparisons["exploratory_holm_families"] == {
+        "family_definition": "candidate_variant_x_placebo_kind",
+        "exact_families": [
+            {
+                "family_id": "dynamic_time",
+                "candidate_variant": "dynamic",
+                "placebo_kind": "time",
+            },
+            {
+                "family_id": "dynamic_space",
+                "candidate_variant": "dynamic",
+                "placebo_kind": "space",
+            },
+            {
+                "family_id": "snapshot_time",
+                "candidate_variant": "snapshot",
+                "placebo_kind": "time",
+            },
+            {
+                "family_id": "snapshot_space",
+                "candidate_variant": "snapshot",
+                "placebo_kind": "space",
+            },
+        ],
+        "magnitude_bins": ["M5_6", "M6_plus"],
+        "horizons_days": [7, 30, 90, 180, 365],
+        "member_key": ["magnitude_bin", "horizon_days"],
+        "complete_cartesian_product_required": True,
+        "exact_member_count_per_family": 10,
+    }
+    gatekeeping = multiple_comparisons["confirmatory_gatekeeping"]
+    current = gatekeeping["current_r2_execution_state"]
+    assert current["formal_validation_scientific_runs_authorized"] == 0
+    assert current["dynamic_qualification_gate"] == {
+        "gate_reached": False,
+        "gate_reached_reason": "etas_comparator_prerequisite_not_evaluable",
+        "qualification_status": "not_reached",
+    }
+    assert current["snapshot_qualification_gate"] == current["dynamic_qualification_gate"]
+    assert current["all_four_placebo_computations_state"] == "not_authorized_not_computed"
+    assert current["all_four_placebo_result_objects_state"] == "not_authorized_not_created"
+    assert current["candidate_gate_record_state"] == "not_authorized_not_created"
+    future = gatekeeping["future_post_etas_preregistered_design"]
+    assert future["etas_evaluable_status_alone_never_satisfies_G2"] is True
+    assert future["comparator_contract"] == {
+        "mandatory_primary_scientific_comparator": {
+            "variant_id": "etas_background_no_increment",
+            "status_required": "evaluable",
+            "frozen_before_target_read": True,
+            "required_bindings": [
+                "etas_artifact_sha256",
+                "etas_parameter_snapshot_sha256",
+                "etas_numerical_qualification_evidence_sha256",
+            ],
+        },
+        "secondary_required_background_comparator": {
+            "variant_id": "kde_background_no_increment",
+            "frozen_input_binding": "inputs.background_model_payload.sha256",
+            "frozen_artifact_sha256": (
+                "63db433a0ea490de2674cb84c485f8efd8215374d70f31f22810da29f0d7b142"
+            ),
+            "never_substitute_etas": True,
+        },
+        "required_reporting_confound_comparator": {
+            "variant_id": "coverage_only",
+            "never_substitute_etas": True,
+        },
+        ("all_three_comparator_tracks_required_for_development_and_regional_qualification"): True,
+    }
+    assert (
+        future["all_four_observed_raw_statistics_and_full_null_distributions_always_computed"]
+        is True
+    )
+    assert future["all_four_placebo_result_objects_always_bound_to_result_identity"] is True
+    assert future["raw_computation_does_not_imply_gate_reached"] is True
+    assert future["snapshot_qualification_gate"] == {
+        "gate_reached_true_iff": {
+            "dynamic_full_qualification_status": "passed",
+            "G3_status_in": ["failed", "evidence_insufficient"],
+        },
+        "reached_reason_codes": [
+            "dynamic_full_qualification_passed_and_G3_failed",
+            "dynamic_full_qualification_passed_and_G3_evidence_insufficient",
+        ],
+        "otherwise": {
+            "gate_reached": False,
+            "qualification_status": "not_reached",
+            "raw_statistics_role": "diagnostic_only",
+            "confirmatory_conclusion_forbidden": True,
+        },
+        "not_reached_reason_codes": [
+            "dynamic_full_qualification_failed",
+            "dynamic_full_qualification_evidence_insufficient",
+            "dynamic_full_qualification_not_reached",
+            "dynamic_full_qualification_passed_and_G3_passed",
+            "dynamic_full_qualification_passed_and_G3_not_reached",
+        ],
+    }
+    assert future["gate_record_identity_requires"] == [
+        "gate_reached",
+        "gate_reached_reason",
+        "gate_record_sha256",
+    ]
+    assert future["gate_record_sha256_payload_requires"] == [
+        "candidate_variant",
+        "gate_reached",
+        "gate_reached_reason",
+        "qualification_status",
+        "etas_artifact_sha256",
+        "etas_parameter_snapshot_sha256",
+        "etas_numerical_qualification_evidence_sha256",
+        "formal_G2_result_object_sha256",
+        "development_increment_stability_result_sha256",
+        "regional_stability_result_sha256",
+        "time_placebo_result_object_sha256",
+        "space_placebo_result_object_sha256",
+    ]
     g2 = protocol["evaluation"]["gates"]["G2"]
+    assert protocol["evaluation"]["information_gain"]["comparator_variant"] == (
+        "etas_background_no_increment"
+    )
+    assert g2["comparator_variant"] == "etas_background_no_increment"
+    assert g2["candidate_minus_etas_macro_information_gain_lower_95pct_bound_gt"] == 0
+    assert g2["etas_evaluable_status_alone_never_satisfies_G2"] is True
+    assert g2["direct_candidate_minus_etas_G2_result_required_for_each_evaluated_variant"]
     assert g2["evaluated_model_variants"] == ["dynamic", "snapshot"]
     assert g2["required_primary_placebos_by_variant"] == {
         "dynamic": ["time", "space"],
@@ -401,9 +583,161 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
         "snapshot",
     ]
     assert g2["candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt"] == 0
-    assert {branch["candidate_variant"] for branch in g2["practical_improvement_any_of"]} == {
-        "current_evaluated_candidate_variant"
+    assert g2["practical_improvement_any_of"] == [
+        {
+            "metric": "same_area_strict_recall_gain_percentage_points",
+            "evaluation_partition": "formal_validation_once",
+            "candidate_variant": "current_evaluated_candidate_variant",
+            "comparator_variant": "etas_background_no_increment",
+            "magnitude_bin": "M5_6",
+            "horizons_days": [7, 30, 90],
+            "macro_weighting": "equal_horizon",
+            "threshold_gte": 5,
+            "lower_95pct_bound_gt": 0,
+            "area_budget_km2": 600000,
+            "per_issue_selection": (
+                "largest_complete_deterministic_cell_prefix_with_exact_area_lte_budget"
+            ),
+            "denominator": "all_study_area_targets_unsupported_count_as_misses",
+        },
+        {
+            "metric": "same_recall_union_area_relative_reduction",
+            "evaluation_partition": "formal_validation_once",
+            "candidate_variant": "current_evaluated_candidate_variant",
+            "comparator_variant": "etas_background_no_increment",
+            "magnitude_bin": "M5_6",
+            "horizons_days": [7, 30, 90],
+            "macro_weighting": "equal_horizon",
+            "reference_hits_per_horizon": ("etas_background_strict_hit_count_at_600000km2"),
+            "candidate_search": "frozen_625km2_budget_grid_no_interpolation",
+            "candidate_budget_per_horizon": "minimum_budget_reaching_reference_hit_count",
+            "area_value": "exact_selected_complete_cell_prefix_area",
+            "exposure_area_aggregation": (
+                "equal_weight_mean_exact_selected_area_across_nonoverlapping_exposures_within_horizon"
+            ),
+            "per_horizon_reduction": (
+                "one_minus_candidate_mean_exact_area_div_background_mean_exact_area"
+            ),
+            "macro_reduction": "equal_weight_mean_of_three_per_horizon_reductions",
+            (
+                "bootstrap_area_values_fixed_event_weights_only_"
+                "change_hit_counts_and_selected_budget"
+            ): True,
+            "zero_reference_hit_action": "branch_not_evaluable_and_not_pass",
+            "unreachable_at_960000km2_action": "branch_not_evaluable_and_not_pass",
+            "bootstrap_invalid_branch_value_action": (
+                "retain_numeric_reduction_0.0_as_failure_not_drop"
+            ),
+            "threshold_gte": 0.10,
+            "lower_95pct_bound_gt": 0,
+        },
+    ]
+    assert g2["candidate_qualification_requires"] == [
+        "formal_validation_G2_core",
+        "direct_candidate_minus_frozen_etas_G2_track",
+        "development_increment_stability",
+        "regional_stability",
+    ]
+    development = protocol["evaluation"]["gates"]["development_increment_stability"]
+    assert development["evaluated_model_variants"] == ["dynamic", "snapshot"]
+    assert development["comparators"] == [
+        "etas_background_no_increment",
+        "kde_background_no_increment",
+        "coverage_only",
+    ]
+    assert development["minimum_positive_folds_per_variant_and_comparator"] == 2
+    assert development["median_fold_macro_information_gain_gt_per_variant_and_comparator"] == 0
+    assert development["every_comparator_track_must_pass"] is True
+    assert development["result_identity"] == {
+        "exact_horizon_row_key": [
+            "development_fold_id",
+            "model_variant",
+            "comparator_variant",
+            "horizon_days",
+        ],
+        "required_horizon_row_values": [
+            "information_gain_nats_per_event",
+            "supported_unique_physical_event_count",
+        ],
+        "complete_fold_variant_comparator_horizon_cartesian_product_required": True,
+        "expected_horizon_row_count": 54,
+        "exact_fold_macro_row_key": [
+            "development_fold_id",
+            "model_variant",
+            "comparator_variant",
+        ],
+        "required_fold_macro_row_values": [
+            "equal_weight_macro_information_gain_nats_per_event",
+            "positive_horizon_count",
+            "status",
+        ],
+        "expected_fold_macro_row_count": 18,
+        "exact_candidate_comparator_summary_key": ["model_variant", "comparator_variant"],
+        "required_candidate_comparator_summary_values": [
+            "positive_fold_count",
+            "median_fold_macro_information_gain_nats_per_event",
+            "status",
+        ],
+        "expected_candidate_comparator_summary_count": 6,
+        "allowed_statuses": ["passed", "failed", "evidence_insufficient"],
+        "missing_row_or_value_action": "evidence_insufficient",
     }
+    regional = protocol["evaluation"]["regional_stability"]
+    assert regional["fixed_nonempty_query_grid_zone_count"] == 39
+    assert regional["comparators"] == [
+        "etas_background_no_increment",
+        "kde_background_no_increment",
+        "coverage_only",
+    ]
+    assert regional["bootstrap"]["strongest_region_reselected_each_replication"] is True
+    assert regional["pass_requirements_per_variant_and_comparator"] == {
+        "observed_leave_strongest_region_out_residual_gt": 0,
+        "lower_95pct_bound_leave_strongest_region_out_residual_gt": 0,
+        "minimum_positive_event_bearing_regions": 2,
+        "positive_event_bearing_region_definition": (
+            "supported_unique_event_count_gte_1_and_macro_contribution_gt_0"
+        ),
+    }
+    assert regional["strict_recall_diagnostic"] == {
+        "denominator_field": "region_all_study_area_target_count",
+        "positive_denominator_rule": (
+            "candidate_or_comparator_strict_recall_equals_its_hit_count_divided_by_denominator"
+        ),
+        "zero_denominator_rule": {
+            "candidate_strict_hit_count_required": 0,
+            "comparator_strict_hit_count_required": 0,
+            "candidate_strict_recall_required": None,
+            "comparator_strict_recall_required": None,
+            "strict_recall_evaluability_required": "not_evaluable_no_region_targets",
+        },
+        "positive_denominator_evaluability_required": "evaluable",
+        "zero_denominator_is_diagnostic_not_track_evidence_insufficient": True,
+    }
+    regional_identity = regional["result_identity"]
+    assert regional_identity["expected_horizon_row_count"] == 702
+    assert regional_identity["expected_region_macro_row_count"] == 234
+    assert regional_identity["expected_track_summary_count"] == 6
+    assert regional_identity["expected_bootstrap_row_count"] == 12000
+    assert (
+        regional_identity[
+            "sum_region_supported_unique_physical_event_count_must_equal_global_"
+            "supported_unique_physical_event_count_within_horizon"
+        ]
+        is True
+    )
+    assert regional_identity["replication_index_domain"] == {
+        "minimum_inclusive": 0,
+        "maximum_inclusive": 1999,
+        "exact_integer_sequence_per_track_required": True,
+        "duplicate_or_extra_rows_forbidden": True,
+    }
+    adoption = protocol["evaluation"]["adoption_matrix"]
+    assert adoption["snapshot_independent_rescue_when_dynamic_G2_not_pass"] == "forbidden"
+    assert adoption["G3_not_pass_statuses"] == ["failed", "evidence_insufficient"]
+    assert adoption["direct_etas_track_pass_required_for_any_anomaly_adoption"] is True
+    assert adoption["etas_evaluable_but_direct_candidate_minus_etas_not_pass"] == (
+        "retain_best_frozen_non_anomaly_background_and_stop_anomaly_adoption"
+    )
 
     compute = protocol["compute"]
     assert compute["max_workers"] == 6
@@ -411,6 +745,19 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
     assert compute["process_priority"] == "below_normal"
     assert compute["nested_parallelism"] is False
     assert compute["blas_threads_per_worker"] == 1
+    access_control = protocol["spatial_permutation_topology"]["local_restricted_artifacts"][
+        "access_control"
+    ]
+    assert access_control["schema_version"] == 3
+    assert access_control["required_before_target_read"] is True
+    assert access_control["retained_handle_verification"]["exact_path_count"] == 5
+    assert access_control["windows"]["inherited_ace_count_required"] == 0
+    assert (
+        access_control["windows"]["inherit_only_ace_may_not_satisfy_current_object_full_control"]
+        is True
+    )
+    assert access_control["posix"]["owner_only_file_mode"] == "0600"
+    assert access_control["receipt_bound_to_scoring_qualification_and_execution_seal"] is True
 
     coverage = protocol["inputs"]["earthquake_target"]["frozen_catalog_coverage"]
     assert coverage["observed_origin_time_max_utc"] == "2026-07-09T04:25:56Z"
@@ -422,17 +769,45 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
     assert coverage["missing_or_short_coverage_action"].startswith("fail_closed")
 
     publication = protocol["publication"]
-    assert publication["result_identity_requires"] == [
-        "dynamic_G2",
-        "snapshot_equivalent_G2",
-        "time_dynamic_placebo_result_distribution",
-        "space_dynamic_placebo_result_distribution",
-        "time_snapshot_placebo_result_distribution",
-        "space_snapshot_placebo_result_distribution",
-        "dynamic_G3",
-        "adoption_decision",
-        "adopted_variant_metrics_table",
-    ]
+    assert publication["result_identity_contract"] == {
+        "current_r2_status": "not_authorized_not_created",
+        "applies_only_to_new_execution_revision_after_etas_evaluable": True,
+        "future_required_objects": [
+            "frozen_etas_artifact_parameter_and_numerical_qualification_receipt",
+            "etas_event_term_and_integrated_compensator_score_object",
+            "direct_candidate_minus_frozen_etas_G2_tracks",
+            "dynamic_minus_etas_formal_G2_result_object",
+            "snapshot_minus_etas_formal_G2_result_object",
+            "dynamic_G2",
+            "snapshot_equivalent_G2",
+            "dynamic_development_increment_stability",
+            "snapshot_development_increment_stability",
+            "development_fold_variant_comparator_horizon_values_counts_macros_and_statuses",
+            "dynamic_regional_stability",
+            "snapshot_regional_stability",
+            "regional_contribution_tables_and_residual_bootstrap_distributions",
+            "time_dynamic_placebo_result_distribution",
+            "space_dynamic_placebo_result_distribution",
+            "time_snapshot_placebo_result_distribution",
+            "space_snapshot_placebo_result_distribution",
+            "dynamic_G3",
+            "candidate_gatekeeping_sequence",
+            "candidate_gate_reached_reason_and_gate_record_sha256",
+            "candidate_gate_record_direct_etas_and_all_component_result_sha256_bindings",
+            "adoption_decision",
+            "adoption_decision_direct_etas_status_and_result_sha256",
+            "adopted_variant_metrics_table",
+        ],
+    }
+    assert publication["adopted_variant_mapping"]["background_only"] == {
+        "variant_source": ("best_frozen_non_anomaly_background_selected_before_stage4_target_read"),
+        "allowed_variants": [
+            "etas_background_no_increment",
+            "kde_background_no_increment",
+        ],
+        "selection_evidence_sha256_required": True,
+        "stage4_target_or_anomaly_result_may_not_affect_selection": True,
+    }
     isolation = publication["spatial_output_isolation"]
     spatial_files = (
         isolation["forecast_target_free_files"]
@@ -442,6 +817,36 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
     assert len(spatial_files) == len(set(spatial_files)) == 4
     assert isolation["target_payload_in_forecast_files_forbidden"] is True
     assert isolation["automatic_cross_file_target_loading_forbidden"] is True
+    assert (
+        isolation[
+            "retrospective_target_bearing_files_require_restricted_access_before_bytes_written"
+        ]
+        is True
+    )
+    assert isolation["retrospective_access_control_receipt_required_before_publication"] is True
+    assert isolation["retrospective_access_control"] == {
+        "receipt_path": (
+            "outputs/visualizations/anomaly_increment_r2_retrospective_acl_receipt.json"
+        ),
+        "restricted_parent_directory": "outputs/visualizations",
+        "parent_directory_restricted_before_target_file_creation": True,
+        "zero_byte_destination_created_before_target_bytes": True,
+        "zero_byte_destination_acl_verified_before_target_bytes": True,
+        "same_verified_handle_held_from_acl_check_through_final_write": True,
+        "file_identity_before_and_after_write_must_match": True,
+        "ordinary_temporary_file_may_not_receive_target_bytes_first": True,
+        "atomic_replace_from_unrestricted_or_unverified_temporary_file_forbidden": True,
+        "required_for_each_retrospective_file": True,
+        "receipt_bindings": [
+            "target_relative_path",
+            "verified_zero_byte_file_identity",
+            "final_file_identity",
+            "final_file_sha256",
+            "final_file_acl_descriptor_sha256",
+            "restricted_parent_directory_acl_descriptor_sha256",
+        ],
+        "receipt_and_retrospective_files_forbidden_from_public_bundle": True,
+    }
     assert isolation["public_forecast_artifact_validator"] == {
         "reject_artifact_classifications": ["local_restricted", "target_bearing"],
         "forbidden_payload_fields": [
@@ -466,11 +871,16 @@ def test_r2_corrective_contract_freezes_placebos_resources_coverage_and_publicat
             "conditional_on_fixed_fitted_model_and_excludes_refit_uncertainty"
         ),
         "etas_comparator_status": "not_evaluable",
-        "allowed_increment_claim": "relative_to_frozen_kde_background_only",
+        "formal_increment_claim_authorized": False,
+        "allowed_formal_increment_claim": "none",
+        "kde_comparison_role": "target_blind_diagnostic_design_only_not_a_formal_result",
         "incremental_value_over_etas_claim_forbidden": True,
+        "etas_not_evaluable_blocks_G2_adoption_and_target_read": True,
     }
     assert publication["display_semantics"] == {
+        "etas_background_primary_comparator_option_required": True,
         "coverage_only_option_required": True,
+        "kde_background_diagnostic_option_required": True,
         "aggregate_retrospective_view": {
             "issue_and_model_controls": "hidden_or_disabled",
             "required_summary_label_template_zh": "全部{N}个起报日汇总",
@@ -1010,7 +1420,8 @@ def test_model_gates_placebos_gpu_and_locked_test_remain_frozen() -> None:
         "threshold": 20,
         "definition": "deduplicated_union_of_physical_event_ids_across_three_primary_horizons",
     }
-    assert g2["macro_information_gain_lower_95pct_bound_gt"] == 0
+    assert g2["comparator_variant"] == "etas_background_no_increment"
+    assert g2["candidate_minus_etas_macro_information_gain_lower_95pct_bound_gt"] == 0
     assert g2["primary_time_permutation_p_lte"] == 0.05
     assert g2["candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt"] == 0
     g3 = evaluation["gates"]["G3"]

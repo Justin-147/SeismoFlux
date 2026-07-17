@@ -15,6 +15,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 from seismoflux.anomaly_increment.compute import BackendEquivalenceEvidence
+from seismoflux.anomaly_increment.config import require_stage4_r2_execution_action
 from seismoflux.anomaly_increment.immutable_file import (
     UnsafeImmutableFileError,
     read_existing_immutable_bytes,
@@ -28,6 +29,13 @@ from seismoflux.anomaly_increment.preregistration import (
     verify_content_sha256,
     with_content_sha256,
 )
+from seismoflux.anomaly_increment.restricted_access import (
+    RestrictedAccessError,
+    RestrictedLocalArtifactAccessControlEvidence,
+    observe_restricted_local_artifact_access_control,
+    restricted_access_contract_sha256,
+    validate_restricted_access_against_protocol,
+)
 from seismoflux.anomaly_increment.score_blind_path import (
     require_score_blind_project_path,
 )
@@ -37,7 +45,7 @@ if TYPE_CHECKING:
     from seismoflux.anomaly_increment.formal_preflight import FormalPreflightReceipt
 
 STAGE4_PROTOCOL_VERSION: Final[str] = "0.4.1"
-STAGE4_QUALIFICATION_SCHEMA_VERSION: Final[int] = 4
+STAGE4_QUALIFICATION_SCHEMA_VERSION: Final[int] = 5
 REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "generated_manifest_hashes_verified",
     "topology_gate_passed",
@@ -45,14 +53,19 @@ REQUIRED_SCORE_BLIND_QUALIFICATIONS: Final[tuple[str, ...]] = (
     "synthetic_end_to_end_passed",
     "cpu_float64_numerical_regression_passed",
     "restricted_spatial_artifact_hashes_verified",
+    "restricted_local_artifact_access_control_verified",
     "identity_time_mapping_reproduces_accepted_snapshot_and_trajectory_columns",
     "identity_space_mapping_reproduces_accepted_200km_scientific_columns",
     "placebo_coverage_values_and_null_bitmap_exactly_unchanged",
     "fixed_small_permutation_matches_stage3_low_level_reference",
     "worker_count_invariance_passed",
     "logical_arrow_identity_r1_verified",
+    "frozen_full_non_target_junit_count_matches_actual_scoring_freeze_suite",
 )
-FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int] = 1078
+# This is deliberately unfrozen at the protocol-tag boundary.  It may be changed
+# to an integer only once scoring implementation and the complete non-target suite
+# are final.  Every real qualification build/load fails closed while it is None.
+FROZEN_FULL_NON_TARGET_TEST_COUNT: Final[int | None] = None
 REQUIRED_TESTS_BY_QUALIFICATION: Final[dict[str, tuple[str, ...]]] = {
     "all_non_target_tests_passed": (),
     "synthetic_end_to_end_passed": (
@@ -174,6 +187,10 @@ _SCORE_BLIND_INPUT_QUALIFICATIONS: Final[frozenset[str]] = frozenset(
         "topology_gate_passed",
     }
 )
+_RESTRICTED_ACCESS_QUALIFICATION: Final[str] = "restricted_local_artifact_access_control_verified"
+_FROZEN_TEST_COUNT_QUALIFICATION: Final[str] = (
+    "frozen_full_non_target_junit_count_matches_actual_scoring_freeze_suite"
+)
 _REPOSITORY_AND_LEDGER_GATES: Final[frozenset[str]] = frozenset(
     {
         "execution_seal_verified",
@@ -274,6 +291,7 @@ class ScoreBlindInputEvidence:
     observed_project_input_hashes: tuple[tuple[str, str], ...]
     generated_manifest_hashes: tuple[tuple[str, str], ...]
     restricted_spatial_artifact_hashes: tuple[tuple[str, str], ...]
+    restricted_access_control: RestrictedLocalArtifactAccessControlEvidence
 
     def __post_init__(self) -> None:
         for label, value in (
@@ -296,6 +314,16 @@ class ScoreBlindInputEvidence:
                 _sha256(digest, label=f"{group_label}.{name}")
         if any(name == "earthquake_target" for name, _ in self.observed_project_input_hashes):
             raise ValueError("score-blind evidence must never observe the earthquake target")
+        if self.restricted_access_control.protocol_design_sha256 != self.protocol_design_sha256:
+            raise ValueError("restricted access evidence uses another protocol design")
+        expected_restricted_hashes = tuple(
+            sorted(
+                (artifact_id, digest)
+                for artifact_id, _, digest in self.restricted_access_control.file_artifacts
+            )
+        )
+        if expected_restricted_hashes != self.restricted_spatial_artifact_hashes:
+            raise ValueError("restricted access evidence uses another four-file hash set")
 
     def as_mapping(self) -> dict[str, object]:
         return with_content_sha256(
@@ -305,6 +333,7 @@ class ScoreBlindInputEvidence:
                 "protocol_design_sha256": self.protocol_design_sha256,
                 "protocol_validation_sha256": self.protocol_validation_sha256,
                 "random_input_seal_sha256": self.random_input_seal_sha256,
+                "restricted_access_control": self.restricted_access_control.as_mapping(),
                 "restricted_spatial_artifact_hashes": dict(self.restricted_spatial_artifact_hashes),
                 "schema_version": STAGE4_QUALIFICATION_SCHEMA_VERSION,
                 "target_bytes_read": False,
@@ -325,6 +354,7 @@ class ScoreBlindInputEvidence:
             "protocol_design_sha256",
             "protocol_validation_sha256",
             "random_input_seal_sha256",
+            "restricted_access_control",
             "restricted_spatial_artifact_hashes",
             "schema_version",
             "target_bytes_read",
@@ -355,8 +385,16 @@ class ScoreBlindInputEvidence:
                 observed_project_input_hashes=pairs("observed_project_input_hashes"),
                 generated_manifest_hashes=pairs("generated_manifest_hashes"),
                 restricted_spatial_artifact_hashes=pairs("restricted_spatial_artifact_hashes"),
+                restricted_access_control=(
+                    RestrictedLocalArtifactAccessControlEvidence.from_mapping(
+                        _mapping(
+                            value.get("restricted_access_control"),
+                            label="restricted_access_control",
+                        )
+                    )
+                ),
             )
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, RestrictedAccessError) as exc:
             raise Stage4QualificationError("score-blind input evidence invariants failed") from exc
 
 
@@ -519,19 +557,18 @@ def observe_score_blind_inputs(
         "entity_mapping": "entity_mapping",
         "zone_geometry": "zone_geometry",
     }
-    local_hashes: dict[str, str] = {}
+    expected_local_hashes: dict[str, str] = {}
     for artifact_id, config_key in config_keys.items():
         entry = _mapping(local_manifest.get(artifact_id), label=f"local_artifacts.{artifact_id}")
-        path = _project_path(
+        _project_path(
             project_root,
             protocol,
             local_config.get(config_key),
             label=f"local_restricted_artifacts.{config_key}",
         )
-        local_hashes[artifact_id] = _verify_hash(
-            path,
+        expected_local_hashes[artifact_id] = _sha256(
             entry.get("sha256"),
-            label=f"local artifact {artifact_id}",
+            label=f"local artifact {artifact_id} expected SHA-256",
         )
 
     validation = validate_stage4_protocol_bundle(
@@ -547,8 +584,19 @@ def observe_score_blind_inputs(
         feature_manifest=generated_documents["feature_set"],
         spatial_manifest=spatial,
     )
+    design_sha256 = protocol_design_sha256(protocol)
+    try:
+        restricted_access_control = observe_restricted_local_artifact_access_control(
+            project_root,
+            protocol,
+            expected_file_hashes=expected_local_hashes,
+        )
+    except RestrictedAccessError as exc:
+        raise Stage4QualificationError(
+            "restricted local artifact access control is not verified"
+        ) from exc
     return ScoreBlindInputEvidence(
-        protocol_design_sha256=protocol_design_sha256(protocol),
+        protocol_design_sha256=design_sha256,
         random_input_seal_sha256=_sha256(
             random_input_seal.get("content_sha256"),
             label="random input seal",
@@ -559,7 +607,13 @@ def observe_score_blind_inputs(
         ),
         observed_project_input_hashes=tuple(sorted(observed_inputs.items())),
         generated_manifest_hashes=tuple(sorted(generated_hashes.items())),
-        restricted_spatial_artifact_hashes=tuple(sorted(local_hashes.items())),
+        restricted_spatial_artifact_hashes=tuple(
+            sorted(
+                (artifact_id, digest)
+                for artifact_id, _, digest in restricted_access_control.file_artifacts
+            )
+        ),
+        restricted_access_control=restricted_access_control,
     )
 
 
@@ -679,10 +733,20 @@ def parse_pytest_junit_evidence(payload: bytes) -> PytestRunEvidence:
 
 def _qualification_check_contract(
     name: str,
-) -> tuple[Literal["score_blind_inputs", "stage4_pytest", "full_pytest"], tuple[str, ...]]:
+) -> tuple[
+    Literal[
+        "score_blind_inputs",
+        "restricted_access_control",
+        "stage4_pytest",
+        "full_pytest",
+    ],
+    tuple[str, ...],
+]:
     if name in _SCORE_BLIND_INPUT_QUALIFICATIONS:
         return "score_blind_inputs", ()
-    if name == "all_non_target_tests_passed":
+    if name == _RESTRICTED_ACCESS_QUALIFICATION:
+        return "restricted_access_control", ()
+    if name in {"all_non_target_tests_passed", _FROZEN_TEST_COUNT_QUALIFICATION}:
         return "full_pytest", ()
     try:
         return "stage4_pytest", tuple(sorted(REQUIRED_TESTS_BY_QUALIFICATION[name]))
@@ -695,14 +759,25 @@ class QualificationCheckReceipt:
     """One gate bound to structured source evidence and exact passing tests."""
 
     name: str
-    evidence_kind: Literal["score_blind_inputs", "stage4_pytest", "full_pytest"]
+    evidence_kind: Literal[
+        "score_blind_inputs",
+        "restricted_access_control",
+        "stage4_pytest",
+        "full_pytest",
+    ]
     evidence_sha256: str
     required_test_ids: tuple[str, ...] = ()
+    expected_test_count: int | None = None
 
     def __post_init__(self) -> None:
         if self.name not in REQUIRED_SCORE_BLIND_QUALIFICATIONS:
             raise ValueError("unknown stage-4 qualification check")
-        if self.evidence_kind not in {"score_blind_inputs", "stage4_pytest", "full_pytest"}:
+        if self.evidence_kind not in {
+            "score_blind_inputs",
+            "restricted_access_control",
+            "stage4_pytest",
+            "full_pytest",
+        }:
             raise ValueError("unknown stage-4 qualification evidence kind")
         _sha256(self.evidence_sha256, label=f"qualification {self.name} evidence")
         if self.required_test_ids != tuple(sorted(set(self.required_test_ids))):
@@ -710,11 +785,21 @@ class QualificationCheckReceipt:
         expected_kind, expected_ids = _qualification_check_contract(self.name)
         if self.evidence_kind != expected_kind or self.required_test_ids != expected_ids:
             raise ValueError("qualification check differs from its frozen evidence contract")
+        if self.name == _FROZEN_TEST_COUNT_QUALIFICATION:
+            if (
+                FROZEN_FULL_NON_TARGET_TEST_COUNT is None
+                or isinstance(self.expected_test_count, bool)
+                or self.expected_test_count != FROZEN_FULL_NON_TARGET_TEST_COUNT
+            ):
+                raise ValueError("full non-target test count is not finally frozen")
+        elif self.expected_test_count is not None:
+            raise ValueError("only the frozen JUnit-count gate may bind a test count")
 
     def as_mapping(self) -> dict[str, object]:
         return {
             "evidence_kind": self.evidence_kind,
             "evidence_sha256": self.evidence_sha256,
+            "expected_test_count": self.expected_test_count,
             "required_test_ids": list(self.required_test_ids),
         }
 
@@ -861,6 +946,8 @@ class Stage4QualificationEvidence:
     scoring_code_commit: str
     checks: tuple[QualificationCheckReceipt, ...]
     score_blind_input_evidence_sha256: str
+    restricted_local_artifact_access_control_evidence_sha256: str
+    restricted_local_artifact_access_contract_sha256: str
     formal_preflight_receipt_sha256: str
     logical_identity_replay_audit_sha256: str
     stage4_pytest: PytestRunEvidence
@@ -878,6 +965,14 @@ class Stage4QualificationEvidence:
             label="score_blind_input_evidence_sha256",
         )
         _sha256(
+            self.restricted_local_artifact_access_control_evidence_sha256,
+            label="restricted_local_artifact_access_control_evidence_sha256",
+        )
+        _sha256(
+            self.restricted_local_artifact_access_contract_sha256,
+            label="restricted_local_artifact_access_contract_sha256",
+        )
+        _sha256(
             self.formal_preflight_receipt_sha256,
             label="formal_preflight_receipt_sha256",
         )
@@ -891,6 +986,8 @@ class Stage4QualificationEvidence:
         )
         if tuple(item.name for item in self.checks) != REQUIRED_SCORE_BLIND_QUALIFICATIONS:
             raise ValueError("qualification checks differ from the frozen gate order")
+        if FROZEN_FULL_NON_TARGET_TEST_COUNT is None:
+            raise ValueError("full non-target regression count is not finally frozen")
         if self.full_pytest.test_count != FROZEN_FULL_NON_TARGET_TEST_COUNT:
             raise ValueError("full non-target regression count differs from the scoring freeze")
         if self.gpu_status not in {
@@ -924,6 +1021,12 @@ class Stage4QualificationEvidence:
                 "logical_identity_replay_audit_sha256": (self.logical_identity_replay_audit_sha256),
                 "protocol_design_sha256": self.protocol_design_sha256,
                 "protocol_version": STAGE4_PROTOCOL_VERSION,
+                "restricted_local_artifact_access_control_evidence_sha256": (
+                    self.restricted_local_artifact_access_control_evidence_sha256
+                ),
+                "restricted_local_artifact_access_contract_sha256": (
+                    self.restricted_local_artifact_access_contract_sha256
+                ),
                 "schema_version": STAGE4_QUALIFICATION_SCHEMA_VERSION,
                 "score_blind_input_evidence_sha256": self.score_blind_input_evidence_sha256,
                 "scoring_code_commit": self.scoring_code_commit,
@@ -955,6 +1058,8 @@ class Stage4QualificationEvidence:
             "logical_identity_replay_audit_sha256",
             "protocol_design_sha256",
             "protocol_version",
+            "restricted_local_artifact_access_contract_sha256",
+            "restricted_local_artifact_access_control_evidence_sha256",
             "schema_version",
             "score_blind_input_evidence_sha256",
             "scoring_code_commit",
@@ -986,7 +1091,12 @@ class Stage4QualificationEvidence:
         receipts: list[QualificationCheckReceipt] = []
         for name in REQUIRED_SCORE_BLIND_QUALIFICATIONS:
             entry = _mapping(checks.get(name), label=f"qualification checks.{name}")
-            if set(entry) != {"evidence_kind", "evidence_sha256", "required_test_ids"}:
+            if set(entry) != {
+                "evidence_kind",
+                "evidence_sha256",
+                "expected_test_count",
+                "required_test_ids",
+            }:
                 raise Stage4QualificationError(f"qualification check schema changed: {name}")
             raw_ids = entry.get("required_test_ids")
             if not isinstance(raw_ids, list) or any(not isinstance(item, str) for item in raw_ids):
@@ -998,6 +1108,7 @@ class Stage4QualificationEvidence:
                         evidence_kind=cast(Any, entry["evidence_kind"]),
                         evidence_sha256=cast(str, entry["evidence_sha256"]),
                         required_test_ids=tuple(cast(list[str], raw_ids)),
+                        expected_test_count=cast(int | None, entry["expected_test_count"]),
                     )
                 )
             except (TypeError, ValueError) as exc:
@@ -1015,6 +1126,14 @@ class Stage4QualificationEvidence:
                 checks=tuple(receipts),
                 score_blind_input_evidence_sha256=cast(
                     str, value["score_blind_input_evidence_sha256"]
+                ),
+                restricted_local_artifact_access_control_evidence_sha256=cast(
+                    str,
+                    value["restricted_local_artifact_access_control_evidence_sha256"],
+                ),
+                restricted_local_artifact_access_contract_sha256=cast(
+                    str,
+                    value["restricted_local_artifact_access_contract_sha256"],
                 ),
                 formal_preflight_receipt_sha256=cast(str, value["formal_preflight_receipt_sha256"]),
                 logical_identity_replay_audit_sha256=cast(
@@ -1066,8 +1185,26 @@ def validate_stage4_qualification_against_protocol(
         raise Stage4QualificationError(
             "structured qualification checks differ from the protocol gate set"
         )
+    test_count_binding = _mapping(
+        scoring.get("test_count_binding"),
+        label="scoring_code_freeze.test_count_binding",
+    )
+    declared_test_count = test_count_binding.get("expected_test_count")
+    if FROZEN_FULL_NON_TARGET_TEST_COUNT is None or declared_test_count != "UNFROZEN":
+        raise Stage4QualificationError(
+            "full non-target JUnit count remains unfrozen in scoring code or the "
+            "protocol delegation changed"
+        )
     if evidence.protocol_design_sha256 != protocol_design_sha256(protocol):
         raise Stage4QualificationError("qualification uses another protocol design")
+    try:
+        expected_access_contract_sha256 = restricted_access_contract_sha256(protocol)
+    except RestrictedAccessError as exc:
+        raise Stage4QualificationError("restricted local artifact access contract changed") from exc
+    if evidence.restricted_local_artifact_access_contract_sha256 != (
+        expected_access_contract_sha256
+    ):
+        raise Stage4QualificationError("qualification uses another restricted-access contract")
     expected_status = _gpu_status(
         protocol,
         requested=evidence.gpu_requested,
@@ -1084,6 +1221,14 @@ def validate_stage4_qualification_against_protocol(
             if receipt.evidence_sha256 != evidence.score_blind_input_evidence_sha256:
                 raise Stage4QualificationError("score-blind check uses another input receipt")
             continue
+        if receipt.evidence_kind == "restricted_access_control":
+            if receipt.evidence_sha256 != (
+                evidence.restricted_local_artifact_access_control_evidence_sha256
+            ):
+                raise Stage4QualificationError(
+                    "restricted-access check uses another typed ACL receipt"
+                )
+            continue
         run = (
             evidence.full_pytest
             if receipt.evidence_kind == "full_pytest"
@@ -1091,6 +1236,12 @@ def validate_stage4_qualification_against_protocol(
         )
         if receipt.evidence_sha256 != run.content_sha256:
             raise Stage4QualificationError("qualification check uses another pytest run")
+        if receipt.name == _FROZEN_TEST_COUNT_QUALIFICATION and (
+            receipt.expected_test_count != run.test_count
+        ):
+            raise Stage4QualificationError(
+                "frozen non-target JUnit count differs from the actual full pytest receipt"
+            )
         if not set(receipt.required_test_ids) <= set(run.test_ids):
             raise Stage4QualificationError(
                 f"qualification evidence omits required tests: {receipt.name}"
@@ -1137,6 +1288,7 @@ def build_stage4_qualification_evidence(
 ) -> Stage4QualificationEvidence:
     """Derive every check from parsed JUnit, fresh inputs, and typed backend evidence."""
 
+    require_stage4_r2_execution_action(protocol, action="qualification")
     if not isinstance(score_blind_input_evidence, ScoreBlindInputEvidence):
         raise TypeError("score_blind_input_evidence must be ScoreBlindInputEvidence")
     # Local import avoids a module cycle: formal_preflight itself depends on the
@@ -1168,6 +1320,15 @@ def build_stage4_qualification_evidence(
         score_blind_input_evidence.random_input_seal_sha256
     ):
         raise Stage4QualificationError("formal preflight uses another random input seal")
+    try:
+        validate_restricted_access_against_protocol(
+            protocol,
+            score_blind_input_evidence.restricted_access_control,
+        )
+    except RestrictedAccessError as exc:
+        raise Stage4QualificationError(
+            "restricted local artifact access evidence differs from the protocol"
+        ) from exc
     receipts: list[QualificationCheckReceipt] = []
     for name in REQUIRED_SCORE_BLIND_QUALIFICATIONS:
         if name in _SCORE_BLIND_INPUT_QUALIFICATIONS:
@@ -1179,12 +1340,33 @@ def build_stage4_qualification_evidence(
                 )
             )
             continue
+        if name == _RESTRICTED_ACCESS_QUALIFICATION:
+            receipts.append(
+                QualificationCheckReceipt(
+                    name=name,
+                    evidence_kind="restricted_access_control",
+                    evidence_sha256=(
+                        score_blind_input_evidence.restricted_access_control.content_sha256
+                    ),
+                )
+            )
+            continue
         if name == "all_non_target_tests_passed":
             receipts.append(
                 QualificationCheckReceipt(
                     name=name,
                     evidence_kind="full_pytest",
                     evidence_sha256=full_pytest.content_sha256,
+                )
+            )
+            continue
+        if name == _FROZEN_TEST_COUNT_QUALIFICATION:
+            receipts.append(
+                QualificationCheckReceipt(
+                    name=name,
+                    evidence_kind="full_pytest",
+                    evidence_sha256=full_pytest.content_sha256,
+                    expected_test_count=FROZEN_FULL_NON_TARGET_TEST_COUNT,
                 )
             )
             continue
@@ -1202,6 +1384,12 @@ def build_stage4_qualification_evidence(
         scoring_code_commit=scoring_code_commit,
         checks=tuple(receipts),
         score_blind_input_evidence_sha256=score_blind_input_evidence.content_sha256,
+        restricted_local_artifact_access_control_evidence_sha256=(
+            score_blind_input_evidence.restricted_access_control.content_sha256
+        ),
+        restricted_local_artifact_access_contract_sha256=(
+            score_blind_input_evidence.restricted_access_control.access_contract_sha256
+        ),
         formal_preflight_receipt_sha256=formal_preflight_receipt.content_sha256,
         logical_identity_replay_audit_sha256=logical_identity_replay_audit_sha256,
         stage4_pytest=stage4_pytest,
@@ -1225,7 +1413,14 @@ def build_stage4_qualification_evidence(
     return result
 
 
-def load_stage4_qualification_evidence(path: Path) -> Stage4QualificationEvidence:
+def _load_stage4_qualification_evidence_generic(path: Path) -> Stage4QualificationEvidence:
+    """Internal evidence parser behind the guarded production loader.
+
+    Unit tests exercise this private serialization core directly.  Repository
+    production callers must use :func:`load_stage4_qualification_evidence`, whose
+    first operation is the frozen R2 qualification guard.
+    """
+
     target = Path(os.path.abspath(os.fspath(path)))
     try:
         require_existing_real_directory_tree(
@@ -1243,11 +1438,25 @@ def load_stage4_qualification_evidence(path: Path) -> Stage4QualificationEvidenc
     return Stage4QualificationEvidence.from_mapping(_mapping(value, label="qualification evidence"))
 
 
-def write_stage4_qualification_evidence_atomic(
+def load_stage4_qualification_evidence(
+    path: Path,
+    *,
+    protocol: Mapping[str, object],
+) -> Stage4QualificationEvidence:
+    """Load production qualification evidence only after the R2 hard stop."""
+
+    # This must remain before Path/os.path conversion, directory inspection,
+    # file open, decoding, or hashing.  A blocked R2 therefore has zero artifact
+    # path observations even when a hostile path-like object is supplied.
+    require_stage4_r2_execution_action(protocol, action="qualification")
+    return _load_stage4_qualification_evidence_generic(path)
+
+
+def _write_stage4_qualification_evidence_atomic_generic(
     path: Path,
     evidence: Stage4QualificationEvidence,
 ) -> str:
-    """Create qualification evidence once; permit only byte-identical replay."""
+    """Create synthetic evidence once; permit only byte-identical replay."""
 
     if not isinstance(evidence, Stage4QualificationEvidence):
         raise TypeError("evidence must be Stage4QualificationEvidence")
@@ -1310,6 +1519,20 @@ def write_stage4_qualification_evidence_atomic(
             "new stage-4 qualification is not a safe single-link regular file"
         ) from exc
     return serialized_sha256
+
+
+def write_stage4_qualification_evidence_atomic(
+    path: Path,
+    evidence: Stage4QualificationEvidence,
+    *,
+    protocol: Mapping[str, object],
+) -> str:
+    """Publish production qualification evidence after a guard-first decision."""
+
+    # Do not type-check or serialize ``evidence`` and do not dereference ``path``
+    # until the complete protocol authorizes qualification artifact I/O.
+    require_stage4_r2_execution_action(protocol, action="qualification")
+    return _write_stage4_qualification_evidence_atomic_generic(path, evidence)
 
 
 __all__ = [

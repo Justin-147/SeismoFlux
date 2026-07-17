@@ -125,6 +125,7 @@ def test_production_entry_has_one_explicit_run_call_and_no_alternate_scoring_cha
         "materialize_after_authorized_target",
         "prepare_formal_run_session",
         "run_stage4_in_memory_pipeline",
+        "_run_stage4_in_memory_pipeline_core",
     }
     assert (
         not {

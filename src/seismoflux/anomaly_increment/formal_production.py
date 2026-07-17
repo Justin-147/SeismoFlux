@@ -31,6 +31,7 @@ from seismoflux.anomaly_increment.config import (
     STAGE4_CHECKPOINT_ROOT_RELATIVE_PATH,
     Stage4ProtocolBundle,
     load_stage4_protocol_bundle,
+    require_stage4_r2_execution_action,
     stage4_scoring_freeze_relative_path,
 )
 from seismoflux.anomaly_increment.convergence import (
@@ -438,8 +439,15 @@ def load_stage4_formal_readiness(project_root: Path) -> FormalProductionReadines
 
     root = Path(project_root).resolve()
     protocol = load_stage4_protocol_bundle(root)
+    require_stage4_r2_execution_action(
+        protocol.protocol,
+        action="formal_scoring",
+    )
     seal_path = _scoring_seal_path(protocol)
-    scoring_seal = load_stage4_scoring_seal(seal_path)
+    scoring_seal = load_stage4_scoring_seal(
+        seal_path,
+        protocol=protocol.protocol,
+    )
     score_blind_inputs = observe_score_blind_inputs(root, protocol.protocol)
     if score_blind_inputs != scoring_seal.score_blind_inputs:
         raise ValueError("fresh score-blind inputs differ from the scoring seal")
@@ -455,7 +463,10 @@ def load_stage4_formal_readiness(project_root: Path) -> FormalProductionReadines
         scoring_code_commit=scoring_seal.qualification.scoring_code_commit,
     )
     receipt_path = _formal_preflight_receipt_path(protocol)
-    stored_receipt = load_formal_preflight_receipt(receipt_path)
+    stored_receipt = load_formal_preflight_receipt(
+        receipt_path,
+        protocol=protocol.protocol,
+    )
     validate_stage4_qualification_against_protocol(
         protocol.protocol,
         scoring_seal.qualification,
@@ -511,6 +522,7 @@ def authorize_stage4_formal_readiness(
         project_root=root,
         authorization=authorization,
         preflight=preflight,
+        execution_protocol=readiness.protocol.protocol,
         checkpoint_directory=_frozen_scoring_path(
             readiness.protocol,
             key="checkpoint_root",

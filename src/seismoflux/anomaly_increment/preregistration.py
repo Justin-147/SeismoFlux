@@ -242,8 +242,10 @@ def validate_stage4_protocol_bundle(
         raise ValueError("stage-4 protocol root keys changed without a protocol revision")
     if protocol.get("protocol_version") != STAGE4_PROTOCOL_VERSION:
         raise ValueError("stage-4 protocol version is not 0.4.1")
-    if protocol.get("status") != "preregistered_before_any_stage4_target_score":
-        raise ValueError("stage-4 protocol is not score-blind preregistration")
+    if protocol.get("status") != (
+        "target_blind_protocol_frozen_execution_blocked_before_target_read"
+    ):
+        raise ValueError("stage-4 R2 protocol is not the frozen target-blind blocked revision")
 
     manifests = {
         "feature": feature_manifest,
@@ -1989,6 +1991,19 @@ def _write_bytes_atomic(path: Path, payload: bytes) -> None:
         raise
 
 
+def _parquet_round_trip_matches(path: Path, expected: pa.Table) -> bool:
+    """Read a Parquet check without retaining a Windows file handle."""
+
+    with path.open("rb") as source:
+        round_trip = pq.read_table(
+            source,
+            use_threads=False,
+            memory_map=False,
+            pre_buffer=False,
+        )
+        return bool(round_trip.equals(expected, check_metadata=True))
+
+
 def _write_mapping_parquet(
     path: Path,
     *,
@@ -2028,8 +2043,7 @@ def _write_mapping_parquet(
             data_page_version="1.0",
             row_group_size=table.num_rows,
         )
-        check = pq.read_table(temporary_name)
-        if not check.equals(table, check_metadata=True):
+        if not _parquet_round_trip_matches(Path(temporary_name), table):
             raise RuntimeError("local construction-zone mapping changed during Parquet round trip")
         os.replace(temporary_name, path)
         temporary_name = None
@@ -2081,8 +2095,7 @@ def _write_entity_mapping_parquet(path: Path, assignments: _EntityAssignments) -
             data_page_version="1.0",
             row_group_size=table.num_rows,
         )
-        check = pq.read_table(temporary_name)
-        if not check.equals(table, check_metadata=True):
+        if not _parquet_round_trip_matches(Path(temporary_name), table):
             raise RuntimeError("local entity-zone mapping changed during Parquet round trip")
         os.replace(temporary_name, path)
         temporary_name = None
@@ -2125,8 +2138,7 @@ def _write_zones_parquet(path: Path, zones: Sequence[BaseGeometry]) -> None:
             data_page_version="1.0",
             row_group_size=table.num_rows,
         )
-        check = pq.read_table(temporary_name)
-        if not check.equals(table, check_metadata=True):
+        if not _parquet_round_trip_matches(Path(temporary_name), table):
             raise RuntimeError("local construction-zone geometry changed during Parquet round trip")
         os.replace(temporary_name, path)
         temporary_name = None

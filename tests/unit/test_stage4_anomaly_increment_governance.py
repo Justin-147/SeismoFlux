@@ -13,26 +13,43 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import ModuleType, SimpleNamespace
 from typing import Any, cast
 
 import pytest
+import yaml
 from stage4_formal_preflight_fixture import make_formal_preflight_receipt
 
+import seismoflux.anomaly_increment.attempt_ledger as attempt_ledger_module
 import seismoflux.anomaly_increment.authorization as authorization_module
+import seismoflux.anomaly_increment.config as config_module
+import seismoflux.anomaly_increment.formal_preflight as formal_preflight_module
 import seismoflux.anomaly_increment.immutable_file as immutable_file_module
+import seismoflux.anomaly_increment.qualification as qualification_module
 import seismoflux.anomaly_increment.target_access as target_access_module
 from seismoflux.anomaly_increment.attempt_ledger import (
     STAGE4_TARGET_SCOPE,
     Stage4LedgerError,
     Stage4OperationAlreadyConsumedError,
-    complete_stage4_operation,
-    initialize_stage4_ledger,
-    read_stage4_ledger,
-    recover_interrupted_stage4_operations,
-    registered_stage4_attempt,
-    reserve_stage4_operation,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _complete_stage4_operation_generic as complete_stage4_operation,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _initialize_stage4_ledger_generic as initialize_stage4_ledger,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _read_stage4_ledger_generic as read_stage4_ledger,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _recover_interrupted_stage4_operations_generic as recover_interrupted_stage4_operations,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _registered_stage4_attempt_generic as registered_stage4_attempt,
+)
+from seismoflux.anomaly_increment.attempt_ledger import (
+    _reserve_stage4_operation_generic as reserve_stage4_operation,
 )
 from seismoflux.anomaly_increment.authorization import (
     STAGE4_ATTEMPT_LEDGER_RELATIVE_PATH,
@@ -53,7 +70,9 @@ from seismoflux.anomaly_increment.compute import BackendEquivalenceEvidence
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
     FormalPreflightReceipt,
-    load_formal_preflight_receipt,
+)
+from seismoflux.anomaly_increment.formal_preflight import (
+    _load_formal_preflight_receipt_generic as load_formal_preflight_receipt,
 )
 from seismoflux.anomaly_increment.immutable_file import (
     UnsafeImmutableFileError,
@@ -64,7 +83,6 @@ from seismoflux.anomaly_increment.preregistration import (
     with_content_sha256,
 )
 from seismoflux.anomaly_increment.qualification import (
-    FROZEN_FULL_NON_TARGET_TEST_COUNT,
     REQUIRED_TESTS_BY_QUALIFICATION,
     PytestRunEvidence,
     ScoreBlindInputEvidence,
@@ -72,10 +90,22 @@ from seismoflux.anomaly_increment.qualification import (
     Stage4QualificationEvidence,
     build_stage4_qualification_evidence,
     expected_target_identity_from_protocol,
-    load_stage4_qualification_evidence,
     parse_pytest_junit_evidence,
     validate_stage4_qualification_against_formal_preflight,
-    write_stage4_qualification_evidence_atomic,
+)
+from seismoflux.anomaly_increment.qualification import (
+    _load_stage4_qualification_evidence_generic as load_stage4_qualification_evidence,
+)
+from seismoflux.anomaly_increment.qualification import (
+    _write_stage4_qualification_evidence_atomic_generic as write_qualification,
+)
+from seismoflux.anomaly_increment.restricted_access import (
+    RESTRICTED_ARTIFACT_IDS,
+    RestrictedAccessError,
+    RestrictedLocalArtifactAccessControlEvidence,
+    RestrictedPathAccessObservation,
+    canonical_permission_descriptor,
+    restricted_access_contract_sha256,
 )
 from seismoflux.anomaly_increment.target_access import (
     Stage4LockedTestForbiddenError,
@@ -94,6 +124,91 @@ PROTOCOL_TAG_OBJECT = "3" * 40
 SCORING_TAG_OBJECT = "4" * 40
 EVIDENCE_SHA256 = "a" * 64
 BINDING_SHA256 = "b" * 64
+SYNTHETIC_FROZEN_TEST_COUNT = 128
+
+
+@pytest.fixture(autouse=True)
+def _synthetic_frozen_test_count(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        qualification_module,
+        "FROZEN_FULL_NON_TARGET_TEST_COUNT",
+        SYNTHETIC_FROZEN_TEST_COUNT,
+    )
+
+    # These tests exercise the pre-registered future execution machinery in
+    # isolation. Production entry points remain blocked by the real R2 protocol;
+    # dedicated fail-closed tests cover that boundary without this fixture.
+    def allow_future_execution(*args: object, **kwargs: object) -> None:
+        return None
+
+    def synthetic_scoring_freeze_relative_path(
+        protocol: dict[str, Any],
+        key: str,
+    ) -> PurePosixPath:
+        freeze = cast(dict[str, Any], protocol["freeze"])
+        scoring = cast(dict[str, Any], freeze["scoring_code_freeze"])
+        raw = scoring[key]
+        assert isinstance(raw, str)
+        return PurePosixPath(raw)
+
+    monkeypatch.setattr(
+        attempt_ledger_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        authorization_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        target_access_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        qualification_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        formal_preflight_module,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        seal_script,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        qualification_script,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    monkeypatch.setattr(
+        preflight_script,
+        "require_stage4_r2_execution_action",
+        allow_future_execution,
+    )
+    # Synthetic target identities necessarily differ from the immutable real R2
+    # design hash.  Only these downstream unit tests replace the strict path
+    # validator; production modules retain the real validator and guard.
+    monkeypatch.setattr(
+        authorization_module,
+        "stage4_scoring_freeze_relative_path",
+        synthetic_scoring_freeze_relative_path,
+    )
+    monkeypatch.setattr(
+        seal_script,
+        "stage4_scoring_freeze_relative_path",
+        synthetic_scoring_freeze_relative_path,
+    )
+    monkeypatch.setattr(
+        qualification_script,
+        "stage4_scoring_freeze_relative_path",
+        synthetic_scoring_freeze_relative_path,
+    )
 
 
 def _load_seal_script() -> ModuleType:
@@ -142,6 +257,7 @@ def _protocol(
 ) -> dict[str, Any]:
     return {
         "protocol_version": "0.4.1",
+        "frozen_on": "2026-07-17",
         "generated_manifests": {},
         "freeze": {
             "execution_revision": "r2",
@@ -249,15 +365,25 @@ def _protocol(
                     "synthetic_end_to_end_passed",
                     "cpu_float64_numerical_regression_passed",
                     "restricted_spatial_artifact_hashes_verified",
+                    "restricted_local_artifact_access_control_verified",
                     "identity_time_mapping_reproduces_accepted_snapshot_and_trajectory_columns",
                     "identity_space_mapping_reproduces_accepted_200km_scientific_columns",
                     "placebo_coverage_values_and_null_bitmap_exactly_unchanged",
                     "fixed_small_permutation_matches_stage3_low_level_reference",
                     "worker_count_invariance_passed",
                     "logical_arrow_identity_r1_verified",
+                    "frozen_full_non_target_junit_count_matches_actual_scoring_freeze_suite",
                     "formal_attempt_count_equals_zero",
                     "target_read_count_equals_zero",
                 ],
+                "test_count_binding": {
+                    "freeze_time": (
+                        "after_scoring_implementation_and_all_non_target_tests_are_final"
+                    ),
+                    "actual_junit_count_must_equal_frozen_count": True,
+                    "protocol_acceptance_snapshot_count_may_not_be_reused": True,
+                    "expected_test_count": "UNFROZEN",
+                },
             },
         },
         "compute": {
@@ -277,6 +403,99 @@ def _protocol(
                 "coefficient_max_abs_tolerance": 1.0e-8,
                 "integrated_intensity_relative_tolerance": 1.0e-8,
             },
+        },
+        "spatial_permutation_topology": {
+            "local_restricted_artifacts": {
+                "directory": "data/interim/stage4/anomaly_increment_r2",
+                "cell_mapping": (
+                    "data/interim/stage4/anomaly_increment_r2/"
+                    "construction_zone_cell_mapping.parquet"
+                ),
+                "connectors": (
+                    "data/interim/stage4/anomaly_increment_r2/construction_zone_connectors.json"
+                ),
+                "entity_mapping": (
+                    "data/interim/stage4/anomaly_increment_r2/"
+                    "construction_zone_entity_mapping.parquet"
+                ),
+                "zone_geometry": (
+                    "data/interim/stage4/anomaly_increment_r2/construction_zones.parquet"
+                ),
+                "access_control": {
+                    "schema_version": 3,
+                    "policy_id": "stage4_restricted_local_artifact_access_v3",
+                    "required_before_target_read": True,
+                    "receipt_bound_to_scoring_qualification_and_execution_seal": True,
+                    "retained_handle_verification": {
+                        "exact_path_count": 5,
+                        "directory_and_four_frozen_artifacts_required": True,
+                        "no_follow_open_required": True,
+                        "regular_single_link_files_and_non_reparse_paths_required": True,
+                        "directory_handle_retained_until_all_file_checks_complete": True,
+                        "all_four_file_hashes_computed_on_retained_handles": True,
+                        (
+                            "entry_and_exit_owner_permission_samples_on_same_retained_"
+                            "handle_required"
+                        ): True,
+                        ("entry_and_exit_canonical_permission_descriptor_bytes_must_match"): True,
+                        "handle_and_path_identity_and_state_reverified_before_release": True,
+                    },
+                    "windows": {
+                        "descriptor_query": "GetSecurityInfo_on_retained_handle",
+                        "queried_by_handle_required": True,
+                        "allowed_principal_roles": [
+                            "current_process_user",
+                            "local_system",
+                            "builtin_administrators",
+                        ],
+                        "owner_must_be_in_allowed_principal_roles": True,
+                        "current_process_user_explicit_full_control_required": True,
+                        ("inherit_only_ace_may_not_satisfy_current_object_full_control"): True,
+                        "full_control_access_mask_hex": "0x001f01ff",
+                        "dacl_present_required": True,
+                        "dacl_protected_required": True,
+                        "dacl_defaulted_required": False,
+                        "inherited_ace_count_required": 0,
+                        "security_descriptor_revision_required": 1,
+                        "security_descriptor_control_protected_bit_hex": "0x1000",
+                        "deny_or_unknown_ace_forbidden": True,
+                        "ace_for_unauthorized_principal_forbidden": True,
+                    },
+                    "posix": {
+                        "platform_family_required": "linux",
+                        "queried_by_handle_required": True,
+                        "owner_must_equal_effective_uid": True,
+                        "owner_only_file_mode": "0600",
+                        "owner_only_directory_mode": "0700",
+                        "filesystem_locality_required": "local",
+                        "acl_model_required": "classic_mode_bits_without_acl_xattrs",
+                        "acl_related_xattrs_must_equal": [],
+                        "allowed_local_classic_filesystems": [
+                            {
+                                "filesystem_type": "ext2_ext3_ext4",
+                                "filesystem_magic_hex": "0x0000ef53",
+                            },
+                            {
+                                "filesystem_type": "tmpfs",
+                                "filesystem_magic_hex": "0x01021994",
+                            },
+                            {
+                                "filesystem_type": "xfs",
+                                "filesystem_magic_hex": "0x58465342",
+                            },
+                            {
+                                "filesystem_type": "btrfs",
+                                "filesystem_magic_hex": "0x9123683e",
+                            },
+                            {
+                                "filesystem_type": "f2fs",
+                                "filesystem_magic_hex": "0xf2f52010",
+                            },
+                        ],
+                    },
+                    "unsupported_or_unverifiable_platform_action": "fail_closed",
+                },
+            }
         },
         "inputs": {
             "earthquake_target": {
@@ -307,6 +526,19 @@ def _protocol(
             }
         },
         "evaluation": {
+            "machine_status_vocabularies": {
+                "scientific_gate_status": {
+                    "allowed": ["passed", "failed", "evidence_insufficient", "not_reached"],
+                    "legacy_fail_status_forbidden": True,
+                },
+                "comparator_evaluability": {
+                    "allowed": ["evaluable", "not_evaluable"],
+                },
+                "execution_artifact_state": {
+                    "allowed": ["not_authorized_not_computed", "not_authorized_not_created"],
+                    "distinct_from_scientific_gate_status": True,
+                },
+            },
             "permutations": {
                 "formal_requests": [
                     {"kind": "time", "model_variant": "dynamic"},
@@ -323,6 +555,98 @@ def _protocol(
                 "checkpoint_identity_pattern": "kind-model_variant",
                 "exact_request_set_required": True,
                 "mappings_paired_across_dynamic_and_snapshot": True,
+            },
+            "multiple_comparisons": {
+                "exploratory_method": "holm",
+                "alpha": 0.05,
+                "exploratory_holm_families": {
+                    "family_definition": "candidate_variant_x_placebo_kind",
+                    "exact_families": [
+                        {
+                            "family_id": "dynamic_time",
+                            "candidate_variant": "dynamic",
+                            "placebo_kind": "time",
+                        },
+                        {
+                            "family_id": "dynamic_space",
+                            "candidate_variant": "dynamic",
+                            "placebo_kind": "space",
+                        },
+                        {
+                            "family_id": "snapshot_time",
+                            "candidate_variant": "snapshot",
+                            "placebo_kind": "time",
+                        },
+                        {
+                            "family_id": "snapshot_space",
+                            "candidate_variant": "snapshot",
+                            "placebo_kind": "space",
+                        },
+                    ],
+                    "magnitude_bins": ["M5_6", "M6_plus"],
+                    "horizons_days": [7, 30, 90, 180, 365],
+                    "member_key": ["magnitude_bin", "horizon_days"],
+                    "complete_cartesian_product_required": True,
+                    "exact_member_count_per_family": 10,
+                },
+                "G2_primary_macro_endpoint_in_holm_family": False,
+                "confirmatory_gatekeeping": {
+                    "primary_candidate": "dynamic",
+                    "snapshot_role": (
+                        "conditional_fallback_only_after_dynamic_G2_pass_and_G3_not_pass"
+                    ),
+                    "snapshot_independent_rescue_when_dynamic_G2_not_pass": "forbidden",
+                    "dynamic_and_snapshot_are_not_parallel_alpha_entries": True,
+                    "all_four_observed_raw_statistics_and_full_null_distributions_"
+                    "always_computed": True,
+                    "all_four_placebo_result_objects_always_bound_to_result_identity": True,
+                    "raw_computation_does_not_imply_gate_reached": True,
+                    "time_and_space_placebo_rule": "intersection_union_both_must_pass",
+                    "candidate_joint_placebo_p_for_reporting": "max_time_and_space_p",
+                    "practical_any_of_branches_were_preregistered_before_scores": True,
+                    "practical_branch_each_uses_two_sided_95pct_lower_bound_gt_zero": True,
+                    "practical_branch_union_one_sided_alpha_upper_bound": 0.05,
+                    "dynamic_qualification_gate": {
+                        "gate_reached": True,
+                        "gate_reached_reason": "primary_confirmatory_candidate",
+                    },
+                    "snapshot_qualification_gate": {
+                        "gate_reached_true_iff": {
+                            "dynamic_full_qualification_status": "passed",
+                            "G3_status_in": ["failed", "evidence_insufficient"],
+                        },
+                        "reached_reason_codes": [
+                            "dynamic_full_qualification_passed_and_G3_failed",
+                            "dynamic_full_qualification_passed_and_G3_evidence_insufficient",
+                        ],
+                        "otherwise": {
+                            "gate_reached": False,
+                            "qualification_status": "not_reached",
+                            "raw_statistics_role": "diagnostic_only",
+                            "confirmatory_conclusion_forbidden": True,
+                        },
+                        "not_reached_reason_codes": [
+                            "dynamic_full_qualification_failed",
+                            "dynamic_full_qualification_evidence_insufficient",
+                            "dynamic_full_qualification_not_reached",
+                            "dynamic_full_qualification_passed_and_G3_passed",
+                            "dynamic_full_qualification_passed_and_G3_not_reached",
+                        ],
+                    },
+                    "gate_record_identity_requires": [
+                        "gate_reached",
+                        "gate_reached_reason",
+                        "gate_record_sha256",
+                    ],
+                    "gate_record_sha256_payload_requires": [
+                        "candidate_variant",
+                        "gate_reached",
+                        "gate_reached_reason",
+                        "qualification_status",
+                        "time_placebo_result_object_sha256",
+                        "space_placebo_result_object_sha256",
+                    ],
+                },
             },
             "gates": {
                 "G2": {
@@ -343,11 +667,239 @@ def _protocol(
                         "snapshot",
                     ],
                     "candidate_minus_coverage_only_macro_information_gain_lower_95pct_bound_gt": 0,
-                    "practical_improvement_any_of": [
-                        {"candidate_variant": "current_evaluated_candidate_variant"},
-                        {"candidate_variant": "current_evaluated_candidate_variant"},
+                    "candidate_qualification_requires": [
+                        "formal_validation_G2_core",
+                        "development_increment_stability",
+                        "regional_stability",
                     ],
-                }
+                    "candidate_qualification_components_must_all_pass": True,
+                    "candidate_qualification_nonpass_statuses": [
+                        "failed",
+                        "evidence_insufficient",
+                    ],
+                    "dynamic_is_only_confirmatory_H1_G2_entry": True,
+                    "snapshot_is_conditional_G3_fallback_only": True,
+                    "practical_improvement_any_of": [
+                        {
+                            "metric": "same_area_strict_recall_gain_percentage_points",
+                            "evaluation_partition": "formal_validation_once",
+                            "candidate_variant": "current_evaluated_candidate_variant",
+                            "comparator_variant": "background_no_increment",
+                            "magnitude_bin": "M5_6",
+                            "horizons_days": [7, 30, 90],
+                            "macro_weighting": "equal_horizon",
+                            "threshold_gte": 5,
+                            "lower_95pct_bound_gt": 0,
+                            "area_budget_km2": 600000,
+                            "per_issue_selection": (
+                                "largest_complete_deterministic_cell_prefix_with_"
+                                "exact_area_lte_budget"
+                            ),
+                            "denominator": ("all_study_area_targets_unsupported_count_as_misses"),
+                        },
+                        {
+                            "metric": "same_recall_union_area_relative_reduction",
+                            "evaluation_partition": "formal_validation_once",
+                            "candidate_variant": "current_evaluated_candidate_variant",
+                            "comparator_variant": "background_no_increment",
+                            "magnitude_bin": "M5_6",
+                            "horizons_days": [7, 30, 90],
+                            "macro_weighting": "equal_horizon",
+                            "reference_hits_per_horizon": (
+                                "background_strict_hit_count_at_600000km2"
+                            ),
+                            "candidate_search": ("frozen_625km2_budget_grid_no_interpolation"),
+                            "candidate_budget_per_horizon": (
+                                "minimum_budget_reaching_reference_hit_count"
+                            ),
+                            "area_value": "exact_selected_complete_cell_prefix_area",
+                            "exposure_area_aggregation": (
+                                "equal_weight_mean_exact_selected_area_across_"
+                                "nonoverlapping_exposures_within_horizon"
+                            ),
+                            "per_horizon_reduction": (
+                                "one_minus_candidate_mean_exact_area_div_background_mean_exact_area"
+                            ),
+                            "macro_reduction": (
+                                "equal_weight_mean_of_three_per_horizon_reductions"
+                            ),
+                            "bootstrap_area_values_fixed_event_weights_only_change_hit_"
+                            "counts_and_selected_budget": True,
+                            "zero_reference_hit_action": ("branch_not_evaluable_and_not_pass"),
+                            "unreachable_at_960000km2_action": (
+                                "branch_not_evaluable_and_not_pass"
+                            ),
+                            "bootstrap_invalid_branch_value_action": (
+                                "retain_numeric_reduction_0.0_as_failure_not_drop"
+                            ),
+                            "threshold_gte": 0.10,
+                            "lower_95pct_bound_gt": 0,
+                        },
+                    ],
+                },
+                "development_increment_stability": {
+                    "role": "required_candidate_qualification_component",
+                    "evaluation_partition": (
+                        "three_frozen_mutually_disjoint_development_rolling_folds"
+                    ),
+                    "evaluated_model_variants": ["dynamic", "snapshot"],
+                    "model_variant_roles": {
+                        "dynamic": "confirmatory_H1_G2_candidate",
+                        "snapshot": "conditional_G3_fallback_only",
+                    },
+                    "comparators": ["background_no_increment", "coverage_only"],
+                    "primary_magnitude_bin": "M5_6",
+                    "horizons_days": [7, 30, 90],
+                    "macro_weighting": "equal_horizon",
+                    "per_horizon_statistic": (
+                        "candidate_minus_comparator_information_gain_nats_per_event"
+                    ),
+                    "fold_statistic": ("equal_weight_mean_of_all_three_horizon_statistics"),
+                    "outer_fold_count_required": 3,
+                    "minimum_positive_folds_per_variant_and_comparator": 2,
+                    "median_fold_macro_information_gain_gt_per_variant_and_comparator": 0,
+                    "every_comparator_track_must_pass": True,
+                    "any_fold_horizon_with_zero_scored_events_action": (
+                        "evidence_insufficient_no_partial_macro"
+                    ),
+                    "target_bands_must_be_mutually_disjoint": True,
+                    "one_model_fit_per_variant_per_fold_shared_across_horizons": True,
+                    "same_background_coverage_preprocessor_penalty_and_exposures_required": True,
+                    "result_identity": {
+                        "exact_horizon_row_key": [
+                            "development_fold_id",
+                            "model_variant",
+                            "comparator_variant",
+                            "horizon_days",
+                        ],
+                        "required_horizon_row_values": [
+                            "information_gain_nats_per_event",
+                            "supported_unique_physical_event_count",
+                        ],
+                        "complete_fold_variant_comparator_horizon_cartesian_product_required": True,
+                        "expected_horizon_row_count": 36,
+                        "exact_fold_macro_row_key": [
+                            "development_fold_id",
+                            "model_variant",
+                            "comparator_variant",
+                        ],
+                        "required_fold_macro_row_values": [
+                            "equal_weight_macro_information_gain_nats_per_event",
+                            "positive_horizon_count",
+                            "status",
+                        ],
+                        "expected_fold_macro_row_count": 12,
+                        "exact_candidate_comparator_summary_key": [
+                            "model_variant",
+                            "comparator_variant",
+                        ],
+                        "required_candidate_comparator_summary_values": [
+                            "positive_fold_count",
+                            "median_fold_macro_information_gain_nats_per_event",
+                            "status",
+                        ],
+                        "expected_candidate_comparator_summary_count": 4,
+                        "allowed_statuses": [
+                            "passed",
+                            "failed",
+                            "evidence_insufficient",
+                        ],
+                        "missing_row_or_value_action": "evidence_insufficient",
+                    },
+                    "failure_action": (
+                        "candidate_not_G2_qualified_and_publish_no_cross_split_stability"
+                    ),
+                    "insufficient_action": (
+                        "candidate_not_G2_qualified_evidence_insufficient_no_random_split"
+                    ),
+                },
+            },
+            "adoption_matrix": {
+                "dynamic_G2_pass_and_G3_pass": "adopt_dynamic_for_stage5_comparison",
+                "dynamic_G2_pass_and_G3_not_pass_and_snapshot_equivalent_G2_pass": (
+                    "adopt_snapshot_only"
+                ),
+                "dynamic_G2_pass_and_G3_not_pass_and_snapshot_equivalent_G2_not_pass": (
+                    "retain_background_only"
+                ),
+                "dynamic_G2_not_pass": ("retain_background_only_and_stop_complex_anomaly_models"),
+                "dynamic_G2_pass_means_all_candidate_qualification_components_passed": True,
+                "snapshot_equivalent_G2_pass_means_all_candidate_qualification_components_"
+                "passed": True,
+                "G2_not_pass_statuses": ["failed", "evidence_insufficient"],
+                "G3_not_pass_statuses": ["failed", "evidence_insufficient"],
+                "snapshot_evaluated_for_adoption_only_after_dynamic_G2_pass_and_G3_not_pass": True,
+                "snapshot_independent_rescue_when_dynamic_G2_not_pass": "forbidden",
+                "coverage_only": "reporting_confound_diagnostic_never_an_anomaly_adoption",
+                "snapshot_equivalent_G2_uses_same_thresholds_placebos_and_practical_metric": True,
+                "no_post_score_fallback_choice": True,
+            },
+            "regional_stability": {
+                "role": ("required_candidate_qualification_component_and_regional_diagnostic"),
+                "strata": "construction_subzones_from_score_blind_linework_topology",
+                "fixed_nonempty_query_grid_zone_count": 39,
+                "fixed_region_order": "construction_zone_id_ascending",
+                "target_may_not_create_merge_split_or_reorder_regions": True,
+                "evaluation_partition": "formal_validation_once",
+                "evaluated_model_variants": ["dynamic", "snapshot"],
+                "model_variant_roles": {
+                    "dynamic": "confirmatory_H1_G2_candidate",
+                    "snapshot": "conditional_G3_fallback_only",
+                },
+                "comparators": ["background_no_increment", "coverage_only"],
+                "primary_magnitude_bin": "M5_6",
+                "horizons_days": [7, 30, 90],
+                "macro_weighting": "equal_horizon",
+                "per_region_horizon_contribution_formula": (
+                    "(region_event_log_intensity_difference-"
+                    "region_integrated_compensator_difference)/"
+                    "global_supported_unique_event_count_for_horizon"
+                ),
+                "zero_global_supported_event_action": "evidence_insufficient",
+                "per_region_macro_contribution": (
+                    "equal_weight_mean_of_three_horizon_contributions"
+                ),
+                "sum_region_macro_contributions_must_equal_global_macro_information_gain": True,
+                "equality_absolute_tolerance": 1.0e-12,
+                "strongest_region_selection": (
+                    "maximum_macro_contribution_then_construction_zone_id_ascending"
+                ),
+                "leave_strongest_region_out_residual_formula": (
+                    "global_macro_information_gain-maximum_region_macro_contribution"
+                ),
+                "bootstrap": {
+                    "reuse_joint_physical_event_bootstrap": True,
+                    "replications": 2000,
+                    "confidence_level": 0.95,
+                    "interval_method": "percentile",
+                    "integrated_compensator_fixed": True,
+                    "strongest_region_reselected_each_replication": True,
+                    "same_event_weights_shared_across_variants_comparators_horizons_and_"
+                    "regions": True,
+                },
+                "pass_requirements_per_variant_and_comparator": {
+                    "observed_leave_strongest_region_out_residual_gt": 0,
+                    "lower_95pct_bound_leave_strongest_region_out_residual_gt": 0,
+                    "minimum_positive_event_bearing_regions": 2,
+                    "positive_event_bearing_region_definition": (
+                        "supported_unique_event_count_gte_1_and_macro_contribution_gt_0"
+                    ),
+                },
+                "every_comparator_track_must_pass": True,
+                "missing_or_incomplete_region_mapping_action": "evidence_insufficient",
+                "fewer_than_two_evaluable_event_regions_action": "evidence_insufficient",
+                "required_by_horizon": [
+                    "information_gain",
+                    "independent_event_count",
+                    "strict_recall",
+                ],
+                "failure_action": (
+                    "candidate_not_G2_qualified_and_publish_no_cross_region_stability"
+                ),
+                "insufficient_action": ("candidate_not_G2_qualified_evidence_insufficient"),
+                "improvement_in_only_one_region_action": (
+                    "candidate_not_G2_qualified_and_no_stable_increment_claim"
+                ),
             },
         },
         "publication": {
@@ -363,6 +915,32 @@ def _protocol(
                 ],
                 "target_payload_in_forecast_files_forbidden": True,
                 "automatic_cross_file_target_loading_forbidden": True,
+                "retrospective_target_bearing_files_require_restricted_access_before_bytes_"
+                "written": True,
+                "retrospective_access_control_receipt_required_before_publication": True,
+                "retrospective_access_control": {
+                    "receipt_path": (
+                        "outputs/visualizations/anomaly_increment_r2_retrospective_acl_receipt.json"
+                    ),
+                    "restricted_parent_directory": "outputs/visualizations",
+                    "parent_directory_restricted_before_target_file_creation": True,
+                    "zero_byte_destination_created_before_target_bytes": True,
+                    "zero_byte_destination_acl_verified_before_target_bytes": True,
+                    "same_verified_handle_held_from_acl_check_through_final_write": True,
+                    "file_identity_before_and_after_write_must_match": True,
+                    "ordinary_temporary_file_may_not_receive_target_bytes_first": True,
+                    "atomic_replace_from_unrestricted_or_unverified_temporary_file_forbidden": True,
+                    "required_for_each_retrospective_file": True,
+                    "receipt_bindings": [
+                        "target_relative_path",
+                        "verified_zero_byte_file_identity",
+                        "final_file_identity",
+                        "final_file_sha256",
+                        "final_file_acl_descriptor_sha256",
+                        "restricted_parent_directory_acl_descriptor_sha256",
+                    ],
+                    "receipt_and_retrospective_files_forbidden_from_public_bundle": True,
+                },
                 "public_forecast_artifact_validator": {
                     "reject_artifact_classifications": [
                         "local_restricted",
@@ -388,11 +966,19 @@ def _protocol(
             "result_identity_requires": [
                 "dynamic_G2",
                 "snapshot_equivalent_G2",
+                "dynamic_development_increment_stability",
+                "snapshot_development_increment_stability",
+                "development_fold_variant_comparator_horizon_values_counts_macros_and_statuses",
+                "dynamic_regional_stability",
+                "snapshot_regional_stability",
+                "regional_contribution_tables_and_residual_bootstrap_distributions",
                 "time_dynamic_placebo_result_distribution",
                 "space_dynamic_placebo_result_distribution",
                 "time_snapshot_placebo_result_distribution",
                 "space_snapshot_placebo_result_distribution",
                 "dynamic_G3",
+                "candidate_gatekeeping_sequence",
+                "candidate_gate_reached_reason_and_gate_record_sha256",
                 "adoption_decision",
                 "adopted_variant_metrics_table",
             ],
@@ -485,14 +1071,87 @@ def _repository() -> Stage4RepositoryEvidence:
     )
 
 
+def _restricted_access(
+    protocol: dict[str, Any],
+) -> RestrictedLocalArtifactAccessControlEvidence:
+    local = protocol["spatial_permutation_topology"]["local_restricted_artifacts"]
+    file_hashes = {
+        artifact_id: (str(index + 1) * 64)[:64]
+        for index, artifact_id in enumerate(RESTRICTED_ARTIFACT_IDS)
+    }
+    observations = [
+        RestrictedPathAccessObservation(
+            relative_path=local["directory"],
+            path_kind="directory",
+            verified_sha256=None,
+            owner_principal="uid:1000",
+            link_count=1,
+            reparse_point=False,
+            permission_descriptor_json=canonical_permission_descriptor(
+                {
+                    "acl_model": "classic_mode_bits_without_acl_xattrs",
+                    "acl_related_xattrs": [],
+                    "filesystem_locality": "local",
+                    "filesystem_magic_hex": "0x0000ef53",
+                    "filesystem_type": "ext2_ext3_ext4",
+                    "mode_octal": "0700",
+                    "owner_uid": 1000,
+                    "platform_family": "linux",
+                    "queried_by_handle": True,
+                }
+            ),
+        )
+    ]
+    for artifact_id in RESTRICTED_ARTIFACT_IDS:
+        observations.append(
+            RestrictedPathAccessObservation(
+                relative_path=local[artifact_id],
+                path_kind="regular_file",
+                verified_sha256=file_hashes[artifact_id],
+                owner_principal="uid:1000",
+                link_count=1,
+                reparse_point=False,
+                permission_descriptor_json=canonical_permission_descriptor(
+                    {
+                        "acl_model": "classic_mode_bits_without_acl_xattrs",
+                        "acl_related_xattrs": [],
+                        "filesystem_locality": "local",
+                        "filesystem_magic_hex": "0x0000ef53",
+                        "filesystem_type": "ext2_ext3_ext4",
+                        "mode_octal": "0600",
+                        "owner_uid": 1000,
+                        "platform_family": "linux",
+                        "queried_by_handle": True,
+                    }
+                ),
+            )
+        )
+    return RestrictedLocalArtifactAccessControlEvidence(
+        protocol_design_sha256=protocol_design_sha256(protocol),
+        access_contract_sha256=restricted_access_contract_sha256(protocol),
+        platform="posix",
+        current_principal="uid:1000",
+        directory_relative_path=local["directory"],
+        file_artifacts=tuple(
+            (artifact_id, local[artifact_id], file_hashes[artifact_id])
+            for artifact_id in RESTRICTED_ARTIFACT_IDS
+        ),
+        observations=tuple(sorted(observations, key=lambda item: item.relative_path)),
+    )
+
+
 def _score_blind_inputs(protocol: dict[str, Any]) -> ScoreBlindInputEvidence:
+    access = _restricted_access(protocol)
     return ScoreBlindInputEvidence(
         protocol_design_sha256=protocol_design_sha256(protocol),
         random_input_seal_sha256="9" * 64,
         protocol_validation_sha256="c" * 64,
         observed_project_input_hashes=(("environment_lock", "d" * 64),),
         generated_manifest_hashes=(("fold", "e" * 64),),
-        restricted_spatial_artifact_hashes=(("cell_mapping", "f" * 64),),
+        restricted_spatial_artifact_hashes=tuple(
+            sorted((artifact_id, digest) for artifact_id, _, digest in access.file_artifacts)
+        ),
+        restricted_access_control=access,
     )
 
 
@@ -509,13 +1168,19 @@ def _preflight_receipt(
     )
 
 
-def _pytest_xml(*, full: bool) -> bytes:
+def _pytest_xml(*, full: bool, full_count: int | None = None) -> bytes:
     test_ids = {
         test_id for values in REQUIRED_TESTS_BY_QUALIFICATION.values() for test_id in values
     }
     if full:
         index = 0
-        while len(test_ids) < FROZEN_FULL_NON_TARGET_TEST_COUNT:
+        frozen_count = (
+            full_count
+            if full_count is not None
+            else qualification_module.FROZEN_FULL_NON_TARGET_TEST_COUNT
+        )
+        assert frozen_count is not None
+        while len(test_ids) < frozen_count:
             test_ids.add(f"tests.unit.synthetic_full::test_dummy_{index:04d}")
             index += 1
     suite = ET.Element(
@@ -538,6 +1203,36 @@ def _pytest_xml(*, full: bool) -> bytes:
 
 def _pytest_evidence(*, full: bool) -> PytestRunEvidence:
     return parse_pytest_junit_evidence(_pytest_xml(full=full))
+
+
+def test_restricted_access_evidence_round_trip_and_tampering_fail_closed() -> None:
+    evidence = _restricted_access(_protocol("0" * 64))
+    assert (
+        RestrictedLocalArtifactAccessControlEvidence.from_mapping(evidence.as_mapping()) == evidence
+    )
+    tampered = evidence.as_mapping()
+    tampered["current_principal"] = "uid:1001"
+    with pytest.raises(RestrictedAccessError, match="hash or schema"):
+        RestrictedLocalArtifactAccessControlEvidence.from_mapping(tampered)
+
+
+@pytest.mark.parametrize("delta", (-1, 1))
+def test_full_junit_count_must_equal_the_synthetic_frozen_count(delta: int) -> None:
+    protocol = _protocol("0" * 64)
+    inputs = _score_blind_inputs(protocol)
+    mismatched = parse_pytest_junit_evidence(
+        _pytest_xml(full=True, full_count=SYNTHETIC_FROZEN_TEST_COUNT + delta)
+    )
+    with pytest.raises((Stage4QualificationError, ValueError), match="count"):
+        build_stage4_qualification_evidence(
+            protocol,
+            scoring_code_commit=CODE_COMMIT,
+            score_blind_input_evidence=inputs,
+            formal_preflight_receipt=_preflight_receipt(protocol, inputs),
+            logical_identity_replay_audit_sha256="c" * 64,
+            stage4_pytest=_pytest_evidence(full=False),
+            full_pytest=mismatched,
+        )
 
 
 def _qualification(
@@ -668,7 +1363,7 @@ def _seal_fixture(
         target_read_ledger=target,
     )
     seal_path = tmp_path / "data" / "manifests" / "anomaly_increment_r2_scoring_seal.json"
-    write_stage4_scoring_seal_atomic(seal_path, seal)
+    write_stage4_scoring_seal_atomic(seal_path, seal, protocol=protocol)
     preflight_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     preflight_path.parent.mkdir(parents=True, exist_ok=True)
     preflight_path.write_text(
@@ -784,8 +1479,11 @@ def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r1_or_drift(
     section: str,
     key: str,
     value: object,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    protocol = deepcopy(_protocol("0" * 64))
+    loaded = yaml.safe_load(Path("configs/anomaly_increment_r2.yaml").read_text("utf-8"))
+    assert isinstance(loaded, dict)
+    protocol = deepcopy(loaded)
     freeze = cast(dict[str, Any], protocol["freeze"])
     scoring = cast(dict[str, Any], freeze["scoring_code_freeze"])
     if section == "freeze":
@@ -796,11 +1494,24 @@ def test_raw_authorization_and_seal_freeze_tags_fail_closed_on_r1_or_drift(
         logical = cast(dict[str, Any], scoring["selected_table_logical_identity"])
         logical[key] = value
 
+    # Restore the real guard for this contract-boundary test.  The module-wide
+    # synthetic fixture bypass is only for downstream future-execution tests.
+    monkeypatch.setattr(
+        authorization_module,
+        "require_stage4_r2_execution_action",
+        config_module.require_stage4_r2_execution_action,
+    )
+    monkeypatch.setattr(
+        seal_script,
+        "require_stage4_r2_execution_action",
+        config_module.require_stage4_r2_execution_action,
+    )
+
     with pytest.raises(
         Stage4ScoringNotAuthorizedError,
-        match="R2 execution freeze",
+        match="R2 execution is blocked",
     ):
-        authorization_module._freeze_tags(protocol)
+        authorization_module._freeze_tags(protocol, action="formal_target_read")
     with pytest.raises(ValueError, match="stage-4"):
         seal_script._freeze_tags(protocol)
 
@@ -809,9 +1520,9 @@ def test_scoring_seal_and_qualification_round_trip_are_content_addressed(
     tmp_path: Path,
 ) -> None:
     protocol, inputs, qualification, _, _, seal_path = _seal_fixture(tmp_path)
-    seal = load_stage4_scoring_seal(seal_path)
+    seal = load_stage4_scoring_seal(seal_path, protocol=protocol)
     qualification_path = tmp_path / "qualification.json"
-    write_stage4_qualification_evidence_atomic(qualification_path, qualification)
+    write_qualification(qualification_path, qualification)
 
     assert load_stage4_qualification_evidence(qualification_path) == qualification
     assert seal.score_blind_inputs == inputs
@@ -844,23 +1555,27 @@ def test_scoring_seal_and_qualification_round_trip_are_content_addressed(
 def test_frozen_governance_writers_are_create_only_and_idempotent(
     tmp_path: Path,
 ) -> None:
-    _, _, qualification, _, _, seal_path = _seal_fixture(tmp_path)
-    seal = load_stage4_scoring_seal(seal_path)
+    protocol, _, qualification, _, _, seal_path = _seal_fixture(tmp_path)
+    seal = load_stage4_scoring_seal(seal_path, protocol=protocol)
     original_seal = seal_path.read_bytes()
     assert (
-        write_stage4_scoring_seal_atomic(seal_path, seal)
+        write_stage4_scoring_seal_atomic(seal_path, seal, protocol=protocol)
         == hashlib.sha256(original_seal).hexdigest()
     )
     changed_seal = replace(seal, initial_attempt_ledger_sha256="0" * 64)
     with pytest.raises(Stage4ScoringNotAuthorizedError, match="different bytes"):
-        write_stage4_scoring_seal_atomic(seal_path, changed_seal)
+        write_stage4_scoring_seal_atomic(
+            seal_path,
+            changed_seal,
+            protocol=protocol,
+        )
     assert seal_path.read_bytes() == original_seal
 
     qualification_path = tmp_path / "qualification.json"
-    write_stage4_qualification_evidence_atomic(qualification_path, qualification)
+    write_qualification(qualification_path, qualification)
     original_qualification = qualification_path.read_bytes()
     assert (
-        write_stage4_qualification_evidence_atomic(
+        write_qualification(
             qualification_path,
             qualification,
         )
@@ -870,18 +1585,30 @@ def test_frozen_governance_writers_are_create_only_and_idempotent(
     changed_mapping["space_placebo_resource_observation_sha256"] = "0" * 64
     changed_qualification = Stage4QualificationEvidence.from_mapping(changed_mapping)
     with pytest.raises(Stage4QualificationError, match="different bytes"):
-        write_stage4_qualification_evidence_atomic(
+        write_qualification(
             qualification_path,
             changed_qualification,
         )
     assert qualification_path.read_bytes() == original_qualification
 
     receipt_path = tmp_path / "formal_preflight_receipt.json"
-    preflight_script._write_atomic(receipt_path, {"receipt": "frozen"})
+    preflight_script._write_atomic(
+        receipt_path,
+        {"receipt": "frozen"},
+        protocol=protocol,
+    )
     original_receipt = receipt_path.read_bytes()
-    preflight_script._write_atomic(receipt_path, {"receipt": "frozen"})
+    preflight_script._write_atomic(
+        receipt_path,
+        {"receipt": "frozen"},
+        protocol=protocol,
+    )
     with pytest.raises(ValueError, match="different bytes"):
-        preflight_script._write_atomic(receipt_path, {"receipt": "changed"})
+        preflight_script._write_atomic(
+            receipt_path,
+            {"receipt": "changed"},
+            protocol=protocol,
+        )
     assert receipt_path.read_bytes() == original_receipt
 
 
@@ -898,26 +1625,34 @@ def _replace_with_same_byte_hardlink(path: Path, payload: bytes) -> Path:
 
 
 def test_frozen_governance_writers_reject_same_byte_hardlinks(tmp_path: Path) -> None:
-    _, _, qualification, _, _, seal_path = _seal_fixture(tmp_path)
-    seal = load_stage4_scoring_seal(seal_path)
+    protocol, _, qualification, _, _, seal_path = _seal_fixture(tmp_path)
+    seal = load_stage4_scoring_seal(seal_path, protocol=protocol)
     seal_payload = seal_path.read_bytes()
     _replace_with_same_byte_hardlink(seal_path, seal_payload)
     with pytest.raises(Stage4ScoringNotAuthorizedError, match="single-link"):
-        write_stage4_scoring_seal_atomic(seal_path, seal)
+        write_stage4_scoring_seal_atomic(seal_path, seal, protocol=protocol)
 
     qualification_path = tmp_path / "hardlinked-qualification.json"
-    write_stage4_qualification_evidence_atomic(qualification_path, qualification)
+    write_qualification(qualification_path, qualification)
     qualification_payload = qualification_path.read_bytes()
     _replace_with_same_byte_hardlink(qualification_path, qualification_payload)
     with pytest.raises(Stage4QualificationError, match="single-link"):
-        write_stage4_qualification_evidence_atomic(qualification_path, qualification)
+        write_qualification(qualification_path, qualification)
 
     receipt_path = tmp_path / "hardlinked-formal-preflight.json"
-    preflight_script._write_atomic(receipt_path, {"receipt": "frozen"})
+    preflight_script._write_atomic(
+        receipt_path,
+        {"receipt": "frozen"},
+        protocol=protocol,
+    )
     receipt_payload = receipt_path.read_bytes()
     _replace_with_same_byte_hardlink(receipt_path, receipt_payload)
     with pytest.raises(ValueError, match="single-link"):
-        preflight_script._write_atomic(receipt_path, {"receipt": "frozen"})
+        preflight_script._write_atomic(
+            receipt_path,
+            {"receipt": "frozen"},
+            protocol=protocol,
+        )
 
 
 def test_immutable_reader_detects_path_replacement_between_lstat_and_open(
@@ -1071,7 +1806,7 @@ def test_incomplete_or_tampered_qualification_fails_closed(tmp_path: Path) -> No
 
     valid = _qualification(protocol, inputs)
     path = tmp_path / "qualification.json"
-    write_stage4_qualification_evidence_atomic(path, valid)
+    write_qualification(path, valid)
     value = json.loads(path.read_text(encoding="utf-8"))
     value["target_read_count"] = 1
     path.write_text(json.dumps(value), encoding="utf-8")
@@ -1324,17 +2059,18 @@ def test_ledger_post_replace_verification_rejects_target_alias_without_reading_i
 
 
 @pytest.mark.parametrize(
-    "loader",
+    ("loader", "requires_protocol"),
     (
-        load_stage4_scoring_seal,
-        load_stage4_qualification_evidence,
-        load_formal_preflight_receipt,
+        (load_stage4_scoring_seal, True),
+        (load_stage4_qualification_evidence, False),
+        (load_formal_preflight_receipt, False),
     ),
 )
 def test_governance_loaders_reject_target_hardlink_before_any_file_open(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     loader: Any,
+    requires_protocol: bool,
 ) -> None:
     target = tmp_path / "synthetic-target.bin"
     payload = b"target bytes must never enter a governance loader"
@@ -1347,7 +2083,10 @@ def test_governance_loaders_reject_target_hardlink_before_any_file_open(
 
     monkeypatch.setattr(immutable_file_module, "_open_no_follow", forbidden_open)
     with pytest.raises(Exception, match="cannot read"):
-        loader(alias)
+        if requires_protocol:
+            loader(alias, protocol=_protocol("0" * 64))
+        else:
+            loader(alias)
     assert target.read_bytes() == payload
 
 
@@ -1401,6 +2140,7 @@ def test_shadow_empty_ledger_cannot_reauthorize_after_canonical_consumption(
     consume_authorized_stage4_target(
         tmp_path,
         authorization,
+        protocol=protocol,
         operation_id="canonical-target-read",
         consumer=lambda value: value,
     )
@@ -1441,6 +2181,7 @@ def test_capability_cannot_be_transferred_to_shadow_ledgers(
         consume_authorized_stage4_target(
             tmp_path,
             transferred,
+            protocol={},
             operation_id="shadow-capability-target-read",
             consumer=lambda value: value,
         )
@@ -1467,6 +2208,7 @@ def test_first_authorized_consumption_reads_synthetic_target_once_and_records_su
     consumed = consume_authorized_stage4_target(
         tmp_path,
         authorization,
+        protocol={},
         operation_id="first-target-consumption",
         consumer=lambda value: value.decode("ascii"),
     )
@@ -1479,6 +2221,7 @@ def test_first_authorized_consumption_reads_synthetic_target_once_and_records_su
         consume_authorized_stage4_target(
             tmp_path,
             authorization,
+            protocol={},
             operation_id="second-target-consumption",
             consumer=lambda value: value,
         )
@@ -1502,6 +2245,7 @@ def test_target_consumer_failure_is_durable_and_cannot_be_retried(
         consume_authorized_stage4_target(
             tmp_path,
             authorization,
+            protocol={},
             operation_id="failed-target-consumption",
             consumer=fail,
         )
@@ -1512,6 +2256,7 @@ def test_target_consumer_failure_is_durable_and_cannot_be_retried(
         consume_authorized_stage4_target(
             tmp_path,
             authorization,
+            protocol={},
             operation_id="retry-is-forbidden",
             consumer=lambda value: value,
         )
@@ -1530,6 +2275,7 @@ def test_target_hash_mismatch_is_registered_as_failure(
         consume_authorized_stage4_target(
             tmp_path,
             authorization,
+            protocol={},
             operation_id="identity-mismatch",
             consumer=lambda value: value,
         )
@@ -1744,7 +2490,7 @@ def test_cli_generate_and_check_are_target_unread_and_fail_after_ledger_consumpt
         ),
         encoding="utf-8",
     )
-    write_stage4_qualification_evidence_atomic(qualification_path, qualification)
+    write_qualification(qualification_path, qualification)
     preflight_path = tmp_path.joinpath(*FORMAL_PREFLIGHT_RECEIPT_PATH.parts)
     preflight_path.parent.mkdir(parents=True, exist_ok=True)
     preflight_path.write_text(

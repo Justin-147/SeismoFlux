@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib
+import inspect
 import json
 from collections.abc import Callable
 from dataclasses import replace
@@ -12,10 +13,15 @@ from typing import cast
 from xml.etree import ElementTree
 
 import pytest
-from test_stage4_anomaly_increment_pipeline import _plan
+from test_stage4_anomaly_increment_pipeline import (
+    _plan,
+    run_stage4_synthetic_test_pipeline,
+)
 
 import seismoflux.anomaly_increment.formal_publication as formal_publication
 import seismoflux.anomaly_increment.immutable_file as immutable_file_module
+from seismoflux.anomaly_increment.authorization import Stage4TargetAuthorization
+from seismoflux.anomaly_increment.config import Stage4R2ExecutionBlockedError
 from seismoflux.anomaly_increment.convergence import (
     CompensatorConvergenceAudit,
     FrozenConvergenceModel,
@@ -30,10 +36,7 @@ from seismoflux.anomaly_increment.formal_publication import (
     publish_successful_formal_result,
 )
 from seismoflux.anomaly_increment.runner import Stage4PublicationPlan
-from seismoflux.anomaly_increment.scoring_pipeline import (
-    PipelineResult,
-    run_stage4_in_memory_pipeline,
-)
+from seismoflux.anomaly_increment.scoring_pipeline import PipelineResult
 
 BINDING = "a" * 64
 AUTHORIZATION = "b" * 64
@@ -74,16 +77,114 @@ def _publish_successful(
     create_file: Callable[[Path, Path], bool] = formal_publication._atomic_create_only,
 ) -> FormalPublicationReceipt:
     audit, artifact = _convergence_evidence()
-    return publish_successful_formal_result(
+    return formal_publication._publish(
         project_root,
         publication,
         execution_binding_id=execution_binding_id,
         authorization_id=authorization_id,
+        model_version=result.retrospective.protocol.model_version,
+        status="succeeded",
         result=result,
+        failure_code=None,
         convergence_audit=audit,
         additional_local_artifacts=(artifact, *additional_local_artifacts),
         create_file=create_file,
     )
+
+
+def _publish_failed(
+    project_root: Path,
+    publication: Stage4PublicationPlan,
+    *,
+    execution_binding_id: str,
+    authorization_id: str,
+    model_version: str,
+    failure_code: str,
+    create_file: Callable[[Path, Path], bool] = formal_publication._atomic_create_only,
+) -> FormalPublicationReceipt:
+    """Synthetic publication helper; deliberately not a formal execution entrance."""
+
+    return formal_publication._publish(
+        project_root,
+        publication,
+        execution_binding_id=execution_binding_id,
+        authorization_id=authorization_id,
+        model_version=model_version,
+        status="failed",
+        result=None,
+        failure_code=failure_code,
+        convergence_audit=None,
+        additional_local_artifacts=(),
+        create_file=create_file,
+    )
+
+
+def test_formal_publication_apis_require_protocol_and_unforgeable_provenance_guard_first(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    assert tuple(inspect.signature(publish_successful_formal_result).parameters) == (
+        "project_root",
+        "publication",
+        "execution_protocol",
+        "authorization",
+        "result",
+        "convergence_audit",
+        "additional_local_artifacts",
+        "create_file",
+    )
+    assert tuple(inspect.signature(publish_failed_formal_result).parameters) == (
+        "project_root",
+        "publication",
+        "execution_protocol",
+        "authorization",
+        "model_version",
+        "failure_code",
+        "create_file",
+    )
+
+    calls: list[tuple[object, str]] = []
+    protocol = {"protocol": "blocked-r2"}
+
+    def block(value: object, *, action: str) -> None:
+        calls.append((value, action))
+        raise Stage4R2ExecutionBlockedError("synthetic blocked R2")
+
+    def unexpected(*args: object, **kwargs: object) -> object:
+        raise AssertionError("formal publication performed work before its R2 guard")
+
+    class ExplodesOnAccess:
+        def __getattribute__(self, name: str) -> object:
+            raise AssertionError(f"caller object inspected before guard: {name}")
+
+    bomb = ExplodesOnAccess()
+    monkeypatch.setattr(formal_publication, "require_stage4_r2_execution_action", block)
+    monkeypatch.setattr(formal_publication, "require_stage4_target_authorization", unexpected)
+    monkeypatch.setattr(formal_publication, "_publish", unexpected)
+
+    with pytest.raises(Stage4R2ExecutionBlockedError, match="blocked R2"):
+        publish_successful_formal_result(
+            cast(Path, bomb),
+            cast(Stage4PublicationPlan, bomb),
+            execution_protocol=protocol,
+            authorization=cast(Stage4TargetAuthorization, bomb),
+            result=cast(PipelineResult, bomb),
+            convergence_audit=cast(CompensatorConvergenceAudit, bomb),
+            create_file=cast(Callable[[Path, Path], bool], unexpected),
+        )
+    with pytest.raises(Stage4R2ExecutionBlockedError, match="blocked R2"):
+        publish_failed_formal_result(
+            cast(Path, bomb),
+            cast(Stage4PublicationPlan, bomb),
+            execution_protocol=protocol,
+            authorization=cast(Stage4TargetAuthorization, bomb),
+            model_version="blocked-r2",
+            failure_code="blocked_r2",
+            create_file=cast(Callable[[Path, Path], bool], unexpected),
+        )
+    assert calls == [
+        (protocol, "formal_scoring"),
+        (protocol, "formal_scoring"),
+    ]
 
 
 def _publication() -> Stage4PublicationPlan:
@@ -104,7 +205,7 @@ def _publication() -> Stage4PublicationPlan:
 
 @pytest.fixture(scope="module")
 def pipeline_result() -> PipelineResult:
-    return run_stage4_in_memory_pipeline(_plan("positive"), placebo_injection=None)
+    return run_stage4_synthetic_test_pipeline(_plan("positive"), placebo_injection=None)
 
 
 def _fixed_paths(root: Path) -> tuple[Path, ...]:
@@ -231,7 +332,7 @@ def test_fixed_formal_paths_are_create_only_and_never_overwritten(
     originals = {path: path.read_bytes() for path in _fixed_paths(tmp_path)}
 
     with pytest.raises(FormalPublicationError, match="different bytes"):
-        publish_failed_formal_result(
+        _publish_failed(
             tmp_path,
             _publication(),
             execution_binding_id=BINDING,
@@ -265,7 +366,7 @@ def test_prepositioned_fixed_hardlink_is_rejected_without_opening_target_alias(
 
     monkeypatch.setattr(immutable_file_module, "_open_no_follow", record_open)
     with pytest.raises(FormalPublicationError, match="unsafe immutable publication file"):
-        publish_failed_formal_result(
+        _publish_failed(
             tmp_path,
             _publication(),
             execution_binding_id=BINDING,
@@ -283,7 +384,7 @@ def test_existing_bundle_hardlink_is_rejected_without_opening_target_alias(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    receipt = publish_failed_formal_result(
+    receipt = _publish_failed(
         tmp_path,
         _publication(),
         execution_binding_id=BINDING,
@@ -309,7 +410,7 @@ def test_existing_bundle_hardlink_is_rejected_without_opening_target_alias(
 
     monkeypatch.setattr(immutable_file_module, "_open_no_follow", record_open)
     with pytest.raises(FormalPublicationError, match="unsafe immutable bundle artifact"):
-        publish_failed_formal_result(
+        _publish_failed(
             tmp_path,
             _publication(),
             execution_binding_id=BINDING,
@@ -371,7 +472,7 @@ def test_rollback_refuses_replaced_hardlink_without_opening_or_unlinking_target(
 
 
 def test_failed_run_publishes_value_free_pages_without_fake_curves(tmp_path: Path) -> None:
-    receipt = publish_failed_formal_result(
+    receipt = _publish_failed(
         tmp_path,
         _publication(),
         execution_binding_id=BINDING,
@@ -543,7 +644,7 @@ def test_success_and_failure_outputs_are_utf8_parseable_and_not_mojibake(
         authorization_id=AUTHORIZATION,
         result=pipeline_result,
     )
-    publish_failed_formal_result(
+    _publish_failed(
         failure_root,
         _publication(),
         execution_binding_id=BINDING,

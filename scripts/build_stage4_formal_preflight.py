@@ -6,11 +6,14 @@ import argparse
 import json
 import os
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from seismoflux.anomaly_increment.compute import build_compute_plan
-from seismoflux.anomaly_increment.config import load_stage4_protocol_bundle
+from seismoflux.anomaly_increment.config import (
+    load_stage4_protocol_bundle,
+    require_stage4_r2_execution_action,
+)
 from seismoflux.anomaly_increment.formal_preflight import (
     FORMAL_PREFLIGHT_RECEIPT_PATH,
     FormalIssueCalendar,
@@ -41,9 +44,19 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _write_atomic(path: Path, document: dict[str, object]) -> None:
+def _write_atomic(
+    path: Path,
+    document: dict[str, object],
+    *,
+    protocol: Mapping[str, object],
+) -> None:
     """Create the canonical receipt once; permit only byte-identical replay."""
 
+    # This writer is intentionally guarded even though its leading underscore
+    # marks it private: direct imports must not bypass the canonical R2 stop.
+    # Keep this before ``path.parent``, serialization, hashing, mkdir, tempfile,
+    # link, or open operations.
+    require_stage4_r2_execution_action(protocol, action="formal_preflight")
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = (
         json.dumps(
@@ -114,6 +127,8 @@ def _write_atomic(path: Path, document: dict[str, object]) -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     protocol = load_stage4_protocol_bundle(ROOT)
+    if args.mode != "dry-run":
+        require_stage4_r2_execution_action(protocol.protocol, action="formal_preflight")
     calendar = FormalIssueCalendar.from_protocol(protocol)
     physical = detect_physical_core_count()
     compute = build_compute_plan(
@@ -150,11 +165,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     document = bundle.receipt.as_mapping()
     if args.mode == "generate":
-        _write_atomic(OUTPUT, document)
+        _write_atomic(OUTPUT, document, protocol=protocol.protocol)
     else:
         if not OUTPUT.is_file():
             raise FileNotFoundError("formal preflight receipt has not been generated")
-        observed = load_formal_preflight_receipt(OUTPUT)
+        observed = load_formal_preflight_receipt(OUTPUT, protocol=protocol.protocol)
         if observed.content_sha256 != bundle.receipt.content_sha256:
             raise ValueError("deterministic preflight identity differs from fresh inputs")
         if observed.deterministic_mapping() != bundle.receipt.deterministic_mapping():
