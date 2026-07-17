@@ -16,12 +16,14 @@ def test_base_configuration_matches_preregistered_contract() -> None:
 
     assert config.project.random_seed == 147
     assert config.config_files.background == "configs/background.yaml"
+    assert config.config_files.anomaly_increment == "configs/anomaly_increment_r2.yaml"
     assert config.time_semantics.forecast_interval == "(T,T+h]"
     assert config.forecast.horizons_days == (7, 30, 90, 180, 365)
     assert config.integration.convergence_cells_km == (50, 25, 12.5)
     assert config.regions.operational_max_components == 10
     assert config.regions.operational_max_union_area_km2 == 960000
     assert config.parallel.reserve_physical_cores == 2
+    assert config.parallel.max_workers == 6
     assert config.parallel.nested_parallelism is False
 
 
@@ -68,4 +70,14 @@ def test_magnitude_bins_must_be_unique() -> None:
     magnitude_bins.append(deepcopy(magnitude_bins[0]))
 
     with pytest.raises(ValidationError, match="magnitude bins"):
+        SeismoFluxConfig.model_validate(raw)
+
+
+def test_base_configuration_rejects_legacy_stage4_protocol_path() -> None:
+    raw = deepcopy(load_yaml_mapping(BASE_CONFIG))
+    config_files = raw["config_files"]
+    assert isinstance(config_files, dict)
+    config_files["anomaly_increment"] = "configs/anomaly_increment.yaml"
+
+    with pytest.raises(ValidationError, match="anomaly_increment_r2"):
         SeismoFluxConfig.model_validate(raw)

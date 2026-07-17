@@ -21,6 +21,11 @@ def _score(
     variant: str,
     intensity: float,
     event_ids: tuple[str, ...] = ("e1", "e2"),
+    support_id: str | None = None,
+    supported_area_km2: float | None = None,
+    compensator_domain_id: str | None = None,
+    authorization_id: str | None = None,
+    evaluation_context_id: str | None = None,
 ) -> PointProcessScoreEvidence:
     index = int(snapshot_id.removeprefix("fold_")) if snapshot_id.startswith("fold_") else 5
     return PointProcessScoreEvidence(
@@ -37,6 +42,11 @@ def _score(
         event_log_intensities=np.full(len(event_ids), np.log(intensity)),
         compensator=2.0,
         numerical_gate_evidence_ids=(f"gate/{snapshot_id}",),
+        support_id=support_id,
+        supported_area_km2=supported_area_km2,
+        compensator_domain_id=compensator_domain_id,
+        authorization_id=authorization_id,
+        evaluation_context_id=evaluation_context_id,
     )
 
 
@@ -171,3 +181,129 @@ def test_score_id_changes_with_event_intensity_or_parameter_identity() -> None:
     )
     assert first.score_id != second.score_id
     assert first.score_id != changed_parameter.score_id
+
+
+def test_legacy_score_id_is_unchanged_without_local_support_identity() -> None:
+    score = _score("etas", "fold_1", variant="etas/d25", intensity=1.1)
+    assert score.score_id == "87746d36ac3764c386285c6ab1a6bb1b6e5c1486d18bd09325633d7338fdcee1"
+
+
+def test_local_support_identity_is_atomic_and_content_addressed() -> None:
+    local = _score(
+        "etas",
+        "fold_1",
+        variant="etas/d25",
+        intensity=1.1,
+        support_id="local-support-0123456789abcdef",
+        supported_area_km2=9_000_000.0,
+        compensator_domain_id="b" * 64,
+        authorization_id="d" * 64,
+    )
+    legacy = _score("etas", "fold_1", variant="etas/d25", intensity=1.1)
+    assert local.score_id != legacy.score_id
+
+    with pytest.raises(ValueError, match="must be supplied together"):
+        _score(
+            "etas",
+            "fold_1",
+            variant="etas/d25",
+            intensity=1.1,
+            support_id="local-support-0123456789abcdef",
+        )
+
+
+@pytest.mark.parametrize(
+    (
+        "support_id",
+        "supported_area_km2",
+        "compensator_domain_id",
+        "authorization_id",
+        "field_name",
+    ),
+    (
+        (
+            "local-support-fedcba9876543210",
+            9_000_000.0,
+            "b" * 64,
+            "d" * 64,
+            "support_id",
+        ),
+        (
+            "local-support-0123456789abcdef",
+            8_999_999.0,
+            "b" * 64,
+            "d" * 64,
+            "supported_area_km2",
+        ),
+        (
+            "local-support-0123456789abcdef",
+            9_000_000.0,
+            "c" * 64,
+            "d" * 64,
+            "compensator_domain_id",
+        ),
+        (
+            "local-support-0123456789abcdef",
+            9_000_000.0,
+            "b" * 64,
+            "e" * 64,
+            "authorization_id",
+        ),
+    ),
+)
+def test_paired_evidence_requires_identical_local_support_domain(
+    support_id: str,
+    supported_area_km2: float,
+    compensator_domain_id: str,
+    authorization_id: str,
+    field_name: str,
+) -> None:
+    uniform = _score(
+        "uniform_poisson",
+        "fold_1",
+        variant="uniform/v1",
+        intensity=1.0,
+        support_id="local-support-0123456789abcdef",
+        supported_area_km2=9_000_000.0,
+        compensator_domain_id="b" * 64,
+        authorization_id="d" * 64,
+    )
+    candidate = _score(
+        "etas",
+        "fold_1",
+        variant="etas/d25",
+        intensity=1.1,
+        support_id=support_id,
+        supported_area_km2=supported_area_km2,
+        compensator_domain_id=compensator_domain_id,
+        authorization_id=authorization_id,
+    )
+    with pytest.raises(ValueError, match=field_name):
+        PairedInformationGainEvidence.build(candidate=candidate, uniform=uniform)
+
+
+def test_paired_secondary_scores_require_identical_evaluation_context() -> None:
+    uniform = _score(
+        "uniform_poisson",
+        "fold_1",
+        variant="uniform/v1",
+        intensity=1.0,
+        support_id="local-support-0123456789abcdef",
+        supported_area_km2=9_000_000.0,
+        compensator_domain_id="b" * 64,
+        authorization_id="d" * 64,
+        evaluation_context_id="e" * 64,
+    )
+    candidate = _score(
+        "etas",
+        "fold_1",
+        variant="etas/d25",
+        intensity=1.1,
+        support_id="local-support-0123456789abcdef",
+        supported_area_km2=9_000_000.0,
+        compensator_domain_id="b" * 64,
+        authorization_id="d" * 64,
+        evaluation_context_id="f" * 64,
+    )
+    with pytest.raises(ValueError, match="evaluation_context_id"):
+        PairedInformationGainEvidence.build(candidate=candidate, uniform=uniform)

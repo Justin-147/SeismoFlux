@@ -53,6 +53,7 @@ FUTURE_REPLICATE_INDICES = tuple(range(FUTURE_REPLICATE_COUNT))
 FUTURE_MAXIMUM_EVENTS = 100_000
 FUTURE_ROOT_SEED = 147
 FUTURE_PROTOCOL_VERSION = "0.2.0"
+ACTIVE_FUTURE_PROTOCOL_VERSIONS = ("0.2.0", "0.2.1")
 FUTURE_SEED_NAMESPACE = "future_simulation"
 FUTURE_MODEL_ID = "etas/final_validation"
 FUTURE_QUANTILE_PROBABILITIES = (0.025, 0.5, 0.975)
@@ -101,6 +102,14 @@ def _canonical_local_date(value: object, *, label: str) -> str:
         raise ValueError(f"{label} must use YYYY-MM-DD") from error
     if parsed.isoformat() != value:
         raise ValueError(f"{label} must use canonical YYYY-MM-DD")
+    return value
+
+
+def _validated_active_protocol_version(value: object) -> str:
+    if not isinstance(value, str):
+        raise TypeError("future protocol_version must be a string")
+    if value not in ACTIVE_FUTURE_PROTOCOL_VERSIONS:
+        raise ValueError("future protocol_version must be an active 0.2.0 or 0.2.1 version")
     return value
 
 
@@ -578,10 +587,15 @@ def _event_cell_id(
     return identifier
 
 
-def _future_seed_context(issue_id: str, replicate_index: int) -> SeedContext:
+def _future_seed_context(
+    issue_id: str,
+    replicate_index: int,
+    *,
+    protocol_version: str = FUTURE_PROTOCOL_VERSION,
+) -> SeedContext:
     return SeedContext(
         root_seed=FUTURE_ROOT_SEED,
-        protocol_version=FUTURE_PROTOCOL_VERSION,
+        protocol_version=_validated_active_protocol_version(protocol_version),
         namespace=FUTURE_SEED_NAMESPACE,
         model_id=FUTURE_MODEL_ID,
         issue_id=issue_id,
@@ -598,12 +612,14 @@ def _simulate_validation_issue_ensemble(
     calendar: FrozenIssueCalendar,
     *,
     issue_date_local: str,
+    protocol_version: str,
 ) -> FutureIssueEnsemble:
     if not isinstance(parameters, ETASParameters):
         raise TypeError("parameters must be ETASParameters")
     if not isinstance(spec, ETASModelSpec):
         raise TypeError("spec must be ETASModelSpec")
     spec.validate_parameters(parameters)
+    active_protocol_version = _validated_active_protocol_version(protocol_version)
     issue_date = _validated_issue_date(calendar, issue_date_local)
     issue_id = f"validation/{issue_date}"
     history = _validated_history(history_events, spec=spec, domain=domain)
@@ -621,7 +637,11 @@ def _simulate_validation_issue_ensemble(
             history,
             domain,
             horizon_days=365.0,
-            seed_context=_future_seed_context(issue_id, replicate_index),
+            seed_context=_future_seed_context(
+                issue_id,
+                replicate_index,
+                protocol_version=active_protocol_version,
+            ),
             maximum_events=FUTURE_MAXIMUM_EVENTS,
         )
         events = _validate_simulation_result(result, spec=spec, domain=domain)
@@ -704,6 +724,7 @@ def simulate_validation_issue_ensemble(
     calendar: FrozenIssueCalendar,
     *,
     issue_date_local: str,
+    protocol_version: str = FUTURE_PROTOCOL_VERSION,
 ) -> FutureIssueEnsemble:
     """Simulate exactly 128 reusable 365-day catalogs for one validation issue."""
 
@@ -718,6 +739,7 @@ def simulate_validation_issue_ensemble(
         grid_family,
         calendar,
         issue_date_local=issue_date_local,
+        protocol_version=protocol_version,
     )
 
 
@@ -756,6 +778,7 @@ def simulate_all_validation_issue_ensembles(
     reserve_physical_cores: int = MINIMUM_RESERVED_PHYSICAL_CORES,
     physical_core_probe: PhysicalCoreProbe = detect_physical_core_count,
     progress: ProgressCallback | None = None,
+    protocol_version: str = FUTURE_PROTOCOL_VERSION,
 ) -> ValidationFutureEnsembles:
     """Run every validation issue with controlled outer workers and stable gathering.
 
@@ -771,6 +794,7 @@ def simulate_all_validation_issue_ensembles(
     if not isinstance(spec, ETASModelSpec):
         raise TypeError("spec must be ETASModelSpec")
     spec.validate_parameters(parameters)
+    active_protocol_version = _validated_active_protocol_version(protocol_version)
     if not callable(physical_core_probe):
         raise TypeError("physical_core_probe must be callable")
     _validate_study_area(study_area)
@@ -802,6 +826,7 @@ def simulate_all_validation_issue_ensembles(
             grid_family,
             calendar,
             issue_date_local=issue_date,
+            protocol_version=active_protocol_version,
         )
 
     if resources.effective_workers == 1:

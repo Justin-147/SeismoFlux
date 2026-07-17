@@ -40,6 +40,20 @@ outputs/releases/**
 !outputs/releases/.gitkeep
 outputs/run_manifests/**
 !outputs/run_manifests/.gitkeep
+outputs/visualizations/**
+!outputs/visualizations/.gitkeep
+
+# Stage-4 local authorization and one-shot attempt state.  These files are
+# generated only after the scoring-code tag exists and must never be published.
+data/manifests/anomaly_increment_scoring_seal.json
+data/manifests/anomaly_increment_attempt_ledger.json
+data/manifests/anomaly_increment_target_read_ledger.json
+data/manifests/anomaly_increment_r1_scoring_seal.json
+data/manifests/anomaly_increment_r1_attempt_ledger.json
+data/manifests/anomaly_increment_r1_target_read_ledger.json
+data/manifests/anomaly_increment_r2_scoring_seal.json
+data/manifests/anomaly_increment_r2_attempt_ledger.json
+data/manifests/anomaly_increment_r2_target_read_ledger.json
 
 # Local overrides and secrets
 .env

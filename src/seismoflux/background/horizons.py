@@ -27,6 +27,7 @@ from seismoflux.background.etas_fit import (
 from seismoflux.background.grid import EqualAreaGridFamily
 from seismoflux.background.issues import FrozenIssueCalendar, IssueExposure
 from seismoflux.background.poisson import SpatialPoissonModel, UniformPoissonModel
+from seismoflux.background.scoring_authorization import require_background_scoring_authorized
 from seismoflux.background.workflow import catalog_etas_events, physical_target_mask
 
 ModelId = Literal["uniform_poisson", "spatial_poisson", "etas"]
@@ -517,6 +518,7 @@ def run_issue_horizon_backtests(
 ) -> BackgroundHorizonBacktests:
     """Run frozen validation issue diagnostics separately for every horizon and delay."""
 
+    require_background_scoring_authorized(config)
     if tuple(config.time.horizons_days) != EXPECTED_HORIZONS:
         raise ValueError("configured horizons differ from the frozen backtest horizons")
     if tuple(config.time.publication_delay_sensitivity_days) != EXPECTED_PUBLICATION_DELAYS:

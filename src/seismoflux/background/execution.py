@@ -37,6 +37,8 @@ _EXECUTION_INPUT_KEYS = (
     "production_fixture",
     "study_area",
 )
+_SUPPORT_MANIFEST_EXECUTION_INPUT_KEYS = (*_EXECUTION_INPUT_KEYS, "support_manifest")
+_MISSING = object()
 
 
 class RepositoryIdentityError(RuntimeError):
@@ -158,7 +160,7 @@ class RepositoryIdentity:
 
 @dataclass(frozen=True, slots=True)
 class ExecutionSeal:
-    """A clean pushed Git identity bound to all seven frozen input bytes."""
+    """A clean pushed Git identity bound to one complete versioned input schema."""
 
     repository: RepositoryIdentity
     protocol_sha256: str
@@ -170,8 +172,13 @@ class ExecutionSeal:
         if _SHA256_PATTERN.fullmatch(self.protocol_sha256) is None:
             raise ValueError("execution seal protocol fingerprint must be SHA-256")
         observed_keys = tuple(key for key, _ in self.input_hashes)
-        if observed_keys != _EXECUTION_INPUT_KEYS:
-            raise ValueError("execution seal must contain the frozen seven input hashes")
+        if observed_keys not in (
+            _EXECUTION_INPUT_KEYS,
+            _SUPPORT_MANIFEST_EXECUTION_INPUT_KEYS,
+        ):
+            raise ValueError(
+                "execution seal must contain one complete sorted frozen input-hash schema"
+            )
         if any(_SHA256_PATTERN.fullmatch(value) is None for _, value in self.input_hashes):
             raise ValueError("execution seal input hashes must be lowercase SHA-256")
 
@@ -198,8 +205,36 @@ class ExecutionSeal:
         return dict(self.input_hashes)
 
 
+def _support_manifest_reference(background: object) -> tuple[str, str] | None:
+    """Return the support-manifest input required by the exact protocol version."""
+
+    protocol_version = getattr(background, "protocol_version", _MISSING)
+    if protocol_version not in {"0.2.0", "0.2.1"}:
+        raise ValueError("unsupported background protocol_version for execution sealing")
+    inputs = getattr(background, "inputs", _MISSING)
+    if inputs is _MISSING:
+        raise TypeError("background must provide validated inputs")
+    reference = getattr(inputs, "support_manifest", _MISSING)
+    expected = getattr(inputs, "support_manifest_sha256", _MISSING)
+    if protocol_version == "0.2.0":
+        if reference is not _MISSING or expected is not _MISSING:
+            raise ValueError("background protocol 0.2.0 forbids support_manifest fields")
+        return None
+    if reference is _MISSING or expected is _MISSING or reference is None or expected is None:
+        raise ValueError(
+            "background protocol 0.2.1 requires support_manifest and "
+            "support_manifest_sha256 together"
+        )
+    if not isinstance(reference, str) or not reference.strip() or reference != reference.strip():
+        raise ValueError("support_manifest must be a non-empty trimmed project path")
+    if not isinstance(expected, str) or _SHA256_PATTERN.fullmatch(expected) is None:
+        raise ValueError("support_manifest_sha256 must be a lowercase SHA-256 string")
+    return reference, expected
+
+
 def _execution_input_references(background: BackgroundConfig) -> dict[str, tuple[str, str]]:
-    return {
+    support_manifest = _support_manifest_reference(background)
+    references = {
         "environment_lock": (
             background.inputs.environment_lock,
             background.inputs.environment_lock_sha256,
@@ -229,6 +264,9 @@ def _execution_input_references(background: BackgroundConfig) -> dict[str, tuple
             background.numerical_regression.oracle_metadata_sha256,
         ),
     }
+    if support_manifest is not None:
+        references["support_manifest"] = support_manifest
+    return references
 
 
 def _observe_execution_input_hashes(
@@ -257,7 +295,7 @@ def create_execution_seal(
     *,
     runner: GitCommandRunner = subprocess_git_runner,
 ) -> ExecutionSeal:
-    """Observe the Git and seven-file identity immediately before scientific work."""
+    """Observe Git and the complete versioned input identity before scientific work."""
 
     repository = require_repository_identity(
         project_root,
@@ -703,7 +741,10 @@ def build_background_plan(
 def _validated_background(background: BackgroundConfig) -> BackgroundConfig:
     if not isinstance(background, BackgroundConfig):
         raise TypeError("background must be a validated BackgroundConfig")
-    return BackgroundConfig.model_validate(background.model_dump(mode="python"))
+    validated = type(background).model_validate(background.model_dump(mode="python"))
+    if not isinstance(validated, BackgroundConfig):
+        raise TypeError("background validator returned an incompatible configuration")
+    return validated
 
 
 def build_address_inputs(
@@ -740,6 +781,9 @@ def build_address_inputs(
         "production_fixture": validated.numerical_regression.production_fixture_sha256,
         "oracle_metadata": validated.numerical_regression.oracle_metadata_sha256,
     }
+    support_manifest = _support_manifest_reference(validated)
+    if support_manifest is not None:
+        input_hashes["support_manifest"] = support_manifest[1]
     address_inputs: dict[str, object] = {
         "protocol": validated.model_dump(mode="python"),
         "input_hashes": input_hashes,
