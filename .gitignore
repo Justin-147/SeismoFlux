@@ -28,6 +28,10 @@ data/processed/**
 !data/processed/.gitkeep
 models/registry/**
 !models/registry/.gitkeep
+!models/registry/background_etas_numerical_repair/
+!models/registry/background_etas_numerical_repair/**
+!models/registry/background_etas_comparator/
+!models/registry/background_etas_comparator/**
 models/frozen/**
 !models/frozen/.gitkeep
 outputs/experiments/**
@@ -54,6 +58,8 @@ data/manifests/anomaly_increment_r1_target_read_ledger.json
 data/manifests/anomaly_increment_r2_scoring_seal.json
 data/manifests/anomaly_increment_r2_attempt_ledger.json
 data/manifests/anomaly_increment_r2_target_read_ledger.json
+data/manifests/etas_numerical_repair_source_access_ledger.json
+data/manifests/etas_numerical_repair_adapter_attempt_ledger.json
 
 # Local overrides and secrets
 .env

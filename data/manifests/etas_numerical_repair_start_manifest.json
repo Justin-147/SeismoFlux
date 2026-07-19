@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "seed_protocol_version": "0.2.1",
+  "root_seed": 147,
+  "bit_generator": "numpy.random.PCG64",
+  "parameter_order": [
+    "log_background_rate_per_day",
+    "log_productivity_k",
+    "log_alpha",
+    "log_c_days",
+    "log_p_minus_one"
+  ],
+  "snapshots": [
+    {
+      "snapshot_id": "fold_1",
+      "model_id": "etas/fold_1",
+      "starts": [
+        {
+          "start_index": 0,
+          "transformed_hex": [
+            "-0x1.09f7346a85068p+0",
+            "-0x1.254c1b847a125p+2",
+            "0x1.c611b872ef4c0p-3",
+            "-0x1.a1ba8a6e80097p+2",
+            "-0x1.d289bafce2622p+1"
+          ]
+        },
+        {
+          "start_index": 1,
+          "transformed_hex": [
+            "-0x1.81a30fae92c40p-2",
+            "-0x1.8919f57c96568p+1",
+            "-0x1.6b45ee7d70d5cp+0",
+            "-0x1.30820752181c6p+2",
+            "-0x1.4e41ea877e898p+1"
+          ]
+        },
+        {
+          "start_index": 2,
+          "transformed_hex": [
+            "-0x1.39c4f05ea6fa5p+1",
+            "-0x1.5eb987a04da2cp+2",
+            "-0x1.70720f4f8f57dp+1",
+            "-0x1.de1447fb0d6dap+1",
+            "-0x1.203c10a8ad8dcp+2"
+          ]
+        },
+        {
+          "start_index": 3,
+          "transformed_hex": [
+            "-0x1.ebad374ef6f84p-1",
+            "-0x1.22684032a6f67p+3",
+            "0x1.60ca0fce86ee0p-4",
+            "-0x1.477c5be4f8766p+2",
+            "-0x1.8eace72588350p-2"
+          ]
+        },
+        {
+          "start_index": 4,
+          "transformed_hex": [
+            "-0x1.34f17f535ad52p+1",
+            "-0x1.dd56bf223eb4cp+2",
+            "0x1.4865e97f87300p-7",
+            "-0x1.ae82b132c7f8dp+2",
+            "-0x1.39c04042dd52ep+1"
+          ]
+        }
+      ]
+    },
+    {
+      "snapshot_id": "fold_2",
+      "model_id": "etas/fold_2",
+      "starts": [
+        {
+          "start_index": 0,
+          "transformed_hex": [
+            "0x1.d775c3d2e3618p+0",
+            "-0x1.1033542de4c3fp+3",
+            "-0x1.80ff4cf558d1ap+0",
+            "0x1.1ebc12310a6f8p+0",
+            "-0x1.09a962ac9a4a0p-3"
+          ]
+        },
+        {
+          "start_index": 1,
+          "transformed_hex": [
+            "-0x1.0c5032febd405p+2",
+            "-0x1.8c56b62234f1cp+0",
+            "-0x1.1558c145b4e96p+1",
+            "-0x1.4c09d00737384p+2",
+            "-0x1.636a9fd624b2cp+1"
+          ]
+        },
+        {
+          "start_index": 2,
+          "transformed_hex": [
+            "-0x1.5fced2bae2906p+1",
+            "-0x1.a473f395ce0b6p+2",
+            "-0x1.5139592192763p+0",
+            "-0x1.b293bbd020f1fp+2",
+            "-0x1.5e621ba71f351p+1"
+          ]
+        },
+        {
+          "start_index": 3,
+          "transformed_hex": [
+            "-0x1.45772704ce1c0p+0",
+            "-0x1.10a8fbd08bc9fp+3",
+            "0x1.2478ce2921bd8p-1",
+            "0x1.4300b7c4efdc0p+1",
+            "-0x1.a24cb54cad9f8p+0"
+          ]
+        },
+        {
+          "start_index": 4,
+          "transformed_hex": [
+            "-0x1.c639d96f91b9cp-1",
+            "-0x1.5c55597b47590p+1",
+            "-0x1.5116537cac510p+0",
+            "-0x1.1cceee10cfc52p+1",
+            "-0x1.d60c0fc197712p+1"
+          ]
+        }
+      ]
+    },
+    {
+      "snapshot_id": "fold_3",
+      "model_id": "etas/fold_3",
+      "starts": [
+        {
+          "start_index": 0,
+          "transformed_hex": [
+            "0x1.aa26a5942fc34p+0",
+            "-0x1.061bf40b55167p+3",
+            "-0x1.9a496887c0714p-1",
+            "-0x1.4f6d10cbffce8p+0",
+            "-0x1.aafea44984d40p+1"
+          ]
+        },
+        {
+          "start_index": 1,
+          "transformed_hex": [
+            "0x1.6b2501eaf1ac0p-1",
+            "-0x1.31ae315afb072p+2",
+            "-0x1.d1897b12d267ep+0",
+            "0x1.714c7687deb48p+1",
+            "-0x1.f07f40f8997f8p+0"
+          ]
+        },
+        {
+          "start_index": 2,
+          "transformed_hex": [
+            "-0x1.7b5679b99de04p+1",
+            "-0x1.771b201798f3cp+2",
+            "-0x1.2404470957870p+1",
+            "-0x1.5f69024f1314dp+2",
+            "-0x1.595fbc494c57ep+1"
+          ]
+        },
+        {
+          "start_index": 3,
+          "transformed_hex": [
+            "-0x1.604ece449e884p-1",
+            "-0x1.6f298ad867651p+2",
+            "-0x1.78fdba089c05ap+0",
+            "0x1.18d1b24cc9d48p-1",
+            "0x1.7b62b8c3e1800p-7"
+          ]
+        },
+        {
+          "start_index": 4,
+          "transformed_hex": [
+            "-0x1.cbe4d53a7d454p+1",
+            "-0x1.8c8719457c546p+2",
+            "0x1.86d0440ec17e0p-4",
+            "0x1.29fc6d4d90060p+1",
+            "-0x1.ba7077f204120p+0"
+          ]
+        }
+      ]
+    },
+    {
+      "snapshot_id": "fold_4",
+      "model_id": "etas/fold_4",
+      "starts": [
+        {
+          "start_index": 0,
+          "transformed_hex": [
+            "-0x1.4c271fe38c2f2p+0",
+            "-0x1.589b2655ad27cp+2",
+            "-0x1.184cc4185281bp+1",
+            "-0x1.3fe62ff71d21ap+1",
+            "-0x1.79a6b7dd2df9ap+0"
+          ]
+        },
+        {
+          "start_index": 1,
+          "transformed_hex": [
+            "-0x1.1185898570a5ep+2",
+            "-0x1.102828ba5981dp+3",
+            "0x1.3a0b7c26ca040p-5",
+            "-0x1.5694af408836cp+0",
+            "-0x1.6a6a171425216p+0"
+          ]
+        },
+        {
+          "start_index": 2,
+          "transformed_hex": [
+            "-0x1.49894c09f425ap+0",
+            "-0x1.f046a363ee418p+1",
+            "0x1.8030508d47f68p-2",
+            "-0x1.a53b083e8b408p+2",
+            "-0x1.ae5562c26a420p+1"
+          ]
+        },
+        {
+          "start_index": 3,
+          "transformed_hex": [
+            "-0x1.7be1f8cfea7acp-1",
+            "-0x1.40443aa6488a2p+1",
+            "-0x1.931889f4fa6a8p+0",
+            "-0x1.751f90801b1abp+2",
+            "-0x1.a8feb373e54b6p+1"
+          ]
+        },
+        {
+          "start_index": 4,
+          "transformed_hex": [
+            "-0x1.18d51d93a1133p+2",
+            "-0x1.2923c7b2564cbp+2",
+            "0x1.613e2b73077a0p-3",
+            "-0x1.d1be9d4d04a4cp+0",
+            "0x1.1e655e0f5ffe0p-3"
+          ]
+        }
+      ]
+    },
+    {
+      "snapshot_id": "final_validation",
+      "model_id": "etas/final_validation",
+      "starts": [
+        {
+          "start_index": 0,
+          "transformed_hex": [
+            "-0x1.9dd7826ec10dbp+1",
+            "-0x1.dca62cd900898p+0",
+            "-0x1.5342d4a7a0c38p-1",
+            "-0x1.7b52f6a24efc1p+2",
+            "-0x1.14c2845950d69p+2"
+          ]
+        },
+        {
+          "start_index": 1,
+          "transformed_hex": [
+            "-0x1.bee45156b4be4p+1",
+            "-0x1.b95020d718f44p+0",
+            "-0x1.0aed1fbda3a00p-8",
+            "0x1.c99a1e19967f0p-2",
+            "-0x1.0e9f0432e2f4bp+2"
+          ]
+        },
+        {
+          "start_index": 2,
+          "transformed_hex": [
+            "0x1.775451f4ca104p+0",
+            "-0x1.c9bf652121d92p+1",
+            "-0x1.75ff76f7f0d6bp+0",
+            "-0x1.e5e689c51c39ap+1",
+            "-0x1.14dc8812140a7p+1"
+          ]
+        },
+        {
+          "start_index": 3,
+          "transformed_hex": [
+            "-0x1.36f58f2790e75p+1",
+            "-0x1.f155b7aec6adep+2",
+            "-0x1.d43afb32b1c4cp-1",
+            "-0x1.dc64ea67294c0p-2",
+            "-0x1.5bdc756eaa6eep+1"
+          ]
+        },
+        {
+          "start_index": 4,
+          "transformed_hex": [
+            "0x1.0a788d0ceb106p+1",
+            "-0x1.1ea7649e68be0p+3",
+            "0x1.b2f82917c2538p-2",
+            "-0x1.e71fad773b86ap+1",
+            "-0x1.b0a6d1d4df79cp-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "vector_payload_sha256": "29275083fb4a6a1209ba2c6e0e1e6033ab5bb51dab7b2ffba689b04784d3acd5"
+}

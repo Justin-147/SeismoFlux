@@ -383,11 +383,11 @@ def test_blocked_public_artifact_io_never_dereferences_hostile_paths_or_creates_
             protocol=bundle.protocol,
         ),
     )
-    for call in ledger_calls:
+    for ledger_call in ledger_calls:
         with pytest.raises(Stage4LedgerError, match="ETAS comparator"):
-            call()
+            ledger_call()
 
-    public_artifact_calls = (
+    public_artifact_calls: tuple[Any, ...] = (
         lambda: load_stage4_qualification_evidence(
             hostile,  # type: ignore[arg-type]
             protocol=bundle.protocol,
@@ -411,9 +411,9 @@ def test_blocked_public_artifact_io_never_dereferences_hostile_paths_or_creates_
             protocol=bundle.protocol,
         ),
     )
-    for call in public_artifact_calls:
+    for public_artifact_call in public_artifact_calls:
         with pytest.raises(Stage4R2ExecutionBlockedError, match="ETAS comparator"):
-            call()
+            public_artifact_call()
 
     assert path_conversions == 0
     assert tuple(tmp_path.iterdir()) == before
@@ -422,7 +422,7 @@ def test_blocked_public_artifact_io_never_dereferences_hostile_paths_or_creates_
 def test_public_r2_artifact_io_functions_have_guard_as_first_executable_statement() -> None:
     """Prevent a future resolve/stat/open/mkdir/tempfile/lock/hash prelude."""
 
-    artifact_guards = {
+    artifact_guards: dict[Any, tuple[str, str]] = {
         qualification_module.load_stage4_qualification_evidence: (
             "require_stage4_r2_execution_action",
             "qualification",
@@ -444,7 +444,7 @@ def test_public_r2_artifact_io_functions_have_guard_as_first_executable_statemen
             "formal_preflight",
         ),
     }
-    ledger_functions = (
+    ledger_functions: tuple[Any, ...] = (
         attempt_ledger_module.initialize_stage4_ledger,
         attempt_ledger_module.read_stage4_ledger,
         attempt_ledger_module.reserve_stage4_operation,
@@ -524,8 +524,8 @@ def test_private_internal_cores_have_only_guarded_repository_production_callers(
     allowed_imports = {
         "_run_stage4_in_memory_pipeline_core": {"src/seismoflux/anomaly_increment/formal_run.py"}
     }
-    observed_calls = {name: set() for name in allowed_callers}
-    observed_imports = {name: set() for name in allowed_callers}
+    observed_calls: dict[str, set[str]] = {name: set() for name in allowed_callers}
+    observed_imports: dict[str, set[str]] = {name: set() for name in allowed_callers}
 
     production_files = tuple(repository.joinpath("src").rglob("*.py")) + tuple(
         repository.joinpath("scripts").rglob("*.py")
