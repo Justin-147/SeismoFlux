@@ -4,16 +4,36 @@
 
 - 工作线：阶段 2 ETAS 数值修复（`0.2.2`）
 - 原始协议标签：`v0.2.2-background-etas-repair-protocol`（保持不可变）
-- 当前勘误标签：`v0.2.2-background-etas-repair-protocol-r1`
+- R1 勘误标签：`v0.2.2-background-etas-repair-protocol-r1`（保持不可变）
+- 当前勘误标签：`v0.2.2-background-etas-repair-protocol-r2`
 - 唯一实施蓝图：`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`
-- 当前勘误分支：`codex/stage2-etas-repair-protocol-r1`；后续实现主分支：`codex/stage2-etas-numerical-repair`
+- 当前勘误分支：`codex/stage2-etas-repair-protocol-r2`；后续实现主分支：`codex/stage2-etas-numerical-repair`
 - 原始协议比较基线：`dae6403`
 - R1 勘误比较基线：`b7c70aced16a6bd57bf8f86f2680687e36b7710d`
+- R2 勘误比较基线：`da916454c908e0cbe4a7526f56a8f837331a3c7c`
 - 状态：通过（本地协议工程验收；提交、推送和远端标签核验属于发布闭环）
 
 本次验收只冻结目标盲修复设计、25 个既有优化初值、输入/执行封印、调用回执、适配边界和停止条件。它不实施修复、不生成真实 fit-only 输入包、不运行真实 ETAS 资格拟合，也不创建新的阶段 4 执行修订。
 
-## R1 勘误边界
+## R2 勘误边界
+
+R1 远端冻结后，Stage 2R-A 实现审计发现资格执行只声明“closing 前使用 Git 忽略 staging”，却没有冻结 qualification attempt 的 staged root、common/evaluable 逐文件 staged→final 路径、closing 后完整 qualification manifest 的独立 staged 路径及公开复制失败后的回滚/重试语义。R2 只关闭该 publication 工程歧义：
+
+- staged root 恰好为既有 fit-input 本地根派生的 `data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public`，必须 Git 忽略、attempt 独占、原先不存在并新建；`attempt_id` 必须完整匹配安全单一 ASCII 组件 `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`，并与既有同 attempt fit-input 目录大小写精确一致；
+- pre-closing identity 只含 7 个 common staged 文件；`evaluable` 另含 2 个参数文件，`not_evaluable` 不得存在参数目录；
+- pre-closing ordered path→SHA map 的 key 精确等于相应 final path，value 精确等于同 mapping staged path 的完整 reopened bytes SHA；size、完整 bytes 和声明 Schema/可视化合同都须复验后再重算 aggregate；
+- qualification closing seal 和 closing 后完整 qualification manifest 各有独立 staged 路径，二者都不得进入 pre-closing identity，避免哈希环；
+- common 9 个最终文件和 evaluable 额外 2 个文件都有逐项精确 `{staged_path, final_path}` 映射；每个 staged 路径都必须等于 staged root 加冻结 final repository-relative path；
+- 所有路径拒绝 symlink、junction、mount/reparse、UNC、drive、`..`、分隔符/大小写别名及根逃逸；所有 staged/final 文件只能独占新建、flush/fsync、no-clobber install、reopen 并逐字节核验；
+- repair code tag 中全部 final 路径必须不存在，物化前仓库重新 clean 且 HEAD/upstream 不变，成功后这些路径只能是 Git `A`，禁止覆盖、删除、rename 或其他修改；
+- 公开复制失败只逆序清除本次调用新建、仍与同 attempt staged bytes 完全相同且可安全重开的 final，保留全部 staging、closing、manifest 与失败证据；
+- `not_evaluable` 物化顺序固定为 common 7→closing→manifest，`evaluable` 固定为 common 7→parameter 2→closing→manifest；rollback 只能是已创建前缀的精确逆序；
+- 每次 post-closing failure 都追加严格的 attempt-local、六位连续序号、own-SHA 链 publication failure receipt，绑定 closing、manifest staging state、按状态可空的 manifest SHA、完整 staged size/SHA map、创建/回滚路径、仓库身份和 retry eligibility；manifest 尚未 reopened-valid 的 construction/temp/install/reopen/schema-byte-cross-file failure 一律 `retry_eligible=false`；
+- post-closing publication failure 只有在 manifest 已 reopened-valid、完整回滚、仓库恢复 clean、HEAD/upstream 未变、final 全空且 staged 9(+2)、closing、manifest 字节和哈希全部未变时，才允许同一 attempt 仅重试 byte-exact materialization；不得重跑 fit、重算/替换 staged payload、改 closing/manifest 或另选结果，否则该 attempt 永久不得发布。
+
+R2 不改变 R1 的 signed `row/column`，也不改变事件、快照、几何、网格、KDE、初值、objective、优化器、数值门限、源访问、目标盲边界或 adapter 合同。该缺口仍在任何真实 fit 源再次 open/stat/hash/query 或 bundle inspection 之前发现；原始和 R1 标签均不移动、不覆盖、不删除。
+
+## R1 勘误边界（历史，继续有效）
 
 代码标签前审计发现，原始协议在 `scientific_fit_input_record_schemas.integer_encoding` 中把所有整数统写为非负，但既有冻结网格的原点固定索引公式、带符号 `cell_id` 模板和 `grid.py` 均明确允许 `row/column` 为有符号整数；中国大陆等面积投影中位于中央经线西侧的固定格不能用非负列号无损表示。R1 仅作以下字段级澄清：
 
@@ -22,7 +42,7 @@
 - `cell_id/row/column` 必须逐格匹配既有冻结网格，不允许移位、取绝对值、重编号或改网格；
 - 不改变事件集合、坐标、几何、KDE、初值、objective、优化器、门限、目标盲边界或任何科学拟合规则。
 
-该冲突在任何真实 fit 源再次 open/stat/hash/query 或 bundle inspection 之前发现并修订；R1 验收期间真实 fit 源、阶段 4 正式目标和阶段 9 锁定测试均保持未访问。原始协议标签不移动、不覆盖、不删除。
+该冲突在任何真实 fit 源再次 open/stat/hash/query 或 bundle inspection 之前发现并修订；R1 验收期间真实 fit 源、阶段 4 正式目标和阶段 9 锁定测试均保持未访问。原始协议标签不移动、不覆盖、不删除；R1 已由提交 `da916454c908e0cbe4a7526f56a8f837331a3c7c` 和远端 annotated tag 冻结。
 
 ## 协议包边界
 
@@ -82,6 +102,26 @@
 
 ## 验收证据
 
+### R2 publication-path 勘误复验
+
+| 项目 | R2 结果 |
+|---|---|
+| 协议定向测试 | 首轮通过；审计修复并回填最终状态后的验收运行：`25 passed in 27.47s`；文档回填后再次完整复验：`25 passed in 24.98s` |
+| 协议、固定网格与 local-support manifest 联合回归 | `57 passed in 24.68s` |
+| 新增路径闭包预复验 | 最终文档状态写入前其余 `24 passed, 1 deselected`；新增 staging/YAML/dotted-ref 三项单独复验 `3 passed` |
+| `.gitignore` / R1 tree 可执行闭包 | 对全部 11 个格式化 staged path 的 `git check-ignore --no-index` 均返回 ignored，对全部 11 个 final path 均返回 not ignored；`git ls-tree` 证明全部 final path 在 R1 基底提交中不存在 |
+| 隔离 public worktree 全量非目标测试 | `1213 passed, 2 skipped in 363.04s`；`failures=0`、`errors=0` |
+| R2 JUnit | `data/interim/protocol-r2-full-nontarget.junit.xml` |
+| R2 JUnit 字节身份 | size `195115`；SHA-256 `ec40ea946c976d362b3b1313fc31c3f318eb4b13dc2717fcd63bf3e1754e9aaf` |
+| Ruff | 协议测试 `ruff check` 与 `ruff format --check` 通过 |
+| Mypy | `Success: no issues found in 1 source file` |
+| Git 空白检查 | `git diff --check` 通过 |
+| 独立只读审计 | 首轮 `P0=1, P1=4, P2=1`；修复 manifest failure 窗口后第三轮终审 `P0=0, P1=0, P2=0`，`FINAL_SCHEMA_AUDIT=PASS` |
+
+R2 没有重跑真实拟合；全量非目标回归仅运行仓库 `tests` 中的合成、单元、泄漏守卫、回归和包契约。两个 skip 仍来自隔离 public worktree 有意不分发的本地受限 Stage 3 feature store / Stage 4 spatial artifacts；没有读取、复制或检查这些受限工件内容。最终只读审计还对 R1→R2 YAML 做 normalized deep compare，确认改动局限于 revision/tag metadata、qualification publication path/rollback/retry 工程闭包、相应文档和机械协议测试，且精确只修改五个允许文件。
+
+全量运行启动前 5 次整机 CPU 抽样均值为 `45.19%`、峰值为 `47.85%`；执行进程使用 affinity `0x3F0000`（6 个逻辑核）、`BelowNormal` 优先级，并强制 OMP/OpenBLAS/MKL/NumExpr/BLIS/VECLIB 单线程。运行中复核均值约 `48.75%`、峰值约 `51.66%`，未占满所有核心。
+
 ### R1 勘误复验
 
 | 项目 | R1 结果 |
@@ -133,6 +173,6 @@ R1 独立只读审计对原协议与勘误 YAML 做深比较，确认除 revisio
 - 阶段 9 锁定测试：未运行
 - 真实 fit-input bundle、资格结果、参数工件和 adapter 工件：均未生成
 
-因此，本次通过只表示阶段 2 ETAS 数值修复的**协议工程冻结**满足本地验收，不表示 ETAS 已稳定拟合，更不表示预测效果或科学门控成功。原始 annotated tag `v0.2.2-background-etas-repair-protocol` 保持不动；当前下一合法动作是提交 R1 协议勘误、推送并创建 annotated tag `v0.2.2-background-etas-repair-protocol-r1`。只有远端 R1 标签解析到该勘误提交后，才允许继续 1 ULP 修复代码子阶段。
+因此，本次勘误即使通过，也只表示阶段 2 ETAS 数值修复的**协议工程路径闭包**满足本地验收，不表示 ETAS 已稳定拟合，更不表示预测效果或科学门控成功。原始和 R1 annotated tag 保持不动；R2 完成定向/回归/静态检查与独立审计后，下一合法动作才是提交 R2 协议勘误、推送并创建 annotated tag `v0.2.2-background-etas-repair-protocol-r2`。只有远端 R2 标签解析到该勘误提交后，才允许恢复 1 ULP 修复代码子阶段。
 
 协议包自身包含本验收文件，因此不能在文件内部嵌入最终提交、标签或自身 blob SHA 而制造自引用。六个精确路径已由测试锁定，最终 Git blob/tree/commit 身份由提交与远端 annotated tag 在外层冻结并可重复查询。

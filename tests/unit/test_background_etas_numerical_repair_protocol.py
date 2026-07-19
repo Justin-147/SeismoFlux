@@ -34,6 +34,7 @@ PROTOCOL_DOCUMENT_PATH = Path("docs/background_etas_numerical_repair_protocol.md
 PROTOCOL_ACCEPTANCE_PATH = Path("docs/phase2_etas_numerical_repair_protocol_acceptance.md")
 RESTART_HANDOFF_PATH = Path("docs/restart_handoff_2026-07-19_stage2_etas_repair_protocol.md")
 STAGE4_R2_PROTOCOL_PATH = Path("configs/anomaly_increment_r2.yaml")
+R1_PROTOCOL_COMMIT = "da916454c908e0cbe4a7526f56a8f837331a3c7c"
 
 SNAPSHOT_ORDER = ("fold_1", "fold_2", "fold_3", "fold_4", "final_validation")
 FIT_ENDS = (
@@ -228,17 +229,17 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.2.2"
-    assert protocol["protocol_revision"] == "r1"
+    assert protocol["protocol_revision"] == "r2"
     assert protocol["stage"] == "2-ETAS-R"
     assert protocol["status"] == "preregistered_target_blind_before_any_repair_fit"
     assert protocol["preregistered_on"] == "2026-07-17"
     assert protocol["revised_on"] == "2026-07-19"
     assert protocol["revision_reason"] == (
-        "make_signed_frozen_grid_row_and_column_encoding_explicit_without_changing_any_"
-        "scientific_input_or_fit_rule"
+        "freeze_qualification_attempt_local_staged_public_paths_and_byte_exact_"
+        "materialization_without_changing_any_scientific_input_or_fit_rule"
     )
     publication = protocol["publication"]
-    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r1"
+    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r2"
     assert publication["qualification_code_tag"] == "v0.2.2-background-etas-repair-code"
     assert publication["qualification_result_tag"] == (
         "v0.2.2-background-etas-numerical-qualification"
@@ -252,7 +253,7 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     assert publication["adapter_code_tag_allowed_only_after_positive_qualification_result_tag"]
     assert publication["new_stage4_revision_requires_comparator_receipt_tag"] is True
     assert protocol["repair_code_scope_from_protocol_tag"]["comparison_base"] == (
-        "v0.2.2-background-etas-repair-protocol-r1"
+        "v0.2.2-background-etas-repair-protocol-r2"
     )
     assert publication["exact_order"] == [
         "protocol_commit_push_and_remote_tag_verification",
@@ -2617,6 +2618,7 @@ def test_qualification_execution_seals_require_clean_remote_frozen_code() -> Non
     ]
     closing = seal["closing_seal"]
     assert closing["all_25_rows_and_five_snapshot_attempts_must_share_exact_attempt_id"]
+    assert closing["preclosing_invalid_execution_has_no_closing_qualification_seal"]
     assert {
         "optimizer_runtime_code_seal_sha256",
         "ordered_five_fit_etas_call_opening_receipt_sha256",
@@ -2628,6 +2630,375 @@ def test_qualification_execution_seals_require_clean_remote_frozen_code() -> Non
         "staged_public_payload_identity_excluding_closing_seal_and_qualification_evidence"
         in (closing["includes"])
     )
+
+
+def test_qualification_public_result_staging_paths_are_attempt_local_and_fail_closed() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    seal = protocol["qualification_execution_seal"]
+    staging = seal["qualification_public_result_staging"]
+    outputs = protocol["outputs"]
+
+    local_root = protocol["fit_input_bundle"]["local_root"]
+    attempt_root = f"{local_root}/attempts/{{attempt_id}}"
+    staged_root = f"{attempt_root}/staged_public"
+    assert staging["fit_input_local_root_ref"] == "fit_input_bundle.local_root"
+    assert staging["attempt_root_path_template"] == attempt_root
+    assert staging["staged_public_root_path_template"] == staged_root
+    attempt_id_contract = staging["attempt_id_path_component_contract"]
+    assert attempt_id_contract["fullmatch_regex"] == "[A-Za-z0-9][A-Za-z0-9._-]{0,127}"
+    assert attempt_id_contract["single_ascii_component_only"] is True
+    assert (
+        attempt_id_contract[
+            "slash_backslash_colon_control_character_NUL_drive_UNC_empty_dot_and_dot_dot_forbidden"
+        ]
+        is True
+    )
+    assert (
+        attempt_id_contract[
+            "trailing_dot_or_space_and_case_insensitive_windows_reserved_device_basename_forbidden"
+        ]
+        is True
+    )
+    assert (
+        attempt_id_contract[
+            "exact_case_must_match_the_existing_same_attempt_fit_input_directory_name"
+        ]
+        is True
+    )
+    assert staging["staged_to_final_record_fields_exact"] == ["staged_path", "final_path"]
+
+    common = staging["common_staged_to_final_path_mapping_exact"]
+    expected_common_final_paths = {
+        "fit_input_manifest": outputs["fit_input_manifest"],
+        "opening_execution_seal": outputs["opening_execution_seal"],
+        "optimizer_runtime_code_seal": outputs["optimizer_runtime_code_seal"],
+        "qualification_input_seal": outputs["qualification_input_seal"],
+        "report": outputs["report"],
+        "static_diagnostic": outputs["static_diagnostic"],
+        "interactive_diagnostic": outputs["interactive_diagnostic"],
+        "qualification_closing_seal": outputs["qualification_closing_seal"],
+        "qualification_manifest": outputs["qualification_manifest"],
+    }
+    assert len(common) == 9
+    assert {key: record["final_path"] for key, record in common.items()} == (
+        expected_common_final_paths
+    )
+
+    evaluable = staging["evaluable_additional_staged_to_final_path_mapping_exact"]
+    expected_evaluable_final_paths = {
+        "parameter_snapshots": (
+            "models/registry/background_etas_numerical_repair/parameter_snapshots.json"
+        ),
+        "parameter_set_manifest": (
+            "models/registry/background_etas_numerical_repair/parameter_set_manifest.json"
+        ),
+    }
+    assert len(evaluable) == 2
+    assert {key: record["final_path"] for key, record in evaluable.items()} == (
+        expected_evaluable_final_paths
+    )
+    assert staging["not_evaluable_additional_staged_to_final_path_mapping_exact"] == {}
+
+    preclosing_common_keys = staging["preclosing_common_logical_artifact_keys_exact"]
+    assert preclosing_common_keys == [
+        "fit_input_manifest",
+        "opening_execution_seal",
+        "optimizer_runtime_code_seal",
+        "qualification_input_seal",
+        "report",
+        "static_diagnostic",
+        "interactive_diagnostic",
+    ]
+    assert [common[key]["final_path"] for key in preclosing_common_keys] == outputs[
+        "canonical_nested_schemas"
+    ]["staged_public_payload_identity"]["common_complete_file_paths_exact"]
+    assert staging["preclosing_evaluable_additional_logical_artifact_keys_exact"] == [
+        "parameter_snapshots",
+        "parameter_set_manifest",
+    ]
+    assert [
+        evaluable[key]["final_path"]
+        for key in staging["preclosing_evaluable_additional_logical_artifact_keys_exact"]
+    ] == outputs["canonical_nested_schemas"]["staged_public_payload_identity"][
+        "evaluable_additional_complete_file_paths_exact"
+    ]
+    assert staging["preclosing_not_evaluable_additional_logical_artifact_keys_exact"] == []
+
+    closing_key = staging["qualification_closing_seal_logical_artifact_key_exact"]
+    manifest_key = staging["qualification_manifest_logical_artifact_key_exact"]
+    assert closing_key == "qualification_closing_seal"
+    assert manifest_key == "qualification_manifest"
+    assert closing_key not in preclosing_common_keys
+    assert manifest_key not in preclosing_common_keys
+    not_evaluable_order = [*preclosing_common_keys, closing_key, manifest_key]
+    evaluable_order = [
+        *preclosing_common_keys,
+        *staging["preclosing_evaluable_additional_logical_artifact_keys_exact"],
+        closing_key,
+        manifest_key,
+    ]
+    assert staging["not_evaluable_public_materialization_logical_artifact_order_exact"] == (
+        not_evaluable_order
+    )
+    assert staging["evaluable_public_materialization_logical_artifact_order_exact"] == (
+        evaluable_order
+    )
+    assert not_evaluable_order[-1] == manifest_key
+    assert evaluable_order[-1] == manifest_key
+
+    all_records = [*common.values(), *evaluable.values()]
+    assert len({record["final_path"] for record in all_records}) == 11
+    assert len({record["staged_path"] for record in all_records}) == 11
+    for record in all_records:
+        assert set(record) == set(staging["staged_to_final_record_fields_exact"])
+        assert record["staged_path"] == f"{staged_root}/{record['final_path']}"
+        assert not record["final_path"].startswith(("/", "\\"))
+        assert ".." not in record["final_path"].split("/")
+        assert "\\" not in record["final_path"]
+
+    ignore_probe_attempt_id = "r2-ignore-probe"
+    ignored_staged_probe = f"{staged_root}/probe".format(attempt_id=ignore_probe_attempt_id)
+    ignored_staged_check = subprocess.run(
+        ["git", "check-ignore", "--no-index", "-q", ignored_staged_probe],
+        check=False,
+    )
+    assert ignored_staged_check.returncode == 0
+    for record in all_records:
+        staged_path = record["staged_path"].format(attempt_id=ignore_probe_attempt_id)
+        staged_path_check = subprocess.run(
+            ["git", "check-ignore", "--no-index", "-q", staged_path],
+            check=False,
+        )
+        assert staged_path_check.returncode == 0, staged_path
+        public_path_check = subprocess.run(
+            ["git", "check-ignore", "--no-index", "-q", record["final_path"]],
+            check=False,
+        )
+        assert public_path_check.returncode == 1, record["final_path"]
+        base_tree_check = subprocess.run(
+            ["git", "ls-tree", "-r", "--name-only", R1_PROTOCOL_COMMIT, "--", record["final_path"]],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert base_tree_check.returncode == 0, base_tree_check.stderr
+        assert base_tree_check.stdout == "", record["final_path"]
+
+    result_diff = seal["qualification_result_tag_diff_from_repair_code_tag"]
+    assert set(expected_common_final_paths.values()) == set(result_diff["common_exact_added_paths"])
+    assert set(expected_evaluable_final_paths.values()) == set(
+        result_diff["evaluable_additional_exact_paths"]
+    )
+    assert result_diff["not_evaluable_additional_exact_paths"] == []
+    assert result_diff["invalid_execution_tracked_added_paths"] == []
+    assert result_diff[
+        "every_evaluable_or_not_evaluable_result_path_must_be_absent_in_repair_code_tag_and_have_exact_git_name_status_A_with_null_old_blob_oid"
+    ]
+    assert result_diff["overwrite_delete_rename_copy_or_other_modified_name_status_forbidden"]
+    assert result_diff["exact_name_status_A_blob_oid_and_binary_patch_receipt_required"]
+
+    staged_identity = outputs["canonical_nested_schemas"]["staged_public_payload_identity"]
+    assert staged_identity[
+        "ordered_complete_file_path_sha256_map_keys_must_equal_common_plus_qualification_status_branch_additional_paths_exactly"
+    ]
+    assert staged_identity[
+        "every_map_key_must_equal_the_final_path_of_exactly_one_same_branch_qualification_public_result_staging_preclosing_record"
+    ]
+    assert staged_identity[
+        "every_map_value_must_equal_sha256_of_complete_reopened_bytes_at_that_same_record_staged_path"
+    ]
+    assert staged_identity[
+        "every_reopened_staged_path_must_be_non_reparse_regular_file_with_stable_size_hash_bytes_and_declared_schema_or_visual_contract"
+    ]
+    assert staged_identity[
+        "aggregate_content_sha256_must_recompute_after_all_mapped_staged_files_are_reopened_and_before_closing_seal"
+    ]
+
+    for required in (
+        "staged_public_root_must_equal_fit_input_local_root_plus_attempts_attempt_id_staged_public",
+        "attempt_root_must_be_the_existing_non_reparse_fit_input_attempt_directory_strictly_below_fit_input_local_root_attempts",
+        "staged_public_root_must_be_gitignored_attempt_exclusive_absent_before_staging_and_created_new",
+        "preclosing_mappings_must_equal_staged_public_payload_identity_common_and_branch_additional_paths_exactly",
+        "branch_materialization_order_must_equal_exact_preclosing_common_then_branch_additional_then_closing_then_manifest_and_manifest_must_be_last",
+        "rollback_order_must_be_the_exact_reverse_of_the_successfully_created_prefix_of_the_same_branch_materialization_order",
+        "staged_public_payload_identity_ordered_path_sha256_map_key_set_must_equal_same_branch_preclosing_mapping_final_paths_exactly",
+        "staged_public_payload_identity_ordered_path_sha256_map_key_must_equal_each_mapped_record_final_path_and_value_must_equal_sha256_of_complete_reopened_bytes_at_same_record_staged_path",
+        "staged_public_payload_identity_every_mapped_staged_file_must_reopen_as_non_reparse_regular_file_with_stable_size_sha256_and_complete_bytes_before_and_after_identity_construction",
+        "staged_public_payload_identity_every_reopened_staged_file_must_validate_against_its_declared_strict_public_file_schema_or_visualization_contract",
+        "staged_public_payload_identity_aggregate_must_recompute_from_exact_branch_status_ordered_path_sha256_map_and_preclosing_manifest_projection_sha256",
+        "qualification_closing_seal_must_use_its_independent_staged_path_only_after_preclosing_identity_and_final_clean_repository_identity_are_frozen",
+        "qualification_manifest_must_use_its_independent_staged_path_only_after_closing_seal_and_complete_qualification_evidence_and_manifest_content_sha256_are_frozen",
+        "closing_seal_and_qualification_manifest_must_not_enter_staged_public_payload_identity",
+        "every_staged_path_must_equal_staged_public_root_plus_its_exact_final_repository_relative_path",
+        "staged_root_and_every_staged_or_final_path_must_resolve_strictly_inside_its_declared_root_without_symlink_junction_mount_point_or_other_reparse_escape",
+        "every_existing_ancestor_must_be_reopened_and_verified_as_the_same_non_reparse_directory_before_each_create_copy_or_remove",
+        "every_staged_and_final_file_must_be_absent_before_its_first_creation_and_no_historical_result_may_be_overwritten",
+        "every_staged_file_must_use_exclusive_sibling_temp_write_flush_fsync_atomic_no_clobber_install_then_reopen_hash_and_byte_verification",
+        "qualification_manifest_staged_file_must_strict_parse_recompute_all_own_and_cross_file_hashes_reserialize_byte_identically_and_reopen_before_public_materialization",
+        "public_materialization_may_begin_only_after_all_branch_required_staged_files_closing_seal_and_qualification_manifest_reopen_checks_and_final_clean_repository_recheck_pass",
+        "public_materialization_source_bytes_must_be_read_only_from_the_exact_mapped_staged_file_and_never_regenerated",
+        "public_materialization_must_use_exclusive_destination_sibling_temp_byte_copy_flush_fsync_reopen_hash_and_byte_verification_atomic_no_clobber_install_then_final_reopen_verification",
+        "every_materialized_final_file_must_equal_its_staged_source_in_size_sha256_and_complete_bytes",
+        "every_final_result_path_must_be_absent_in_repair_code_tag_and_prepublication_worktree_then_have_git_status_A_only_after_successful_materialization",
+        "tracked_status_for_every_materialized_path_must_be_exact_A_with_no_overwrite_delete_rename_or_other_modified_path_allowed",
+        "prepublication_recheck_must_verify_clean_repository_unchanged_head_and_upstream_all_final_paths_absent_and_complete_staged_nine_or_eleven_file_set_byte_exact",
+        "evaluable_must_materialize_exactly_all_nine_common_and_two_evaluable_additional_files",
+        "not_evaluable_must_materialize_exactly_all_nine_common_and_no_additional_files",
+        "not_evaluable_parameter_artifact_root_must_be_absent_before_during_and_after_materialization",
+        "any_materialization_failure_must_rollback_in_reverse_creation_order_only_same_invocation_new_final_files_that_reopen_as_non_reparse_regular_files_and_still_match_their_exact_staged_bytes",
+        "rollback_must_retain_all_attempt_staging_and_local_failure_evidence_and_must_never_remove_preexisting_mismatched_ambiguous_or_unverified_paths",
+        "rollback_may_remove_only_attempt_unique_destination_sibling_temps_after_strict_parent_and_name_reverification_and_may_not_recursively_remove_any_directory",
+        "rollback_must_reopen_and_verify_every_removed_final_path_is_absent_else_publication_failure_requires_manual_remediation_without_result_commit_or_tag",
+        "post_closing_publication_failure_must_preserve_the_reopened_staged_closing_seal_and_any_installed_manifest_or_attempt_unique_manifest_temp_failure_evidence_and_publish_no_result_or_tag",
+        "same_attempt_byte_exact_public_materialization_retry_allowed_only_after_complete_verified_rollback_clean_repository_unchanged_head_and_upstream_all_final_paths_absent_and_all_staged_bytes_and_hashes_unchanged",
+        "same_attempt_publication_retry_may_not_rerun_fit_recompute_replace_or_modify_any_staged_payload_closing_seal_or_qualification_manifest_or_select_a_new_result",
+        "failed_retry_precondition_permanently_invalidates_attempt_for_publication_and_forbids_result_commit_or_tag",
+    ):
+        assert staging[required] is True
+    assert staging[
+        "any_preclosing_path_creation_reopen_hash_byte_or_cross_file_mismatch_action"
+    ] == ("invalid_execution_without_closing_seal_public_result_commit_or_qualification_result_tag")
+    assert staging[
+        "any_post_closing_copy_reopen_hash_byte_cross_file_or_rollback_mismatch_action"
+    ] == ("publication_failure_without_public_result_commit_or_qualification_result_tag")
+
+    failure_receipt = staging["publication_failure_receipt"]
+    assert failure_receipt["path_template"] == (
+        f"{attempt_root}/publication_failures/"
+        "{publication_failure_sequence_decimal_zero_padded_6}.json"
+    )
+    assert failure_receipt["classification"] == "local_restricted_gitignored_append_only"
+    assert failure_receipt["schema_version_exact"] == 1
+    assert failure_receipt["fields_exact"] == [
+        "schema_version",
+        "attempt_id",
+        "publication_failure_sequence",
+        "failed_at_utc",
+        "failure_phase",
+        "failure_code",
+        "exception_type_or_null",
+        "qualification_closing_seal_sha256",
+        "qualification_manifest_staging_state",
+        "qualification_manifest_content_sha256_or_null",
+        "qualification_manifest_file_sha256_or_null",
+        "ordered_created_final_paths",
+        "ordered_rolled_back_final_paths",
+        "staged_file_size_and_sha256_or_null_by_final_path",
+        "repository_identity_after_rollback",
+        "rollback_complete",
+        "retry_eligible",
+        "previous_publication_failure_receipt_sha256_or_null",
+        "publication_failure_receipt_sha256",
+    ]
+    assert failure_receipt["failure_phase_values_exact"] == [
+        "qualification_manifest_construction",
+        "qualification_manifest_sibling_temp_write",
+        "qualification_manifest_atomic_no_clobber_install",
+        "qualification_manifest_reopen",
+        "qualification_manifest_schema_byte_cross_file_validation",
+        "pre_materialization_recheck",
+        "destination_sibling_temp_copy",
+        "destination_sibling_temp_reopen",
+        "atomic_no_clobber_install",
+        "final_file_reopen",
+        "rollback",
+        "post_rollback_recheck",
+    ]
+    assert failure_receipt["qualification_manifest_staging_state_values_exact"] == [
+        "not_constructed",
+        "canonical_bytes_constructed_not_validly_reopened",
+        "reopened_bytes_not_validated",
+        "reopened_valid",
+    ]
+    manifest_state_by_phase = failure_receipt[
+        "qualification_manifest_staging_state_required_by_failure_phase_exact"
+    ]
+    assert set(manifest_state_by_phase) == set(failure_receipt["failure_phase_values_exact"])
+    assert manifest_state_by_phase["qualification_manifest_construction"] == "not_constructed"
+    for phase in (
+        "qualification_manifest_sibling_temp_write",
+        "qualification_manifest_atomic_no_clobber_install",
+        "qualification_manifest_reopen",
+    ):
+        assert manifest_state_by_phase[phase] == "canonical_bytes_constructed_not_validly_reopened"
+    assert (
+        manifest_state_by_phase["qualification_manifest_schema_byte_cross_file_validation"]
+        == "reopened_bytes_not_validated"
+    )
+    for phase in failure_receipt["failure_phase_values_exact"][5:]:
+        assert manifest_state_by_phase[phase] == "reopened_valid"
+    assert failure_receipt[
+        "qualification_manifest_sha_required_null_state_by_staging_state_exact"
+    ] == {
+        "not_constructed": {"content_sha256": None, "file_sha256": None},
+        "canonical_bytes_constructed_not_validly_reopened": {
+            "content_sha256": None,
+            "file_sha256": None,
+        },
+        "reopened_bytes_not_validated": {
+            "content_sha256": None,
+            "file_sha256": "required",
+        },
+        "reopened_valid": {"content_sha256": "required", "file_sha256": "required"},
+    }
+    assert failure_receipt["first_sequence_exact"] == 0
+    assert failure_receipt["maximum_sequence_exact"] == 999999
+    assert failure_receipt["sequence_exhaustion_action"] == (
+        "publication_failure_requires_manual_remediation_without_retry_result_commit_or_tag"
+    )
+    assert failure_receipt["attempt_id_schema_ref"] == (
+        "qualification_execution_seal.qualification_public_result_staging."
+        "attempt_id_path_component_contract"
+    )
+    assert failure_receipt["failed_at_utc_type"] == "canonical_RFC3339_UTC_instant_with_Z"
+    assert failure_receipt["failure_code_fullmatch_regex"] == "[a-z][a-z0-9_]{0,127}"
+    assert failure_receipt["staged_file_size_or_null_type"] == (
+        "strict_nonnegative_base10_integer_or_null_only_for_manifest_before_reopened_bytes"
+    )
+    assert failure_receipt["staged_file_sha256_or_null_type"] == (
+        "lowercase_hex_length_64_or_null_only_for_manifest_before_reopened_bytes"
+    )
+    assert failure_receipt["rollback_complete_and_retry_eligible_type"] == "strict_boolean"
+    assert failure_receipt[
+        "staged_file_size_and_sha256_or_null_by_final_path_value_fields_exact"
+    ] == [
+        "file_size_or_null",
+        "file_sha256_or_null",
+    ]
+    assert (
+        failure_receipt["staged_file_size_and_sha256_or_null_by_final_path_key_order"]
+        == "unicode_codepoint_ascending"
+    )
+    assert failure_receipt["repository_identity_after_rollback_schema_ref"] == (
+        "outputs.canonical_nested_schemas.final_clean_repository_identity"
+    )
+    for required in (
+        "path_sequence_component_must_equal_sequence_as_exact_six_digit_zero_padded_decimal",
+        "each_later_sequence_must_equal_previous_sequence_plus_one",
+        "previous_receipt_sha256_is_null_only_for_sequence_zero_else_must_equal_immediately_previous_reopened_receipt_own_sha256",
+        "ordered_created_final_paths_must_equal_successfully_created_prefix_of_same_branch_materialization_order",
+        "ordered_rolled_back_final_paths_must_equal_exact_successful_reverse_rollback_projection_of_ordered_created_final_paths",
+        "any_extra_missing_alias_duplicate_unknown_or_noncanonical_top_level_or_nested_field_forbidden",
+        "staged_file_size_and_sha256_or_null_by_final_path_key_set_must_equal_complete_same_branch_nine_or_eleven_final_paths",
+        "every_non_manifest_staged_file_size_and_sha256_value_must_be_nonnull_and_equal_reopened_same_attempt_mapped_staged_regular_file_complete_bytes",
+        "manifest_staged_file_size_and_sha256_value_must_be_null_null_before_reopened_bytes_and_nonnull_equal_reopened_complete_bytes_for_reopened_bytes_not_validated_or_reopened_valid",
+        "qualification_closing_seal_sha256_must_equal_reopened_same_attempt_staged_closing_seal_own_sha256",
+        "nonnull_qualification_manifest_content_sha256_must_equal_reopened_valid_same_attempt_staged_manifest_own_content_sha256",
+        "nonnull_qualification_manifest_file_sha256_must_equal_sha256_of_complete_reopened_same_attempt_staged_manifest_file_bytes",
+        "manifest_staging_failure_phases_require_empty_created_and_rolled_back_final_paths_retry_eligible_false_and_no_same_attempt_materialization_retry",
+        "retry_eligible_true_iff_rollback_complete_repository_clean_head_upstream_unchanged_all_final_paths_absent_and_all_staged_sizes_hashes_and_bytes_unchanged",
+        "same_attempt_receipt_files_must_be_complete_gapless_append_only_hash_chain_and_may_never_be_overwritten_truncated_deleted_or_reordered",
+    ):
+        assert failure_receipt[required] is True
+    failure_receipt_probe = failure_receipt["path_template"].format(
+        attempt_id=ignore_probe_attempt_id,
+        publication_failure_sequence_decimal_zero_padded_6="000000",
+    )
+    failure_receipt_ignore_check = subprocess.run(
+        ["git", "check-ignore", "--no-index", "-q", failure_receipt_probe],
+        check=False,
+    )
+    assert failure_receipt_ignore_check.returncode == 0
 
 
 def test_issue_forecast_seed_context_exact_bytes_and_reference_vector() -> None:
@@ -4088,7 +4459,7 @@ def test_adapter_local_restricted_payloads_have_strict_byte_and_source_closure()
 def test_protocol_document_states_the_same_stop_boundary() -> None:
     document = PROTOCOL_DOCUMENT_PATH.read_text(encoding="utf-8")
     for required in (
-        "v0.2.2-background-etas-repair-protocol-r1",
+        "v0.2.2-background-etas-repair-protocol-r2",
         "Stage 4 formal target consumer 调用 0",
         "恰好有 25 行",
         "不得复用旧 `run_local_support_etas_pipeline`",
@@ -4103,6 +4474,9 @@ def test_protocol_document_states_the_same_stop_boundary() -> None:
         "四个公开 seal (opening、runtime、input、closing)",
         "只能包含规定章节中的聚合数值诊断和公开协议/工件 SHA",
         "当前阶段 4 R2 继续保持目标读取前硬停",
+        "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public",
+        "pre-closing identity 只覆盖 7 个 common 文件",
+        "同一 attempt 仅重试 byte-exact public materialization",
     ):
         assert required in document
 
@@ -4133,12 +4507,19 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
     for document in (acceptance, handoff):
         assert "v0.2.2-background-etas-repair-protocol" in document
         assert "v0.2.2-background-etas-repair-protocol-r1" in document
+        assert "v0.2.2-background-etas-repair-protocol-r2" in document
         assert "codex/stage2-etas-numerical-repair" in document
         assert "dae6403" in document
         assert f"阶段 9 锁定测试{fullwidth_colon}未运行" in document
         assert "not_run_upstream_gate" in document
         assert "adapter runtime preflight" in document
         assert "artifact、global receipt、报告、静态 SVG、离线 HTML" in document
+        assert (
+            "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/"
+            "{attempt_id}/staged_public"
+        ) in document
+        assert "staged→final" in document
+        assert "post-closing" in document
 
     assert f"状态{fullwidth_colon}通过{fullwidth_left_parenthesis}本地协议工程验收" in acceptance
     assert "进行中" not in acceptance

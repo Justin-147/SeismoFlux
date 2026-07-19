@@ -1,16 +1,16 @@
 schema_version: 1
 protocol_version: 0.2.2
-protocol_revision: r1
+protocol_revision: r2
 stage: 2-ETAS-R
 experiment_family: background_etas_numerical_repair
 status: preregistered_target_blind_before_any_repair_fit
 preregistered_on: '2026-07-17'
 revised_on: '2026-07-19'
-revision_reason: make_signed_frozen_grid_row_and_column_encoding_explicit_without_changing_any_scientific_input_or_fit_rule
+revision_reason: freeze_qualification_attempt_local_staged_public_paths_and_byte_exact_materialization_without_changing_any_scientific_input_or_fit_rule
 blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
 
 publication:
-  protocol_tag: v0.2.2-background-etas-repair-protocol-r1
+  protocol_tag: v0.2.2-background-etas-repair-protocol-r2
   qualification_code_tag: v0.2.2-background-etas-repair-code
   qualification_result_tag: v0.2.2-background-etas-numerical-qualification
   comparator_adapter_code_tag: v0.2.2-background-etas-comparator-adapter
@@ -59,7 +59,7 @@ purpose:
   kde_remains_secondary_comparator_and_is_never_an_etas_substitute: true
 
 repair_code_scope_from_protocol_tag:
-  comparison_base: v0.2.2-background-etas-repair-protocol-r1
+  comparison_base: v0.2.2-background-etas-repair-protocol-r2
   allowed_changed_or_added_paths:
     - src/seismoflux/background/etas_fit.py
     - src/seismoflux/background/etas_numerical_repair.py
@@ -1810,6 +1810,162 @@ qualification_execution_seal:
   public_artifacts_may_be_materialized_only_as_byte_exact_copies_after_final_seal_check: true
   post_execution_dirty_worktree_allowlist_is_exactly_the_preregistered_public_result_paths: true
   source_or_test_file_changes_during_publication_forbidden: true
+  qualification_public_result_staging:
+    fit_input_local_root_ref: fit_input_bundle.local_root
+    attempt_root_path_template: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}
+    staged_public_root_path_template: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public
+    attempt_id_path_component_contract:
+      fullmatch_regex: '[A-Za-z0-9][A-Za-z0-9._-]{0,127}'
+      single_ascii_component_only: true
+      slash_backslash_colon_control_character_NUL_drive_UNC_empty_dot_and_dot_dot_forbidden: true
+      trailing_dot_or_space_and_case_insensitive_windows_reserved_device_basename_forbidden: true
+      exact_case_must_match_the_existing_same_attempt_fit_input_directory_name: true
+    staged_public_root_must_equal_fit_input_local_root_plus_attempts_attempt_id_staged_public: true
+    attempt_root_must_be_the_existing_non_reparse_fit_input_attempt_directory_strictly_below_fit_input_local_root_attempts: true
+    staged_public_root_must_be_gitignored_attempt_exclusive_absent_before_staging_and_created_new: true
+    staged_to_final_record_fields_exact: [staged_path, final_path]
+    common_staged_to_final_path_mapping_exact:
+      fit_input_manifest:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_fit_input_manifest.json
+        final_path: data/manifests/etas_numerical_repair_fit_input_manifest.json
+      opening_execution_seal:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_opening_execution_seal.json
+        final_path: data/manifests/etas_numerical_repair_opening_execution_seal.json
+      optimizer_runtime_code_seal:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_optimizer_runtime_code_seal.json
+        final_path: data/manifests/etas_numerical_repair_optimizer_runtime_code_seal.json
+      qualification_input_seal:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_qualification_input_seal.json
+        final_path: data/manifests/etas_numerical_repair_qualification_input_seal.json
+      report:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/docs/background_etas_numerical_repair_report.md
+        final_path: docs/background_etas_numerical_repair_report.md
+      static_diagnostic:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/docs/background_etas_numerical_repair_diagnostic.svg
+        final_path: docs/background_etas_numerical_repair_diagnostic.svg
+      interactive_diagnostic:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/outputs/interactive/background_etas_numerical_repair/index.html
+        final_path: outputs/interactive/background_etas_numerical_repair/index.html
+      qualification_closing_seal:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_qualification_closing_seal.json
+        final_path: data/manifests/etas_numerical_repair_qualification_closing_seal.json
+      qualification_manifest:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/data/manifests/etas_numerical_repair_qualification.json
+        final_path: data/manifests/etas_numerical_repair_qualification.json
+    evaluable_additional_staged_to_final_path_mapping_exact:
+      parameter_snapshots:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/models/registry/background_etas_numerical_repair/parameter_snapshots.json
+        final_path: models/registry/background_etas_numerical_repair/parameter_snapshots.json
+      parameter_set_manifest:
+        staged_path: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public/models/registry/background_etas_numerical_repair/parameter_set_manifest.json
+        final_path: models/registry/background_etas_numerical_repair/parameter_set_manifest.json
+    not_evaluable_additional_staged_to_final_path_mapping_exact: {}
+    preclosing_common_logical_artifact_keys_exact: [fit_input_manifest, opening_execution_seal, optimizer_runtime_code_seal, qualification_input_seal, report, static_diagnostic, interactive_diagnostic]
+    preclosing_evaluable_additional_logical_artifact_keys_exact: [parameter_snapshots, parameter_set_manifest]
+    preclosing_not_evaluable_additional_logical_artifact_keys_exact: []
+    qualification_closing_seal_logical_artifact_key_exact: qualification_closing_seal
+    qualification_manifest_logical_artifact_key_exact: qualification_manifest
+    not_evaluable_public_materialization_logical_artifact_order_exact: [fit_input_manifest, opening_execution_seal, optimizer_runtime_code_seal, qualification_input_seal, report, static_diagnostic, interactive_diagnostic, qualification_closing_seal, qualification_manifest]
+    evaluable_public_materialization_logical_artifact_order_exact: [fit_input_manifest, opening_execution_seal, optimizer_runtime_code_seal, qualification_input_seal, report, static_diagnostic, interactive_diagnostic, parameter_snapshots, parameter_set_manifest, qualification_closing_seal, qualification_manifest]
+    branch_materialization_order_must_equal_exact_preclosing_common_then_branch_additional_then_closing_then_manifest_and_manifest_must_be_last: true
+    rollback_order_must_be_the_exact_reverse_of_the_successfully_created_prefix_of_the_same_branch_materialization_order: true
+    preclosing_mappings_must_equal_staged_public_payload_identity_common_and_branch_additional_paths_exactly: true
+    staged_public_payload_identity_ordered_path_sha256_map_key_set_must_equal_same_branch_preclosing_mapping_final_paths_exactly: true
+    staged_public_payload_identity_ordered_path_sha256_map_key_must_equal_each_mapped_record_final_path_and_value_must_equal_sha256_of_complete_reopened_bytes_at_same_record_staged_path: true
+    staged_public_payload_identity_every_mapped_staged_file_must_reopen_as_non_reparse_regular_file_with_stable_size_sha256_and_complete_bytes_before_and_after_identity_construction: true
+    staged_public_payload_identity_every_reopened_staged_file_must_validate_against_its_declared_strict_public_file_schema_or_visualization_contract: true
+    staged_public_payload_identity_aggregate_must_recompute_from_exact_branch_status_ordered_path_sha256_map_and_preclosing_manifest_projection_sha256: true
+    qualification_closing_seal_must_use_its_independent_staged_path_only_after_preclosing_identity_and_final_clean_repository_identity_are_frozen: true
+    qualification_manifest_must_use_its_independent_staged_path_only_after_closing_seal_and_complete_qualification_evidence_and_manifest_content_sha256_are_frozen: true
+    closing_seal_and_qualification_manifest_must_not_enter_staged_public_payload_identity: true
+    every_staged_path_must_equal_staged_public_root_plus_its_exact_final_repository_relative_path: true
+    every_template_attempt_id_must_equal_the_single_qualification_attempt_id_after_strict_attempt_id_validation: true
+    staged_and_final_paths_must_use_canonical_forward_slash_repository_relative_spelling_without_empty_dot_dot_absolute_drive_UNC_alias_or_case_collision: true
+    staged_root_and_every_staged_or_final_path_must_resolve_strictly_inside_its_declared_root_without_symlink_junction_mount_point_or_other_reparse_escape: true
+    every_existing_ancestor_must_be_reopened_and_verified_as_the_same_non_reparse_directory_before_each_create_copy_or_remove: true
+    every_staged_and_final_file_must_be_absent_before_its_first_creation_and_no_historical_result_may_be_overwritten: true
+    every_staged_file_must_use_exclusive_sibling_temp_write_flush_fsync_atomic_no_clobber_install_then_reopen_hash_and_byte_verification: true
+    qualification_manifest_staged_file_must_strict_parse_recompute_all_own_and_cross_file_hashes_reserialize_byte_identically_and_reopen_before_public_materialization: true
+    public_materialization_may_begin_only_after_all_branch_required_staged_files_closing_seal_and_qualification_manifest_reopen_checks_and_final_clean_repository_recheck_pass: true
+    public_materialization_source_bytes_must_be_read_only_from_the_exact_mapped_staged_file_and_never_regenerated: true
+    public_materialization_must_use_exclusive_destination_sibling_temp_byte_copy_flush_fsync_reopen_hash_and_byte_verification_atomic_no_clobber_install_then_final_reopen_verification: true
+    every_materialized_final_file_must_equal_its_staged_source_in_size_sha256_and_complete_bytes: true
+    every_final_result_path_must_be_absent_in_repair_code_tag_and_prepublication_worktree_then_have_git_status_A_only_after_successful_materialization: true
+    tracked_status_for_every_materialized_path_must_be_exact_A_with_no_overwrite_delete_rename_or_other_modified_path_allowed: true
+    prepublication_recheck_must_verify_clean_repository_unchanged_head_and_upstream_all_final_paths_absent_and_complete_staged_nine_or_eleven_file_set_byte_exact: true
+    evaluable_must_materialize_exactly_all_nine_common_and_two_evaluable_additional_files: true
+    not_evaluable_must_materialize_exactly_all_nine_common_and_no_additional_files: true
+    not_evaluable_parameter_artifact_root_must_be_absent_before_during_and_after_materialization: true
+    any_materialization_failure_must_rollback_in_reverse_creation_order_only_same_invocation_new_final_files_that_reopen_as_non_reparse_regular_files_and_still_match_their_exact_staged_bytes: true
+    rollback_must_retain_all_attempt_staging_and_local_failure_evidence_and_must_never_remove_preexisting_mismatched_ambiguous_or_unverified_paths: true
+    rollback_may_remove_only_attempt_unique_destination_sibling_temps_after_strict_parent_and_name_reverification_and_may_not_recursively_remove_any_directory: true
+    rollback_must_reopen_and_verify_every_removed_final_path_is_absent_else_publication_failure_requires_manual_remediation_without_result_commit_or_tag: true
+    post_closing_publication_failure_must_preserve_the_reopened_staged_closing_seal_and_any_installed_manifest_or_attempt_unique_manifest_temp_failure_evidence_and_publish_no_result_or_tag: true
+    same_attempt_byte_exact_public_materialization_retry_allowed_only_after_complete_verified_rollback_clean_repository_unchanged_head_and_upstream_all_final_paths_absent_and_all_staged_bytes_and_hashes_unchanged: true
+    same_attempt_publication_retry_may_not_rerun_fit_recompute_replace_or_modify_any_staged_payload_closing_seal_or_qualification_manifest_or_select_a_new_result: true
+    failed_retry_precondition_permanently_invalidates_attempt_for_publication_and_forbids_result_commit_or_tag: true
+    any_preclosing_path_creation_reopen_hash_byte_or_cross_file_mismatch_action: invalid_execution_without_closing_seal_public_result_commit_or_qualification_result_tag
+    any_post_closing_copy_reopen_hash_byte_cross_file_or_rollback_mismatch_action: publication_failure_without_public_result_commit_or_qualification_result_tag
+    publication_failure_receipt:
+      path_template: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/publication_failures/{publication_failure_sequence_decimal_zero_padded_6}.json
+      classification: local_restricted_gitignored_append_only
+      schema_version_exact: 1
+      fields_exact: [schema_version, attempt_id, publication_failure_sequence, failed_at_utc, failure_phase, failure_code, exception_type_or_null, qualification_closing_seal_sha256, qualification_manifest_staging_state, qualification_manifest_content_sha256_or_null, qualification_manifest_file_sha256_or_null, ordered_created_final_paths, ordered_rolled_back_final_paths, staged_file_size_and_sha256_or_null_by_final_path, repository_identity_after_rollback, rollback_complete, retry_eligible, previous_publication_failure_receipt_sha256_or_null, publication_failure_receipt_sha256]
+      failure_phase_values_exact: [qualification_manifest_construction, qualification_manifest_sibling_temp_write, qualification_manifest_atomic_no_clobber_install, qualification_manifest_reopen, qualification_manifest_schema_byte_cross_file_validation, pre_materialization_recheck, destination_sibling_temp_copy, destination_sibling_temp_reopen, atomic_no_clobber_install, final_file_reopen, rollback, post_rollback_recheck]
+      qualification_manifest_staging_state_values_exact: [not_constructed, canonical_bytes_constructed_not_validly_reopened, reopened_bytes_not_validated, reopened_valid]
+      qualification_manifest_staging_state_required_by_failure_phase_exact:
+        qualification_manifest_construction: not_constructed
+        qualification_manifest_sibling_temp_write: canonical_bytes_constructed_not_validly_reopened
+        qualification_manifest_atomic_no_clobber_install: canonical_bytes_constructed_not_validly_reopened
+        qualification_manifest_reopen: canonical_bytes_constructed_not_validly_reopened
+        qualification_manifest_schema_byte_cross_file_validation: reopened_bytes_not_validated
+        pre_materialization_recheck: reopened_valid
+        destination_sibling_temp_copy: reopened_valid
+        destination_sibling_temp_reopen: reopened_valid
+        atomic_no_clobber_install: reopened_valid
+        final_file_reopen: reopened_valid
+        rollback: reopened_valid
+        post_rollback_recheck: reopened_valid
+      qualification_manifest_sha_required_null_state_by_staging_state_exact:
+        not_constructed: {content_sha256: null, file_sha256: null}
+        canonical_bytes_constructed_not_validly_reopened: {content_sha256: null, file_sha256: null}
+        reopened_bytes_not_validated: {content_sha256: null, file_sha256: required}
+        reopened_valid: {content_sha256: required, file_sha256: required}
+      publication_failure_sequence_type: strict_nonnegative_base10_integer
+      path_sequence_component_must_equal_sequence_as_exact_six_digit_zero_padded_decimal: true
+      first_sequence_exact: 0
+      maximum_sequence_exact: 999999
+      sequence_exhaustion_action: publication_failure_requires_manual_remediation_without_retry_result_commit_or_tag
+      each_later_sequence_must_equal_previous_sequence_plus_one: true
+      previous_receipt_sha256_is_null_only_for_sequence_zero_else_must_equal_immediately_previous_reopened_receipt_own_sha256: true
+      attempt_id_schema_ref: qualification_execution_seal.qualification_public_result_staging.attempt_id_path_component_contract
+      failed_at_utc_type: canonical_RFC3339_UTC_instant_with_Z
+      failure_code_fullmatch_regex: '[a-z][a-z0-9_]{0,127}'
+      exception_type_or_null_type: null_or_nonempty_dotted_Python_exception_type_name_without_message_traceback_path_or_secret
+      qualification_and_receipt_sha256_type: lowercase_hex_length_64_or_null_only_where_exact_state_matrix_allows
+      ordered_created_and_rolled_back_final_paths_type: ordered_unique_lists_of_exact_branch_final_repository_relative_paths
+      staged_file_size_or_null_type: strict_nonnegative_base10_integer_or_null_only_for_manifest_before_reopened_bytes
+      staged_file_sha256_or_null_type: lowercase_hex_length_64_or_null_only_for_manifest_before_reopened_bytes
+      rollback_complete_and_retry_eligible_type: strict_boolean
+      repository_identity_after_rollback_schema_ref: outputs.canonical_nested_schemas.final_clean_repository_identity
+      any_extra_missing_alias_duplicate_unknown_or_noncanonical_top_level_or_nested_field_forbidden: true
+      append_protocol: exclusive_temp_write_flush_fsync_atomic_no_clobber_install_reopen_hash_and_byte_verify_without_overwrite_truncate_delete_or_gap
+      ordered_created_final_paths_must_equal_successfully_created_prefix_of_same_branch_materialization_order: true
+      ordered_rolled_back_final_paths_must_equal_exact_successful_reverse_rollback_projection_of_ordered_created_final_paths: true
+      staged_file_size_and_sha256_or_null_by_final_path_key_set_must_equal_complete_same_branch_nine_or_eleven_final_paths: true
+      staged_file_size_and_sha256_or_null_by_final_path_key_order: unicode_codepoint_ascending
+      staged_file_size_and_sha256_or_null_by_final_path_value_fields_exact: [file_size_or_null, file_sha256_or_null]
+      every_non_manifest_staged_file_size_and_sha256_value_must_be_nonnull_and_equal_reopened_same_attempt_mapped_staged_regular_file_complete_bytes: true
+      manifest_staged_file_size_and_sha256_value_must_be_null_null_before_reopened_bytes_and_nonnull_equal_reopened_complete_bytes_for_reopened_bytes_not_validated_or_reopened_valid: true
+      qualification_closing_seal_sha256_must_equal_reopened_same_attempt_staged_closing_seal_own_sha256: true
+      nonnull_qualification_manifest_content_sha256_must_equal_reopened_valid_same_attempt_staged_manifest_own_content_sha256: true
+      nonnull_qualification_manifest_file_sha256_must_equal_sha256_of_complete_reopened_same_attempt_staged_manifest_file_bytes: true
+      manifest_staging_failure_phases_require_empty_created_and_rolled_back_final_paths_retry_eligible_false_and_no_same_attempt_materialization_retry: true
+      retry_eligible_true_iff_rollback_complete_repository_clean_head_upstream_unchanged_all_final_paths_absent_and_all_staged_sizes_hashes_and_bytes_unchanged: true
+      own_sha256_formula: sha256_seismoflux_canonical_json_v1_of_complete_fields_without_publication_failure_receipt_sha256
+      serialized_file_bytes: seismoflux_canonical_json_v1_of_complete_fields_exact_including_publication_failure_receipt_sha256
+      same_attempt_receipt_files_must_be_complete_gapless_append_only_hash_chain_and_may_never_be_overwritten_truncated_deleted_or_reordered: true
+      receipt_write_failure_or_schema_sequence_hash_path_staged_repository_or_retry_mismatch_action: publication_failure_requires_manual_remediation_without_retry_result_commit_or_tag
   opening_seal:
     created_before_any_new_qualification_attempt_source_open_stat_hash_query_or_bundle_inspection_after_protocol_freeze: true
     repository_requirements:
@@ -2048,7 +2204,7 @@ qualification_execution_seal:
     all_25_rows_and_five_snapshot_attempts_must_share_exact_attempt_id: true
     canonical_qualification_closing_seal_sha256_required: true
     unchanged_recheck_before_public_artifact_materialization: true
-    invalid_execution_has_no_closing_qualification_seal: true
+    preclosing_invalid_execution_has_no_closing_qualification_seal: true
     self_or_mutual_hash_reference_forbidden: true
     qualification_publication_hash_DAG_order_exact: qualification_manifest_preclosing_projection_then_staged_public_payload_identity_then_qualification_closing_seal_then_complete_qualification_evidence_projection_then_etas_numerical_qualification_evidence_sha256_then_qualification_manifest_content_sha256
     qualification_manifest_preclosing_projection_excludes_closing_seal_qualification_evidence_and_manifest_content_sha256: true
@@ -2057,7 +2213,7 @@ qualification_execution_seal:
     final_file_byte_sha256_map_is_frozen_only_by_result_commit_and_qualification_result_tag: true
     qualification_evidence_may_bind_closing_seal_but_closing_seal_may_not_bind_qualification_evidence_or_final_file_bytes: true
   qualification_result_tag_diff_from_repair_code_tag:
-    common_exact_added_or_modified_paths:
+    common_exact_added_paths:
       - data/manifests/etas_numerical_repair_fit_input_manifest.json
       - data/manifests/etas_numerical_repair_opening_execution_seal.json
       - data/manifests/etas_numerical_repair_optimizer_runtime_code_seal.json
@@ -2072,10 +2228,12 @@ qualification_execution_seal:
       - models/registry/background_etas_numerical_repair/parameter_set_manifest.json
     not_evaluable_additional_exact_paths: []
     not_evaluable_parameter_artifact_root_must_be_absent: true
-    invalid_execution_tracked_added_or_modified_paths: []
+    invalid_execution_tracked_added_paths: []
     every_other_tracked_path_and_blob_must_equal_repair_code_tag: true
     source_protocol_test_and_repair_code_blob_changes_forbidden: true
-    exact_name_status_blob_oid_and_binary_patch_receipt_required: true
+    every_evaluable_or_not_evaluable_result_path_must_be_absent_in_repair_code_tag_and_have_exact_git_name_status_A_with_null_old_blob_oid: true
+    overwrite_delete_rename_copy_or_other_modified_name_status_forbidden: true
+    exact_name_status_A_blob_oid_and_binary_patch_receipt_required: true
   drift_or_dirty_worktree_action: invalidate_attempt_and_publish_no_result_until_clean_restart
   interrupted_attempts:
     retain_attempt_directory_and_failure_receipt: true
@@ -3181,6 +3339,10 @@ outputs:
       common_complete_file_paths_exact: [data/manifests/etas_numerical_repair_fit_input_manifest.json, data/manifests/etas_numerical_repair_opening_execution_seal.json, data/manifests/etas_numerical_repair_optimizer_runtime_code_seal.json, data/manifests/etas_numerical_repair_qualification_input_seal.json, docs/background_etas_numerical_repair_report.md, docs/background_etas_numerical_repair_diagnostic.svg, outputs/interactive/background_etas_numerical_repair/index.html]
       evaluable_additional_complete_file_paths_exact: [models/registry/background_etas_numerical_repair/parameter_snapshots.json, models/registry/background_etas_numerical_repair/parameter_set_manifest.json]
       not_evaluable_additional_complete_file_paths_exact: []
+      ordered_complete_file_path_sha256_map_keys_must_equal_common_plus_qualification_status_branch_additional_paths_exactly: true
+      every_map_key_must_equal_the_final_path_of_exactly_one_same_branch_qualification_public_result_staging_preclosing_record: true
+      every_map_value_must_equal_sha256_of_complete_reopened_bytes_at_that_same_record_staged_path: true
+      every_reopened_staged_path_must_be_non_reparse_regular_file_with_stable_size_hash_bytes_and_declared_schema_or_visual_contract: true
       map_values: lowercase_hex_length_64
       path_order: unicode_codepoint_ascending
       absolute_path_allowed: false
@@ -3189,6 +3351,7 @@ outputs:
       qualification_manifest_content_sha256_may_not_enter_preclosing_projection_directly_or_transitively: true
       every_preclosing_staged_file_byte_payload_must_exclude_direct_and_transitive_references_to: [qualification_closing_seal_sha256, etas_numerical_qualification_evidence_sha256, qualification_manifest_content_sha256]
       aggregate_content_sha256_formula: sha256_seismoflux_canonical_json_v1_of_complete_identity_without_aggregate_content_sha256
+      aggregate_content_sha256_must_recompute_after_all_mapped_staged_files_are_reopened_and_before_closing_seal: true
     staged_local_scientific_payload_identity:
       fields_exact: [ordered_logical_artifact_id_content_sha256_map, aggregate_content_sha256]
       logical_artifact_ids_exact: [source_access_ledger, local_restricted_input_acceptance_receipt, five_scientific_fit_input_bundles, five_parent_replay_payloads, optimizer_call_observation_log, five_returned_fit_result_payloads, three_grid_gate_evidence_presence_and_sha256_by_snapshot]
