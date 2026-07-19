@@ -13,6 +13,7 @@ from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 import numpy as np
+import pytest
 import shapely
 import shapely._geometry as shapely_geometry
 import shapely.creation as shapely_creation
@@ -24,6 +25,7 @@ from shapely.geometry import Point
 from shapely.geometry import point as shapely_point
 
 from seismoflux.background.etas_fit import ETASParameterBounds, optimizer_start
+from seismoflux.background.grid import GridSpec, cell_id
 from seismoflux.background.randomness import SeedContext
 
 PROTOCOL_PATH = Path("configs/background_etas_numerical_repair.yaml")
@@ -226,11 +228,17 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.2.2"
+    assert protocol["protocol_revision"] == "r1"
     assert protocol["stage"] == "2-ETAS-R"
     assert protocol["status"] == "preregistered_target_blind_before_any_repair_fit"
     assert protocol["preregistered_on"] == "2026-07-17"
+    assert protocol["revised_on"] == "2026-07-19"
+    assert protocol["revision_reason"] == (
+        "make_signed_frozen_grid_row_and_column_encoding_explicit_without_changing_any_"
+        "scientific_input_or_fit_rule"
+    )
     publication = protocol["publication"]
-    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol"
+    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r1"
     assert publication["qualification_code_tag"] == "v0.2.2-background-etas-repair-code"
     assert publication["qualification_result_tag"] == (
         "v0.2.2-background-etas-numerical-qualification"
@@ -243,6 +251,9 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     assert publication["negative_result_requires_same_qualification_result_tag"] is True
     assert publication["adapter_code_tag_allowed_only_after_positive_qualification_result_tag"]
     assert publication["new_stage4_revision_requires_comparator_receipt_tag"] is True
+    assert protocol["repair_code_scope_from_protocol_tag"]["comparison_base"] == (
+        "v0.2.2-background-etas-repair-protocol-r1"
+    )
     assert publication["exact_order"] == [
         "protocol_commit_push_and_remote_tag_verification",
         "repair_code_and_tests_commit_push_and_remote_tag_verification",
@@ -575,6 +586,27 @@ def test_source_access_ledger_hash_chain_reference_is_non_self_referential() -> 
     assert mutated_1["entry_sha256"] != reference["entry_1_sha256"]
     mutated_payload = {"schema_version": 1, "entries": [mutated_0, mutated_1]}
     assert _canonical_payload_sha256(mutated_payload) != reference["final_ledger_content_sha256"]
+
+
+def test_scientific_fit_input_integer_encoding_keeps_only_grid_indices_signed() -> None:
+    schemas = _load_yaml(PROTOCOL_PATH)["fit_input_bundle"]["scientific_fit_input_record_schemas"]
+    assert schemas["quadrature_cell_integer_field_types"] == {
+        "row": "strict_base10_integer",
+        "column": "strict_base10_integer",
+    }
+    assert schemas["integer_encoding"] == {
+        "signed_fields_exact": [
+            "ordered_quadrature_containers.cells.row",
+            "ordered_quadrature_containers.cells.column",
+        ],
+        "signed_field_encoding": "strict_base10_integer",
+        "every_other_integer_field_encoding": "strict_nonnegative_base10_integer",
+        "python_bool_is_not_an_integer": True,
+    }
+    spec = GridSpec(25.0)
+    assert cell_id(spec, row=-1, column=2) == "g25000000_r-0000001_c+0000002"
+    with pytest.raises(TypeError, match="row must be an integer"):
+        cell_id(spec, row=True, column=2)
 
 
 def test_parent_protocol_twenty_five_optimizer_starts_are_hex_exact() -> None:
@@ -4056,7 +4088,7 @@ def test_adapter_local_restricted_payloads_have_strict_byte_and_source_closure()
 def test_protocol_document_states_the_same_stop_boundary() -> None:
     document = PROTOCOL_DOCUMENT_PATH.read_text(encoding="utf-8")
     for required in (
-        "v0.2.2-background-etas-repair-protocol",
+        "v0.2.2-background-etas-repair-protocol-r1",
         "Stage 4 formal target consumer 调用 0",
         "恰好有 25 行",
         "不得复用旧 `run_local_support_etas_pipeline`",
@@ -4100,6 +4132,7 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
 
     for document in (acceptance, handoff):
         assert "v0.2.2-background-etas-repair-protocol" in document
+        assert "v0.2.2-background-etas-repair-protocol-r1" in document
         assert "codex/stage2-etas-numerical-repair" in document
         assert "dae6403" in document
         assert f"阶段 9 锁定测试{fullwidth_colon}未运行" in document

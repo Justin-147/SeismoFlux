@@ -1,13 +1,16 @@
 schema_version: 1
 protocol_version: 0.2.2
+protocol_revision: r1
 stage: 2-ETAS-R
 experiment_family: background_etas_numerical_repair
 status: preregistered_target_blind_before_any_repair_fit
 preregistered_on: '2026-07-17'
+revised_on: '2026-07-19'
+revision_reason: make_signed_frozen_grid_row_and_column_encoding_explicit_without_changing_any_scientific_input_or_fit_rule
 blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
 
 publication:
-  protocol_tag: v0.2.2-background-etas-repair-protocol
+  protocol_tag: v0.2.2-background-etas-repair-protocol-r1
   qualification_code_tag: v0.2.2-background-etas-repair-code
   qualification_result_tag: v0.2.2-background-etas-numerical-qualification
   comparator_adapter_code_tag: v0.2.2-background-etas-comparator-adapter
@@ -56,7 +59,7 @@ purpose:
   kde_remains_secondary_comparator_and_is_never_an_etas_substitute: true
 
 repair_code_scope_from_protocol_tag:
-  comparison_base: v0.2.2-background-etas-repair-protocol
+  comparison_base: v0.2.2-background-etas-repair-protocol-r1
   allowed_changed_or_added_paths:
     - src/seismoflux/background/etas_fit.py
     - src/seismoflux/background/etas_numerical_repair.py
@@ -844,6 +847,9 @@ fit_input_bundle:
     immigrant_kde_training_event_fields_exact: [physical_event_id, projected_x_y_km_hex]
     immigrant_kde_payload_fields_exact: [bandwidth_km_hex, ordered_training_events, training_duration_days_hex, normalization_grid_identity_sha256, normalization_mass_hex, ordered_density_grid_float64_hex_sha256]
     quadrature_cell_fields_exact: [cell_id, row, column, representative_x_y_km_hex, exact_clipped_area_km2_hex]
+    quadrature_cell_integer_field_types:
+      row: strict_base10_integer
+      column: strict_base10_integer
     snapshot_metadata_fields_exact: [snapshot_id, fit_interval, support_id, compensator_domain_id, common_mc_hex, aki_b_hex, beta_hex]
     fit_interval_fields_exact: [fit_start_utc, fit_end_utc]
     model_spec_fields_exact: [variant_id, mc_hex, beta_hex, maximum_magnitude_hex, d_km2_hex, q_hex, gamma_hex, spatial_cutoff_km_hex, history_parent_cutoff_days_hex, branching_ratio_maximum_hex, alpha_beta_equality_tolerance_hex]
@@ -859,7 +865,11 @@ fit_input_bundle:
     every_top_level_component_must_use_its_complete_exact_schema_and_no_partial_projection_allowed: true
     mutate_any_declared_field_must_change_scientific_fit_input_sha256: true
     scientific_floating_point_encoding: finite_python_float64_hex_string
-    integer_encoding: strict_nonnegative_base10_integer
+    integer_encoding:
+      signed_fields_exact: [ordered_quadrature_containers.cells.row, ordered_quadrature_containers.cells.column]
+      signed_field_encoding: strict_base10_integer
+      every_other_integer_field_encoding: strict_nonnegative_base10_integer
+      python_bool_is_not_an_integer: true
   parent_replay_membership_equivalence:
     source_commit: 34fa7b4a491a062ff6e86daecf5568539661b42f
     frozen_source_blobs:

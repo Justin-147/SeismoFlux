@@ -3,13 +3,26 @@
 ## 验收对象
 
 - 工作线：阶段 2 ETAS 数值修复（`0.2.2`）
-- 协议标签：`v0.2.2-background-etas-repair-protocol`
+- 原始协议标签：`v0.2.2-background-etas-repair-protocol`（保持不可变）
+- 当前勘误标签：`v0.2.2-background-etas-repair-protocol-r1`
 - 唯一实施蓝图：`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`
-- 当前分支：`codex/stage2-etas-numerical-repair`
-- 比较基线：`dae6403`
+- 当前勘误分支：`codex/stage2-etas-repair-protocol-r1`；后续实现主分支：`codex/stage2-etas-numerical-repair`
+- 原始协议比较基线：`dae6403`
+- R1 勘误比较基线：`b7c70aced16a6bd57bf8f86f2680687e36b7710d`
 - 状态：通过（本地协议工程验收；提交、推送和远端标签核验属于发布闭环）
 
 本次验收只冻结目标盲修复设计、25 个既有优化初值、输入/执行封印、调用回执、适配边界和停止条件。它不实施修复、不生成真实 fit-only 输入包、不运行真实 ETAS 资格拟合，也不创建新的阶段 4 执行修订。
+
+## R1 勘误边界
+
+代码标签前审计发现，原始协议在 `scientific_fit_input_record_schemas.integer_encoding` 中把所有整数统写为非负，但既有冻结网格的原点固定索引公式、带符号 `cell_id` 模板和 `grid.py` 均明确允许 `row/column` 为有符号整数；中国大陆等面积投影中位于中央经线西侧的固定格不能用非负列号无损表示。R1 仅作以下字段级澄清：
+
+- `ordered_quadrature_containers.cells.row` 与 `.column` 为严格 Python `int` 的有符号 base-10 整数，bool 必须拒绝；
+- 计数、`start_index`、优化器迭代上限和其余整数仍严格非负；
+- `cell_id/row/column` 必须逐格匹配既有冻结网格，不允许移位、取绝对值、重编号或改网格；
+- 不改变事件集合、坐标、几何、KDE、初值、objective、优化器、门限、目标盲边界或任何科学拟合规则。
+
+该冲突在任何真实 fit 源再次 open/stat/hash/query 或 bundle inspection 之前发现并修订；R1 验收期间真实 fit 源、阶段 4 正式目标和阶段 9 锁定测试均保持未访问。原始协议标签不移动、不覆盖、不删除。
 
 ## 协议包边界
 
@@ -69,7 +82,24 @@
 
 ## 验收证据
 
-### 测试与静态检查
+### R1 勘误复验
+
+| 项目 | R1 结果 |
+|---|---|
+| 协议定向测试 | `24 passed` |
+| 协议、固定网格与 local-support manifest 联合回归 | `56 passed in 24.34s` |
+| 隔离 public worktree 全量非目标测试 | `1212 passed, 2 skipped in 351.64s`；`failures=0`、`errors=0` |
+| R1 JUnit | `data/interim/protocol-r1-full-nontarget.junit.xml` |
+| R1 JUnit 字节身份 | size `194932`；SHA-256 `d463853cf3b010e79ac9ef3646dfc0cb6332128e1405cd1fd0b206cf6702a259` |
+| Ruff | R1 协议测试 `ruff check` 与 `ruff format --check` 通过 |
+| Mypy | R1 协议测试：`Success: no issues found in 1 source file` |
+| Git 空白检查 | `git diff --check` 通过 |
+
+两个 skip 都来自 clean public worktree 有意不分发的本地受限 Stage 3 feature store / Stage 4 spatial artifacts；没有读取、复制或检查这些受限工件内容，也没有用它们验证 R1。新增一项协议测试后，本次共收集 `1214` 项：`1212` 项执行并通过、`2` 项按既有公开仓库保护条件跳过。第一次隔离全量 runner 因未把仓库根加入 `sys.path`，在收集期以 `scripts` import error 退出且没有执行测试；修正 runner 后才得到上述有效结果。
+
+R1 独立只读审计对原协议与勘误 YAML 做深比较，确认除 revision metadata、R1 tag/comparison base 和 quadrature `row/column` integer encoding 外，其余协议语义完全相同；审计提出的 package 清单、证据状态、comparison-base、revision-reason 与 bool 拒绝回归均已补齐并复跑。
+
+### 原始协议冻结证据（历史，不替代 R1 复验）
 
 | 项目 | 最终结果 |
 |---|---|
@@ -103,6 +133,6 @@
 - 阶段 9 锁定测试：未运行
 - 真实 fit-input bundle、资格结果、参数工件和 adapter 工件：均未生成
 
-因此，本次通过只表示阶段 2 ETAS 数值修复的**协议工程冻结**满足本地验收，不表示 ETAS 已稳定拟合，更不表示预测效果或科学门控成功。下一合法动作是提交六文件协议包及同批机械修复/交接记录，推送分支并创建 annotated tag `v0.2.2-background-etas-repair-protocol`；只有远端标签解析到该提交后，才允许进入 1 ULP 修复代码子阶段。
+因此，本次通过只表示阶段 2 ETAS 数值修复的**协议工程冻结**满足本地验收，不表示 ETAS 已稳定拟合，更不表示预测效果或科学门控成功。原始 annotated tag `v0.2.2-background-etas-repair-protocol` 保持不动；当前下一合法动作是提交 R1 协议勘误、推送并创建 annotated tag `v0.2.2-background-etas-repair-protocol-r1`。只有远端 R1 标签解析到该勘误提交后，才允许继续 1 ULP 修复代码子阶段。
 
 协议包自身包含本验收文件，因此不能在文件内部嵌入最终提交、标签或自身 blob SHA 而制造自引用。六个精确路径已由测试锁定，最终 Git blob/tree/commit 身份由提交与远端 annotated tag 在外层冻结并可重复查询。

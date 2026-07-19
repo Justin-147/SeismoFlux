@@ -2,6 +2,20 @@
 
 更新时间：2026-07-19（Asia/Shanghai）
 
+## R1 协议勘误续接覆盖（当前有效）
+
+原始协议标签 `v0.2.2-background-etas-repair-protocol` 已提交、推送并完成远端核验，保持不可变。其后在修复代码标签前、且未再次访问任何真实 fit 源或阶段 4 正式目标时，审计发现科学输入的全局“非负整数”声明与既有有符号固定网格 `row/column` 契约冲突。当前插入一个最小协议勘误门控：
+
+- 勘误分支：`codex/stage2-etas-repair-protocol-r1`；实现主分支仍为 `codex/stage2-etas-numerical-repair`；
+- 勘误基线：`b7c70aced16a6bd57bf8f86f2680687e36b7710d`；
+- 待冻结 annotated tag：`v0.2.2-background-etas-repair-protocol-r1`；
+- 唯一语义改动：`ordered_quadrature_containers.cells.row/column` 明确为拒绝 bool 的严格有符号 Python `int`；所有其他整数继续严格非负；
+- 禁止借勘误修改网格、事件、KDE、初值、优化器、objective、门限、目标边界或科学输入内容；
+- 必须先完成 R1 定向/回归/静态验收、提交、推送与远端标签核验，再恢复 Stage 2R-A；
+- Stage 2R-A 的在建代码保留为未提交工作树，不得在 R1 标签之前生成 runtime baseline、code diff receipt、真实 bundle 或资格结果。
+
+原协议冻结过程仅作为后文历史证据保留；当前续接必须执行本节和第 5 节的 R1 步骤。其余目标盲、资源、停止条件和后续阶段边界继续有效。Stage 4 formal target consumer 调用仍为 0，assessment row 物化仍为 0，阶段 9 锁定测试：未运行。
+
 ## 1. 工作目标与唯一蓝图
 
 唯一实施蓝图仍为仓库根目录的 `SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`。本工作线的目标不是证明 ETAS 预测有效，而是在不读取阶段 4 正式目标、不运行阶段 9 锁定测试的前提下：
@@ -17,17 +31,25 @@
 
 ## 2. 当前工作线和仓库现场
 
-- 工作线：阶段 2 ETAS 数值修复（协议冻结子阶段）
-- 分支：`codex/stage2-etas-numerical-repair`
-- 当前基底提交：`dae6403`（`Finalize Stage 4 R2 blocked protocol`）
-- 计划中的本阶段标签：`v0.2.2-background-etas-repair-protocol`
-- 协议状态：本地协议工程验收已通过；本文件写入时尚未提交、推送或打标签，续接时必须先查询本地与远端 Git 状态再决定是否执行发布步骤
+- 工作线：阶段 2 ETAS 数值修复（R1 协议勘误子阶段）
+- 当前勘误分支：`codex/stage2-etas-repair-protocol-r1`；后续实现主分支：`codex/stage2-etas-numerical-repair`
+- 原始协议基底：`dae6403`（`Finalize Stage 4 R2 blocked protocol`）；R1 勘误基底：`b7c70aced16a6bd57bf8f86f2680687e36b7710d`
+- 计划中的本阶段标签：`v0.2.2-background-etas-repair-protocol-r1`
+- 协议状态：原协议已远端冻结；R1 本地协议工程验收已通过，提交、推送和远端标签核验尚未完成，续接时必须先查询本地与远端 Git 状态
 - 真实阶段 2 拟合源：本工作线尚未重新打开或查询
 - Stage 4 formal target consumer 调用：0
 - assessment row 物化：0
 - 阶段 9 锁定测试：未运行
 
-当前未提交文件：
+当前 R1 未提交文件：
+
+- `configs/background_etas_numerical_repair.yaml`
+- `docs/background_etas_numerical_repair_protocol.md`
+- `docs/phase2_etas_numerical_repair_protocol_acceptance.md`
+- `docs/restart_handoff_2026-07-19_stage2_etas_repair_protocol.md`
+- `tests/unit/test_background_etas_numerical_repair_protocol.py`
+
+规范 protocol package 仍是以下六个精确路径：
 
 - `.gitignore`
 - `configs/background_etas_numerical_repair.yaml`
@@ -35,10 +57,8 @@
 - `docs/background_etas_numerical_repair_protocol.md`
 - `docs/phase2_etas_numerical_repair_protocol_acceptance.md`
 - `tests/unit/test_background_etas_numerical_repair_protocol.py`
-- `tests/unit/test_stage4_anomaly_increment_runtime.py`（仅机械类型标注修复，不改变测试逻辑）
-- 本交接文档
 
-配置冻结的 protocol package 是前六个文件（从 `.gitignore` 到协议单元测试）。Stage 4 测试改动只清理严格 mypy 的基底机械类型债务；本交接文档只提供恢复现场。上述改动须在同一次阶段提交中完整保留，不得拆分协议包，也不得在验收前推送标签。
+其中 `.gitignore` 与 start manifest 在 R1 中保持与原协议 blob 完全相同，配置、主协议、验收记录和协议测试随勘误更新。本交接文档位于 package 外，只提供恢复现场。上述五项 R1 改动须在同一次勘误提交中完整保留，不得在验收前推送标签。
 
 ## 3. 已完成内容
 
@@ -66,7 +86,17 @@
 - 当前没有本工作线的 Python 重任务在运行；
 - 运行时 baseline 已设计覆盖 Python、NumPy、SciPy、stdlib、PE image 和原生依赖的文件身份。
 
-### 3.4 已有测试证据
+### 3.4 R1 勘误验收证据
+
+- 协议定向：`24 passed in 26.62s`；
+- 协议、固定网格与 local-support manifest 联合回归：`56 passed in 24.34s`；
+- clean public worktree 全量非目标回归：`1212 passed, 2 skipped in 351.64s`，`failures=0`、`errors=0`；新增一项协议测试后共收集 `1214` 项；
+- 两个 skip 仅因 public worktree 不分发本地受限 Stage 3 feature store / Stage 4 spatial artifacts，未读取或复制这些工件；
+- R1 JUnit：`data/interim/protocol-r1-full-nontarget.junit.xml`，size `194932`，SHA-256 `d463853cf3b010e79ac9ef3646dfc0cb6332128e1405cd1fd0b206cf6702a259`；
+- Ruff check/format、单文件严格 mypy、`git diff --check` 均通过；
+- 独立只读深比较确认，除 revision metadata、R1 tag/comparison base 与 quadrature `row/column` integer encoding 外，其余协议语义完全相同；审计提出的 package 清单、证据状态、comparison-base、revision-reason 和 bool 拒绝回归均已修复并复跑。
+
+### 3.5 原始协议冻结证据（历史，不替代 R1）
 
 - 最近一次中间全量非目标测试：`1205 passed in 396.88s`；
 - JUnit：`data/interim/stage2/etas_numerical_repair/runtime_logs/protocol-final-full-nontarget-rerun1.junit.xml`；
@@ -140,11 +170,12 @@
 
 ## 5. 精确续接步骤
 
-1. 先执行 `git status --short`、`git rev-parse HEAD`、`git ls-remote origin` 和标签查询；若远端 annotated tag `v0.2.2-background-etas-repair-protocol` 已存在且解析到当前协议提交，直接进入第 4 步，不重复提交或打标签；
-2. 若标签尚不存在，重跑协议文档完整性测试与静态检查，随后把当前协议包、Stage 4 机械类型修复和本交接作为一个阶段提交推送到 `origin/codex/stage2-etas-numerical-repair`；
-3. 创建并推送 annotated tag `v0.2.2-background-etas-repair-protocol`，再用网络查询确认远端分支提交和 peeled tag commit 均等于本地 `HEAD`；
-4. 只有第 3 步已由远端证据满足后，才进入阶段 2R-A 的 1 ULP 修复代码实现；不得打开真实阶段 2 fit 源或阶段 4 目标；
-5. 阶段 2R-A 仍须独立完成测试、验收、提交、推送和代码标签核验，不能把本次协议验收当作代码实现验收。
+1. 先执行 `git status --short`、`git rev-parse HEAD`、`git ls-remote origin` 和标签查询；原标签 `v0.2.2-background-etas-repair-protocol` 只能核验、不得移动；
+2. 重跑 R1 协议文档完整性、signed row/column、固定网格回归、Ruff、mypy、全量非目标测试和独立只读审计；
+3. 把上述五项勘误作为一个提交推送到 `origin/codex/stage2-etas-repair-protocol-r1`；
+4. 创建并推送 annotated tag `v0.2.2-background-etas-repair-protocol-r1`，再用网络查询确认远端勘误分支和 peeled tag commit 均等于本地 `HEAD`；
+5. 只有第 4 步已由远端证据满足后，才把 R1 勘误提交整合到实现主分支并继续阶段 2R-A；不得在此之前打开真实阶段 2 fit 源或阶段 4 目标；
+6. 阶段 2R-A 仍须独立完成测试、验收、提交、推送和代码标签核验，不能把本次协议验收当作代码实现验收。
 
 ## 6. 后续阶段计划
 
