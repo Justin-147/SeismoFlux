@@ -4,10 +4,16 @@ import ast
 import base64
 import hashlib
 import json
+import os
+import re
 import subprocess
 import types
+import unicodedata
+from copy import deepcopy
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from importlib.metadata import distribution
+from itertools import count
 from pathlib import Path
 from typing import Any, cast
 from zoneinfo import ZoneInfo
@@ -24,8 +30,18 @@ import yaml
 from shapely.geometry import Point
 from shapely.geometry import point as shapely_point
 
+from seismoflux.background.artifacts import canonical_json_bytes
 from seismoflux.background.etas_fit import ETASParameterBounds, optimizer_start
-from seismoflux.background.grid import GridSpec, cell_id
+from seismoflux.background.grid import (
+    GridConvergenceDiagnostics,
+    GridSpec,
+    ThreeGridConvergenceGateEvidence,
+    cell_id,
+)
+from seismoflux.background.pipeline_etas import (
+    ETASGridGateEvidence,
+    ETASGridResolutionEvidence,
+)
 from seismoflux.background.randomness import SeedContext
 
 PROTOCOL_PATH = Path("configs/background_etas_numerical_repair.yaml")
@@ -35,8 +51,244 @@ PROTOCOL_ACCEPTANCE_PATH = Path("docs/phase2_etas_numerical_repair_protocol_acce
 RESTART_HANDOFF_PATH = Path("docs/restart_handoff_2026-07-19_stage2_etas_repair_protocol.md")
 STAGE4_R2_PROTOCOL_PATH = Path("configs/anomaly_increment_r2.yaml")
 R1_PROTOCOL_COMMIT = "da916454c908e0cbe4a7526f56a8f837331a3c7c"
+R2_PROTOCOL_TAG = "v0.2.2-background-etas-repair-protocol-r2"
+R2_PROTOCOL_TAG_OBJECT = "903c80ed64295311f8d7870b4847f56d67caee51"
+R2_PROTOCOL_COMMIT = "5a5902a83645c217ea11a3bd99eb70b535f0e4df"
 
 SNAPSHOT_ORDER = ("fold_1", "fold_2", "fold_3", "fold_4", "final_validation")
+SYNTHETIC_WINDOWS_VOLUME_GUID_PREFIX = r"\\?\Volume{00000000-0000-0000-0000-000000000001}"
+WINDOWS_VOLUME_GUID_PATH_PATTERN = re.compile(
+    r"^\\\\\?\\Volume\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+    r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}\\(.+)$"
+)
+
+
+@dataclass(frozen=True, slots=True)
+class _SyntheticLiveDirectoryIdentityCapture:
+    source_kind: str
+    capture_id: str
+    opened_handle_count: int
+    records: tuple[dict[str, object], ...]
+    _provenance_capability: object
+
+
+_LIVE_CAPTURE_FACTORY_TOKEN = object()
+_LIVE_CAPTURE_ID_COUNTER = count()
+_REGISTERED_LIVE_CAPTURE_RECEIPTS: dict[
+    int, tuple[_SyntheticLiveDirectoryIdentityCapture, str, str, int, bytes]
+] = {}
+_CONSUMED_LIVE_CAPTURE_IDS: set[str] = set()
+_UNBOUND_LIVE_HANDLE_SOURCES: dict[int, tuple[object, tuple[object, ...]]] = {}
+_REGISTERED_LIVE_HANDLE_SOURCES: dict[int, tuple[object, object, tuple[object, ...]]] = {}
+_CONSUMED_LIVE_HANDLE_SOURCES: dict[int, object] = {}
+_REGISTERED_LIVE_CAPTURE_PROVIDERS: dict[int, tuple[object, object]] = {}
+_CONSUMED_LIVE_CAPTURE_PROVIDERS: dict[int, object] = {}
+
+
+class _SyntheticLiveDirectoryHandleSource:
+    __slots__ = (
+        "_attempt_id",
+        "_identity_override",
+        "_opened_handle_limit_for_test",
+        "_path",
+        "_platform",
+        "_posix_parent_st_ino",
+        "_posix_st_dev",
+        "_windows_parent_file_id",
+        "_windows_volume_serial",
+    )
+
+    def __init__(
+        self,
+        *,
+        factory_token: object,
+        attempt_id: str,
+        platform: str | None,
+        path: Path | None,
+        windows_volume_serial: str | None,
+        windows_parent_file_id: str | None,
+        posix_st_dev: str | None,
+        posix_parent_st_ino: str | None,
+        identity_override: tuple[int, str, object] | None,
+        opened_handle_limit_for_test: int | None,
+    ) -> None:
+        if factory_token is not _LIVE_CAPTURE_FACTORY_TOKEN:
+            raise ValueError("live handle source requires the controlled factory")
+        if type(self) is not _SyntheticLiveDirectoryHandleSource:
+            raise ValueError("live handle source requires the exact controlled factory class")
+        if (path is None) == (platform is None):
+            raise ValueError("live handle source requires exactly one source mode")
+        if platform is not None and platform not in {"posix", "windows"}:
+            raise ValueError("live handle source platform is invalid")
+        if opened_handle_limit_for_test is not None and opened_handle_limit_for_test < 0:
+            raise ValueError("live handle source test limit is invalid")
+        self._attempt_id = attempt_id
+        self._platform = platform
+        self._path = path
+        self._windows_volume_serial = windows_volume_serial
+        self._windows_parent_file_id = windows_parent_file_id
+        self._posix_st_dev = posix_st_dev
+        self._posix_parent_st_ino = posix_parent_st_ino
+        self._identity_override = identity_override
+        self._opened_handle_limit_for_test = opened_handle_limit_for_test
+        _UNBOUND_LIVE_HANDLE_SOURCES[id(self)] = (
+            self,
+            _synthetic_live_handle_source_configuration_snapshot(self),
+        )
+
+    def observe_each_live_directory_handle(
+        self,
+        *,
+        requesting_provider: object,
+    ) -> tuple[dict[str, object], ...]:
+        registered_source = _REGISTERED_LIVE_HANDLE_SOURCES.get(id(self))
+        if (
+            registered_source is None
+            or registered_source[0] is not self
+            or registered_source[1] is not requesting_provider
+        ):
+            if _CONSUMED_LIVE_HANDLE_SOURCES.get(id(self)) is self:
+                raise ValueError("live handle source is single-use")
+            raise ValueError("live handle source is not bound to the requesting provider")
+        del _REGISTERED_LIVE_HANDLE_SOURCES[id(self)]
+        _CONSUMED_LIVE_HANDLE_SOURCES[id(self)] = self
+        if _synthetic_live_handle_source_configuration_snapshot(self) != registered_source[2]:
+            raise ValueError("live handle source configuration changed after binding")
+        if self._path is not None:
+            parent_stat = self._path.parent.stat()
+            platform = "windows" if os.name == "nt" else "posix"
+            parent_file_id = (
+                _synthetic_file_id_128_hex(role="parent", identity_value=parent_stat.st_ino)
+                if platform == "windows"
+                else str(parent_stat.st_ino)
+            )
+            windows_volume_serial = str(parent_stat.st_dev) if platform == "windows" else None
+            windows_parent_file_id = parent_file_id if platform == "windows" else None
+            posix_st_dev = str(parent_stat.st_dev) if platform == "posix" else None
+            posix_parent_st_ino = parent_file_id if platform == "posix" else None
+        else:
+            if self._platform is None:
+                raise AssertionError("raw live handle source platform disappeared")
+            platform = self._platform
+            windows_volume_serial = self._windows_volume_serial
+            windows_parent_file_id = self._windows_parent_file_id
+            posix_st_dev = self._posix_st_dev
+            posix_parent_st_ino = self._posix_parent_st_ino
+        raw_observations = _independent_synthetic_live_handle_records(
+            attempt_id=self._attempt_id,
+            platform=platform,
+            windows_volume_serial=windows_volume_serial,
+            windows_parent_file_id=windows_parent_file_id,
+            posix_st_dev=posix_st_dev,
+            posix_parent_st_ino=posix_parent_st_ino,
+            identity_override=self._identity_override,
+        )
+        observations: list[dict[str, object]] = []
+        for record in raw_observations:
+            if (
+                self._opened_handle_limit_for_test is not None
+                and len(observations) >= self._opened_handle_limit_for_test
+            ):
+                break
+            observations.append(deepcopy(record))
+        return tuple(observations)
+
+
+def _synthetic_live_handle_source_configuration_snapshot(
+    source: _SyntheticLiveDirectoryHandleSource,
+) -> tuple[object, ...]:
+    path = source._path
+    identity_override = source._identity_override
+    return (
+        (type(source._attempt_id), source._attempt_id),
+        (type(source._platform), source._platform),
+        (type(path), id(path), path),
+        (type(source._windows_volume_serial), source._windows_volume_serial),
+        (type(source._windows_parent_file_id), source._windows_parent_file_id),
+        (type(source._posix_st_dev), source._posix_st_dev),
+        (type(source._posix_parent_st_ino), source._posix_parent_st_ino),
+        (
+            type(identity_override),
+            id(identity_override),
+            canonical_json_bytes(list(identity_override))
+            if identity_override is not None
+            else None,
+        ),
+        (
+            type(source._opened_handle_limit_for_test),
+            source._opened_handle_limit_for_test,
+        ),
+    )
+
+
+class _SyntheticLiveDirectoryCaptureProvider:
+    __slots__ = ("_live_handle_source",)
+
+    def __init__(
+        self,
+        *,
+        factory_token: object,
+        live_handle_source: _SyntheticLiveDirectoryHandleSource,
+    ) -> None:
+        if factory_token is not _LIVE_CAPTURE_FACTORY_TOKEN:
+            raise ValueError("live capture provider requires the controlled factory")
+        if type(self) is not _SyntheticLiveDirectoryCaptureProvider:
+            raise ValueError("live capture provider requires the exact controlled factory class")
+        if type(live_handle_source) is not _SyntheticLiveDirectoryHandleSource:
+            raise ValueError("live capture provider requires a controlled handle source")
+        unbound_source = _UNBOUND_LIVE_HANDLE_SOURCES.get(id(live_handle_source))
+        if unbound_source is None or unbound_source[0] is not live_handle_source:
+            raise ValueError("live capture provider requires a new unbound handle source")
+        del _UNBOUND_LIVE_HANDLE_SOURCES[id(live_handle_source)]
+        construction_snapshot = unbound_source[1]
+        if (
+            _synthetic_live_handle_source_configuration_snapshot(live_handle_source)
+            != construction_snapshot
+        ):
+            raise ValueError("live handle source configuration changed before binding")
+        self._live_handle_source = live_handle_source
+        _REGISTERED_LIVE_CAPTURE_PROVIDERS[id(self)] = (self, live_handle_source)
+        _REGISTERED_LIVE_HANDLE_SOURCES[id(live_handle_source)] = (
+            live_handle_source,
+            self,
+            construction_snapshot,
+        )
+
+    def capture_before_evidence_read(self) -> _SyntheticLiveDirectoryIdentityCapture:
+        registered_provider = _REGISTERED_LIVE_CAPTURE_PROVIDERS.get(id(self))
+        if registered_provider is None or registered_provider[0] is not self:
+            if _CONSUMED_LIVE_CAPTURE_PROVIDERS.get(id(self)) is self:
+                raise ValueError("live capture provider is single-use")
+            raise ValueError("live capture provider is not registered")
+        del _REGISTERED_LIVE_CAPTURE_PROVIDERS[id(self)]
+        _CONSUMED_LIVE_CAPTURE_PROVIDERS[id(self)] = self
+        registered_source = registered_provider[1]
+        if (
+            type(self._live_handle_source) is not _SyntheticLiveDirectoryHandleSource
+            or self._live_handle_source is not registered_source
+        ):
+            raise ValueError("live capture provider source changed after construction")
+        observed_records = self._live_handle_source.observe_each_live_directory_handle(
+            requesting_provider=self
+        )
+        capability = object()
+        receipt = _SyntheticLiveDirectoryIdentityCapture(
+            source_kind="independent_live_directory_handle_capture",
+            capture_id=f"synthetic-live-capture-{next(_LIVE_CAPTURE_ID_COUNTER):08d}",
+            opened_handle_count=len(observed_records),
+            records=observed_records,
+            _provenance_capability=capability,
+        )
+        _REGISTERED_LIVE_CAPTURE_RECEIPTS[id(capability)] = (
+            receipt,
+            receipt.source_kind,
+            receipt.capture_id,
+            receipt.opened_handle_count,
+            canonical_json_bytes(list(observed_records)),
+        )
+        return receipt
+
+
 FIT_ENDS = (
     "2004-12-31T16:00:00Z",
     "2009-12-31T16:00:00Z",
@@ -105,6 +357,20 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     )
 
 
+def _load_yaml_at_revision(revision: str, path: Path) -> dict[str, Any]:
+    result = subprocess.run(
+        ["git", "show", f"{revision}:{path.as_posix()}"],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    return cast(
+        dict[str, Any],
+        yaml.load(result.stdout, Loader=_UniqueKeySafeLoader),
+    )
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
@@ -121,6 +387,1471 @@ def _canonical_payload_sha256(value: Any) -> str:
         ensure_ascii=False,
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _canonical_v1_sha256(value: Any) -> str:
+    return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def _float_from_exact_hex(value: object) -> float:
+    if not isinstance(value, str):
+        raise ValueError("expected a float.hex string")
+    parsed = float.fromhex(value)
+    if not np.isfinite(parsed) or parsed.hex() != value:
+        raise ValueError("float hex is non-finite or non-canonical")
+    return parsed
+
+
+def _synthetic_resolution_payload(
+    resolution: ETASGridResolutionEvidence,
+) -> dict[str, object]:
+    return {
+        "cell_size_km_hex": resolution.cell_size_km.hex(),
+        "cell_count": resolution.cell_count,
+        "background_total_hex": resolution.background_total.hex(),
+        "triggering_total_hex": resolution.triggering_total.hex(),
+        "total_hex": resolution.total.hex(),
+        "ordered_cell_masses_sha256": resolution.ordered_cell_masses_sha256,
+    }
+
+
+def _synthetic_pair_payload(
+    diagnostics: GridConvergenceDiagnostics,
+) -> dict[str, object]:
+    identity: dict[str, object] = {
+        "coarse_grid_size_km_hex": diagnostics.coarse_cell_size_km.hex(),
+        "fine_grid_size_km_hex": diagnostics.fine_cell_size_km.hex(),
+        "coarse_total_expected_count_hex": diagnostics.coarse_total.hex(),
+        "fine_total_expected_count_hex": diagnostics.fine_total.hex(),
+        "relative_expected_count_difference_hex": (
+            diagnostics.relative_expected_count_difference.hex()
+        ),
+        "density_l1_difference_hex": diagnostics.density_l1_difference.hex(),
+        "passes_frozen_tolerances": diagnostics.passed,
+    }
+    return {**identity, "diagnostic_payload_sha256": _canonical_v1_sha256(identity)}
+
+
+def _resolution_from_local_payload(
+    payload: dict[str, object],
+) -> ETASGridResolutionEvidence:
+    cell_count = payload["cell_count"]
+    if not isinstance(cell_count, int) or isinstance(cell_count, bool) or cell_count <= 0:
+        raise ValueError("cell_count must be a positive strict integer")
+    reconstructed = {
+        "cell_size_km": _float_from_exact_hex(payload["cell_size_km_hex"]),
+        "cell_count": cell_count,
+        "background_total": _float_from_exact_hex(payload["background_total_hex"]),
+        "triggering_total": _float_from_exact_hex(payload["triggering_total_hex"]),
+        "total": _float_from_exact_hex(payload["total_hex"]),
+        "ordered_cell_masses_sha256": payload["ordered_cell_masses_sha256"],
+    }
+    return ETASGridResolutionEvidence(**cast(Any, reconstructed))
+
+
+def _comparison_from_local_payload(
+    payload: dict[str, object],
+) -> GridConvergenceDiagnostics:
+    reconstructed = {
+        "coarse_cell_size_km": _float_from_exact_hex(payload["coarse_grid_size_km_hex"]),
+        "fine_cell_size_km": _float_from_exact_hex(payload["fine_grid_size_km_hex"]),
+        "coarse_total": _float_from_exact_hex(payload["coarse_total_expected_count_hex"]),
+        "fine_total": _float_from_exact_hex(payload["fine_total_expected_count_hex"]),
+        "relative_expected_count_difference": _float_from_exact_hex(
+            payload["relative_expected_count_difference_hex"]
+        ),
+        "density_l1_difference": _float_from_exact_hex(payload["density_l1_difference_hex"]),
+    }
+    diagnostics = GridConvergenceDiagnostics(**cast(Any, reconstructed))
+    if payload["passes_frozen_tolerances"] is not diagnostics.passed:
+        raise ValueError("pair pass flag does not match frozen tolerances")
+    return diagnostics
+
+
+def _independent_numerical_evidence_id(
+    *,
+    protocol_sha256: str,
+    snapshot_id: str,
+    parameter_snapshot_id: str,
+    resolutions: tuple[ETASGridResolutionEvidence, ...],
+    comparisons: tuple[GridConvergenceDiagnostics, ...],
+) -> str:
+    preimage = {
+        "protocol_sha256": protocol_sha256,
+        "snapshot_id": snapshot_id,
+        "parameter_snapshot_id": parameter_snapshot_id,
+        "resolutions": tuple(asdict(item) for item in resolutions),
+        "comparisons": tuple(asdict(item) for item in comparisons),
+    }
+    return _canonical_v1_sha256(preimage)
+
+
+def _reconstruct_gate_from_envelope_payload(
+    envelope: dict[str, object],
+    persistence: dict[str, Any],
+) -> tuple[ETASGridGateEvidence, str]:
+    sealed = cast(dict[str, Any], envelope["sealed_three_grid_gate_evidence"])
+    identity = cast(dict[str, str], sealed["existing_evaluator_return_identity"])
+    resolution_map = cast(
+        dict[str, dict[str, object]], envelope["grid_resolution_payload_by_grid_size"]
+    )
+    crosswalk = persistence["numerical_evidence_id_crosswalk_exact"]
+    resolution_keys = tuple(
+        path.rsplit(".", 1)[1] for path in crosswalk["resolution_source_paths_in_order_exact"]
+    )
+    pair_fields = tuple(
+        path.rsplit(".", 1)[1] for path in crosswalk["comparison_source_paths_in_order_exact"]
+    )
+    resolutions = tuple(
+        _resolution_from_local_payload(resolution_map[key]) for key in resolution_keys
+    )
+    comparisons = tuple(
+        _comparison_from_local_payload(cast(dict[str, object], sealed[field]))
+        for field in pair_fields
+    )
+    if len(comparisons) != 2:
+        raise ValueError("three-grid evidence requires exactly two comparison payloads")
+    convergence = ThreeGridConvergenceGateEvidence(
+        diagnostic_50_to_25=comparisons[0],
+        primary_25_to_12_5=comparisons[1],
+    )
+    gate = ETASGridGateEvidence(
+        protocol_sha256=identity["protocol_sha256"],
+        snapshot_id=identity["snapshot_id"],
+        parameter_snapshot_id=identity["parameter_snapshot_id"],
+        resolutions=resolutions,
+        convergence=convergence,
+    )
+    independent = _independent_numerical_evidence_id(
+        protocol_sha256=gate.protocol_sha256,
+        snapshot_id=gate.snapshot_id,
+        parameter_snapshot_id=gate.parameter_snapshot_id,
+        resolutions=gate.resolutions,
+        comparisons=gate.convergence.comparisons,
+    )
+    if independent != gate.numerical_evidence_id:
+        raise ValueError("independent numerical evidence formula disagrees with pipeline property")
+    return gate, independent
+
+
+def _numerical_evidence_id_from_envelope_payload(
+    envelope: dict[str, object],
+    persistence: dict[str, Any],
+) -> str:
+    gate, independent = _reconstruct_gate_from_envelope_payload(envelope, persistence)
+    crosswalk = persistence["numerical_evidence_id_crosswalk_exact"]
+    assert (
+        list(
+            {
+                "protocol_sha256": gate.protocol_sha256,
+                "snapshot_id": gate.snapshot_id,
+                "parameter_snapshot_id": gate.parameter_snapshot_id,
+                "resolutions": gate.resolutions,
+                "comparisons": gate.convergence.comparisons,
+            }
+        )
+        == crosswalk["numerical_evidence_preimage_fields_exact"]
+    )
+    return independent
+
+
+def _unchecked_numerical_evidence_id_from_envelope_payload(
+    envelope: dict[str, object],
+    persistence: dict[str, Any],
+) -> str:
+    """Rehash an adversarial payload without enforcing wrapper invariants."""
+
+    sealed = cast(dict[str, Any], envelope["sealed_three_grid_gate_evidence"])
+    identity = cast(dict[str, str], sealed["existing_evaluator_return_identity"])
+    resolution_map = cast(
+        dict[str, dict[str, object]], envelope["grid_resolution_payload_by_grid_size"]
+    )
+    crosswalk = persistence["numerical_evidence_id_crosswalk_exact"]
+    resolution_keys = tuple(
+        path.rsplit(".", 1)[1] for path in crosswalk["resolution_source_paths_in_order_exact"]
+    )
+    pair_fields = tuple(
+        path.rsplit(".", 1)[1] for path in crosswalk["comparison_source_paths_in_order_exact"]
+    )
+    return _independent_numerical_evidence_id(
+        protocol_sha256=identity["protocol_sha256"],
+        snapshot_id=identity["snapshot_id"],
+        parameter_snapshot_id=identity["parameter_snapshot_id"],
+        resolutions=tuple(
+            _resolution_from_local_payload(resolution_map[key]) for key in resolution_keys
+        ),
+        comparisons=tuple(
+            _comparison_from_local_payload(cast(dict[str, object], sealed[field]))
+            for field in pair_fields
+        ),
+    )
+
+
+def _directory_chain_relative_paths(attempt_id: str) -> list[str]:
+    return [
+        ".",
+        "data",
+        "data/processed",
+        "data/processed/stage2R",
+        "data/processed/stage2R/etas_numerical_repair_fit_input",
+        "data/processed/stage2R/etas_numerical_repair_fit_input/attempts",
+        f"data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}",
+        (
+            "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/"
+            f"{attempt_id}/local_restricted"
+        ),
+        (
+            "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/"
+            f"{attempt_id}/local_restricted/three_grid_gate_evidence"
+        ),
+    ]
+
+
+def _synthetic_canonical_directory_path(*, platform: str, relative_path: str) -> str:
+    components = ["synthetic_workspace"]
+    if relative_path != ".":
+        components.extend(relative_path.split("/"))
+    separator = "\\" if platform == "windows" else "/"
+    prefix = SYNTHETIC_WINDOWS_VOLUME_GUID_PREFIX if platform == "windows" else ""
+    return f"{prefix}{separator}{separator.join(components)}"
+
+
+def _synthetic_directory_identity_chain(
+    *,
+    attempt_id: str,
+    platform: str,
+    windows_volume_serial: str | None,
+    windows_parent_file_id: str | None,
+    posix_st_dev: str | None,
+    posix_parent_st_ino: str | None,
+) -> list[dict[str, object]]:
+    paths = _directory_chain_relative_paths(attempt_id)
+    records: list[dict[str, object]] = []
+    for index, relative_path in enumerate(paths):
+        is_parent = index == len(paths) - 1
+        components = [] if relative_path == "." else relative_path.split("/")
+        record: dict[str, object]
+        if platform == "windows":
+            file_id = (
+                windows_parent_file_id
+                if is_parent
+                else _synthetic_file_id_128_hex(
+                    role="directory-chain",
+                    identity_value=f"{index}:{relative_path}",
+                )
+            )
+            record = {
+                "repository_relative_directory_path": relative_path,
+                "exact_case_relative_components_from_workspace_root": components,
+                "canonical_directory_path": _synthetic_canonical_directory_path(
+                    platform=platform,
+                    relative_path=relative_path,
+                ),
+                "platform": platform,
+                "windows_volume_serial_u64_decimal_or_null": windows_volume_serial,
+                "windows_directory_file_id_16_bytes_hex_or_null": file_id,
+                "posix_st_dev_decimal_or_null": None,
+                "posix_st_ino_decimal_or_null": None,
+            }
+        else:
+            inode = posix_parent_st_ino if is_parent else str(1000 + index)
+            record = {
+                "repository_relative_directory_path": relative_path,
+                "exact_case_relative_components_from_workspace_root": components,
+                "canonical_directory_path": _synthetic_canonical_directory_path(
+                    platform=platform,
+                    relative_path=relative_path,
+                ),
+                "platform": platform,
+                "windows_volume_serial_u64_decimal_or_null": None,
+                "windows_directory_file_id_16_bytes_hex_or_null": None,
+                "posix_st_dev_decimal_or_null": posix_st_dev,
+                "posix_st_ino_decimal_or_null": inode,
+            }
+        records.append(record)
+    return records
+
+
+def _independent_synthetic_live_handle_records(
+    *,
+    attempt_id: str,
+    platform: str,
+    windows_volume_serial: str | None,
+    windows_parent_file_id: str | None,
+    posix_st_dev: str | None,
+    posix_parent_st_ino: str | None,
+    identity_override: tuple[int, str, object] | None = None,
+) -> list[dict[str, object]]:
+    paths = _directory_chain_relative_paths(attempt_id)
+    source_records: list[dict[str, object]] = []
+    for index, relative_path in enumerate(paths):
+        is_parent = index == len(paths) - 1
+        components = [] if relative_path == "." else relative_path.split("/")
+        record: dict[str, object] = {
+            "repository_relative_directory_path": relative_path,
+            "exact_case_relative_components_from_workspace_root": components,
+            "canonical_directory_path": _synthetic_canonical_directory_path(
+                platform=platform,
+                relative_path=relative_path,
+            ),
+            "platform": platform,
+            "windows_volume_serial_u64_decimal_or_null": (
+                windows_volume_serial if platform == "windows" else None
+            ),
+            "windows_directory_file_id_16_bytes_hex_or_null": (
+                (
+                    windows_parent_file_id
+                    if is_parent
+                    else _synthetic_file_id_128_hex(
+                        role="directory-chain",
+                        identity_value=f"{index}:{relative_path}",
+                    )
+                )
+                if platform == "windows"
+                else None
+            ),
+            "posix_st_dev_decimal_or_null": (posix_st_dev if platform == "posix" else None),
+            "posix_st_ino_decimal_or_null": (
+                (posix_parent_st_ino if is_parent else str(1000 + index))
+                if platform == "posix"
+                else None
+            ),
+        }
+        source_records.append(record)
+    if identity_override is not None:
+        record_index, field_name, value = identity_override
+        source_records[record_index][field_name] = value
+    return source_records
+
+
+def _synthetic_live_directory_capture_provider(
+    *,
+    attempt_id: str,
+    platform: str,
+    windows_volume_serial: str | None,
+    windows_parent_file_id: str | None,
+    posix_st_dev: str | None,
+    posix_parent_st_ino: str | None,
+    identity_override: tuple[int, str, object] | None = None,
+    opened_handle_limit_for_test: int | None = None,
+) -> _SyntheticLiveDirectoryCaptureProvider:
+    live_handle_source = _SyntheticLiveDirectoryHandleSource(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        attempt_id=attempt_id,
+        platform=platform,
+        path=None,
+        windows_volume_serial=windows_volume_serial,
+        windows_parent_file_id=windows_parent_file_id,
+        posix_st_dev=posix_st_dev,
+        posix_parent_st_ino=posix_parent_st_ino,
+        identity_override=identity_override,
+        opened_handle_limit_for_test=opened_handle_limit_for_test,
+    )
+    return _SyntheticLiveDirectoryCaptureProvider(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        live_handle_source=live_handle_source,
+    )
+
+
+def _synthetic_live_directory_capture_provider_from_path(
+    path: Path,
+    *,
+    attempt_id: str,
+    identity_override: tuple[int, str, object] | None = None,
+) -> _SyntheticLiveDirectoryCaptureProvider:
+    live_handle_source = _SyntheticLiveDirectoryHandleSource(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        attempt_id=attempt_id,
+        platform=None,
+        path=path,
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev=None,
+        posix_parent_st_ino=None,
+        identity_override=identity_override,
+        opened_handle_limit_for_test=None,
+    )
+    return _SyntheticLiveDirectoryCaptureProvider(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        live_handle_source=live_handle_source,
+    )
+
+
+def _synthetic_three_grid_envelope(
+    protocol: dict[str, Any],
+    installed_file_identity: dict[str, object] | None = None,
+    *,
+    attempt_id: str = "synthetic-r3-envelope",
+    snapshot_id: str = "fold_1",
+    protocol_sha256: str = "a" * 64,
+    parameter_snapshot_id: str = "b" * 64,
+) -> tuple[ETASGridGateEvidence, dict[str, object], dict[str, object]]:
+    resolutions = (
+        ETASGridResolutionEvidence(50.0, 10, 2.0, 1.0, 3.0, "1" * 64),
+        ETASGridResolutionEvidence(25.0, 40, 2.25, 0.75, 3.0, "2" * 64),
+        ETASGridResolutionEvidence(12.5, 160, 2.5, 0.5, 3.0, "3" * 64),
+    )
+    convergence = ThreeGridConvergenceGateEvidence(
+        diagnostic_50_to_25=GridConvergenceDiagnostics(50.0, 25.0, 3.0, 3.0, 0.0, 0.01),
+        primary_25_to_12_5=GridConvergenceDiagnostics(25.0, 12.5, 3.0, 3.0, 0.0, 0.02),
+    )
+    gate = ETASGridGateEvidence(
+        protocol_sha256=protocol_sha256,
+        snapshot_id=snapshot_id,
+        parameter_snapshot_id=parameter_snapshot_id,
+        resolutions=resolutions,
+        convergence=convergence,
+    )
+    resolution_keys = ("50_km", "25_km", "12_5_km")
+    resolution_payloads = {
+        key: _synthetic_resolution_payload(value)
+        for key, value in zip(resolution_keys, resolutions, strict=True)
+    }
+    resolution_hashes = {
+        key: _canonical_v1_sha256(value) for key, value in resolution_payloads.items()
+    }
+    sealed_identity: dict[str, object] = {
+        "schema_version": 1,
+        "attempt_id": attempt_id,
+        "snapshot_id": gate.snapshot_id,
+        "scientific_fit_input_sha256": "c" * 64,
+        "selected_start_index": 0,
+        "selected_terminal_transformed_sha256": "d" * 64,
+        "selected_physical_parameters_sha256": gate.parameter_snapshot_id,
+        "evaluator_callable_identity_sha256": "e" * 64,
+        "existing_evaluator_return_identity": {
+            "protocol_sha256": gate.protocol_sha256,
+            "snapshot_id": gate.snapshot_id,
+            "parameter_snapshot_id": gate.parameter_snapshot_id,
+            "numerical_evidence_id": gate.numerical_evidence_id,
+        },
+        "grid_resolution_payload_sha256_by_grid_size": resolution_hashes,
+        "diagnostic_50_to_25": _synthetic_pair_payload(convergence.diagnostic_50_to_25),
+        "primary_25_to_12_5": _synthetic_pair_payload(convergence.primary_25_to_12_5),
+    }
+    sealed = {
+        **sealed_identity,
+        "three_grid_gate_evidence_sha256": _canonical_v1_sha256(sealed_identity),
+    }
+    persistence = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    if installed_file_identity is None:
+        directory_chain = _synthetic_directory_identity_chain(
+            attempt_id=attempt_id,
+            platform="posix",
+            windows_volume_serial=None,
+            windows_parent_file_id=None,
+            posix_st_dev="1",
+            posix_parent_st_ino="9",
+        )
+        evidence_parent = directory_chain[-1]
+        installed_file_identity = {
+            "profile_id": "posix_linkat_v1",
+            "filesystem_name": "synthetic-posix",
+            "parent_identity": {
+                "platform": "posix",
+                "canonical_final_path": evidence_parent["canonical_directory_path"],
+                "exact_case_relative_components": [
+                    "local_restricted",
+                    "three_grid_gate_evidence",
+                ],
+                "windows_volume_serial_u64_decimal_or_null": None,
+                "windows_directory_file_id_16_bytes_hex_or_null": None,
+                "posix_st_dev_decimal_or_null": "1",
+                "posix_st_ino_decimal_or_null": "9",
+            },
+            "ordered_directory_identity_chain": directory_chain,
+            "ordered_directory_identity_chain_sha256": _canonical_v1_sha256(directory_chain),
+            "final_repository_relative_path": (
+                "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/"
+                f"{attempt_id}/local_restricted/three_grid_gate_evidence/{snapshot_id}.json"
+            ),
+            "temp_leaf_utf8_hex": f".{snapshot_id}.envelope.tmp".encode().hex(),
+            "final_leaf_utf8_hex": f"{snapshot_id}.json".encode().hex(),
+            "canonical_final_path": (
+                f"{evidence_parent['canonical_directory_path']}/{snapshot_id}.json"
+            ),
+            "exact_case_relative_components": [
+                "local_restricted",
+                "three_grid_gate_evidence",
+                f"{snapshot_id}.json",
+            ],
+            "platform": "posix",
+            "windows_volume_serial_u64_decimal_or_null": None,
+            "windows_file_id_16_bytes_hex_or_null": None,
+            "windows_number_of_links_at_temp_capture_or_null": None,
+            "posix_st_dev_decimal_or_null": "1",
+            "posix_st_ino_decimal_or_null": "2",
+            "posix_st_nlink_at_temp_capture_or_null": 1,
+            "required_final_nlink": 1,
+        }
+    envelope_identity: dict[str, object] = {
+        "envelope_schema_version": persistence["envelope_schema_version_exact"],
+        "installed_file_identity": installed_file_identity,
+        "sealed_three_grid_gate_evidence": sealed,
+        "grid_resolution_payload_by_grid_size": resolution_payloads,
+        "numerical_evidence_id_crosswalk": deepcopy(
+            persistence["numerical_evidence_id_crosswalk_exact"]
+        ),
+    }
+    envelope = {
+        **envelope_identity,
+        "three_grid_gate_evidence_envelope_sha256": _canonical_v1_sha256(envelope_identity),
+    }
+    public_crosswalk = _synthetic_public_crosswalk_from_envelope(envelope)
+    return gate, envelope, public_crosswalk
+
+
+def _convert_installed_identity_to_valid_synthetic_windows(
+    installed_identity: dict[str, object],
+    *,
+    attempt_id: str,
+) -> None:
+    windows_volume_serial = "1"
+    windows_file_id = _file_id_128_identifier_raw_bytes_hex(bytes(range(16)))
+    windows_parent_file_id = _file_id_128_identifier_raw_bytes_hex(bytes(range(16, 32)))
+    directory_chain = _synthetic_directory_identity_chain(
+        attempt_id=attempt_id,
+        platform="windows",
+        windows_volume_serial=windows_volume_serial,
+        windows_parent_file_id=windows_parent_file_id,
+        posix_st_dev=None,
+        posix_parent_st_ino=None,
+    )
+    evidence_parent = directory_chain[-1]
+    parent_identity = cast(dict[str, object], installed_identity["parent_identity"])
+    parent_identity.update(
+        {
+            "platform": "windows",
+            "canonical_final_path": evidence_parent["canonical_directory_path"],
+            "windows_volume_serial_u64_decimal_or_null": windows_volume_serial,
+            "windows_directory_file_id_16_bytes_hex_or_null": windows_parent_file_id,
+            "posix_st_dev_decimal_or_null": None,
+            "posix_st_ino_decimal_or_null": None,
+        }
+    )
+    final_leaf = _decode_canonical_utf8_hex_component(
+        installed_identity["final_leaf_utf8_hex"],
+        field_name="final leaf",
+    )
+    installed_identity.update(
+        {
+            "profile_id": "windows_ntfs_ntcreatefile_filerenameinfo_v1",
+            "filesystem_name": "NTFS",
+            "ordered_directory_identity_chain": directory_chain,
+            "ordered_directory_identity_chain_sha256": _canonical_v1_sha256(directory_chain),
+            "canonical_final_path": (
+                f"{evidence_parent['canonical_directory_path']}\\{final_leaf}"
+            ),
+            "platform": "windows",
+            "windows_volume_serial_u64_decimal_or_null": windows_volume_serial,
+            "windows_file_id_16_bytes_hex_or_null": windows_file_id,
+            "windows_number_of_links_at_temp_capture_or_null": 1,
+            "posix_st_dev_decimal_or_null": None,
+            "posix_st_ino_decimal_or_null": None,
+            "posix_st_nlink_at_temp_capture_or_null": None,
+        }
+    )
+
+
+def _synthetic_public_crosswalk_from_envelope(
+    envelope: dict[str, object],
+) -> dict[str, object]:
+    sealed = cast(dict[str, Any], envelope["sealed_three_grid_gate_evidence"])
+    envelope_sha = envelope["three_grid_gate_evidence_envelope_sha256"]
+    return {
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null": envelope_sha,
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null": envelope_sha,
+        "staged_local_presence_map_value": envelope_sha,
+        "snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null": cast(
+            dict[str, object], sealed["diagnostic_50_to_25"]
+        )["diagnostic_payload_sha256"],
+        "snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null": cast(
+            dict[str, object], sealed["primary_25_to_12_5"]
+        )["relative_expected_count_difference_hex"],
+        "snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null": cast(
+            dict[str, object], sealed["primary_25_to_12_5"]
+        )["density_l1_difference_hex"],
+    }
+
+
+def _cascade_rehash_synthetic_three_grid_envelope(
+    protocol: dict[str, Any],
+    envelope: dict[str, object],
+) -> dict[str, object]:
+    persistence = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    sealed = cast(dict[str, Any], envelope["sealed_three_grid_gate_evidence"])
+    resolution_payloads = cast(
+        dict[str, dict[str, object]], envelope["grid_resolution_payload_by_grid_size"]
+    )
+    sealed["grid_resolution_payload_sha256_by_grid_size"] = {
+        key: _canonical_v1_sha256(value) for key, value in resolution_payloads.items()
+    }
+    for pair_field in ("diagnostic_50_to_25", "primary_25_to_12_5"):
+        pair = cast(dict[str, object], sealed[pair_field])
+        pair["diagnostic_payload_sha256"] = _canonical_v1_sha256(
+            {key: value for key, value in pair.items() if key != "diagnostic_payload_sha256"}
+        )
+    returned_identity = cast(dict[str, str], sealed["existing_evaluator_return_identity"])
+    returned_identity["numerical_evidence_id"] = (
+        _unchecked_numerical_evidence_id_from_envelope_payload(envelope, persistence)
+    )
+    sealed["three_grid_gate_evidence_sha256"] = _canonical_v1_sha256(
+        {key: value for key, value in sealed.items() if key != "three_grid_gate_evidence_sha256"}
+    )
+    envelope["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in envelope.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    return _synthetic_public_crosswalk_from_envelope(envelope)
+
+
+def _is_canonical_unsigned_decimal(
+    value: object,
+    *,
+    maximum: int | None = None,
+) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        parsed = int(value, 10)
+    except ValueError:
+        return False
+    return parsed >= 0 and (maximum is None or parsed <= maximum) and str(parsed) == value
+
+
+def _is_lowercase_hex(value: object, *, length: int) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == length
+        and value == value.lower()
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _file_id_128_identifier_raw_bytes_hex(identifier: bytes) -> str:
+    if not isinstance(identifier, bytes) or len(identifier) != 16:
+        raise ValueError("FILE_ID_128 Identifier must be exactly 16 raw bytes")
+    return identifier.hex()
+
+
+def _synthetic_file_id_128_hex(*, role: str, identity_value: object) -> str:
+    return hashlib.sha256(f"{role}:{identity_value}".encode()).digest()[:16].hex()
+
+
+def _decode_canonical_utf8_hex_component(value: object, *, field_name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value
+        or len(value) % 2 != 0
+        or value != value.lower()
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ValueError(f"{field_name} must be canonical lowercase UTF-8 hex")
+    try:
+        decoded = bytes.fromhex(value).decode("utf-8")
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise ValueError(f"{field_name} must be canonical lowercase UTF-8 hex") from exc
+    if decoded.encode("utf-8").hex() != value:
+        raise ValueError(f"{field_name} UTF-8 hex does not round-trip")
+    if decoded != unicodedata.normalize("NFC", decoded):
+        raise ValueError(f"{field_name} must decode to NFC")
+    if (
+        not decoded
+        or decoded in {".", ".."}
+        or "/" in decoded
+        or "\\" in decoded
+        or "\0" in decoded
+    ):
+        raise ValueError(f"{field_name} must decode to one safe component")
+    return decoded
+
+
+def _validate_exact_nfc_components(
+    value: object,
+    *,
+    expected_length: int,
+    field_name: str,
+) -> list[str]:
+    if not isinstance(value, list) or len(value) != expected_length:
+        raise ValueError(f"{field_name} must be an exact {expected_length}-item list")
+    if any(not isinstance(component, str) for component in value):
+        raise ValueError(f"{field_name} components must be strings")
+    components = cast(list[str], value)
+    if any(
+        not component
+        or component in {".", ".."}
+        or component != unicodedata.normalize("NFC", component)
+        or "/" in component
+        or "\\" in component
+        or "\0" in component
+        for component in components
+    ):
+        raise ValueError(f"{field_name} components must be safe UTF-8 NFC names")
+    return components
+
+
+def _validate_platform_canonical_path(
+    value: object,
+    *,
+    platform: object,
+    field_name: str,
+) -> str:
+    if not isinstance(value, str) or not value or value != unicodedata.normalize("NFC", value):
+        raise ValueError(f"{field_name} must be a non-empty NFC string")
+    if platform == "windows":
+        match = WINDOWS_VOLUME_GUID_PATH_PATTERN.fullmatch(value)
+        if match is None or "/" in value or "\0" in value:
+            raise ValueError(f"{field_name} must be a canonical absolute Windows volume path")
+        components = match.group(1).split("\\")
+        if any(
+            not component
+            or component in {".", ".."}
+            or component != unicodedata.normalize("NFC", component)
+            for component in components
+        ):
+            raise ValueError(f"{field_name} must contain safe exact-case Windows components")
+    elif platform == "posix":
+        if not value.startswith("/") or "\\" in value or "//" in value or "\0" in value:
+            raise ValueError(f"{field_name} must be a canonical absolute POSIX path")
+        if any(component in {".", ".."} for component in value.split("/")[1:]):
+            raise ValueError(f"{field_name} must contain safe POSIX components")
+    else:
+        raise ValueError("wrong installed identity platform")
+    return value
+
+
+def _verify_directory_identity_chain(
+    persistence: dict[str, Any],
+    installed_identity: dict[str, object],
+    *,
+    attempt_id: str,
+    platform: str,
+    parent_identity: dict[str, object],
+) -> None:
+    chain_value = installed_identity["ordered_directory_identity_chain"]
+    if not isinstance(chain_value, list):
+        raise ValueError("directory identity chain must be a list")
+    chain = cast(list[dict[str, object]], chain_value)
+    if len(chain) != persistence["directory_identity_chain_length_exact"]:
+        raise ValueError("directory identity chain has wrong length")
+    expected_paths = [
+        value.format(attempt_id=attempt_id)
+        for value in persistence[
+            "directory_identity_chain_repository_relative_path_templates_exact"
+        ]
+    ]
+    if expected_paths != _directory_chain_relative_paths(attempt_id):
+        raise ValueError("protocol directory identity chain templates drifted")
+    if [record.get("repository_relative_directory_path") for record in chain] != expected_paths:
+        raise ValueError("directory identity chain paths are missing, extra, or out of order")
+    expected_fields = set(persistence["directory_identity_chain_record_fields_exact"])
+    root_canonical_path: str | None = None
+    seen_platform_ids: set[str] = set()
+    for relative_path, record in zip(expected_paths, chain, strict=True):
+        if not isinstance(record, dict) or set(record) != expected_fields:
+            raise ValueError("directory identity chain record has missing or extra fields")
+        expected_components = [] if relative_path == "." else relative_path.split("/")
+        components = _validate_exact_nfc_components(
+            record["exact_case_relative_components_from_workspace_root"],
+            expected_length=len(expected_components),
+            field_name="directory chain exact-case components",
+        )
+        if components != expected_components:
+            raise ValueError("directory identity chain components disagree with path")
+        if record["platform"] != platform:
+            raise ValueError("directory identity chain platform mismatch")
+        canonical_path = _validate_platform_canonical_path(
+            record["canonical_directory_path"],
+            platform=platform,
+            field_name="directory chain canonical path",
+        )
+        if root_canonical_path is None:
+            root_canonical_path = canonical_path
+        else:
+            separator = "\\" if platform == "windows" else "/"
+            expected_canonical_path = (
+                f"{root_canonical_path.rstrip(separator)}{separator}"
+                f"{separator.join(expected_components)}"
+            )
+            if canonical_path != expected_canonical_path:
+                raise ValueError("directory identity chain canonical path mismatch")
+        windows_values = (
+            record["windows_volume_serial_u64_decimal_or_null"],
+            record["windows_directory_file_id_16_bytes_hex_or_null"],
+        )
+        posix_values = (
+            record["posix_st_dev_decimal_or_null"],
+            record["posix_st_ino_decimal_or_null"],
+        )
+        if platform == "windows":
+            if any(value is None for value in windows_values) or any(
+                value is not None for value in posix_values
+            ):
+                raise ValueError("invalid Windows directory chain null branch")
+            if not _is_canonical_unsigned_decimal(
+                windows_values[0], maximum=(1 << 64) - 1
+            ) or not _is_lowercase_hex(windows_values[1], length=32):
+                raise ValueError("invalid Windows directory chain identity encoding")
+            if windows_values[0] != installed_identity["windows_volume_serial_u64_decimal_or_null"]:
+                raise ValueError("directory chain and file Windows volume serial disagree")
+            platform_id = cast(str, windows_values[1])
+        else:
+            if any(value is None for value in posix_values) or any(
+                value is not None for value in windows_values
+            ):
+                raise ValueError("invalid POSIX directory chain null branch")
+            if not all(_is_canonical_unsigned_decimal(value) for value in posix_values):
+                raise ValueError("invalid POSIX directory chain identity encoding")
+            if posix_values[0] != installed_identity["posix_st_dev_decimal_or_null"]:
+                raise ValueError("directory chain and file POSIX device disagree")
+            platform_id = cast(str, posix_values[1])
+        if platform_id in seen_platform_ids:
+            raise ValueError("directory identity chain reuses a directory identity")
+        seen_platform_ids.add(platform_id)
+    if _canonical_v1_sha256(chain) != installed_identity["ordered_directory_identity_chain_sha256"]:
+        raise ValueError("directory identity chain hash mismatch")
+    final_record = chain[-1]
+    if (
+        final_record["canonical_directory_path"] != parent_identity["canonical_final_path"]
+        or cast(list[str], final_record["exact_case_relative_components_from_workspace_root"])[-2:]
+        != parent_identity["exact_case_relative_components"]
+    ):
+        raise ValueError("parent identity does not project from final directory chain record")
+    for key in (
+        "windows_volume_serial_u64_decimal_or_null",
+        "windows_directory_file_id_16_bytes_hex_or_null",
+        "posix_st_dev_decimal_or_null",
+        "posix_st_ino_decimal_or_null",
+    ):
+        if final_record[key] != parent_identity[key]:
+            raise ValueError("parent platform identity disagrees with directory chain")
+
+
+def _verify_independently_observed_live_directory_identity_chain(
+    installed_identity: dict[str, object],
+    observed_live_directory_identity_capture: object,
+) -> None:
+    expected_value = installed_identity["ordered_directory_identity_chain"]
+    if not isinstance(expected_value, list):
+        raise ValueError("embedded expected directory identity chain must be a list")
+    expected_chain = cast(list[dict[str, object]], expected_value)
+    if type(observed_live_directory_identity_capture) is not (
+        _SyntheticLiveDirectoryIdentityCapture
+    ):
+        raise ValueError("observed live directory identity requires an independent capture receipt")
+    capability_id = id(observed_live_directory_identity_capture._provenance_capability)
+    registered_entry = _REGISTERED_LIVE_CAPTURE_RECEIPTS.get(capability_id)
+    if (
+        registered_entry is None
+        or registered_entry[0] is not observed_live_directory_identity_capture
+    ):
+        if observed_live_directory_identity_capture.capture_id in _CONSUMED_LIVE_CAPTURE_IDS:
+            raise ValueError("observed live directory identity capture ID was already consumed")
+        raise ValueError(
+            "observed live directory identity capture receipt is not the registered original"
+        )
+    issuance_source_kind = registered_entry[1]
+    issuance_capture_id = registered_entry[2]
+    issuance_opened_handle_count = registered_entry[3]
+    issuance_record_bytes = registered_entry[4]
+    if issuance_capture_id in _CONSUMED_LIVE_CAPTURE_IDS:
+        raise ValueError("observed live directory identity capture ID was already consumed")
+    del _REGISTERED_LIVE_CAPTURE_RECEIPTS[capability_id]
+    _CONSUMED_LIVE_CAPTURE_IDS.add(issuance_capture_id)
+    if (
+        observed_live_directory_identity_capture.source_kind != issuance_source_kind
+        or observed_live_directory_identity_capture.capture_id != issuance_capture_id
+        or observed_live_directory_identity_capture.opened_handle_count
+        != issuance_opened_handle_count
+    ):
+        raise ValueError("observed live directory identity capture metadata changed after issuance")
+    if (
+        issuance_source_kind != "independent_live_directory_handle_capture"
+        or not issuance_capture_id
+    ):
+        raise ValueError("observed live directory identity capture source is invalid")
+    if issuance_opened_handle_count != len(expected_chain):
+        raise ValueError("observed live directory identity capture did not open all handles")
+    observed_chain = list(observed_live_directory_identity_capture.records)
+    if canonical_json_bytes(observed_chain) != issuance_record_bytes:
+        raise ValueError("observed live directory identity capture changed after issuance")
+    if observed_chain is expected_chain or any(
+        observed is expected
+        for observed, expected in zip(observed_chain, expected_chain, strict=False)
+    ):
+        raise ValueError("observed live directory identity chain must be independent")
+    if len(observed_chain) != len(expected_chain):
+        raise ValueError("observed live directory identity chain length drifted")
+    if canonical_json_bytes(observed_chain) != canonical_json_bytes(expected_chain):
+        raise ValueError("observed live directory identity chain drifted")
+    if (
+        _canonical_v1_sha256(observed_chain)
+        != installed_identity["ordered_directory_identity_chain_sha256"]
+    ):
+        raise ValueError("observed live directory identity chain hash drifted")
+
+
+def _verify_synthetic_three_grid_envelope(
+    protocol: dict[str, Any],
+    envelope_bytes: bytes,
+    public_crosswalk: dict[str, object],
+    *,
+    expected_attempt_id: str | None = None,
+    expected_snapshot_id: str | None = None,
+    expected_final_repository_relative_path: str | None = None,
+    expected_protocol_sha256: str | None = None,
+    expected_installed_file_identity: dict[str, object] | None = None,
+) -> dict[str, str]:
+    grid_protocol = protocol["qualification"]["three_grid_gate_evidence_protocol"]
+    persistence = grid_protocol["local_restricted_persistence"]
+    parsed = cast(dict[str, object], json.loads(envelope_bytes))
+    if canonical_json_bytes(parsed) != envelope_bytes:
+        raise ValueError("envelope bytes are not canonical JSON v1")
+    if set(parsed) != set(persistence["envelope_fields_exact"]):
+        raise ValueError("missing or extra envelope field")
+    if parsed["envelope_schema_version"] != persistence["envelope_schema_version_exact"]:
+        raise ValueError("wrong envelope schema version")
+    installed_identity = cast(dict[str, object], parsed["installed_file_identity"])
+    if set(installed_identity) != set(persistence["installed_file_identity_fields_exact"]):
+        raise ValueError("missing or extra installed identity field")
+    if (
+        expected_installed_file_identity is not None
+        and installed_identity != expected_installed_file_identity
+    ):
+        raise ValueError("embedded installed identity differs from the captured external identity")
+    if installed_identity["platform"] not in {"windows", "posix"}:
+        raise ValueError("wrong installed identity platform")
+    parent_identity = cast(dict[str, object], installed_identity["parent_identity"])
+    if set(parent_identity) != set(persistence["installed_file_parent_identity_fields_exact"]):
+        raise ValueError("missing or extra parent identity field")
+    if parent_identity["platform"] != installed_identity["platform"]:
+        raise ValueError("parent and file platform disagree")
+    required_nlink = installed_identity["required_final_nlink"]
+    if required_nlink != 1 or isinstance(required_nlink, bool):
+        raise ValueError("required final link count must be exactly one")
+    platform = installed_identity["platform"]
+    windows_fields = (
+        installed_identity["windows_volume_serial_u64_decimal_or_null"],
+        installed_identity["windows_file_id_16_bytes_hex_or_null"],
+        installed_identity["windows_number_of_links_at_temp_capture_or_null"],
+    )
+    posix_fields = (
+        installed_identity["posix_st_dev_decimal_or_null"],
+        installed_identity["posix_st_ino_decimal_or_null"],
+        installed_identity["posix_st_nlink_at_temp_capture_or_null"],
+    )
+    expected_profile = (
+        "windows_ntfs_ntcreatefile_filerenameinfo_v1"
+        if platform == "windows"
+        else "posix_linkat_v1"
+    )
+    if installed_identity["profile_id"] != expected_profile:
+        raise ValueError("installed identity profile mismatch")
+    if platform == "windows" and installed_identity["filesystem_name"] != "NTFS":
+        raise ValueError("Windows profile requires NTFS")
+    if (
+        not isinstance(installed_identity["filesystem_name"], str)
+        or not installed_identity["filesystem_name"]
+    ):
+        raise ValueError("filesystem name is required")
+    if platform == "windows":
+        if any(value is None for value in windows_fields) or any(
+            value is not None for value in posix_fields
+        ):
+            raise ValueError("invalid Windows identity null branch")
+        if windows_fields[2] != 1 or isinstance(windows_fields[2], bool):
+            raise ValueError("Windows temp link count must be one")
+        if not _is_canonical_unsigned_decimal(
+            windows_fields[0],
+            maximum=(1 << 64) - 1,
+        ) or not _is_lowercase_hex(windows_fields[1], length=32):
+            raise ValueError("invalid Windows installed file identity encoding")
+    else:
+        if any(value is None for value in posix_fields) or any(
+            value is not None for value in windows_fields
+        ):
+            raise ValueError("invalid POSIX identity null branch")
+        if posix_fields[2] != 1 or isinstance(posix_fields[2], bool):
+            raise ValueError("POSIX temp link count must be one")
+        if not all(_is_canonical_unsigned_decimal(value) for value in posix_fields[:2]):
+            raise ValueError("invalid POSIX installed file identity encoding")
+
+    parent_windows_fields = (
+        parent_identity["windows_volume_serial_u64_decimal_or_null"],
+        parent_identity["windows_directory_file_id_16_bytes_hex_or_null"],
+    )
+    parent_posix_fields = (
+        parent_identity["posix_st_dev_decimal_or_null"],
+        parent_identity["posix_st_ino_decimal_or_null"],
+    )
+    if platform == "windows":
+        if any(value is None for value in parent_windows_fields) or any(
+            value is not None for value in parent_posix_fields
+        ):
+            raise ValueError("invalid Windows parent identity null branch")
+        if not _is_canonical_unsigned_decimal(
+            parent_windows_fields[0],
+            maximum=(1 << 64) - 1,
+        ) or not _is_lowercase_hex(parent_windows_fields[1], length=32):
+            raise ValueError("invalid Windows parent identity encoding")
+    else:
+        if any(value is None for value in parent_posix_fields) or any(
+            value is not None for value in parent_windows_fields
+        ):
+            raise ValueError("invalid POSIX parent identity null branch")
+        if not all(_is_canonical_unsigned_decimal(value) for value in parent_posix_fields):
+            raise ValueError("invalid POSIX parent identity encoding")
+    parent_components = _validate_exact_nfc_components(
+        parent_identity["exact_case_relative_components"],
+        expected_length=2,
+        field_name="parent exact-case components",
+    )
+    components = _validate_exact_nfc_components(
+        installed_identity["exact_case_relative_components"],
+        expected_length=3,
+        field_name="file exact-case components",
+    )
+    if parent_components != components[:-1]:
+        raise ValueError("parent and file exact-case components disagree")
+    if platform == "windows":
+        if parent_windows_fields[0] != windows_fields[0]:
+            raise ValueError("parent and file Windows volume serial disagree")
+    elif parent_posix_fields[0] != posix_fields[0]:
+        raise ValueError("parent and file POSIX device identity disagree")
+    _decode_canonical_utf8_hex_component(
+        installed_identity["temp_leaf_utf8_hex"],
+        field_name="temp leaf",
+    )
+    final_leaf = _decode_canonical_utf8_hex_component(
+        installed_identity["final_leaf_utf8_hex"],
+        field_name="final leaf",
+    )
+    if final_leaf != components[-1]:
+        raise ValueError("final leaf and exact-case components disagree")
+    parent_canonical_path = _validate_platform_canonical_path(
+        parent_identity["canonical_final_path"],
+        platform=platform,
+        field_name="parent canonical path",
+    )
+    file_canonical_path = _validate_platform_canonical_path(
+        installed_identity["canonical_final_path"],
+        platform=platform,
+        field_name="file canonical path",
+    )
+    path_separator = "\\" if platform == "windows" else "/"
+    if (
+        file_canonical_path
+        != f"{parent_canonical_path.rstrip(path_separator)}{path_separator}{final_leaf}"
+    ):
+        raise ValueError("parent and file canonical paths disagree")
+    final_repository_relative_path = installed_identity["final_repository_relative_path"]
+    if not isinstance(final_repository_relative_path, str):
+        raise ValueError("final repository-relative path must be a string")
+    repository_components = final_repository_relative_path.split("/")
+    if (
+        final_repository_relative_path.startswith("/")
+        or "\\" in final_repository_relative_path
+        or any(not component or component in {".", ".."} for component in repository_components)
+        or repository_components[-len(components) :] != components
+    ):
+        raise ValueError("final repository-relative path mismatch")
+    if (
+        expected_final_repository_relative_path is not None
+        and installed_identity["final_repository_relative_path"]
+        != expected_final_repository_relative_path
+    ):
+        raise ValueError("installed path differs from the externally bound final path")
+    if (
+        parsed["numerical_evidence_id_crosswalk"]
+        != persistence["numerical_evidence_id_crosswalk_exact"]
+    ):
+        raise ValueError("numerical evidence crosswalk mismatch")
+
+    sealed = cast(dict[str, Any], parsed["sealed_three_grid_gate_evidence"])
+    if set(sealed) != set(grid_protocol["evidence_fields_exact"]):
+        raise ValueError("missing or extra sealed evidence field")
+    returned_identity = cast(dict[str, str], sealed["existing_evaluator_return_identity"])
+    if set(returned_identity) != set(
+        grid_protocol["existing_evaluator_return_identity_fields_exact"]
+    ):
+        raise ValueError("missing or extra evaluator return identity field")
+    if sealed["snapshot_id"] != returned_identity["snapshot_id"]:
+        raise ValueError("sealed snapshot and evaluator return identity disagree")
+    if sealed["selected_physical_parameters_sha256"] != returned_identity["parameter_snapshot_id"]:
+        raise ValueError("selected physical parameters and evaluator parameter identity disagree")
+    attempt_id = sealed["attempt_id"]
+    snapshot_id = sealed["snapshot_id"]
+    if not isinstance(attempt_id, str) or not attempt_id:
+        raise ValueError("sealed attempt ID must be a non-empty string")
+    if snapshot_id not in SNAPSHOT_ORDER:
+        raise ValueError("sealed snapshot ID is not frozen")
+    exact_path = persistence["file_path_template"].format(
+        attempt_id=attempt_id,
+        snapshot_id=snapshot_id,
+    )
+    if installed_identity["final_repository_relative_path"] != exact_path:
+        raise ValueError("sealed attempt/snapshot do not match the installed file path")
+    if components != ["local_restricted", "three_grid_gate_evidence", f"{snapshot_id}.json"]:
+        raise ValueError("sealed snapshot does not match exact-case path components")
+    _verify_directory_identity_chain(
+        persistence,
+        installed_identity,
+        attempt_id=attempt_id,
+        platform=cast(str, platform),
+        parent_identity=parent_identity,
+    )
+    if expected_attempt_id is not None and attempt_id != expected_attempt_id:
+        raise ValueError("sealed attempt ID differs from the external attempt binding")
+    if expected_snapshot_id is not None and snapshot_id != expected_snapshot_id:
+        raise ValueError("sealed snapshot ID differs from the external snapshot binding")
+    if (
+        expected_protocol_sha256 is not None
+        and returned_identity["protocol_sha256"] != expected_protocol_sha256
+    ):
+        raise ValueError("evaluator protocol SHA differs from the external protocol binding")
+    resolutions = cast(dict[str, dict[str, object]], parsed["grid_resolution_payload_by_grid_size"])
+    resolution_keys = grid_protocol["grid_resolution_payload_sha256_keys_exact"]
+    if set(resolutions) != set(resolution_keys):
+        raise ValueError("missing or extra resolution payload")
+    resolution_hashes = cast(dict[str, str], sealed["grid_resolution_payload_sha256_by_grid_size"])
+    if set(resolution_hashes) != set(resolution_keys):
+        raise ValueError("missing or extra sealed resolution hash")
+    for key in resolution_keys:
+        payload = resolutions[key]
+        if set(payload) != set(grid_protocol["grid_resolution_payload_fields_exact"]):
+            raise ValueError("missing or extra resolution field")
+        _resolution_from_local_payload(payload)
+        if _canonical_v1_sha256(payload) != resolution_hashes[key]:
+            raise ValueError("resolution payload hash mismatch")
+
+    for pair_field in ("diagnostic_50_to_25", "primary_25_to_12_5"):
+        pair = cast(dict[str, object], sealed[pair_field])
+        if set(pair) != set(grid_protocol["grid_pair_diagnostic_fields_exact"]):
+            raise ValueError("missing or extra pair diagnostic field")
+        pair_identity = {
+            key: value for key, value in pair.items() if key != "diagnostic_payload_sha256"
+        }
+        if _canonical_v1_sha256(pair_identity) != pair["diagnostic_payload_sha256"]:
+            raise ValueError("pair diagnostic hash mismatch")
+        _comparison_from_local_payload(pair)
+
+    sealed_identity = {
+        key: value for key, value in sealed.items() if key != "three_grid_gate_evidence_sha256"
+    }
+    sealed_sha = _canonical_v1_sha256(sealed_identity)
+    if sealed_sha != sealed["three_grid_gate_evidence_sha256"]:
+        raise ValueError("sealed evidence hash mismatch")
+    reconstructed_gate, numerical_evidence_id = _reconstruct_gate_from_envelope_payload(
+        parsed,
+        persistence,
+    )
+    if numerical_evidence_id != returned_identity["numerical_evidence_id"]:
+        raise ValueError("pipeline numerical evidence ID mismatch")
+    if numerical_evidence_id != reconstructed_gate.numerical_evidence_id:
+        raise ValueError("reconstructed pipeline property mismatch")
+    envelope_identity = {
+        key: value
+        for key, value in parsed.items()
+        if key != "three_grid_gate_evidence_envelope_sha256"
+    }
+    envelope_sha = _canonical_v1_sha256(envelope_identity)
+    if envelope_sha != parsed["three_grid_gate_evidence_envelope_sha256"]:
+        raise ValueError("envelope hash mismatch")
+
+    diagnostic = cast(dict[str, object], sealed["diagnostic_50_to_25"])
+    primary = cast(dict[str, object], sealed["primary_25_to_12_5"])
+    expected_public = {
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null": envelope_sha,
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null": envelope_sha,
+        "staged_local_presence_map_value": envelope_sha,
+        "snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null": diagnostic[
+            "diagnostic_payload_sha256"
+        ],
+        "snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null": primary[
+            "relative_expected_count_difference_hex"
+        ],
+        "snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null": primary[
+            "density_l1_difference_hex"
+        ],
+    }
+    if public_crosswalk != expected_public:
+        raise ValueError("public gate/fit-attempt/presence crosswalk mismatch")
+    return {
+        "sealed_sha256": sealed_sha,
+        "envelope_sha256": envelope_sha,
+        "numerical_evidence_id": numerical_evidence_id,
+    }
+
+
+def _synthetic_installed_file_identity(
+    source_path: Path,
+    final_path: Path,
+    *,
+    attempt_id: str = "synthetic-r3-envelope",
+) -> dict[str, object]:
+    stat_result = source_path.stat()
+    parent_stat = source_path.parent.stat()
+    platform = "windows" if os.name == "nt" else "posix"
+    parent_file_id = (
+        _synthetic_file_id_128_hex(role="parent", identity_value=parent_stat.st_ino)
+        if platform == "windows"
+        else str(parent_stat.st_ino)
+    )
+    components = ["local_restricted", "three_grid_gate_evidence", final_path.name]
+    directory_chain = _synthetic_directory_identity_chain(
+        attempt_id=attempt_id,
+        platform=platform,
+        windows_volume_serial=(str(parent_stat.st_dev) if platform == "windows" else None),
+        windows_parent_file_id=(parent_file_id if platform == "windows" else None),
+        posix_st_dev=(str(parent_stat.st_dev) if platform == "posix" else None),
+        posix_parent_st_ino=(parent_file_id if platform == "posix" else None),
+    )
+    evidence_parent = directory_chain[-1]
+    separator = "\\" if platform == "windows" else "/"
+    return {
+        "profile_id": (
+            "windows_ntfs_ntcreatefile_filerenameinfo_v1"
+            if platform == "windows"
+            else "posix_linkat_v1"
+        ),
+        "filesystem_name": "NTFS" if platform == "windows" else "synthetic-posix",
+        "parent_identity": {
+            "platform": platform,
+            "canonical_final_path": evidence_parent["canonical_directory_path"],
+            "exact_case_relative_components": components[:-1],
+            "windows_volume_serial_u64_decimal_or_null": (
+                str(parent_stat.st_dev) if platform == "windows" else None
+            ),
+            "windows_directory_file_id_16_bytes_hex_or_null": (
+                parent_file_id if platform == "windows" else None
+            ),
+            "posix_st_dev_decimal_or_null": (
+                str(parent_stat.st_dev) if platform == "posix" else None
+            ),
+            "posix_st_ino_decimal_or_null": (parent_file_id if platform == "posix" else None),
+        },
+        "ordered_directory_identity_chain": directory_chain,
+        "ordered_directory_identity_chain_sha256": _canonical_v1_sha256(directory_chain),
+        "final_repository_relative_path": (
+            "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/"
+            f"{attempt_id}/{'/'.join(components)}"
+        ),
+        "temp_leaf_utf8_hex": source_path.name.encode("utf-8").hex(),
+        "final_leaf_utf8_hex": final_path.name.encode("utf-8").hex(),
+        "canonical_final_path": (
+            f"{evidence_parent['canonical_directory_path']}{separator}{final_path.name}"
+        ),
+        "exact_case_relative_components": components,
+        "platform": platform,
+        "windows_volume_serial_u64_decimal_or_null": (
+            str(stat_result.st_dev) if platform == "windows" else None
+        ),
+        "windows_file_id_16_bytes_hex_or_null": (
+            _synthetic_file_id_128_hex(role="file", identity_value=stat_result.st_ino)
+            if platform == "windows"
+            else None
+        ),
+        "windows_number_of_links_at_temp_capture_or_null": (
+            stat_result.st_nlink if platform == "windows" else None
+        ),
+        "posix_st_dev_decimal_or_null": str(stat_result.st_dev) if platform == "posix" else None,
+        "posix_st_ino_decimal_or_null": str(stat_result.st_ino) if platform == "posix" else None,
+        "posix_st_nlink_at_temp_capture_or_null": (
+            stat_result.st_nlink if platform == "posix" else None
+        ),
+        "required_final_nlink": 1,
+    }
+
+
+def _assert_installed_file_identity(path: Path, expected: dict[str, object]) -> None:
+    stat_result = path.stat()
+    if expected["platform"] == "windows":
+        actual_file_id = _synthetic_file_id_128_hex(
+            role="file",
+            identity_value=stat_result.st_ino,
+        )
+        expected_volume = expected["windows_volume_serial_u64_decimal_or_null"]
+        expected_file_id = expected["windows_file_id_16_bytes_hex_or_null"]
+    else:
+        actual_file_id = str(stat_result.st_ino)
+        expected_volume = expected["posix_st_dev_decimal_or_null"]
+        expected_file_id = expected["posix_st_ino_decimal_or_null"]
+    if str(stat_result.st_dev) != expected_volume:
+        raise ValueError("volume/device identity changed")
+    if actual_file_id != expected_file_id:
+        raise ValueError("file identity changed")
+    if stat_result.st_nlink != expected["required_final_nlink"]:
+        raise ValueError("link count changed")
+    components = cast(list[str], expected["exact_case_relative_components"])
+    if path.name != components[-1]:
+        raise ValueError("exact-case destination component changed")
+    parent = cast(dict[str, object], expected["parent_identity"])
+    parent_stat = path.parent.stat()
+    if expected["platform"] == "windows":
+        expected_parent_volume = parent["windows_volume_serial_u64_decimal_or_null"]
+        expected_parent_id = parent["windows_directory_file_id_16_bytes_hex_or_null"]
+        actual_parent_id = _synthetic_file_id_128_hex(
+            role="parent",
+            identity_value=parent_stat.st_ino,
+        )
+    else:
+        expected_parent_volume = parent["posix_st_dev_decimal_or_null"]
+        expected_parent_id = parent["posix_st_ino_decimal_or_null"]
+        actual_parent_id = str(parent_stat.st_ino)
+    if str(parent_stat.st_dev) != expected_parent_volume or actual_parent_id != expected_parent_id:
+        raise ValueError("parent identity changed")
+    platform = cast(str, expected["platform"])
+    parent_path = _validate_platform_canonical_path(
+        parent["canonical_final_path"],
+        platform=platform,
+        field_name="synthetic parent canonical path",
+    )
+    file_path = _validate_platform_canonical_path(
+        expected["canonical_final_path"],
+        platform=platform,
+        field_name="synthetic file canonical path",
+    )
+    separator = "\\" if platform == "windows" else "/"
+    if file_path != f"{parent_path}{separator}{path.name}":
+        raise ValueError("canonical final path changed")
+
+
+def _reopen_and_verify_synthetic_three_grid_envelope(
+    protocol: dict[str, Any],
+    path: Path,
+    public_crosswalk: dict[str, object],
+    *,
+    live_directory_capture_provider: _SyntheticLiveDirectoryCaptureProvider,
+    expected_attempt_id: str,
+    expected_snapshot_id: str,
+    expected_protocol_sha256: str,
+    verification_order_events: list[str] | None = None,
+) -> dict[str, str]:
+    if type(live_directory_capture_provider) is not _SyntheticLiveDirectoryCaptureProvider:
+        raise ValueError("fresh checkpoint requires a controlled live capture provider")
+    captured_observed_live_chain = live_directory_capture_provider.capture_before_evidence_read()
+    if verification_order_events is not None:
+        verification_order_events.append("capture_independent_live_directory_chain")
+    before = path.stat()
+    reopened_bytes = path.read_bytes()
+    after = path.stat()
+    if verification_order_events is not None:
+        verification_order_events.append("open_and_read_untrusted_complete_file")
+    if (before.st_dev, before.st_ino, before.st_nlink, before.st_size) != (
+        after.st_dev,
+        after.st_ino,
+        after.st_nlink,
+        after.st_size,
+    ) or len(reopened_bytes) != before.st_size:
+        raise ValueError("installed envelope size changed during complete read")
+    persistence = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    verified = _verify_synthetic_three_grid_envelope(
+        protocol,
+        reopened_bytes,
+        public_crosswalk,
+        expected_attempt_id=expected_attempt_id,
+        expected_snapshot_id=expected_snapshot_id,
+        expected_final_repository_relative_path=persistence["snapshot_path_by_id_exact"][
+            expected_snapshot_id
+        ].format(attempt_id=expected_attempt_id),
+        expected_protocol_sha256=expected_protocol_sha256,
+    )
+    if verification_order_events is not None:
+        verification_order_events.append("outer_sha_matches_independent_public_anchors")
+    parsed = cast(dict[str, object], json.loads(reopened_bytes))
+    authenticated_installed_identity = cast(
+        dict[str, object],
+        parsed["installed_file_identity"],
+    )
+    _verify_independently_observed_live_directory_identity_chain(
+        authenticated_installed_identity,
+        captured_observed_live_chain,
+    )
+    if verification_order_events is not None:
+        verification_order_events.append("compare_live_chain_to_authenticated_embedded_chain")
+    _assert_installed_file_identity(path, authenticated_installed_identity)
+    if verification_order_events is not None:
+        verification_order_events.append("accept_authenticated_file")
+    return verified
+
+
+def _null_three_grid_public_crosswalk() -> dict[str, object]:
+    return {
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null": None,
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null": None,
+        "staged_local_presence_map_value": None,
+        "snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null": None,
+        "snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null": None,
+        "snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null": None,
+    }
+
+
+def _verify_synthetic_three_grid_presence_file_set(
+    protocol: dict[str, Any],
+    evidence_directory: Path,
+    public_crosswalk_by_snapshot: dict[str, dict[str, object]],
+    installed_identity_by_snapshot: dict[str, dict[str, object]],
+    *,
+    expected_attempt_id: str,
+    expected_protocol_sha256: str,
+) -> tuple[dict[str, str | None], str]:
+    if set(public_crosswalk_by_snapshot) != set(SNAPSHOT_ORDER):
+        raise ValueError("presence crosswalk must contain exactly five snapshots")
+    present_snapshots: set[str] = set()
+    for snapshot_id in SNAPSHOT_ORDER:
+        crosswalk = public_crosswalk_by_snapshot[snapshot_id]
+        anchor_values = (
+            crosswalk["snapshot_gate_three_grid_gate_evidence_sha256_or_null"],
+            crosswalk["fit_attempt_three_grid_gate_evidence_sha256_or_null"],
+            crosswalk["staged_local_presence_map_value"],
+        )
+        if all(value is None for value in anchor_values):
+            if crosswalk != _null_three_grid_public_crosswalk():
+                raise ValueError("absent evidence requires every grid crosswalk value to be null")
+        elif len(set(anchor_values)) == 1 and all(
+            _is_lowercase_hex(value, length=64) for value in anchor_values
+        ):
+            present_snapshots.add(snapshot_id)
+        else:
+            raise ValueError("gate/fit/presence outer envelope anchors disagree")
+    observed_entries = {entry.name for entry in evidence_directory.iterdir()}
+    expected_entries = {f"{snapshot_id}.json" for snapshot_id in present_snapshots}
+    if observed_entries != expected_entries:
+        raise ValueError("three-grid evidence file set does not match presence projection")
+    if set(installed_identity_by_snapshot) != present_snapshots:
+        raise ValueError("installed identity set does not match presence projection")
+
+    presence_map: dict[str, str | None] = {}
+    for snapshot_id in SNAPSHOT_ORDER:
+        crosswalk = public_crosswalk_by_snapshot[snapshot_id]
+        if snapshot_id not in present_snapshots:
+            presence_map[snapshot_id] = None
+            continue
+        result = _reopen_and_verify_synthetic_three_grid_envelope(
+            protocol,
+            evidence_directory / f"{snapshot_id}.json",
+            crosswalk,
+            live_directory_capture_provider=(
+                _synthetic_live_directory_capture_provider_from_path(
+                    evidence_directory / f"{snapshot_id}.json",
+                    attempt_id=expected_attempt_id,
+                )
+            ),
+            expected_attempt_id=expected_attempt_id,
+            expected_snapshot_id=snapshot_id,
+            expected_protocol_sha256=expected_protocol_sha256,
+        )
+        presence_map[snapshot_id] = result["envelope_sha256"]
+    return presence_map, _canonical_v1_sha256(presence_map)
 
 
 def _ledger_entry_sha256(entry: dict[str, Any]) -> str:
@@ -229,17 +1960,49 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.2.2"
-    assert protocol["protocol_revision"] == "r2"
+    assert protocol["protocol_revision"] == "r3"
     assert protocol["stage"] == "2-ETAS-R"
     assert protocol["status"] == "preregistered_target_blind_before_any_repair_fit"
     assert protocol["preregistered_on"] == "2026-07-17"
     assert protocol["revised_on"] == "2026-07-19"
     assert protocol["revision_reason"] == (
-        "freeze_qualification_attempt_local_staged_public_paths_and_byte_exact_"
-        "materialization_without_changing_any_scientific_input_or_fit_rule"
+        "freeze_attempt_local_complete_three_grid_envelope_identity_durability_and_"
+        "fresh_disk_reopen_without_changing_any_scientific_input_public_schema_or_fit_rule"
     )
+    revision_base = protocol["revision_base"]
+    assert revision_base == {
+        "protocol_tag": R2_PROTOCOL_TAG,
+        "protocol_tag_object": R2_PROTOCOL_TAG_OBJECT,
+        "protocol_commit": R2_PROTOCOL_COMMIT,
+        "protocol_tag_object_type_exact": "annotated_tag",
+        "protocol_tag_must_peel_exactly_to_protocol_commit": True,
+        "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r3_freeze": True,
+    }
+    tag_type = subprocess.run(
+        ["git", "cat-file", "-t", R2_PROTOCOL_TAG],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    peeled_commit = subprocess.run(
+        ["git", "rev-parse", f"{R2_PROTOCOL_TAG}^{{}}"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert tag_type == "tag"
+    assert (
+        subprocess.run(
+            ["git", "rev-parse", R2_PROTOCOL_TAG],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        == R2_PROTOCOL_TAG_OBJECT
+    )
+    assert peeled_commit == R2_PROTOCOL_COMMIT
     publication = protocol["publication"]
-    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r2"
+    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r3"
     assert publication["qualification_code_tag"] == "v0.2.2-background-etas-repair-code"
     assert publication["qualification_result_tag"] == (
         "v0.2.2-background-etas-numerical-qualification"
@@ -253,7 +2016,7 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     assert publication["adapter_code_tag_allowed_only_after_positive_qualification_result_tag"]
     assert publication["new_stage4_revision_requires_comparator_receipt_tag"] is True
     assert protocol["repair_code_scope_from_protocol_tag"]["comparison_base"] == (
-        "v0.2.2-background-etas-repair-protocol-r2"
+        "v0.2.2-background-etas-repair-protocol-r3"
     )
     assert publication["exact_order"] == [
         "protocol_commit_push_and_remote_tag_verification",
@@ -3001,6 +4764,2085 @@ def test_qualification_public_result_staging_paths_are_attempt_local_and_fail_cl
     assert failure_receipt_ignore_check.returncode == 0
 
 
+def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    grid = protocol["qualification"]["three_grid_gate_evidence_protocol"]
+    persistence = grid["local_restricted_persistence"]
+    staging = protocol["qualification_execution_seal"]["qualification_public_result_staging"]
+    attempt_root = staging["attempt_root_path_template"]
+    expected_root = f"{attempt_root}/local_restricted/three_grid_gate_evidence"
+    expected_template = f"{expected_root}/{{snapshot_id}}.json"
+
+    assert len(grid["evidence_fields_exact"]) == 13
+    assert persistence["persisted_file_is_complete_envelope_not_bare_13_field_evidence"]
+    assert persistence["envelope_fields_exact"] == [
+        "envelope_schema_version",
+        "installed_file_identity",
+        "sealed_three_grid_gate_evidence",
+        "grid_resolution_payload_by_grid_size",
+        "numerical_evidence_id_crosswalk",
+        "three_grid_gate_evidence_envelope_sha256",
+    ]
+    assert (
+        persistence["envelope_identity_fields_exact"] == persistence["envelope_fields_exact"][:-1]
+    )
+    assert persistence[
+        "envelope_identity_fields_must_equal_envelope_fields_excluding_three_grid_gate_"
+        "evidence_envelope_sha256"
+    ]
+    assert persistence["installed_file_identity_fields_exact"] == [
+        "profile_id",
+        "filesystem_name",
+        "parent_identity",
+        "ordered_directory_identity_chain",
+        "ordered_directory_identity_chain_sha256",
+        "final_repository_relative_path",
+        "temp_leaf_utf8_hex",
+        "final_leaf_utf8_hex",
+        "canonical_final_path",
+        "exact_case_relative_components",
+        "platform",
+        "windows_volume_serial_u64_decimal_or_null",
+        "windows_file_id_16_bytes_hex_or_null",
+        "windows_number_of_links_at_temp_capture_or_null",
+        "posix_st_dev_decimal_or_null",
+        "posix_st_ino_decimal_or_null",
+        "posix_st_nlink_at_temp_capture_or_null",
+        "required_final_nlink",
+    ]
+    assert persistence["installed_file_parent_identity_fields_exact"] == [
+        "platform",
+        "canonical_final_path",
+        "exact_case_relative_components",
+        "windows_volume_serial_u64_decimal_or_null",
+        "windows_directory_file_id_16_bytes_hex_or_null",
+        "posix_st_dev_decimal_or_null",
+        "posix_st_ino_decimal_or_null",
+    ]
+    assert persistence["directory_identity_chain_record_fields_exact"] == [
+        "repository_relative_directory_path",
+        "exact_case_relative_components_from_workspace_root",
+        "canonical_directory_path",
+        "platform",
+        "windows_volume_serial_u64_decimal_or_null",
+        "windows_directory_file_id_16_bytes_hex_or_null",
+        "posix_st_dev_decimal_or_null",
+        "posix_st_ino_decimal_or_null",
+    ]
+    assert persistence["directory_identity_chain_length_exact"] == 9
+    assert persistence["directory_identity_chain_repository_relative_path_templates_exact"] == (
+        _directory_chain_relative_paths("{attempt_id}")
+    )
+    raw_file_id_type = (
+        "lowercase_hex_of_FILE_ID_128_Identifier_bytes_index_0_through_15_in_raw_array_"
+        "order_no_integer_or_GUID_endian_conversion_or_null"
+    )
+    assert (
+        persistence["installed_file_identity_field_types_exact"][
+            "windows_file_id_16_bytes_hex_or_null"
+        ]
+        == raw_file_id_type
+    )
+    assert (
+        persistence["installed_file_parent_identity_field_types_exact"][
+            "windows_directory_file_id_16_bytes_hex_or_null"
+        ]
+        == raw_file_id_type
+    )
+    assert (
+        persistence["directory_identity_chain_record_field_types_exact"][
+            "windows_directory_file_id_16_bytes_hex_or_null"
+        ]
+        == raw_file_id_type
+    )
+    assert persistence[
+        "every_windows_FILE_ID_128_hex_must_serialize_Identifier_raw_bytes_in_index_0_"
+        "through_15_order_without_GUID_or_integer_endian_conversion"
+    ]
+    assert persistence["initial_install_directory_identity_chain_source_exact"].startswith(
+        "one_live_verified_handle_per_workspace_root"
+    )
+    assert persistence["before_seal_return_expected_directory_identity_source_exact"].startswith(
+        "installer_live_handle_chain"
+    )
+    assert persistence["fresh_checkpoint_workspace_root_namespace_source_exact"].startswith(
+        "isolated_launcher_fixed_worktree_root_argument"
+    )
+    assert persistence["fresh_checkpoint_expected_directory_identity_source_exact"].startswith(
+        "complete_envelope_chain_whose_outer_sha_must_equal_independently_frozen"
+    )
+    assert persistence["fresh_checkpoint_observed_live_directory_identity_source_exact"].startswith(
+        "independent_launcher_root_handle"
+    )
+    assert persistence[
+        "fresh_checkpoint_reference_verifier_requires_controlled_single_use_live_directory_"
+        "capture_provider_and_invokes_it_before_evidence_stat_or_read"
+    ]
+    assert persistence["synthetic_reference_live_capture_receipt_contract_exact"] == {
+        "fields_exact": ["source_kind", "capture_id", "opened_handle_count", "records"],
+        "source_kind_exact": "independent_live_directory_handle_capture",
+        "capture_id": (
+            "nonempty_process_unique_monotonic_synthetic_checkpoint_identifier_consumed_"
+            "exactly_once"
+        ),
+        "opened_handle_count": "exact_directory_identity_chain_length",
+        "records": (
+            "independently_constructed_nine_record_live_chain_equal_only_by_value_to_"
+            "authenticated_embedded_chain"
+        ),
+        "opaque_runtime_provenance_capability": (
+            "minted_only_by_controlled_provider_factory_registered_by_object_identity_"
+            "consumed_exactly_once_and_not_serialized_or_value_forgeable"
+        ),
+        "controlled_provider_input": (
+            "independent_raw_live_handle_source_values_only_never_embedded_chain_or_receipt_records"
+        ),
+        "provider_constructor_accepts_only_controlled_live_handle_source_and_never_a_"
+        "prebuilt_record_collection": True,
+        "controlled_live_handle_source_capture_provider_and_receipt_must_have_exact_factory_"
+        "class_and_reject_subclasses_or_structural_matches": True,
+        "provider_and_source_factory_bindings_and_single_use_state_must_live_in_external_"
+        "object_identity_registries_not_mutable_instance_flags": True,
+        "unbound_source_registry_must_freeze_the_complete_construction_snapshot_"
+        "immediately_when_the_exact_factory_finishes_source_construction": True,
+        "provider_constructor_must_atomically_consume_the_unbound_source_then_compare_the_"
+        "original_construction_snapshot_before_binding": True,
+        "provider_capture_must_atomically_consume_its_registered_original_object_then_"
+        "revalidate_the_exact_original_bound_source_object_before_observation": True,
+        "source_binding_registry_must_freeze_every_construction_field_type_and_value_plus_"
+        "path_object_identity_and_identity_override_canonical_bytes": True,
+        "source_observation_must_atomically_consume_then_reject_any_post_binding_source_"
+        "configuration_mutation_before_path_stat_or_record_construction": True,
+        "controlled_provider_must_be_single_use_and_called_by_reference_verifier_before_"
+        "file_stat_open_or_read": True,
+        "registered_original_receipt_binding": (
+            "exact_receipt_object_identity_capture_id_opened_handle_count_and_issuance_"
+            "canonical_record_bytes_until_first_verification_attempt"
+        ),
+        "first_registered_original_verification_attempt_must_atomically_consume_capture_id_"
+        "and_capability_before_count_or_content_validation": True,
+        "passing_embedded_chain_directly_or_by_shallow_or_deep_copy_must_be_rejected": True,
+        "wrapping_a_deep_copy_in_a_structurally_valid_receipt_with_self_claimed_source_and_"
+        "capture_id_must_be_rejected": True,
+        "post_construction_source_swap_or_provider_or_source_used_state_reset_must_be_"
+        "rejected": True,
+        "post_construction_pre_binding_path_to_raw_mode_or_raw_scalar_mutation_must_be_"
+        "rejected": True,
+        "post_binding_path_to_raw_mode_or_any_other_source_field_mutation_must_be_rejected": True,
+        "stealing_a_registered_capability_into_a_new_wrapper_or_mutating_any_scalar_"
+        "metadata_or_nested_records_after_issuance_must_be_rejected": True,
+        "duplicate_capture_id_capability_reuse_or_fewer_than_nine_opened_handles_must_be_"
+        "rejected": True,
+    }
+    assert persistence[
+        "observed_live_directory_identity_chain_must_not_alias_or_be_derived_from_the_"
+        "embedded_expected_chain"
+    ]
+    assert persistence["fresh_checkpoint_verification_order_exact"].startswith(
+        "capture_independent_live_directory_chain_without_reading_envelope"
+    )
+    assert persistence[
+        "compare_every_previously_captured_observed_live_directory_record_to_the_"
+        "outer_SHA_authenticated_embedded_expected_record_before_accepting_or_"
+        "trusting_the_evidence_file"
+    ]
+    root_argument = persistence["fixed_workspace_root_argument_contract_exact"]
+    assert root_argument["cli_option"] == "--workspace-root"
+    assert root_argument["occurrence_count_exact"] == 1
+    assert root_argument["public_artifact_value"] == "forbidden_local_restricted_only"
+    assert root_argument["windows_nt_object_name_example"] == (
+        r"\??\Volume{11111111-2222-3333-4444-555555555555}\repo"
+    )
+    assert root_argument[
+        "any_drive_UNC_DOS_device_alias_environment_current_directory_or_envelope_"
+        "derived_root_forbidden"
+    ]
+    assert (
+        "opening_seal_verifies_HEAD_upstream_repair_code_tag"
+        in persistence["opening_repository_root_crosswalk_exact"]
+    )
+    opening_requirements = protocol["qualification_execution_seal"]["opening_seal"][
+        "repository_requirements"
+    ]
+    assert opening_requirements[
+        "fixed_workspace_root_argument_must_open_the_exact_worktree_whose_HEAD_upstream_"
+        "remote_code_tag_and_protocol_package_blobs_are_verified_here"
+    ]
+    assert opening_requirements[
+        "absolute_workspace_root_path_remains_local_restricted_and_may_not_enter_opening_"
+        "or_public_artifacts"
+    ]
+    launcher = protocol["qualification_execution_seal"]["optimizer_runtime_code_seal"][
+        "isolated_launcher_contract"
+    ]
+    assert launcher["qualification_local_restricted_workspace_root_cli_option_exact"] == (
+        "--workspace-root"
+    )
+    assert launcher[
+        "workspace_root_option_must_occur_exactly_once_and_equal_the_fixed_root_argument_"
+        "contract_before_any_project_import_or_evidence_open"
+    ]
+    assert launcher[
+        "workspace_root_argument_must_not_come_from_environment_current_directory_or_envelope"
+    ]
+    assert persistence[
+        "every_fresh_checkpoint_must_capture_live_chain_from_the_launcher_root_handle_"
+        "and_compare_every_record_to_the_outer_SHA_anchored_embedded_chain_before_"
+        "trusting_file_content"
+    ]
+    assert (
+        persistence["installed_file_identity_field_types_exact"][
+            "windows_volume_serial_u64_decimal_or_null"
+        ]
+        == "canonical_unsigned_u64_base10_string_or_null"
+    )
+    assert (
+        persistence["installed_file_parent_identity_field_types_exact"][
+            "windows_volume_serial_u64_decimal_or_null"
+        ]
+        == "canonical_unsigned_u64_base10_string_or_null"
+    )
+    assert persistence["sealed_three_grid_gate_evidence_field_count_exact"] == 13
+    assert persistence["sealed_three_grid_gate_evidence_fields_exact_ref"] == (
+        "qualification.three_grid_gate_evidence_protocol.evidence_fields_exact"
+    )
+    assert persistence["each_grid_resolution_payload_field_count_exact"] == 6
+    assert persistence["each_grid_resolution_payload_fields_exact_ref"] == (
+        "qualification.three_grid_gate_evidence_protocol.grid_resolution_payload_fields_exact"
+    )
+    crosswalk = persistence["numerical_evidence_id_crosswalk_exact"]
+    assert list(crosswalk) == persistence["numerical_evidence_id_crosswalk_fields_exact"]
+    assert crosswalk["implementation_qualified_name"] == (
+        "seismoflux.background.pipeline_etas.ETASGridGateEvidence.numerical_evidence_id"
+    )
+    assert crosswalk["numerical_evidence_preimage_fields_exact"] == [
+        "protocol_sha256",
+        "snapshot_id",
+        "parameter_snapshot_id",
+        "resolutions",
+        "comparisons",
+    ]
+    assert crosswalk["resolution_asdict_fields_exact"] == list(
+        asdict(ETASGridResolutionEvidence(50.0, 1, 1.0, 0.0, 1.0, "0" * 64))
+    )
+    assert crosswalk["comparison_asdict_fields_exact"] == list(
+        asdict(GridConvergenceDiagnostics(50.0, 25.0, 1.0, 1.0, 0.0, 0.0))
+    )
+    assert persistence["attempt_root_path_template_ref"] == (
+        "qualification_execution_seal.qualification_public_result_staging."
+        "attempt_root_path_template"
+    )
+    assert persistence["root_path_template"] == expected_root
+    assert persistence["file_path_template"] == expected_template
+    assert persistence["snapshot_key_order_exact"] == list(SNAPSHOT_ORDER)
+    expected_paths = {
+        snapshot_id: f"{expected_root}/{snapshot_id}.json" for snapshot_id in SNAPSHOT_ORDER
+    }
+    assert persistence["snapshot_path_by_id_exact"] == expected_paths
+    assert persistence["directory_components_below_attempt_root_exact"] == [
+        "local_restricted",
+        "three_grid_gate_evidence",
+    ]
+    for required in (
+        "snapshot_id_path_substitution_must_use_exact_allowlisted_snapshot_id_without_alias_case_or_separator_normalization",
+        "every_path_must_equal_attempt_root_plus_local_restricted_three_grid_gate_evidence_and_exact_snapshot_filename",
+        "every_path_and_existing_ancestor_must_resolve_strictly_inside_same_non_reparse_attempt_root_without_symlink_junction_mount_hardlink_alias_drive_UNC_dot_dot_case_or_separator_escape",
+        "each_existing_directory_component_must_be_reopened_by_parent_relative_handle_and_verified_same_non_reparse_directory_before_every_file_operation",
+        "each_missing_directory_component_must_be_created_once_without_replacement_then_durably_bound_to_its_verified_parent_before_use",
+        "three_grid_gate_evidence_directory_may_preexist_only_as_the_same_verified_directory_created_by_same_attempt_initialization_or_retained_from_an_earlier_same_attempt_snapshot_and_may_never_be_recreated_or_replaced",
+        "directory_entries_and_installed_files_are_append_only_and_successful_snapshot_files_must_follow_frozen_snapshot_order",
+        "complete_directory_tree_must_be_precreated_durably_reopened_and_identity_verified_before_any_same_attempt_three_grid_evaluator_call",
+        "any_directory_create_reopen_identity_or_durability_capability_failure_must_fail_closed_before_grid_evaluator_and_require_new_attempt_id",
+        "sealed_three_grid_gate_evidence_must_be_byte_identical_to_the_existing_13_field_object_before_embedding",
+        "numerical_evidence_id_reconstruction_must_match_pipeline_etas_ETASGridGateEvidence_property_field_for_field_without_wrapper_passed_failure_reasons_or_diagnostic_hash_fields",
+        "each_resolution_sha256_must_recompute_from_matching_embedded_exact_six_field_payload_and_equal_sealed_grid_resolution_payload_sha256_by_grid_size",
+        "each_pair_sha256_must_recompute_from_matching_embedded_pair_payload_without_diagnostic_payload_sha256",
+        "sealed_13_field_own_sha256_must_recompute_without_three_grid_gate_evidence_sha256",
+        "persisted_file_must_strict_parse_recompute_all_three_resolution_sha256_values_both_pair_sha256_values_sealed_13_field_own_sha256_numerical_evidence_id_envelope_own_sha256_and_reserialize_byte_identically",
+        "file_must_be_absent_before_same_snapshot_grid_evaluator_call_and_before_no_clobber_install",
+        "any_preexisting_file_even_if_byte_identical_is_invalid_execution_and_may_not_be_adopted",
+        "exactly_zero_or_one_file_per_snapshot_and_exact_file_set_must_equal_presence_truth_table_projection",
+        "seal_must_close_renamed_file_handle_after_flush_retain_verified_parent_chain_for_"
+        "handle_relative_final_reopen_then_close_reopened_file_and_all_parent_handles_after_"
+        "complete_verification",
+        "seal_returned_13_field_payload_envelope_sha256_and_public_crosswalk_values_must_be_derived_only_from_complete_reopened_envelope_bytes_not_from_preinstall_memory_or_temp_bytes",
+        "seal_may_return_only_after_path_regular_file_identity_stable_size_complete_bytes_strict_envelope_schema_all_nested_hashes_both_own_hashes_numerical_evidence_id_crosswalk_and_byte_reserialization_checks_pass",
+        "every_checkpoint_must_discard_in_memory_payload_temp_bytes_and_cached_file_handle_then_reopen_the_exact_installed_path_from_disk",
+        "every_checkpoint_must_revalidate_exact_file_set_presence_stable_identity_and_link_count_complete_bytes_strict_envelope_and_embedded_13_field_schema_three_resolution_hashes_two_pair_hashes_both_own_hashes_numerical_evidence_id_canonical_reserialization_and_cross_snapshot_bindings",
+        "before_first_external_anchor_checkpoint_must_return_reopened_envelope_sha_for_immediate_durable_snapshot_gate_anchor_without_permitting_restart_reanchor",
+        "every_checkpoint_at_or_after_first_external_anchor_must_rederive_envelope_sha_from_reopened_file_and_compare_to_independently_frozen_snapshot_gate_fit_attempt_and_staged_local_presence_values",
+        "checkpoint_replay_of_grid_evaluator_or_reconstruction_from_fit_result_gate_manifest_or_public_sha_forbidden",
+        "missing_corrupt_changed_or_extra_file_may_not_be_recreated_replaced_substituted_or_repaired_under_same_attempt",
+        "same_attempt_grid_evaluator_rerun_or_evidence_recompute_reseal_replace_substitute_or_alternate_path_forbidden",
+        "all_installed_evidence_files_and_attempt_directories_must_be_retained_after_invalid_execution_publication_failure_successful_public_materialization_result_commit_and_remote_tag",
+        "public_schema_public_path_and_public_file_count_must_remain_unchanged_and_local_file_path_or_bytes_may_not_be_published",
+    ):
+        assert persistence[required] is True
+    assert (
+        "seal_returned_13_field_payload_envelope_sha256_and_initial_external_crosswalk_"
+        "values_must_be_derived_only_from_complete_reopened_envelope_bytes_not_from_"
+        "preinstall_memory_or_temp_bytes" not in persistence
+    )
+
+    durability = persistence["durable_create_once_file_protocol"]
+    assert durability["selected_install_profile_exact"] == (
+        "windows_ntfs_ntcreatefile_filerenameinfo_v1"
+    )
+    assert durability[
+        "posix_linkat_v1_is_defined_for_portability_but_is_not_selectable_in_this_"
+        "frozen_windows_qualification_runtime"
+    ]
+    assert durability["scope_exact"] == (
+        "local_restricted_three_grid_evidence_envelope_files_and_their_local_restricted_"
+        "and_three_grid_gate_evidence_directory_components_only"
+    )
+    assert durability[
+        "staged_public_closing_manifest_failure_receipt_and_public_destination_install_"
+        "protocols_remain_exactly_R2_and_are_not_governed_or_changed_by_this_local_"
+        "durable_contract"
+    ]
+    assert durability["install_failure_state_machine"] == {
+        "preexisting_final_before_evaluator_or_install": (
+            "collision_invalid_execution_never_adopt_even_if_byte_identical"
+        ),
+        "failure_before_install_success": (
+            "retain_temp_and_attempt_evidence_no_primitive_fallback_no_same_final_retry"
+        ),
+        "install_success_until_complete_postinstall_flush_parent_sync_and_reopen_verification": (
+            "any_crash_or_failure_is_indeterminate_after_install_retain_everything_for_audit_"
+            "read_only_forensic_reopen_only_no_delete_rollback_overwrite_or_same_final_retry_"
+            "same_attempt_may_never_resume_reanchor_publish_or_advance_qualification_new_"
+            "attempt_id_only_after_manual_audit"
+        ),
+        "complete_postinstall_reopen_verification_before_first_external_envelope_sha_anchor_"
+        "is_durably_persisted": (
+            "any_crash_or_failure_is_invalid_execution_retain_everything_same_attempt_may_"
+            "never_resume_reanchor_or_publish_new_attempt_only_after_manual_audit"
+        ),
+        "at_or_after_first_external_envelope_sha_anchor": (
+            "any_missing_changed_or_mismatched_local_envelope_or_external_anchor_is_invalid_"
+            "execution_retain_everything_without_same_attempt_repair_reanchor_or_scientific_"
+            "retry"
+        ),
+        "any_scientific_retry": "new_attempt_id_only_after_manual_audit",
+    }
+    assert durability["common_order_exact"] == [
+        "strict_parent_reopen",
+        "missing_directory_create_once_and_directory_entry_durable_sync",
+        "exclusive_sibling_temp_create",
+        "temp_file_identity_capture_and_destination_path_case_prebind",
+        "complete_canonical_envelope_byte_write",
+        "file_flush_and_durable_sync",
+        "close_initial_temp_write_handle",
+        "preinstall_temp_handle_relative_reopen_and_verification",
+        "atomic_no_clobber_install",
+        "installed_file_flush",
+        "parent_directory_entry_durable_sync",
+        "close_renamed_file_handle_while_retaining_verified_parent_chain",
+        "installed_file_handle_relative_reopen_and_complete_verification",
+        "close_reopened_file_and_all_parent_handles",
+    ]
+    windows = durability["windows"]
+    assert windows["profile_id_exact"] == "windows_ntfs_ntcreatefile_filerenameinfo_v1"
+    assert windows["trusted_namespace_bootstrap_exact"] == (
+        "one_absolute_NT_path_open_of_trusted_workspace_root_per_initial_install_or_fresh_"
+        "checkpoint_verification_session_then_attempt_root_and_all_descendants_opened_only_"
+        "by_RootDirectory_relative_descent"
+    )
+    assert windows["trusted_workspace_root_bootstrap_object_attributes_exact"] == (
+        "RootDirectory_NULL_ObjectName_exact_NT_path_derived_from_fixed_launcher_workspace_"
+        "root_argument_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_"
+        "0x1000_without_OBJ_CASE_INSENSITIVE_0x40"
+    )
+    assert "trusted_workspace_root_bootstrap_create_disposition_and_options_exact" not in windows
+    assert windows["trusted_workspace_root_bootstrap_create_disposition_exact"] == {
+        "symbol": "FILE_OPEN",
+        "uint32_hex": "00000001",
+    }
+    assert windows["trusted_workspace_root_bootstrap_create_options_exact"] == {
+        "symbolic_or": (
+            "FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_"
+            "bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020"
+        ),
+        "uint32_hex": "00200021",
+    }
+    assert windows[
+        "every_fresh_checkpoint_session_must_close_all_prior_handles_open_workspace_root_once_"
+        "then_parent_relative_redescend_and_reverify_every_directory_identity_before_final_"
+        "file_open"
+    ]
+    assert windows[
+        "share_access_for_every_workspace_directory_temp_preinstall_and_final_reopen_exact"
+    ] == (
+        "FILE_SHARE_READ_0x1_bitwise_OR_FILE_SHARE_WRITE_0x2_equal_0x3_and_explicitly_"
+        "without_FILE_SHARE_DELETE_0x4"
+    )
+    assert windows[
+        "share_delete_absence_must_be_mechanically_verified_for_every_open_and_no_handle_"
+        "with_DELETE_desired_access_may_overlap_an_incompatible_second_open"
+    ]
+    directory_access_mask = 0x20000 | 0x100000 | 0x1 | 0x2 | 0x4 | 0x8 | 0x10 | 0x20 | 0x80 | 0x100
+    directory_access = {
+        "symbolic_or": (
+            "READ_CONTROL_0x00020000_bitwise_OR_SYNCHRONIZE_0x00100000_bitwise_OR_FILE_"
+            "LIST_DIRECTORY_0x00000001_bitwise_OR_FILE_ADD_FILE_0x00000002_bitwise_OR_FILE_"
+            "ADD_SUBDIRECTORY_0x00000004_bitwise_OR_FILE_READ_EA_0x00000008_bitwise_OR_FILE_"
+            "WRITE_EA_0x00000010_bitwise_OR_FILE_TRAVERSE_0x00000020_bitwise_OR_FILE_READ_"
+            "ATTRIBUTES_0x00000080_bitwise_OR_FILE_WRITE_ATTRIBUTES_0x00000100"
+        ),
+        "uint32_hex": f"{directory_access_mask:08x}",
+    }
+    temp_access = {
+        "symbolic_or": (
+            "GENERIC_READ_0x80000000_bitwise_OR_GENERIC_WRITE_0x40000000_bitwise_OR_"
+            "DELETE_0x00010000_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_OR_"
+            "SYNCHRONIZE_0x00100000"
+        ),
+        "uint32_hex": f"{0x80000000 | 0x40000000 | 0x10000 | 0x80 | 0x100000:08x}",
+    }
+    final_access = {
+        "symbolic_or": (
+            "GENERIC_READ_0x80000000_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_"
+            "OR_SYNCHRONIZE_0x00100000"
+        ),
+        "uint32_hex": f"{0x80000000 | 0x80 | 0x100000:08x}",
+    }
+    assert windows["desired_access_by_open_kind_exact"] == {
+        "trusted_workspace_root_bootstrap": directory_access,
+        "attempt_root_or_descendant_directory_create_or_reopen": directory_access,
+        "exclusive_temp_create_and_preinstall_reopen_for_same_handle_install": temp_access,
+        "installed_final_read_only_reopen": final_access,
+    }
+    assert windows[
+        "FILE_SYNCHRONOUS_IO_NONALERT_requires_SYNCHRONIZE_in_every_matching_desired_access_mask"
+    ]
+    assert windows["generic_access_high_bits_for_directory_NtCreateFile_forbidden"]
+    assert int(directory_access["uint32_hex"], 16) & 0xC0000000 == 0
+    assert int(directory_access["uint32_hex"], 16) & 0x00120116 == 0x00120116
+    assert windows[
+        "every_directory_handle_passed_to_FlushFileBuffers_must_have_the_fully_expanded_FILE_"
+        "GENERIC_WRITE_specific_rights_0x00120116_as_a_subset_of_granted_access"
+    ]
+    assert windows[
+        "every_file_handle_passed_to_FlushFileBuffers_requires_GENERIC_WRITE_in_its_desired_"
+        "access_mask"
+    ]
+    assert windows["filesystem_capability_gate_exact"] == (
+        "GetVolumeInformationByHandleW_on_workspace_attempt_root_and_evidence_parent_"
+        "handles_must_report_exact_NTFS_and_identical_volume_serial_plus_"
+        "NtQueryVolumeInformationFile_FileFsDeviceInformation_DeviceType_FILE_DEVICE_"
+        "DISK_0x00000007_and_Characteristics_bitwise_AND_FILE_REMOTE_DEVICE_0x00000010_"
+        "equal_zero"
+    )
+    assert windows["local_nonremote_predicate_exact"] == (
+        "DeviceType_equal_FILE_DEVICE_DISK_0x00000007_and_Characteristics_bitwise_AND_"
+        "FILE_REMOTE_DEVICE_0x00000010_equal_zero_on_workspace_attempt_root_and_evidence_"
+        "parent_handles"
+    )
+    assert windows["remote_SMB_NFS_ReFS_FAT_unknown_or_nonlocal_filesystem_action"] == (
+        "fail_closed_before_grid_evaluator"
+    )
+    assert windows["descendant_namespace_primitives_exact"] == (
+        "NtCreateFile_RootDirectory_relative_open_and_create_plus_"
+        "SetFileInformationByHandle_FileRenameInfo_RootDirectory_relative_install"
+    )
+    assert windows[
+        "path_based_CreateDirectoryW_CreateFileW_or_MoveFileExW_for_descendant_"
+        "directory_temp_destination_or_install_forbidden"
+    ]
+    assert windows["object_attributes_exact"] == (
+        "RootDirectory_verified_parent_handle_ObjectName_single_UTF16_leaf_component_"
+        "Attributes_OBJ_DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40"
+    )
+    assert windows["ntcreatefile_common_structure_contract_exact"] == {
+        "OBJECT_ATTRIBUTES_Length": "sizeof_OBJECT_ATTRIBUTES_for_active_architecture",
+        "OBJECT_ATTRIBUTES_SecurityDescriptor": None,
+        "OBJECT_ATTRIBUTES_SecurityQualityOfService": None,
+        "OBJECT_ATTRIBUTES_Attributes_uint32_hex": "00001000",
+        "UNICODE_STRING_Length": (
+            "exact_ObjectName_UTF16LE_byte_length_without_terminator_reject_odd_or_over_65534"
+        ),
+        "UNICODE_STRING_MaximumLength": ("exactly_equal_Length_no_implicit_terminator_capacity"),
+        "UNICODE_STRING_Buffer": (
+            "exact_absolute_workspace_root_or_single_leaf_UTF16_code_units_matching_ObjectName_kind"
+        ),
+        "AllocationSize": None,
+        "EaBuffer": None,
+        "EaLength_uint32_hex": "00000000",
+        "IO_STATUS_BLOCK_Status_initial": (
+            "zero_initialized_before_call_then_NT_SUCCESS_required_after_call"
+        ),
+    }
+    parameter_fields = [
+        "root_directory_kind",
+        "object_name_kind",
+        "desired_access_uint32_hex",
+        "share_access_uint32_hex",
+        "file_attributes_symbol",
+        "file_attributes_uint32_hex",
+        "create_disposition_symbol",
+        "create_disposition_uint32_hex",
+        "create_options_symbolic_or",
+        "create_options_uint32_hex",
+        "allocation_size",
+        "ea_buffer",
+        "ea_length_uint32_hex",
+        "expected_io_status_information_symbol",
+        "expected_io_status_information_uint64_hex",
+    ]
+    assert windows["ntcreatefile_call_parameter_fields_exact"] == parameter_fields
+    directory_options = (
+        "FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_"
+        "bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020"
+    )
+    temp_create_options = (
+        "FILE_NON_DIRECTORY_FILE_0x00000040_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_"
+        "bitwise_OR_FILE_WRITE_THROUGH_0x00000002"
+    )
+    preinstall_options = f"{temp_create_options}_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020"
+    final_options = (
+        "FILE_NON_DIRECTORY_FILE_0x00000040_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_"
+        "bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020"
+    )
+    row_defaults: dict[str, object] = {
+        "share_access_uint32_hex": "00000003",
+        "allocation_size": None,
+        "ea_buffer": None,
+        "ea_length_uint32_hex": "00000000",
+    }
+    expected_call_rows: dict[str, dict[str, object]] = {
+        "trusted_workspace_root_bootstrap": {
+            "root_directory_kind": None,
+            "object_name_kind": (
+                "exact_NT_ObjectName_derived_only_from_fixed_launcher_workspace_root_"
+                "argument_and_crosschecked_to_opening_repository_HEAD"
+            ),
+            "desired_access_uint32_hex": "001201bf",
+            "file_attributes_symbol": "zero_ignored_for_FILE_OPEN",
+            "file_attributes_uint32_hex": "00000000",
+            "create_disposition_symbol": "FILE_OPEN",
+            "create_disposition_uint32_hex": "00000001",
+            "create_options_symbolic_or": directory_options,
+            "create_options_uint32_hex": "00200021",
+            "expected_io_status_information_symbol": "FILE_OPENED",
+            "expected_io_status_information_uint64_hex": "0000000000000001",
+        },
+        "existing_ancestor_or_evidence_directory_reopen": {
+            "root_directory_kind": "verified_parent_directory_handle",
+            "object_name_kind": "exact_safe_single_UTF16_leaf",
+            "desired_access_uint32_hex": "001201bf",
+            "file_attributes_symbol": "zero_ignored_for_FILE_OPEN",
+            "file_attributes_uint32_hex": "00000000",
+            "create_disposition_symbol": "FILE_OPEN",
+            "create_disposition_uint32_hex": "00000001",
+            "create_options_symbolic_or": directory_options,
+            "create_options_uint32_hex": "00200021",
+            "expected_io_status_information_symbol": "FILE_OPENED",
+            "expected_io_status_information_uint64_hex": "0000000000000001",
+        },
+        "missing_directory_create": {
+            "root_directory_kind": "verified_parent_directory_handle",
+            "object_name_kind": "exact_safe_single_UTF16_leaf",
+            "desired_access_uint32_hex": "001201bf",
+            "file_attributes_symbol": "FILE_ATTRIBUTE_DIRECTORY",
+            "file_attributes_uint32_hex": "00000010",
+            "create_disposition_symbol": "FILE_CREATE",
+            "create_disposition_uint32_hex": "00000002",
+            "create_options_symbolic_or": directory_options,
+            "create_options_uint32_hex": "00200021",
+            "expected_io_status_information_symbol": "FILE_CREATED",
+            "expected_io_status_information_uint64_hex": "0000000000000002",
+        },
+        "exclusive_temp_create": {
+            "root_directory_kind": "verified_evidence_parent_directory_handle",
+            "object_name_kind": "exact_attempt_unique_safe_single_UTF16_temp_leaf",
+            "desired_access_uint32_hex": "c0110080",
+            "file_attributes_symbol": "FILE_ATTRIBUTE_NORMAL",
+            "file_attributes_uint32_hex": "00000080",
+            "create_disposition_symbol": "FILE_CREATE",
+            "create_disposition_uint32_hex": "00000002",
+            "create_options_symbolic_or": temp_create_options,
+            "create_options_uint32_hex": "00200042",
+            "expected_io_status_information_symbol": "FILE_CREATED",
+            "expected_io_status_information_uint64_hex": "0000000000000002",
+        },
+        "temp_preinstall_reopen": {
+            "root_directory_kind": "verified_evidence_parent_directory_handle",
+            "object_name_kind": "exact_stored_case_safe_single_UTF16_temp_leaf",
+            "desired_access_uint32_hex": "c0110080",
+            "file_attributes_symbol": "zero_ignored_for_FILE_OPEN",
+            "file_attributes_uint32_hex": "00000000",
+            "create_disposition_symbol": "FILE_OPEN",
+            "create_disposition_uint32_hex": "00000001",
+            "create_options_symbolic_or": preinstall_options,
+            "create_options_uint32_hex": "00200062",
+            "expected_io_status_information_symbol": "FILE_OPENED",
+            "expected_io_status_information_uint64_hex": "0000000000000001",
+        },
+        "installed_final_read_only_reopen": {
+            "root_directory_kind": "verified_evidence_parent_directory_handle",
+            "object_name_kind": "exact_stored_case_safe_single_UTF16_final_leaf",
+            "desired_access_uint32_hex": "80100080",
+            "file_attributes_symbol": "zero_ignored_for_FILE_OPEN",
+            "file_attributes_uint32_hex": "00000000",
+            "create_disposition_symbol": "FILE_OPEN",
+            "create_disposition_uint32_hex": "00000001",
+            "create_options_symbolic_or": final_options,
+            "create_options_uint32_hex": "00200060",
+            "expected_io_status_information_symbol": "FILE_OPENED",
+            "expected_io_status_information_uint64_hex": "0000000000000001",
+        },
+    }
+    matrix = windows["ntcreatefile_call_parameter_matrix_exact"]
+    assert list(matrix) == list(expected_call_rows)
+    for call_kind, expected_specific in expected_call_rows.items():
+        expected_row = {**row_defaults, **expected_specific}
+        assert set(matrix[call_kind]) == set(parameter_fields)
+        assert matrix[call_kind] == expected_row
+    assert windows[
+        "every_NtCreateFile_call_must_match_exactly_one_parameter_matrix_row_and_no_"
+        "unlisted_default_or_implicit_argument_is_permitted"
+    ]
+    assert "NtCreateFile_with_exact_object_attributes" in windows["directory_create_exact"]
+    assert "NtCreateFile_with_exact_object_attributes" in windows["temp_create_exact"]
+    assert windows["temp_create_result_exact"] == (
+        "NT_SUCCESS_and_IoStatusBlock_Information_FILE_CREATED"
+    )
+    assert "EndOfFile_zero" in windows["temp_initial_state_exact"]
+    assert "FileIdInfo" in windows["temp_preinstall_reopen_exact"]
+    for required_option in (
+        "FILE_NON_DIRECTORY_FILE",
+        "FILE_OPEN_REPARSE_POINT",
+        "FILE_WRITE_THROUGH",
+        "FILE_SYNCHRONOUS_IO_NONALERT",
+    ):
+        assert required_option in windows["temp_preinstall_reopen_exact"]
+    assert windows["atomic_no_clobber_install_exact"] == (
+        "SetFileInformationByHandle_FileRenameInfo_on_open_temp_handle_with_FILE_RENAME_"
+        "INFO_ReplaceIfExists_FALSE_RootDirectory_verified_parent_handle_and_exact_"
+        "destination_component"
+    )
+    assert windows["durability_flush_api_exact"] == "kernel32_FlushFileBuffers_only"
+    assert windows["installed_file_flush_exact"] == (
+        "kernel32_FlushFileBuffers_on_the_original_renamed_file_handle_must_succeed_"
+        "before_parent_FlushFileBuffers"
+    )
+    assert windows[
+        "NtFlushBuffersFile_NtFlushBuffersFileEx_or_any_other_NtFlush_durability_call_forbidden"
+    ]
+    assert "VolumeSerialNumber_and_FileId" in windows["identity_capture_exact"]
+    assert "NumberOfLinks" in windows["identity_capture_exact"]
+    assert windows["parent_identity_capture_exact"].startswith(
+        "GetFileInformationByHandleEx_FileIdInfo_on_each_verified_workspace_attempt"
+    )
+    assert "FILE_ID_128" in windows["parent_identity_source_and_crosscheck_exact"]
+    assert (
+        "path_stat_or_synthetic_st_ino_source_forbidden"
+        in windows["parent_identity_source_and_crosscheck_exact"]
+    )
+    assert windows["canonical_volume_guid_path_grammar_exact"] == (
+        "windows_extended_length_prefix_then_Volume_braced_GUID_8_4_4_4_12_hex_then_"
+        "backslash_then_one_or_more_exact_case_UTF16_NFC_safe_components"
+    )
+    assert windows[
+        "fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact"
+    ] == (
+        "replace_exact_leading_two_backslashes_question_mark_backslash_with_single_"
+        "backslash_question_mark_question_mark_backslash_preserve_all_remaining_UTF16_"
+        "code_units_and_reject_any_other_prefix"
+    )
+    assert windows[
+        "DOS_drive_UNC_incomplete_volume_GUID_dot_dot_dot_empty_or_repeated_separator_"
+        "forward_slash_NUL_or_non_NFC_canonical_path_forbidden"
+    ]
+    assert windows[
+        "synthetic_windows_path_fixture_must_use_a_complete_fake_volume_GUID_path_and_"
+        "may_not_use_Path_resolve_drive_letter_output"
+    ]
+    assert windows[
+        "volume_serial_file_id_final_path_and_exact_case_components_must_match_install_"
+        "record_at_every_checkpoint"
+    ]
+    posix = durability["posix"]
+    assert posix["profile_id_exact"] == "posix_linkat_v1"
+    assert posix["selectable_in_current_windows_qualification_runtime"] is False
+    assert posix["trusted_workspace_root_bootstrap_exact"] == (
+        "open_exact_fixed_launcher_workspace_root_argument_once_with_O_RDONLY_O_DIRECTORY_"
+        "O_NOFOLLOW_O_CLOEXEC_then_fstat_and_bind_to_opening_repository_HEAD"
+    )
+    assert posix[
+        "every_fresh_checkpoint_session_must_close_all_prior_handles_open_the_fixed_"
+        "workspace_root_once_then_openat_parent_relative_redescend_every_frozen_"
+        "directory_component"
+    ]
+    assert posix[
+        "each_of_nine_directory_identity_chain_records_must_come_from_fstat_on_its_"
+        "independently_open_live_directory_handle_with_canonical_st_dev_and_st_ino_"
+        "before_opening_the_next_child"
+    ]
+    assert posix[
+        "absolute_open_below_root_chdir_environment_current_directory_envelope_path_or_"
+        "path_stat_identity_source_forbidden"
+    ]
+    assert posix["directory_create_exact"] == (
+        "mkdirat_verified_parent_once_then_openat_child_O_DIRECTORY_O_NOFOLLOW"
+    )
+    assert posix["atomic_no_clobber_install_exact"] == (
+        "linkat_verified_parent_temp_component_to_same_verified_parent_destination_"
+        "component_flags_zero_must_fail_EEXIST_if_destination_exists_then_unlinkat_"
+        "temp_component"
+    )
+    assert posix["ordinary_rename_renameat_or_replace_install_forbidden"]
+    assert posix[
+        "install_profile_must_be_selected_and_capability_verified_before_first_grid_"
+        "evaluator_and_may_not_fallback_during_attempt"
+    ]
+    assert posix[
+        "parent_directory_fsync_required_after_each_mkdirat_linkat_success_and_unlinkat_"
+        "temp_cleanup"
+    ]
+    assert "st_dev_and_st_ino" in posix["installed_identity_exact"]
+    assert "st_nlink_equal_one" in posix["installed_identity_exact"]
+    assert persistence["disk_reopen_checkpoints_exact"] == [
+        "before_seal_return",
+        "qualification_result_finalize",
+        "staged_local_scientific_payload_identity_construction",
+        "qualification_closing_seal_construction",
+        "qualification_manifest_construction",
+        "qualification_manifest_staged_reopen_validation",
+        "before_initial_public_materialization",
+        "before_every_same_attempt_public_materialization_retry",
+    ]
+
+    truth = persistence["presence_sha_null_truth_table_exact"]
+    required_state = truth["grid_evidence_required"]
+    assert required_state["exact_local_file_presence"] == "required"
+    assert required_state["exact_local_file_payload"] == (
+        "complete_six_field_envelope_with_installed_identity_embedded_sealed_13_fields_and_three_"
+        "resolution_preimages_required"
+    )
+    for field in (
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null",
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null",
+        "staged_local_presence_map_value",
+    ):
+        assert required_state[field] == "required_equal_complete_envelope_own_sha256"
+    forbidden_state = truth["grid_evidence_forbidden"]
+    assert forbidden_state["exact_local_file_presence"] == "forbidden"
+    assert forbidden_state["exact_local_file_payload"] == "absent"
+    for field in (
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null",
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null",
+        "staged_local_presence_map_value",
+        "snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null",
+        "snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null",
+        "snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null",
+    ):
+        assert forbidden_state[field] is None
+
+    r3_probe_attempt = "r3-three-grid-evidence-probe"
+    for path in expected_paths.values():
+        formatted = path.format(attempt_id=r3_probe_attempt)
+        ignore_check = subprocess.run(
+            ["git", "check-ignore", "--no-index", "-q", formatted],
+            check=False,
+        )
+        assert ignore_check.returncode == 0, formatted
+
+    r2 = _load_yaml_at_revision(R2_PROTOCOL_COMMIT, PROTOCOL_PATH)
+    assert staging == r2["qualification_execution_seal"]["qualification_public_result_staging"]
+
+    execution_rules = protocol["repair_code_scope_from_protocol_tag"][
+        "new_repair_module_execution_rules"
+    ]
+    responsibility = (
+        "complete_three_grid_local_restricted_create_once_persistence_and_disk_reopen_validation"
+    )
+    assert (
+        responsibility
+        in execution_rules["src/seismoflux/background/etas_numerical_repair_io.py"][
+            "allowed_responsibilities"
+        ]
+    )
+    assert (
+        responsibility
+        in execution_rules["src/seismoflux/background/etas_numerical_repair_evidence.py"][
+            "allowed_responsibilities"
+        ]
+    )
+
+
+def test_three_grid_envelope_synthetic_canonical_round_trip_matches_pipeline_formula(
+    tmp_path: Path,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    temp_path = tmp_path / ".fold_1.envelope.tmp"
+    final_path = tmp_path / "fold_1.json"
+    with temp_path.open("xb"):
+        pass
+    installed_identity = _synthetic_installed_file_identity(temp_path, final_path)
+    gate, envelope, public_crosswalk = _synthetic_three_grid_envelope(
+        protocol,
+        installed_identity,
+    )
+    envelope_bytes = canonical_json_bytes(envelope)
+    with temp_path.open("r+b") as handle:
+        handle.write(envelope_bytes)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.link(temp_path, final_path)
+    assert temp_path.stat().st_nlink == 2
+    temp_path.unlink()
+    assert final_path.stat().st_nlink == 1
+    _assert_installed_file_identity(final_path, installed_identity)
+
+    verification_order_events: list[str] = []
+    verified = _reopen_and_verify_synthetic_three_grid_envelope(
+        protocol,
+        final_path,
+        public_crosswalk,
+        live_directory_capture_provider=(
+            _synthetic_live_directory_capture_provider_from_path(
+                final_path,
+                attempt_id="synthetic-r3-envelope",
+            )
+        ),
+        expected_attempt_id="synthetic-r3-envelope",
+        expected_snapshot_id="fold_1",
+        expected_protocol_sha256=gate.protocol_sha256,
+        verification_order_events=verification_order_events,
+    )
+    assert verification_order_events == [
+        "capture_independent_live_directory_chain",
+        "open_and_read_untrusted_complete_file",
+        "outer_sha_matches_independent_public_anchors",
+        "compare_live_chain_to_authenticated_embedded_chain",
+        "accept_authenticated_file",
+    ]
+    reopened_bytes = final_path.read_bytes()
+    assert reopened_bytes == envelope_bytes
+    assert verified["numerical_evidence_id"] == gate.numerical_evidence_id
+    assert (
+        verified["envelope_sha256"]
+        == public_crosswalk["snapshot_gate_three_grid_gate_evidence_sha256_or_null"]
+    )
+    assert (
+        verified["sealed_sha256"]
+        == cast(dict[str, object], envelope["sealed_three_grid_gate_evidence"])[
+            "three_grid_gate_evidence_sha256"
+        ]
+    )
+    assert verified["envelope_sha256"] == envelope["three_grid_gate_evidence_envelope_sha256"]
+
+
+def test_three_grid_envelope_rejects_cascade_rehash_tamper_against_public_crosswalk() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, public_crosswalk = _synthetic_three_grid_envelope(protocol)
+    tampered = deepcopy(envelope)
+    resolution_map = cast(
+        dict[str, dict[str, object]], tampered["grid_resolution_payload_by_grid_size"]
+    )
+    resolution_25 = resolution_map["25_km"]
+    resolution_25["background_total_hex"] = (2.0).hex()
+    resolution_25["triggering_total_hex"] = (1.0).hex()
+    _cascade_rehash_synthetic_three_grid_envelope(protocol, tampered)
+
+    with pytest.raises(ValueError, match="public gate/fit-attempt/presence crosswalk"):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(tampered),
+            public_crosswalk,
+        )
+
+
+@pytest.mark.parametrize("platform", ("posix", "windows"))
+def test_three_grid_envelope_rejects_identity_replacement_outer_cascade_and_each_old_anchor(
+    platform: str,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, _ = _synthetic_three_grid_envelope(protocol)
+    original_identity = cast(dict[str, object], envelope["installed_file_identity"])
+    if platform == "windows":
+        _convert_installed_identity_to_valid_synthetic_windows(
+            original_identity,
+            attempt_id="synthetic-r3-envelope",
+        )
+    assert original_identity["platform"] == platform
+    envelope["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in envelope.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    frozen_external_anchors = _synthetic_public_crosswalk_from_envelope(envelope)
+    replacement = deepcopy(envelope)
+    original_sealed = deepcopy(replacement["sealed_three_grid_gate_evidence"])
+    replacement_identity = cast(dict[str, object], replacement["installed_file_identity"])
+    changed_field = (
+        "windows_file_id_16_bytes_hex_or_null"
+        if platform == "windows"
+        else "posix_st_ino_decimal_or_null"
+    )
+    replacement_identity[changed_field] = (
+        _file_id_128_identifier_raw_bytes_hex(bytes(range(15, -1, -1)))
+        if platform == "windows"
+        else "777"
+    )
+    restored_identity = deepcopy(replacement_identity)
+    restored_identity[changed_field] = original_identity[changed_field]
+    assert restored_identity == original_identity
+    replacement["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in replacement.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    replacement_anchors = _synthetic_public_crosswalk_from_envelope(replacement)
+
+    assert replacement["sealed_three_grid_gate_evidence"] == original_sealed
+    assert (
+        cast(dict[str, object], replacement["sealed_three_grid_gate_evidence"])[
+            "three_grid_gate_evidence_sha256"
+        ]
+        == cast(dict[str, object], envelope["sealed_three_grid_gate_evidence"])[
+            "three_grid_gate_evidence_sha256"
+        ]
+    )
+    assert (
+        replacement["three_grid_gate_evidence_envelope_sha256"]
+        != envelope["three_grid_gate_evidence_envelope_sha256"]
+    )
+    with pytest.raises(ValueError, match="public gate/fit-attempt/presence crosswalk"):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(replacement),
+            frozen_external_anchors,
+        )
+
+    anchor_fields = (
+        "snapshot_gate_three_grid_gate_evidence_sha256_or_null",
+        "fit_attempt_three_grid_gate_evidence_sha256_or_null",
+        "staged_local_presence_map_value",
+    )
+    for anchor_field in anchor_fields:
+        one_stale_anchor = deepcopy(replacement_anchors)
+        one_stale_anchor[anchor_field] = frozen_external_anchors[anchor_field]
+        with pytest.raises(ValueError, match="public gate/fit-attempt/presence crosswalk"):
+            _verify_synthetic_three_grid_envelope(
+                protocol,
+                canonical_json_bytes(replacement),
+                one_stale_anchor,
+            )
+
+    verified_only_when_all_external_anchors_are_replaced = _verify_synthetic_three_grid_envelope(
+        protocol,
+        canonical_json_bytes(replacement),
+        replacement_anchors,
+    )
+    assert (
+        verified_only_when_all_external_anchors_are_replaced["envelope_sha256"]
+        == replacement["three_grid_gate_evidence_envelope_sha256"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("tamper_kind", "error_pattern"),
+    (
+        ("resolution_order", "50, 25, and 12.5 km in order"),
+        ("pair_direction", "exactly 50-to-25 diagnostic"),
+        ("snapshot_binding", "sealed snapshot and evaluator return identity disagree"),
+        (
+            "parameter_binding",
+            "selected physical parameters and evaluator parameter identity disagree",
+        ),
+    ),
+)
+def test_three_grid_envelope_rejects_cascade_rehashed_source_impossible_bindings(
+    tamper_kind: str,
+    error_pattern: str,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, _ = _synthetic_three_grid_envelope(protocol)
+    tampered = deepcopy(envelope)
+    sealed = cast(dict[str, Any], tampered["sealed_three_grid_gate_evidence"])
+    if tamper_kind == "resolution_order":
+        resolution_map = cast(
+            dict[str, dict[str, object]], tampered["grid_resolution_payload_by_grid_size"]
+        )
+        resolution_map["25_km"], resolution_map["12_5_km"] = (
+            resolution_map["12_5_km"],
+            resolution_map["25_km"],
+        )
+    elif tamper_kind == "pair_direction":
+        diagnostic = cast(dict[str, object], sealed["diagnostic_50_to_25"])
+        diagnostic["coarse_grid_size_km_hex"] = (40.0).hex()
+    elif tamper_kind == "snapshot_binding":
+        sealed["snapshot_id"] = "fold_2"
+    elif tamper_kind == "parameter_binding":
+        sealed["selected_physical_parameters_sha256"] = "f" * 64
+    else:  # pragma: no cover - the parameterization is frozen above
+        raise AssertionError(tamper_kind)
+    attacker_crosswalk = _cascade_rehash_synthetic_three_grid_envelope(protocol, tampered)
+
+    with pytest.raises(ValueError, match=error_pattern):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(tampered),
+            attacker_crosswalk,
+        )
+
+
+def test_three_grid_envelope_rejects_missing_extra_and_no_clobber(tmp_path: Path) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, public_crosswalk = _synthetic_three_grid_envelope(protocol)
+
+    missing = deepcopy(envelope)
+    missing.pop("grid_resolution_payload_by_grid_size")
+    with pytest.raises(ValueError, match="missing or extra envelope field"):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(missing),
+            public_crosswalk,
+        )
+
+    extra = deepcopy(envelope)
+    resolution_map = cast(
+        dict[str, dict[str, object]], extra["grid_resolution_payload_by_grid_size"]
+    )
+    resolution_map["50_km"]["unexpected"] = "forbidden"
+    with pytest.raises(ValueError, match="missing or extra resolution field"):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(extra),
+            public_crosswalk,
+        )
+
+    destination = tmp_path / "fold_1.json"
+    challenger = tmp_path / ".challenger.tmp"
+    original_bytes = canonical_json_bytes(envelope)
+    destination.write_bytes(original_bytes)
+    challenger.write_bytes(original_bytes)
+    with pytest.raises(FileExistsError):
+        os.link(challenger, destination)
+    assert destination.read_bytes() == original_bytes
+    assert destination.stat().st_nlink == 1
+
+
+def test_three_grid_envelope_detects_same_bytes_replacement_and_hardlink_identity_tamper(
+    tmp_path: Path,
+) -> None:
+    original = tmp_path / "fold_1.json"
+    original.write_bytes(b"same canonical bytes")
+    expected_identity = _synthetic_installed_file_identity(original, original)
+    _assert_installed_file_identity(original, expected_identity)
+
+    replacement = tmp_path / ".replacement.tmp"
+    replacement.write_bytes(original.read_bytes())
+    replacement_identity = _synthetic_installed_file_identity(replacement, original)
+    assert replacement_identity != expected_identity
+    os.replace(replacement, original)
+    assert original.read_bytes() == b"same canonical bytes"
+    with pytest.raises(ValueError, match="file identity changed"):
+        _assert_installed_file_identity(original, expected_identity)
+
+    hardlink_target = tmp_path / "fold_2.json"
+    hardlink_target.write_bytes(b"hardlink probe")
+    hardlink_identity = _synthetic_installed_file_identity(hardlink_target, hardlink_target)
+    alias = tmp_path / "fold_2.alias"
+    os.link(hardlink_target, alias)
+    with pytest.raises(ValueError, match="link count changed"):
+        _assert_installed_file_identity(hardlink_target, hardlink_identity)
+
+
+@pytest.mark.parametrize(
+    ("mutation_path", "invalid_value", "error_pattern"),
+    (
+        (
+            ("windows_volume_serial_u64_decimal_or_null",),
+            str(1 << 64),
+            "Windows installed file identity encoding",
+        ),
+        (
+            ("windows_volume_serial_u64_decimal_or_null",),
+            "01",
+            "Windows installed file identity encoding",
+        ),
+        (
+            ("windows_file_id_16_bytes_hex_or_null",),
+            "A" * 32,
+            "Windows installed file identity encoding",
+        ),
+        (
+            ("windows_file_id_16_bytes_hex_or_null",),
+            "a" * 31,
+            "Windows installed file identity encoding",
+        ),
+        (
+            ("posix_st_dev_decimal_or_null",),
+            "1",
+            "Windows identity null branch",
+        ),
+        (
+            ("parent_identity", "windows_volume_serial_u64_decimal_or_null"),
+            str(1 << 64),
+            "Windows parent identity encoding",
+        ),
+        (
+            ("parent_identity", "windows_directory_file_id_16_bytes_hex_or_null"),
+            "g" * 32,
+            "Windows parent identity encoding",
+        ),
+        (
+            ("parent_identity", "windows_volume_serial_u64_decimal_or_null"),
+            "2",
+            "parent and file Windows volume serial disagree",
+        ),
+        (
+            ("parent_identity", "exact_case_relative_components"),
+            ["local_restricted", "wrong_case"],
+            "parent and file exact-case components disagree",
+        ),
+        (
+            ("temp_leaf_utf8_hex",),
+            b".fold_1.envelope.tmp".hex().upper(),
+            "temp leaf must be canonical lowercase UTF-8 hex",
+        ),
+        (
+            ("final_leaf_utf8_hex",),
+            b"fold_1.json".hex() + " ",
+            "final leaf must be canonical lowercase UTF-8 hex",
+        ),
+        (
+            ("temp_leaf_utf8_hex",),
+            123,
+            "temp leaf must be canonical lowercase UTF-8 hex",
+        ),
+        (
+            ("exact_case_relative_components",),
+            ["local_restricted", "three_grid_gate_evidence", "e\u0301.json"],
+            "final leaf and exact-case components disagree",
+        ),
+        (
+            ("exact_case_relative_components",),
+            "local_restricted/three_grid_gate_evidence/fold_1.json",
+            "file exact-case components must be an exact 3-item list",
+        ),
+        (
+            ("parent_identity", "exact_case_relative_components"),
+            ["three_grid_gate_evidence"],
+            "parent exact-case components must be an exact 2-item list",
+        ),
+        (
+            ("canonical_final_path",),
+            "/synthetic/three_grid_gate_evidence/fold_1.json",
+            "file canonical path must be a canonical absolute Windows volume path",
+        ),
+        (
+            ("canonical_final_path",),
+            r"D:\synthetic\three_grid_gate_evidence\fold_1.json",
+            "file canonical path must be a canonical absolute Windows volume path",
+        ),
+        (
+            ("canonical_final_path",),
+            r"\\?\Volume{00000000}\synthetic\fold_1.json",
+            "file canonical path must be a canonical absolute Windows volume path",
+        ),
+        (
+            ("canonical_final_path",),
+            (
+                f"{SYNTHETIC_WINDOWS_VOLUME_GUID_PREFIX}\\synthetic_workspace"
+                r"\\fold_1.json"
+            ),
+            "file canonical path must contain safe exact-case Windows components",
+        ),
+        (
+            ("canonical_final_path",),
+            f"{SYNTHETIC_WINDOWS_VOLUME_GUID_PREFIX}\\synthetic_workspace\\..\\fold_1.json",
+            "file canonical path must contain safe exact-case Windows components",
+        ),
+        (
+            ("final_repository_relative_path",),
+            123,
+            "final repository-relative path must be a string",
+        ),
+    ),
+)
+def test_three_grid_envelope_rejects_malformed_windows_file_and_parent_identity(
+    mutation_path: tuple[str, ...],
+    invalid_value: object,
+    error_pattern: str,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, _ = _synthetic_three_grid_envelope(protocol)
+    installed_identity = cast(dict[str, object], envelope["installed_file_identity"])
+    _convert_installed_identity_to_valid_synthetic_windows(
+        installed_identity,
+        attempt_id="synthetic-r3-envelope",
+    )
+    target: dict[str, object] = installed_identity
+    for component in mutation_path[:-1]:
+        target = cast(dict[str, object], target[component])
+    target[mutation_path[-1]] = invalid_value
+    envelope["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in envelope.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    public_crosswalk = _synthetic_public_crosswalk_from_envelope(envelope)
+    with pytest.raises(ValueError, match=error_pattern):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(envelope),
+            public_crosswalk,
+        )
+
+
+def test_three_grid_identity_component_validator_rejects_non_nfc_input_before_serialization() -> (
+    None
+):
+    with pytest.raises(ValueError, match="safe UTF-8 NFC names"):
+        _validate_exact_nfc_components(
+            ["local_restricted", "e\u0301"],
+            expected_length=2,
+            field_name="parent exact-case components",
+        )
+
+
+def test_file_id_128_serialization_preserves_raw_identifier_array_order() -> None:
+    identifier = bytes(range(16))
+    assert _file_id_128_identifier_raw_bytes_hex(identifier) == ("000102030405060708090a0b0c0d0e0f")
+    assert _file_id_128_identifier_raw_bytes_hex(identifier[::-1]) == (
+        "0f0e0d0c0b0a09080706050403020100"
+    )
+    with pytest.raises(ValueError, match="exactly 16 raw bytes"):
+        _file_id_128_identifier_raw_bytes_hex(identifier[:-1])
+
+
+def test_directory_identity_chain_requires_independent_live_capture_receipt() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, _ = _synthetic_three_grid_envelope(protocol)
+    installed_identity = cast(dict[str, object], envelope["installed_file_identity"])
+    expected_chain = cast(
+        list[dict[str, object]],
+        installed_identity["ordered_directory_identity_chain"],
+    )
+    for derived_candidate in (
+        expected_chain,
+        list(expected_chain),
+        deepcopy(expected_chain),
+    ):
+        with pytest.raises(ValueError, match="independent capture receipt"):
+            _verify_independently_observed_live_directory_identity_chain(
+                installed_identity,
+                derived_candidate,
+            )
+    forged_wrapped_deepcopy = _SyntheticLiveDirectoryIdentityCapture(
+        source_kind="independent_live_directory_handle_capture",
+        capture_id="forged-wrapped-deepcopy",
+        opened_handle_count=len(expected_chain),
+        records=tuple(deepcopy(expected_chain)),
+        _provenance_capability=object(),
+    )
+    with pytest.raises(ValueError, match="not the registered original"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            forged_wrapped_deepcopy,
+        )
+
+    with pytest.raises(ValueError, match="controlled factory"):
+        _SyntheticLiveDirectoryCaptureProvider(
+            factory_token=object(),
+            live_handle_source=cast(_SyntheticLiveDirectoryHandleSource, object()),
+        )
+    with pytest.raises(ValueError, match="controlled handle source"):
+        _SyntheticLiveDirectoryCaptureProvider(
+            factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+            live_handle_source=cast(
+                _SyntheticLiveDirectoryHandleSource,
+                tuple(deepcopy(expected_chain)),
+            ),
+        )
+
+    prebind_path_source = _SyntheticLiveDirectoryHandleSource(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        attempt_id="synthetic-r3-envelope",
+        platform=None,
+        path=Path("must-not-be-read-before-binding.json"),
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev=None,
+        posix_parent_st_ino=None,
+        identity_override=None,
+        opened_handle_limit_for_test=None,
+    )
+    object.__setattr__(prebind_path_source, "_path", None)
+    object.__setattr__(prebind_path_source, "_platform", "posix")
+    object.__setattr__(prebind_path_source, "_posix_st_dev", "1")
+    object.__setattr__(prebind_path_source, "_posix_parent_st_ino", "9")
+    with pytest.raises(ValueError, match="configuration changed before binding"):
+        _SyntheticLiveDirectoryCaptureProvider(
+            factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+            live_handle_source=prebind_path_source,
+        )
+    with pytest.raises(ValueError, match="new unbound handle source"):
+        _SyntheticLiveDirectoryCaptureProvider(
+            factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+            live_handle_source=prebind_path_source,
+        )
+
+    prebind_raw_source = _SyntheticLiveDirectoryHandleSource(
+        factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+        attempt_id="synthetic-r3-envelope",
+        platform="posix",
+        path=None,
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev="1",
+        posix_parent_st_ino="9",
+        identity_override=None,
+        opened_handle_limit_for_test=None,
+    )
+    object.__setattr__(prebind_raw_source, "_attempt_id", "forged-before-binding")
+    with pytest.raises(ValueError, match="configuration changed before binding"):
+        _SyntheticLiveDirectoryCaptureProvider(
+            factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+            live_handle_source=prebind_raw_source,
+        )
+
+    class _CopyingLiveHandleSource(_SyntheticLiveDirectoryHandleSource):
+        def observe_each_live_directory_handle(
+            self,
+            *,
+            requesting_provider: object,
+        ) -> tuple[dict[str, object], ...]:
+            del requesting_provider
+            return tuple(deepcopy(expected_chain))
+
+    with pytest.raises(ValueError, match="exact controlled factory class"):
+        _CopyingLiveHandleSource(
+            factory_token=_LIVE_CAPTURE_FACTORY_TOKEN,
+            attempt_id="synthetic-r3-envelope",
+            platform="posix",
+            path=None,
+            windows_volume_serial=None,
+            windows_parent_file_id=None,
+            posix_st_dev="1",
+            posix_parent_st_ino="9",
+            identity_override=None,
+            opened_handle_limit_for_test=None,
+        )
+    copying_source = object.__new__(_CopyingLiveHandleSource)
+    swapped_provider = _synthetic_live_directory_capture_provider(
+        attempt_id="synthetic-r3-envelope",
+        platform="posix",
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev="1",
+        posix_parent_st_ino="9",
+    )
+    object.__setattr__(swapped_provider, "_live_handle_source", copying_source)
+    with pytest.raises(ValueError, match="source changed after construction"):
+        swapped_provider.capture_before_evidence_read()
+    with pytest.raises(ValueError, match="single-use"):
+        swapped_provider.capture_before_evidence_read()
+
+    mutated_source_provider = _synthetic_live_directory_capture_provider_from_path(
+        Path("must-not-be-read.json"),
+        attempt_id="synthetic-r3-envelope",
+    )
+    mutated_source = mutated_source_provider._live_handle_source
+    object.__setattr__(mutated_source, "_path", None)
+    object.__setattr__(mutated_source, "_platform", "posix")
+    object.__setattr__(mutated_source, "_posix_st_dev", "1")
+    object.__setattr__(mutated_source, "_posix_parent_st_ino", "9")
+    with pytest.raises(ValueError, match="configuration changed after binding"):
+        mutated_source_provider.capture_before_evidence_read()
+    with pytest.raises(ValueError, match="single-use"):
+        mutated_source_provider.capture_before_evidence_read()
+
+    class _OverridingCaptureProvider(_SyntheticLiveDirectoryCaptureProvider):
+        pass
+
+    overriding_provider = object.__new__(_OverridingCaptureProvider)
+    with pytest.raises(ValueError, match="controlled live capture provider"):
+        _reopen_and_verify_synthetic_three_grid_envelope(
+            protocol,
+            Path("must-not-be-opened.json"),
+            {},
+            live_directory_capture_provider=overriding_provider,
+            expected_attempt_id="must-not-be-used",
+            expected_snapshot_id="must-not-be-used",
+            expected_protocol_sha256="must-not-be-used",
+        )
+
+    short_provider = _synthetic_live_directory_capture_provider(
+        attempt_id="synthetic-r3-envelope",
+        platform="posix",
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev="1",
+        posix_parent_st_ino="9",
+        opened_handle_limit_for_test=len(expected_chain) - 1,
+    )
+    short_capture = short_provider.capture_before_evidence_read()
+    with pytest.raises(ValueError, match="did not open all handles"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            short_capture,
+        )
+    with pytest.raises(ValueError, match="ID was already consumed"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            short_capture,
+        )
+
+    mutated_provider = _synthetic_live_directory_capture_provider(
+        attempt_id="synthetic-r3-envelope",
+        platform="posix",
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev="1",
+        posix_parent_st_ino="9",
+    )
+    mutated_capture = mutated_provider.capture_before_evidence_read()
+    mutated_capture.records[0]["posix_st_ino_decimal_or_null"] = "forged-after-issuance"
+    with pytest.raises(ValueError, match="changed after issuance"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            mutated_capture,
+        )
+    with pytest.raises(ValueError, match="ID was already consumed"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            mutated_capture,
+        )
+
+    for field_name, forged_value in (
+        ("source_kind", "forged-source-kind"),
+        ("capture_id", "forged-capture-id"),
+        ("opened_handle_count", len(expected_chain) + 1),
+    ):
+        scalar_provider = _synthetic_live_directory_capture_provider(
+            attempt_id="synthetic-r3-envelope",
+            platform="posix",
+            windows_volume_serial=None,
+            windows_parent_file_id=None,
+            posix_st_dev="1",
+            posix_parent_st_ino="9",
+        )
+        scalar_capture = scalar_provider.capture_before_evidence_read()
+        assert not hasattr(scalar_capture, "__dict__")
+        object.__setattr__(scalar_capture, field_name, forged_value)
+        with pytest.raises(ValueError, match="metadata changed after issuance"):
+            _verify_independently_observed_live_directory_identity_chain(
+                installed_identity,
+                scalar_capture,
+            )
+
+    provider = _synthetic_live_directory_capture_provider(
+        attempt_id="synthetic-r3-envelope",
+        platform="posix",
+        windows_volume_serial=None,
+        windows_parent_file_id=None,
+        posix_st_dev="1",
+        posix_parent_st_ino="9",
+    )
+    independent_capture = provider.capture_before_evidence_read()
+    bound_source = provider._live_handle_source
+    stolen_capability_wrapper = _SyntheticLiveDirectoryIdentityCapture(
+        source_kind=independent_capture.source_kind,
+        capture_id=independent_capture.capture_id,
+        opened_handle_count=independent_capture.opened_handle_count,
+        records=tuple(deepcopy(independent_capture.records)),
+        _provenance_capability=independent_capture._provenance_capability,
+    )
+    with pytest.raises(ValueError, match="not the registered original"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            stolen_capability_wrapper,
+        )
+    _verify_independently_observed_live_directory_identity_chain(
+        installed_identity,
+        independent_capture,
+    )
+    with pytest.raises(ValueError, match="ID was already consumed"):
+        _verify_independently_observed_live_directory_identity_chain(
+            installed_identity,
+            independent_capture,
+        )
+    with pytest.raises(AttributeError):
+        object.__setattr__(provider, "_used", False)
+    with pytest.raises(AttributeError):
+        object.__setattr__(bound_source, "_used", False)
+    with pytest.raises(ValueError, match="single-use"):
+        bound_source.observe_each_live_directory_handle(requesting_provider=provider)
+    with pytest.raises(ValueError, match="single-use"):
+        provider.capture_before_evidence_read()
+
+
+@pytest.mark.parametrize("platform", ("posix", "windows"))
+def test_directory_identity_chain_ancestor_replacement_reanchors_outer_sha(
+    platform: str,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, _ = _synthetic_three_grid_envelope(protocol)
+    installed_identity = cast(dict[str, object], envelope["installed_file_identity"])
+    if platform == "windows":
+        _convert_installed_identity_to_valid_synthetic_windows(
+            installed_identity,
+            attempt_id="synthetic-r3-envelope",
+        )
+    envelope["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in envelope.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    frozen_anchors = _synthetic_public_crosswalk_from_envelope(envelope)
+    replacement = deepcopy(envelope)
+    replacement_identity = cast(dict[str, object], replacement["installed_file_identity"])
+    replacement_chain = cast(
+        list[dict[str, object]],
+        replacement_identity["ordered_directory_identity_chain"],
+    )
+    target_record = replacement_chain[3]
+    changed_field = (
+        "windows_directory_file_id_16_bytes_hex_or_null"
+        if platform == "windows"
+        else "posix_st_ino_decimal_or_null"
+    )
+    original_value = target_record[changed_field]
+    target_record[changed_field] = (
+        _file_id_128_identifier_raw_bytes_hex(bytes(range(15, -1, -1)))
+        if platform == "windows"
+        else "7777"
+    )
+    restored_chain = deepcopy(replacement_chain)
+    restored_chain[3][changed_field] = original_value
+    assert restored_chain == installed_identity["ordered_directory_identity_chain"]
+    replacement_identity["ordered_directory_identity_chain_sha256"] = _canonical_v1_sha256(
+        replacement_chain
+    )
+    replacement["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+        {
+            key: value
+            for key, value in replacement.items()
+            if key != "three_grid_gate_evidence_envelope_sha256"
+        }
+    )
+    replacement_anchors = _synthetic_public_crosswalk_from_envelope(replacement)
+    assert (
+        replacement["sealed_three_grid_gate_evidence"]
+        == envelope["sealed_three_grid_gate_evidence"]
+    )
+    assert (
+        replacement["three_grid_gate_evidence_envelope_sha256"]
+        != envelope["three_grid_gate_evidence_envelope_sha256"]
+    )
+    with pytest.raises(ValueError, match="public gate/fit-attempt/presence crosswalk"):
+        _verify_synthetic_three_grid_envelope(
+            protocol,
+            canonical_json_bytes(replacement),
+            frozen_anchors,
+        )
+    _verify_synthetic_three_grid_envelope(
+        protocol,
+        canonical_json_bytes(replacement),
+        replacement_anchors,
+    )
+
+
+def test_directory_identity_chain_rejects_stale_hash_missing_record_and_wrong_order() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    _, envelope, public_crosswalk = _synthetic_three_grid_envelope(protocol)
+    for mutation in ("stale_hash", "missing", "wrong_order"):
+        tampered = deepcopy(envelope)
+        identity = cast(dict[str, object], tampered["installed_file_identity"])
+        chain = cast(list[dict[str, object]], identity["ordered_directory_identity_chain"])
+        if mutation == "stale_hash":
+            chain[2]["posix_st_ino_decimal_or_null"] = "8888"
+        elif mutation == "missing":
+            chain.pop(2)
+            identity["ordered_directory_identity_chain_sha256"] = _canonical_v1_sha256(chain)
+        else:
+            chain[1], chain[2] = chain[2], chain[1]
+            identity["ordered_directory_identity_chain_sha256"] = _canonical_v1_sha256(chain)
+        tampered["three_grid_gate_evidence_envelope_sha256"] = _canonical_v1_sha256(
+            {
+                key: value
+                for key, value in tampered.items()
+                if key != "three_grid_gate_evidence_envelope_sha256"
+            }
+        )
+        tampered_crosswalk = _synthetic_public_crosswalk_from_envelope(tampered)
+        with pytest.raises(ValueError, match="directory identity chain"):
+            _verify_synthetic_three_grid_envelope(
+                protocol,
+                canonical_json_bytes(tampered),
+                tampered_crosswalk if mutation != "stale_hash" else public_crosswalk,
+            )
+
+
+@pytest.mark.parametrize("platform", ("posix", "windows"))
+def test_fresh_checkpoint_rejects_independent_live_middle_ancestor_identity_drift(
+    tmp_path: Path,
+    platform: str,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    temp_path = tmp_path / f".{platform}.fold_1.envelope.tmp"
+    final_path = tmp_path / "fold_1.json"
+    with temp_path.open("xb"):
+        pass
+    if platform == "windows":
+        installed_identity = _synthetic_installed_file_identity(temp_path, final_path)
+        _convert_installed_identity_to_valid_synthetic_windows(
+            installed_identity,
+            attempt_id="synthetic-r3-envelope",
+        )
+        gate, envelope, public_crosswalk = _synthetic_three_grid_envelope(
+            protocol,
+            installed_identity,
+        )
+    else:
+        gate, envelope, public_crosswalk = _synthetic_three_grid_envelope(protocol)
+        installed_identity = cast(dict[str, object], envelope["installed_file_identity"])
+    frozen_envelope_bytes = canonical_json_bytes(envelope)
+    frozen_outer_sha = cast(str, envelope["three_grid_gate_evidence_envelope_sha256"])
+    frozen_anchors = deepcopy(public_crosswalk)
+    with temp_path.open("r+b") as handle:
+        handle.write(frozen_envelope_bytes)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.link(temp_path, final_path)
+    temp_path.unlink()
+
+    changed_field = (
+        "windows_directory_file_id_16_bytes_hex_or_null"
+        if platform == "windows"
+        else "posix_st_ino_decimal_or_null"
+    )
+    changed_value = "ffffffffffffffffffffffffffffffff" if platform == "windows" else "999999999"
+    drifted_live_capture_provider = _synthetic_live_directory_capture_provider(
+        attempt_id="synthetic-r3-envelope",
+        platform=platform,
+        windows_volume_serial="1" if platform == "windows" else None,
+        windows_parent_file_id=(
+            _file_id_128_identifier_raw_bytes_hex(bytes(range(16, 32)))
+            if platform == "windows"
+            else None
+        ),
+        posix_st_dev="1" if platform == "posix" else None,
+        posix_parent_st_ino="9" if platform == "posix" else None,
+        identity_override=(3, changed_field, changed_value),
+    )
+
+    with pytest.raises(ValueError, match="observed live directory identity chain drifted"):
+        _reopen_and_verify_synthetic_three_grid_envelope(
+            protocol,
+            final_path,
+            frozen_anchors,
+            live_directory_capture_provider=drifted_live_capture_provider,
+            expected_attempt_id="synthetic-r3-envelope",
+            expected_snapshot_id="fold_1",
+            expected_protocol_sha256=gate.protocol_sha256,
+        )
+    assert final_path.read_bytes() == frozen_envelope_bytes
+    assert envelope["three_grid_gate_evidence_envelope_sha256"] == frozen_outer_sha
+    assert public_crosswalk == frozen_anchors
+
+
+@pytest.mark.parametrize(
+    "present_snapshots",
+    (
+        frozenset(("fold_1", "fold_3", "final_validation")),
+        frozenset(SNAPSHOT_ORDER),
+    ),
+    ids=("mixed_present_null", "all_present"),
+)
+def test_three_grid_presence_map_mixed_round_trip_and_exact_file_set(
+    tmp_path: Path,
+    present_snapshots: frozenset[str],
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    attempt_id = "synthetic-r3-five-snapshot-presence"
+    protocol_sha256 = "a" * 64
+    evidence_directory = (
+        tmp_path / "attempts" / attempt_id / "local_restricted" / "three_grid_gate_evidence"
+    )
+    evidence_directory.mkdir(parents=True)
+    public_crosswalk_by_snapshot = {
+        snapshot_id: _null_three_grid_public_crosswalk() for snapshot_id in SNAPSHOT_ORDER
+    }
+    installed_identity_by_snapshot: dict[str, dict[str, object]] = {}
+    outer_sha_by_snapshot: dict[str, str] = {}
+
+    for snapshot_id in SNAPSHOT_ORDER:
+        if snapshot_id not in present_snapshots:
+            continue
+        temp_path = evidence_directory / f".{snapshot_id}.envelope.tmp"
+        final_path = evidence_directory / f"{snapshot_id}.json"
+        with temp_path.open("xb"):
+            pass
+        installed_identity = _synthetic_installed_file_identity(
+            temp_path,
+            final_path,
+            attempt_id=attempt_id,
+        )
+        _, envelope, public_crosswalk = _synthetic_three_grid_envelope(
+            protocol,
+            installed_identity,
+            attempt_id=attempt_id,
+            snapshot_id=snapshot_id,
+            protocol_sha256=protocol_sha256,
+        )
+        envelope_bytes = canonical_json_bytes(envelope)
+        with temp_path.open("r+b") as handle:
+            handle.write(envelope_bytes)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temp_path, final_path)
+        temp_path.unlink()
+        installed_identity_by_snapshot[snapshot_id] = installed_identity
+        public_crosswalk_by_snapshot[snapshot_id] = public_crosswalk
+        outer_sha_by_snapshot[snapshot_id] = cast(
+            str,
+            envelope["three_grid_gate_evidence_envelope_sha256"],
+        )
+
+    presence_map, presence_map_sha256 = _verify_synthetic_three_grid_presence_file_set(
+        protocol,
+        evidence_directory,
+        public_crosswalk_by_snapshot,
+        installed_identity_by_snapshot,
+        expected_attempt_id=attempt_id,
+        expected_protocol_sha256=protocol_sha256,
+    )
+    assert list(presence_map) == list(SNAPSHOT_ORDER)
+    assert presence_map == {
+        snapshot_id: outer_sha_by_snapshot.get(snapshot_id) for snapshot_id in SNAPSHOT_ORDER
+    }
+    assert presence_map_sha256 == _canonical_v1_sha256(presence_map)
+
+    extra_path = evidence_directory / "unexpected.json"
+    extra_path.write_bytes(b"unexpected")
+    with pytest.raises(ValueError, match="file set does not match presence projection"):
+        _verify_synthetic_three_grid_presence_file_set(
+            protocol,
+            evidence_directory,
+            public_crosswalk_by_snapshot,
+            installed_identity_by_snapshot,
+            expected_attempt_id=attempt_id,
+            expected_protocol_sha256=protocol_sha256,
+        )
+    extra_path.unlink()
+
+    missing_snapshot = next(iter(sorted(present_snapshots)))
+    (evidence_directory / f"{missing_snapshot}.json").unlink()
+    with pytest.raises(ValueError, match="file set does not match presence projection"):
+        _verify_synthetic_three_grid_presence_file_set(
+            protocol,
+            evidence_directory,
+            public_crosswalk_by_snapshot,
+            installed_identity_by_snapshot,
+            expected_attempt_id=attempt_id,
+            expected_protocol_sha256=protocol_sha256,
+        )
+
+
+def test_three_grid_indeterminate_after_install_is_terminal() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    state_machine = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]["durable_create_once_file_protocol"]["install_failure_state_machine"]
+    indeterminate_action = state_machine[
+        "install_success_until_complete_postinstall_flush_parent_sync_and_reopen_verification"
+    ]
+    for terminal_requirement in (
+        "indeterminate_after_install",
+        "read_only_forensic_reopen_only",
+        "no_delete_rollback_overwrite_or_same_final_retry",
+        "same_attempt_may_never_resume_reanchor_publish_or_advance_qualification",
+        "new_attempt_id_only_after_manual_audit",
+    ):
+        assert terminal_requirement in indeterminate_action
+
+
+def test_three_grid_pre_anchor_restart_may_not_adopt_or_reanchor_installed_file(
+    tmp_path: Path,
+) -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    attempt_id = "synthetic-r3-pre-anchor-crash"
+    evidence_directory = tmp_path / "three_grid_gate_evidence"
+    evidence_directory.mkdir()
+    _, envelope, _ = _synthetic_three_grid_envelope(
+        protocol,
+        attempt_id=attempt_id,
+        snapshot_id="fold_1",
+    )
+    (evidence_directory / "fold_1.json").write_bytes(canonical_json_bytes(envelope))
+    all_null_crosswalks = {
+        snapshot_id: _null_three_grid_public_crosswalk() for snapshot_id in SNAPSHOT_ORDER
+    }
+    with pytest.raises(ValueError, match="file set does not match presence projection"):
+        _verify_synthetic_three_grid_presence_file_set(
+            protocol,
+            evidence_directory,
+            all_null_crosswalks,
+            {},
+            expected_attempt_id=attempt_id,
+            expected_protocol_sha256="a" * 64,
+        )
+
+    state_machine = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]["durable_create_once_file_protocol"]["install_failure_state_machine"]
+    assert state_machine[
+        "complete_postinstall_reopen_verification_before_first_external_envelope_sha_anchor_"
+        "is_durably_persisted"
+    ].startswith("any_crash_or_failure_is_invalid_execution")
+
+
+def test_r3_is_a_minimal_engineering_erratum_from_exact_r2_tag_and_commit() -> None:
+    current = _load_yaml(PROTOCOL_PATH)
+    r2 = _load_yaml_at_revision(R2_PROTOCOL_COMMIT, PROTOCOL_PATH)
+
+    assert current["revision_base"]["protocol_tag"] == R2_PROTOCOL_TAG
+    assert current["revision_base"]["protocol_tag_object"] == R2_PROTOCOL_TAG_OBJECT
+    assert current["revision_base"]["protocol_commit"] == R2_PROTOCOL_COMMIT
+    assert (
+        current["qualification"]["per_snapshot_conjunctive_requirements"]
+        == r2["qualification"]["per_snapshot_conjunctive_requirements"]
+    )
+    assert (
+        current["qualification_execution_seal"][
+            "qualification_result_tag_diff_from_repair_code_tag"
+        ]
+        == r2["qualification_execution_seal"]["qualification_result_tag_diff_from_repair_code_tag"]
+    )
+
+    missing = object()
+    differences: set[tuple[str, ...]] = set()
+
+    def collect_differences(
+        left: object,
+        right: object,
+        path: tuple[str, ...] = (),
+    ) -> None:
+        if left is missing or right is missing:
+            differences.add(path)
+            return
+        if isinstance(left, dict) and isinstance(right, dict):
+            for key in set(left) | set(right):
+                collect_differences(
+                    left.get(key, missing),
+                    right.get(key, missing),
+                    (*path, str(key)),
+                )
+            return
+        if left != right:
+            differences.add(path)
+
+    collect_differences(current, r2)
+    responsibility_paths = {
+        (
+            "repair_code_scope_from_protocol_tag",
+            "new_repair_module_execution_rules",
+            module_path,
+            "allowed_responsibilities",
+        )
+        for module_path in (
+            "src/seismoflux/background/etas_numerical_repair_io.py",
+            "src/seismoflux/background/etas_numerical_repair_evidence.py",
+        )
+    }
+    hash_source_semantic_paths = {
+        (
+            "qualification",
+            "three_grid_gate_evidence_protocol",
+            "evidence_payload_is_local_restricted_but_its_sha256_is_public_in_same_snapshot_gate_and_fit_attempt",
+        ),
+        (
+            "qualification",
+            "three_grid_gate_evidence_protocol",
+            "embedded_13_field_evidence_payload_is_local_restricted_and_its_own_sha256_is_not_an_external_identity_anchor",
+        ),
+        (
+            "qualification",
+            "three_grid_gate_evidence_protocol",
+            "complete_six_field_envelope_own_sha256_is_public_in_same_snapshot_gate_fit_attempt_and_presence_map_without_changing_field_names_types_paths_or_file_counts",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "public_embedding",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "exact_bytes",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "includes_ref",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "fields_must_equal_evidence_fields_excluding_own_sha256",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "fields_must_equal_complete_envelope_fields_excluding_envelope_own_sha256",
+        ),
+        (
+            "content_addressing",
+            "identities",
+            "three_grid_gate_evidence_sha256",
+            "embedded_13_field_own_sha256_remains_recomputed_inside_envelope_but_is_not_the_public_crosswalk_value",
+        ),
+        (
+            "outputs",
+            "canonical_nested_schemas",
+            "three_grid_gate_evidence_presence_and_sha256_by_snapshot",
+            "R3_present_value_exact_source",
+        ),
+        (
+            "outputs",
+            "public_qualification_manifest_schema",
+            "snapshot_gate_result_derivation_and_crosswalk",
+            "three_grid_gate_evidence_sha256_exact_source",
+        ),
+    }
+    root_binding_semantic_paths = {
+        (
+            "qualification_execution_seal",
+            "opening_seal",
+            "repository_requirements",
+            "fixed_workspace_root_argument_must_open_the_exact_worktree_whose_HEAD_upstream_"
+            "remote_code_tag_and_protocol_package_blobs_are_verified_here",
+        ),
+        (
+            "qualification_execution_seal",
+            "opening_seal",
+            "repository_requirements",
+            "absolute_workspace_root_path_remains_local_restricted_and_may_not_enter_"
+            "opening_or_public_artifacts",
+        ),
+        (
+            "qualification_execution_seal",
+            "optimizer_runtime_code_seal",
+            "isolated_launcher_contract",
+            "qualification_local_restricted_workspace_root_cli_option_exact",
+        ),
+        (
+            "qualification_execution_seal",
+            "optimizer_runtime_code_seal",
+            "isolated_launcher_contract",
+            "workspace_root_option_must_occur_exactly_once_and_equal_the_fixed_root_"
+            "argument_contract_before_any_project_import_or_evidence_open",
+        ),
+        (
+            "qualification_execution_seal",
+            "optimizer_runtime_code_seal",
+            "isolated_launcher_contract",
+            "workspace_root_argument_must_not_come_from_environment_current_directory_or_envelope",
+        ),
+    }
+    exact_allowed_paths = {
+        ("protocol_revision",),
+        ("revision_reason",),
+        ("revision_base",),
+        ("publication", "protocol_tag"),
+        ("repair_code_scope_from_protocol_tag", "comparison_base"),
+        (
+            "qualification",
+            "three_grid_gate_evidence_protocol",
+            "local_restricted_persistence",
+        ),
+        *hash_source_semantic_paths,
+        *root_binding_semantic_paths,
+        *responsibility_paths,
+    }
+    assert differences == exact_allowed_paths
+
+    grid_protocol = current["qualification"]["three_grid_gate_evidence_protocol"]
+    assert grid_protocol[
+        "embedded_13_field_evidence_payload_is_local_restricted_and_its_own_sha256_is_not_an_external_identity_anchor"
+    ]
+    assert grid_protocol[
+        "complete_six_field_envelope_own_sha256_is_public_in_same_snapshot_gate_fit_attempt_and_presence_map_without_changing_field_names_types_paths_or_file_counts"
+    ]
+    assert (
+        "evidence_payload_is_local_restricted_but_its_sha256_is_public_in_same_snapshot_gate_and_fit_attempt"
+        not in grid_protocol
+    )
+    three_grid_identity = current["content_addressing"]["identities"][
+        "three_grid_gate_evidence_sha256"
+    ]
+    assert three_grid_identity["public_embedding"] == (
+        "complete_envelope_own_sha256_only_in_same_snapshot_gate_fit_attempt_and_presence_map"
+    )
+    assert three_grid_identity["exact_bytes"] == (
+        "canonical_json_v1_of_envelope_identity_fields_exact"
+    )
+    assert three_grid_identity["includes_ref"] == (
+        "qualification.three_grid_gate_evidence_protocol.local_restricted_persistence."
+        "envelope_identity_fields_exact"
+    )
+    persistence = current["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    assert (
+        persistence["envelope_identity_fields_exact"] == persistence["envelope_fields_exact"][:-1]
+    )
+    assert three_grid_identity[
+        "embedded_13_field_own_sha256_remains_recomputed_inside_envelope_but_is_not_the_public_crosswalk_value"
+    ]
+    presence_schema = current["outputs"]["canonical_nested_schemas"][
+        "three_grid_gate_evidence_presence_and_sha256_by_snapshot"
+    ]
+    assert presence_schema["R3_present_value_exact_source"] == (
+        "same_snapshot_complete_envelope_three_grid_gate_evidence_envelope_sha256"
+    )
+
+    for path in root_binding_semantic_paths:
+        current_value: Any = current
+        for component in path:
+            current_value = current_value[component]
+        if path[-1] == "qualification_local_restricted_workspace_root_cli_option_exact":
+            assert current_value == "--workspace-root"
+        else:
+            assert current_value is True
+
+    responsibility = (
+        "complete_three_grid_local_restricted_create_once_persistence_and_disk_reopen_validation"
+    )
+    for path in responsibility_paths:
+        current_values: Any = current
+        r2_values: Any = r2
+        for component in path:
+            current_values = current_values[component]
+            r2_values = r2_values[component]
+        assert current_values == [*r2_values, responsibility]
+
+    assert (
+        current["qualification_execution_seal"]["qualification_public_result_staging"]
+        == r2["qualification_execution_seal"]["qualification_public_result_staging"]
+    )
+
+
 def test_issue_forecast_seed_context_exact_bytes_and_reference_vector() -> None:
     forecast = _load_yaml(PROTOCOL_PATH)["adapter_contract"]["issue_forecast_definition"]
     seed = forecast["seed_context_contract"]
@@ -4236,7 +8078,8 @@ def test_qualification_gate_and_public_result_crosswalks_are_closed() -> None:
         "qualification.selected_start_rule_applied_to_same_snapshot_five_diagnostic_rows"
     )
     assert gate_crosswalk["three_grid_gate_evidence_sha256_exact_source"] == (
-        "same_snapshot_frozen_three_grid_gate_evidence_payload"
+        "same_snapshot_reopened_complete_six_field_envelope_three_grid_gate_evidence_"
+        "envelope_sha256"
     )
     assert gate_crosswalk["prerequisite_skip_and_failure_code_semantics_ref"] == (
         "qualification.snapshot_failure_code_order_and_deduplication."
@@ -4459,7 +8302,9 @@ def test_adapter_local_restricted_payloads_have_strict_byte_and_source_closure()
 def test_protocol_document_states_the_same_stop_boundary() -> None:
     document = PROTOCOL_DOCUMENT_PATH.read_text(encoding="utf-8")
     for required in (
-        "v0.2.2-background-etas-repair-protocol-r2",
+        "v0.2.2-background-etas-repair-protocol-r3",
+        R2_PROTOCOL_TAG_OBJECT,
+        R2_PROTOCOL_COMMIT,
         "Stage 4 formal target consumer 调用 0",
         "恰好有 25 行",
         "不得复用旧 `run_local_support_etas_pipeline`",
@@ -4477,6 +8322,18 @@ def test_protocol_document_states_the_same_stop_boundary() -> None:
         "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/staged_public",
         "pre-closing identity 只覆盖 7 个 common 文件",
         "同一 attempt 仅重试 byte-exact public materialization",
+        "local_restricted/three_grid_gate_evidence/{snapshot_id}.json",
+        "6 字段 complete envelope",
+        "sealed 对象仍是包括自身 SHA 的原 13 字段",
+        "presence/SHA/null 真值表",
+        "OBJ_DONT_REPARSE(0x1000)",
+        "FileIdExtdDirectoryInfo",
+        "ordered_directory_identity_chain",
+        "--workspace-root",
+        "Identifier[0]",
+        "受控、单次的 live-capture provider",
+        "indeterminate_after_install",
+        "成功公开、结果提交和远端标签后这些 evidence 仍永久保留",
     ):
         assert required in document
 
@@ -4508,6 +8365,9 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
         assert "v0.2.2-background-etas-repair-protocol" in document
         assert "v0.2.2-background-etas-repair-protocol-r1" in document
         assert "v0.2.2-background-etas-repair-protocol-r2" in document
+        assert "v0.2.2-background-etas-repair-protocol-r3" in document
+        assert R2_PROTOCOL_TAG_OBJECT in document
+        assert R2_PROTOCOL_COMMIT in document
         assert "codex/stage2-etas-numerical-repair" in document
         assert "dae6403" in document
         assert f"阶段 9 锁定测试{fullwidth_colon}未运行" in document
@@ -4520,10 +8380,66 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
         ) in document
         assert "staged→final" in document
         assert "post-closing" in document
+        assert "local_restricted/three_grid_gate_evidence" in document
+        assert "6 字段" in document
+        assert "13 字段" in document
+        assert "presence/SHA/null" in document
+        assert "windows_ntfs_ntcreatefile_filerenameinfo_v1" in document
+        assert "envelope_identity_fields_exact" in document
+        assert "before_seal_return" in document
+        assert "0x001201bf" in document
+        assert "0xc01000a1" not in document
+        assert "P0=1/P1=2/P2=1" in document
+        assert "P0=1/P1=4/P2=1" in document
+        assert "P0=0/P1=1/P2=1" in document
+        assert "P0=0/P1=0/P2=1" in document
+        assert "P0=0/P1=3/P2=2" in document
+        assert "ordered_directory_identity_chain" in document
+        assert "--workspace-root" in document
+        assert "Identifier[0" in document
+        for second_round_count in (
+            "P0=0/P1=2/P2=1",
+            "P0=0/P1=2/P2=0",
+            "P0=0/P1=3/P2=0",
+        ):
+            assert second_round_count in document
+        assert "INVALID/STOPPED" in document
+        assert "R2→R3" in document
 
-    assert f"状态{fullwidth_colon}通过{fullwidth_left_parenthesis}本地协议工程验收" in acceptance
-    assert "进行中" not in acceptance
+    assert (
+        f"状态{fullwidth_colon}未通过{fullwidth_left_parenthesis}第四轮独立终审仍发现 P1/P2"
+        in acceptance
+    )
     assert "之后补填" not in acceptance
+    assert "文档同步后的最终限定复跑、三路独立复审" not in acceptance
+    assert "最终限定复跑和静态检查已经完成" in acceptance
+    for r3_evidence in (
+        "ModuleNotFoundError: scripts",
+        "1 error in 14.17s",
+        "stdout 约 70%",
+        "cascade rehash",
+        "同字节替换",
+        "qualification_public_result_staging",
+        "10 passed in 13.31s",
+        "31 passed in 35.49s",
+        "31 passed in 35.10s",
+        "63 passed in 33.55s",
+        "25 passed, 33 deselected in 24.25s",
+        "58 passed in 60.16s",
+        "90 passed in 66.95s",
+        "90 passed in 60.85s",
+        "33 passed, 34 deselected in 32.34s",
+        "67 passed in 60.76s",
+        "99 passed in 61.24s",
+        "7 passed, 63 deselected in 10.52s",
+        "2 passed, 68 deselected in 7.63s",
+        "70 passed in 67.63s",
+        "102 passed in 67.52s",
+        "Success: no issues found in 1 source file",
+        "git diff --check` 通过",
+        "仅修改配置、主协议、验收记录、重启交接和协议测试五个授权 tracked 文件",
+    ):
+        assert r3_evidence in acceptance
     for final_evidence in (
         "1213 passed in 329.82s",
         "failures=0",

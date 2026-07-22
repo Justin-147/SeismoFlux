@@ -1,16 +1,24 @@
 schema_version: 1
 protocol_version: 0.2.2
-protocol_revision: r2
+protocol_revision: r3
 stage: 2-ETAS-R
 experiment_family: background_etas_numerical_repair
 status: preregistered_target_blind_before_any_repair_fit
 preregistered_on: '2026-07-17'
 revised_on: '2026-07-19'
-revision_reason: freeze_qualification_attempt_local_staged_public_paths_and_byte_exact_materialization_without_changing_any_scientific_input_or_fit_rule
+revision_reason: freeze_attempt_local_complete_three_grid_envelope_identity_durability_and_fresh_disk_reopen_without_changing_any_scientific_input_public_schema_or_fit_rule
 blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
 
-publication:
+revision_base:
   protocol_tag: v0.2.2-background-etas-repair-protocol-r2
+  protocol_tag_object: 903c80ed64295311f8d7870b4847f56d67caee51
+  protocol_commit: 5a5902a83645c217ea11a3bd99eb70b535f0e4df
+  protocol_tag_object_type_exact: annotated_tag
+  protocol_tag_must_peel_exactly_to_protocol_commit: true
+  remote_protocol_tag_and_peeled_commit_must_be_verified_before_r3_freeze: true
+
+publication:
+  protocol_tag: v0.2.2-background-etas-repair-protocol-r3
   qualification_code_tag: v0.2.2-background-etas-repair-code
   qualification_result_tag: v0.2.2-background-etas-numerical-qualification
   comparator_adapter_code_tag: v0.2.2-background-etas-comparator-adapter
@@ -59,7 +67,7 @@ purpose:
   kde_remains_secondary_comparator_and_is_never_an_etas_substitute: true
 
 repair_code_scope_from_protocol_tag:
-  comparison_base: v0.2.2-background-etas-repair-protocol-r2
+  comparison_base: v0.2.2-background-etas-repair-protocol-r3
   allowed_changed_or_added_paths:
     - src/seismoflux/background/etas_fit.py
     - src/seismoflux/background/etas_numerical_repair.py
@@ -116,12 +124,12 @@ repair_code_scope_from_protocol_tag:
       new_likelihood_objective_optimizer_hessian_grid_integrator_or_scientific_selection_definition_forbidden: true
       numerical_work_must_delegate_only_to_verified_existing_code_tag_callables: true
     src/seismoflux/background/etas_numerical_repair_io.py:
-      allowed_responsibilities: [reader_boundary_projection_and_predicate, two_phase_source_access_ledger, fit_input_bundle_construction, parent_blob_fit_predicate_replay, local_restricted_content_addressed_persistence]
+      allowed_responsibilities: [reader_boundary_projection_and_predicate, two_phase_source_access_ledger, fit_input_bundle_construction, parent_blob_fit_predicate_replay, local_restricted_content_addressed_persistence, complete_three_grid_local_restricted_create_once_persistence_and_disk_reopen_validation]
       formal_target_assessment_score_anomaly_or_locked_test_reader_forbidden: true
       optimizer_objective_parameter_decoder_or_model_selection_definition_or_call_forbidden: true
       every_real_source_access_must_enter_frozen_global_ledger: true
     src/seismoflux/background/etas_numerical_repair_evidence.py:
-      allowed_responsibilities: [canonical_schema_validation_and_serialization, repository_and_runtime_code_seals, fixed_no_source_no_target_optimizer_runtime_warmup, fit_and_optimizer_call_receipts, qualification_seals, strict_public_materialization, invalid_execution_local_failure_receipt]
+      allowed_responsibilities: [canonical_schema_validation_and_serialization, repository_and_runtime_code_seals, fixed_no_source_no_target_optimizer_runtime_warmup, fit_and_optimizer_call_receipts, qualification_seals, strict_public_materialization, invalid_execution_local_failure_receipt, complete_three_grid_local_restricted_create_once_persistence_and_disk_reopen_validation]
       exact_runtime_warmup_callable: seismoflux.background.etas_numerical_repair_evidence._run_fixed_optimizer_runtime_warmup
       event_row_coordinate_target_score_or_secret_public_serialization_forbidden: true
       scientific_likelihood_parameter_decoder_grid_evaluator_or_model_selection_definition_or_call_forbidden: true
@@ -1740,10 +1748,458 @@ qualification:
     every_resolution_map_value_and_pair_diagnostic_sha256_must_recompute_from_its_exact_embedded_or_local_restricted_preimage: true
     each_grid_pair_diagnostic_payload_sha256_formula: sha256_seismoflux_canonical_json_v1_without_diagnostic_payload_sha256
     evidence_sha256_formula: sha256_seismoflux_canonical_json_v1_without_three_grid_gate_evidence_sha256
-    evidence_payload_is_local_restricted_but_its_sha256_is_public_in_same_snapshot_gate_and_fit_attempt: true
+    embedded_13_field_evidence_payload_is_local_restricted_and_its_own_sha256_is_not_an_external_identity_anchor: true
+    complete_six_field_envelope_own_sha256_is_public_in_same_snapshot_gate_fit_attempt_and_presence_map_without_changing_field_names_types_paths_or_file_counts: true
     evidence_present_iff_selected_start_index_is_nonnull_and_all_upstream_stability_gates_required_before_grid_evaluation_pass: true
     absent_evidence_requires_gate_and_fit_attempt_sha256_fields_null_and_all_grid_metric_fields_null: true
     missing_extra_recomputed_substituted_or_cross_snapshot_evidence_action: invalid_execution_without_qualification_result
+    local_restricted_persistence:
+      classification: local_restricted_gitignored_append_only_create_once
+      attempt_root_path_template_ref: qualification_execution_seal.qualification_public_result_staging.attempt_root_path_template
+      root_path_template: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence
+      file_path_template: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/{snapshot_id}.json
+      snapshot_path_by_id_exact:
+        fold_1: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/fold_1.json
+        fold_2: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/fold_2.json
+        fold_3: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/fold_3.json
+        fold_4: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/fold_4.json
+        final_validation: data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/final_validation.json
+      snapshot_key_order_exact: [fold_1, fold_2, fold_3, fold_4, final_validation]
+      snapshot_id_path_substitution_must_use_exact_allowlisted_snapshot_id_without_alias_case_or_separator_normalization: true
+      every_path_must_equal_attempt_root_plus_local_restricted_three_grid_gate_evidence_and_exact_snapshot_filename: true
+      every_path_and_existing_ancestor_must_resolve_strictly_inside_same_non_reparse_attempt_root_without_symlink_junction_mount_hardlink_alias_drive_UNC_dot_dot_case_or_separator_escape: true
+      directory_components_below_attempt_root_exact: [local_restricted, three_grid_gate_evidence]
+      each_existing_directory_component_must_be_reopened_by_parent_relative_handle_and_verified_same_non_reparse_directory_before_every_file_operation: true
+      each_missing_directory_component_must_be_created_once_without_replacement_then_durably_bound_to_its_verified_parent_before_use: true
+      three_grid_gate_evidence_directory_may_preexist_only_as_the_same_verified_directory_created_by_same_attempt_initialization_or_retained_from_an_earlier_same_attempt_snapshot_and_may_never_be_recreated_or_replaced: true
+      directory_entries_and_installed_files_are_append_only_and_successful_snapshot_files_must_follow_frozen_snapshot_order: true
+      complete_directory_tree_must_be_precreated_durably_reopened_and_identity_verified_before_any_same_attempt_three_grid_evaluator_call: true
+      any_directory_create_reopen_identity_or_durability_capability_failure_must_fail_closed_before_grid_evaluator_and_require_new_attempt_id: true
+      persisted_file_is_complete_envelope_not_bare_13_field_evidence: true
+      envelope_fields_exact: [envelope_schema_version, installed_file_identity, sealed_three_grid_gate_evidence, grid_resolution_payload_by_grid_size, numerical_evidence_id_crosswalk, three_grid_gate_evidence_envelope_sha256]
+      envelope_identity_fields_exact: [envelope_schema_version, installed_file_identity, sealed_three_grid_gate_evidence, grid_resolution_payload_by_grid_size, numerical_evidence_id_crosswalk]
+      envelope_identity_fields_must_equal_envelope_fields_excluding_three_grid_gate_evidence_envelope_sha256: true
+      envelope_schema_version_exact: 1
+      installed_file_identity_fields_exact: [profile_id, filesystem_name, parent_identity, ordered_directory_identity_chain, ordered_directory_identity_chain_sha256, final_repository_relative_path, temp_leaf_utf8_hex, final_leaf_utf8_hex, canonical_final_path, exact_case_relative_components, platform, windows_volume_serial_u64_decimal_or_null, windows_file_id_16_bytes_hex_or_null, windows_number_of_links_at_temp_capture_or_null, posix_st_dev_decimal_or_null, posix_st_ino_decimal_or_null, posix_st_nlink_at_temp_capture_or_null, required_final_nlink]
+      installed_file_parent_identity_fields_exact: [platform, canonical_final_path, exact_case_relative_components, windows_volume_serial_u64_decimal_or_null, windows_directory_file_id_16_bytes_hex_or_null, posix_st_dev_decimal_or_null, posix_st_ino_decimal_or_null]
+      installed_file_parent_identity_field_types_exact:
+        platform: enum_windows_or_posix
+        canonical_final_path: platform_canonical_absolute_parent_path_string_local_restricted_never_public
+        exact_case_relative_components: exact_two_item_UTF8_NFC_list_local_restricted_three_grid_gate_evidence
+        windows_volume_serial_u64_decimal_or_null: canonical_unsigned_u64_base10_string_or_null
+        windows_directory_file_id_16_bytes_hex_or_null: lowercase_hex_of_FILE_ID_128_Identifier_bytes_index_0_through_15_in_raw_array_order_no_integer_or_GUID_endian_conversion_or_null
+        posix_st_dev_decimal_or_null: canonical_unsigned_base10_string_or_null
+        posix_st_ino_decimal_or_null: canonical_unsigned_base10_string_or_null
+      installed_file_parent_identity_platform_null_branches_exact:
+        windows: {windows_volume_serial_u64_decimal_or_null: required, windows_directory_file_id_16_bytes_hex_or_null: required, posix_st_dev_decimal_or_null: null, posix_st_ino_decimal_or_null: null}
+        posix: {windows_volume_serial_u64_decimal_or_null: null, windows_directory_file_id_16_bytes_hex_or_null: null, posix_st_dev_decimal_or_null: required, posix_st_ino_decimal_or_null: required}
+      directory_identity_chain_record_fields_exact: [repository_relative_directory_path, exact_case_relative_components_from_workspace_root, canonical_directory_path, platform, windows_volume_serial_u64_decimal_or_null, windows_directory_file_id_16_bytes_hex_or_null, posix_st_dev_decimal_or_null, posix_st_ino_decimal_or_null]
+      directory_identity_chain_record_field_types_exact:
+        repository_relative_directory_path: dot_for_workspace_root_or_safe_forward_slash_repository_relative_directory_path
+        exact_case_relative_components_from_workspace_root: ordered_UTF8_NFC_safe_component_list_equal_repository_relative_directory_path_components_or_empty_for_dot
+        canonical_directory_path: platform_canonical_absolute_directory_path_local_restricted_never_public
+        platform: enum_windows_or_posix
+        windows_volume_serial_u64_decimal_or_null: canonical_unsigned_u64_base10_string_or_null
+        windows_directory_file_id_16_bytes_hex_or_null: lowercase_hex_of_FILE_ID_128_Identifier_bytes_index_0_through_15_in_raw_array_order_no_integer_or_GUID_endian_conversion_or_null
+        posix_st_dev_decimal_or_null: canonical_unsigned_base10_string_or_null
+        posix_st_ino_decimal_or_null: canonical_unsigned_base10_string_or_null
+      directory_identity_chain_repository_relative_path_templates_exact:
+        - .
+        - data
+        - data/processed
+        - data/processed/stage2R
+        - data/processed/stage2R/etas_numerical_repair_fit_input
+        - data/processed/stage2R/etas_numerical_repair_fit_input/attempts
+        - "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}"
+        - "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted"
+        - "data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence"
+      directory_identity_chain_length_exact: 9
+      ordered_directory_identity_chain_sha256_formula: sha256_seismoflux_canonical_json_v1_of_complete_ordered_directory_identity_chain
+      initial_install_directory_identity_chain_source_exact: one_live_verified_handle_per_workspace_root_and_each_repository_relative_directory_ancestor_captured_before_descending_or_creating_the_next_child_and_embedded_before_first_file_byte_write
+      before_seal_return_expected_directory_identity_source_exact: installer_live_handle_chain_captured_before_file_write_and_held_outside_the_envelope_until_complete_final_reopen_verification
+      fresh_checkpoint_workspace_root_namespace_source_exact: isolated_launcher_fixed_worktree_root_argument_bound_to_opening_repository_HEAD_and_not_read_from_envelope_environment_or_current_directory
+      fixed_workspace_root_argument_contract_exact:
+        cli_option: --workspace-root
+        occurrence_count_exact: 1
+        source: trusted_local_supervisor_argument_outside_envelope_environment_and_current_directory
+        qualification_value: canonical_absolute_Win32_Volume_GUID_path_of_the_exact_worktree_root_whose_HEAD_upstream_protocol_package_blobs_and_remote_repair_code_tag_are_verified_by_opening_seal
+        public_artifact_value: forbidden_local_restricted_only
+        live_root_identity_crosswalk: independently_captured_root_handle_record_must_equal_authenticated_ordered_directory_identity_chain_record_zero_before_evidence_acceptance
+        windows_nt_object_name_derivation_exact: replace_exact_leading_two_backslashes_question_mark_backslash_with_single_backslash_question_mark_question_mark_backslash_and_preserve_Volume_GUID_and_every_exact_case_suffix_UTF16_code_unit
+        windows_nt_object_name_example: "\\??\\Volume{11111111-2222-3333-4444-555555555555}\\repo"
+        any_drive_UNC_DOS_device_alias_environment_current_directory_or_envelope_derived_root_forbidden: true
+      opening_repository_root_crosswalk_exact: launcher_workspace_root_handle_must_host_the_same_worktree_for_which_opening_seal_verifies_HEAD_upstream_repair_code_tag_and_all_protocol_package_blobs_and_authenticated_chain_record_zero_must_equal_that_live_handle_identity
+      fresh_checkpoint_expected_directory_identity_source_exact: complete_envelope_chain_whose_outer_sha_must_equal_independently_frozen_gate_fit_and_presence_anchors_with_pre_anchor_restart_permanently_forbidden
+      fresh_checkpoint_observed_live_directory_identity_source_exact: independent_launcher_root_handle_then_one_live_handle_per_descended_directory_captured_in_the_current_checkpoint_session_and_never_read_or_derived_from_the_envelope
+      fresh_checkpoint_reference_verifier_requires_controlled_single_use_live_directory_capture_provider_and_invokes_it_before_evidence_stat_or_read: true
+      synthetic_reference_live_capture_receipt_contract_exact:
+        fields_exact: [source_kind, capture_id, opened_handle_count, records]
+        source_kind_exact: independent_live_directory_handle_capture
+        capture_id: nonempty_process_unique_monotonic_synthetic_checkpoint_identifier_consumed_exactly_once
+        opened_handle_count: exact_directory_identity_chain_length
+        records: independently_constructed_nine_record_live_chain_equal_only_by_value_to_authenticated_embedded_chain
+        opaque_runtime_provenance_capability: minted_only_by_controlled_provider_factory_registered_by_object_identity_consumed_exactly_once_and_not_serialized_or_value_forgeable
+        controlled_provider_input: independent_raw_live_handle_source_values_only_never_embedded_chain_or_receipt_records
+        provider_constructor_accepts_only_controlled_live_handle_source_and_never_a_prebuilt_record_collection: true
+        controlled_live_handle_source_capture_provider_and_receipt_must_have_exact_factory_class_and_reject_subclasses_or_structural_matches: true
+        provider_and_source_factory_bindings_and_single_use_state_must_live_in_external_object_identity_registries_not_mutable_instance_flags: true
+        unbound_source_registry_must_freeze_the_complete_construction_snapshot_immediately_when_the_exact_factory_finishes_source_construction: true
+        provider_constructor_must_atomically_consume_the_unbound_source_then_compare_the_original_construction_snapshot_before_binding: true
+        provider_capture_must_atomically_consume_its_registered_original_object_then_revalidate_the_exact_original_bound_source_object_before_observation: true
+        source_binding_registry_must_freeze_every_construction_field_type_and_value_plus_path_object_identity_and_identity_override_canonical_bytes: true
+        source_observation_must_atomically_consume_then_reject_any_post_binding_source_configuration_mutation_before_path_stat_or_record_construction: true
+        controlled_provider_must_be_single_use_and_called_by_reference_verifier_before_file_stat_open_or_read: true
+        registered_original_receipt_binding: exact_receipt_object_identity_capture_id_opened_handle_count_and_issuance_canonical_record_bytes_until_first_verification_attempt
+        first_registered_original_verification_attempt_must_atomically_consume_capture_id_and_capability_before_count_or_content_validation: true
+        passing_embedded_chain_directly_or_by_shallow_or_deep_copy_must_be_rejected: true
+        wrapping_a_deep_copy_in_a_structurally_valid_receipt_with_self_claimed_source_and_capture_id_must_be_rejected: true
+        post_construction_source_swap_or_provider_or_source_used_state_reset_must_be_rejected: true
+        post_construction_pre_binding_path_to_raw_mode_or_raw_scalar_mutation_must_be_rejected: true
+        post_binding_path_to_raw_mode_or_any_other_source_field_mutation_must_be_rejected: true
+        stealing_a_registered_capability_into_a_new_wrapper_or_mutating_any_scalar_metadata_or_nested_records_after_issuance_must_be_rejected: true
+        duplicate_capture_id_capability_reuse_or_fewer_than_nine_opened_handles_must_be_rejected: true
+      observed_live_directory_identity_chain_must_not_alias_or_be_derived_from_the_embedded_expected_chain: true
+      fresh_checkpoint_verification_order_exact: capture_independent_live_directory_chain_without_reading_envelope_then_handle_relative_open_and_read_untrusted_complete_file_then_recompute_outer_SHA_and_match_independently_frozen_gate_fit_presence_anchors_then_compare_captured_live_chain_to_authenticated_embedded_expected_chain_then_accept_file
+      compare_every_previously_captured_observed_live_directory_record_to_the_outer_SHA_authenticated_embedded_expected_record_before_accepting_or_trusting_the_evidence_file: true
+      every_fresh_checkpoint_must_capture_live_chain_from_the_launcher_root_handle_and_compare_every_record_to_the_outer_SHA_anchored_embedded_chain_before_trusting_file_content: true
+      parent_identity_must_equal_the_last_directory_chain_record_for_platform_canonical_path_and_platform_identity_with_exact_case_relative_components_equal_to_its_last_two_components: true
+      every_windows_FILE_ID_128_hex_must_serialize_Identifier_raw_bytes_in_index_0_through_15_order_without_GUID_or_integer_endian_conversion: true
+      installed_file_identity_field_types_exact:
+        profile_id: enum_windows_ntfs_ntcreatefile_filerenameinfo_v1_or_posix_linkat_v1
+        filesystem_name: exact_NTFS_for_selected_windows_profile_or_posix_fstatfs_name_for_unselected_reference_profile
+        parent_identity: exact_installed_file_parent_identity_fields
+        ordered_directory_identity_chain: exact_ordered_directory_identity_chain_records
+        ordered_directory_identity_chain_sha256: lowercase_hex_length_64
+        final_repository_relative_path: exact_same_snapshot_file_path_after_attempt_id_substitution
+        temp_leaf_utf8_hex: lowercase_hex_of_exact_case_attempt_unique_UTF8_temp_filename_bytes
+        final_leaf_utf8_hex: lowercase_hex_of_exact_case_UTF8_filename_bytes
+        canonical_final_path: platform_canonical_absolute_path_string_local_restricted_never_public
+        exact_case_relative_components: exact_three_item_UTF8_NFC_list_local_restricted_three_grid_gate_evidence_snapshot_filename
+        platform: enum_windows_or_posix
+        windows_volume_serial_u64_decimal_or_null: canonical_unsigned_u64_base10_string_or_null
+        windows_file_id_16_bytes_hex_or_null: lowercase_hex_of_FILE_ID_128_Identifier_bytes_index_0_through_15_in_raw_array_order_no_integer_or_GUID_endian_conversion_or_null
+        windows_number_of_links_at_temp_capture_or_null: strict_integer_one_or_null_reject_bool
+        posix_st_dev_decimal_or_null: canonical_unsigned_base10_string_or_null
+        posix_st_ino_decimal_or_null: canonical_unsigned_base10_string_or_null
+        posix_st_nlink_at_temp_capture_or_null: strict_integer_one_or_null_reject_bool
+        required_final_nlink: strict_integer_exactly_one_reject_bool
+      installed_file_identity_must_be_captured_from_exclusively_created_sibling_temp_after_create_and_before_envelope_serialization_or_first_byte_write: true
+      installed_file_identity_canonical_final_path_and_exact_case_components_must_be_prebound_to_the_exact_destination_before_byte_write: true
+      installer_must_parent_handle_relative_reopen_temp_and_compare_live_identity_to_embedded_expected_identity_before_parsing_or_trusting_envelope: true
+      rename_or_link_install_must_preserve_captured_file_id_or_inode_and_final_post_cleanup_link_count_must_equal_one: true
+      sealed_three_grid_gate_evidence_fields_exact_ref: qualification.three_grid_gate_evidence_protocol.evidence_fields_exact
+      sealed_three_grid_gate_evidence_field_count_exact: 13
+      sealed_three_grid_gate_evidence_must_be_byte_identical_to_the_existing_13_field_object_before_embedding: true
+      grid_resolution_payload_by_grid_size_keys_exact_ref: qualification.three_grid_gate_evidence_protocol.grid_resolution_payload_sha256_keys_exact
+      each_grid_resolution_payload_fields_exact_ref: qualification.three_grid_gate_evidence_protocol.grid_resolution_payload_fields_exact
+      each_grid_resolution_payload_field_count_exact: 6
+      numerical_evidence_id_crosswalk_fields_exact: [implementation_qualified_name, canonical_json_version, numerical_evidence_preimage_fields_exact, scalar_source_path_by_preimage_field_exact, resolution_source_paths_in_order_exact, resolution_asdict_fields_exact, resolution_field_projection_exact, comparison_source_paths_in_order_exact, comparison_asdict_fields_exact, comparison_field_projection_exact, expected_numerical_evidence_id_source_path_exact]
+      numerical_evidence_id_crosswalk_exact:
+        implementation_qualified_name: seismoflux.background.pipeline_etas.ETASGridGateEvidence.numerical_evidence_id
+        canonical_json_version: seismoflux_canonical_json_v1
+        numerical_evidence_preimage_fields_exact: [protocol_sha256, snapshot_id, parameter_snapshot_id, resolutions, comparisons]
+        scalar_source_path_by_preimage_field_exact:
+          protocol_sha256: sealed_three_grid_gate_evidence.existing_evaluator_return_identity.protocol_sha256
+          snapshot_id: sealed_three_grid_gate_evidence.existing_evaluator_return_identity.snapshot_id
+          parameter_snapshot_id: sealed_three_grid_gate_evidence.existing_evaluator_return_identity.parameter_snapshot_id
+        resolution_source_paths_in_order_exact: [grid_resolution_payload_by_grid_size.50_km, grid_resolution_payload_by_grid_size.25_km, grid_resolution_payload_by_grid_size.12_5_km]
+        resolution_asdict_fields_exact: [cell_size_km, cell_count, background_total, triggering_total, total, ordered_cell_masses_sha256]
+        resolution_field_projection_exact:
+          cell_size_km: cell_size_km_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          cell_count: cell_count_strict_integer_reject_bool
+          background_total: background_total_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          triggering_total: triggering_total_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          total: total_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          ordered_cell_masses_sha256: ordered_cell_masses_sha256_unchanged
+        comparison_source_paths_in_order_exact: [sealed_three_grid_gate_evidence.diagnostic_50_to_25, sealed_three_grid_gate_evidence.primary_25_to_12_5]
+        comparison_asdict_fields_exact: [coarse_cell_size_km, fine_cell_size_km, coarse_total, fine_total, relative_expected_count_difference, density_l1_difference]
+        comparison_field_projection_exact:
+          coarse_cell_size_km: coarse_grid_size_km_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          fine_cell_size_km: fine_grid_size_km_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          coarse_total: coarse_total_expected_count_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          fine_total: fine_total_expected_count_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          relative_expected_count_difference: relative_expected_count_difference_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+          density_l1_difference: density_l1_difference_hex_via_float_fromhex_with_finite_and_exact_hex_roundtrip
+        expected_numerical_evidence_id_source_path_exact: sealed_three_grid_gate_evidence.existing_evaluator_return_identity.numerical_evidence_id
+      numerical_evidence_id_reconstruction_formula_exact: sha256_hex_of_seismoflux_canonical_json_v1_after_pipeline_etas__canonical_safe_of_exact_five_field_preimage_with_resolution_tuple_and_comparison_tuple
+      numerical_evidence_id_reconstruction_must_match_pipeline_etas_ETASGridGateEvidence_property_field_for_field_without_wrapper_passed_failure_reasons_or_diagnostic_hash_fields: true
+      each_resolution_sha256_must_recompute_from_matching_embedded_exact_six_field_payload_and_equal_sealed_grid_resolution_payload_sha256_by_grid_size: true
+      each_pair_sha256_must_recompute_from_matching_embedded_pair_payload_without_diagnostic_payload_sha256: true
+      sealed_13_field_own_sha256_must_recompute_without_three_grid_gate_evidence_sha256: true
+      envelope_own_sha256_formula: sha256_seismoflux_canonical_json_v1_without_three_grid_gate_evidence_envelope_sha256
+      persisted_file_serialized_bytes: seismoflux_canonical_json_v1_of_complete_exact_six_field_envelope_including_installed_identity_and_envelope_own_sha256
+      persisted_file_must_strict_parse_recompute_all_three_resolution_sha256_values_both_pair_sha256_values_sealed_13_field_own_sha256_numerical_evidence_id_envelope_own_sha256_and_reserialize_byte_identically: true
+      reopened_payload_must_reconstruct_and_validate_actual_ETASGridResolutionEvidence_ThreeGridConvergenceGateEvidence_and_ETASGridGateEvidence_dataclasses_before_any_hash_or_crosswalk_is_accepted: true
+      sealed_snapshot_id_and_selected_physical_parameters_sha256_must_equal_nested_evaluator_snapshot_id_and_parameter_snapshot_id: true
+      file_must_be_absent_before_same_snapshot_grid_evaluator_call_and_before_no_clobber_install: true
+      any_preexisting_file_even_if_byte_identical_is_invalid_execution_and_may_not_be_adopted: true
+      exactly_zero_or_one_file_per_snapshot_and_exact_file_set_must_equal_presence_truth_table_projection: true
+      external_envelope_sha_anchor_targets_exact: [same_snapshot_snapshot_gate_three_grid_gate_evidence_sha256_or_null, same_snapshot_fit_attempt_three_grid_gate_evidence_sha256_or_null, five_snapshot_staged_local_presence_map_value]
+      every_external_envelope_sha_anchor_value_exact_source: reopened_complete_envelope_three_grid_gate_evidence_envelope_sha256
+      embedded_13_field_own_sha256_must_never_be_used_as_an_external_gate_fit_attempt_presence_or_restart_identity_anchor: true
+      external_anchor_DAG_exact: installed_identity_plus_sealed_13_fields_plus_three_resolution_preimages_plus_crosswalk_then_envelope_own_sha256_then_snapshot_gate_fit_attempt_and_presence_map_then_staged_local_aggregate_then_closing_seal_then_manifest_result_commit_and_remote_tag
+      external_anchor_DAG_has_no_back_reference_from_envelope_to_gate_fit_attempt_presence_closing_manifest_commit_or_tag: true
+      replacement_identity_plus_cascade_rehashed_envelope_must_fail_all_three_old_external_anchors_even_when_embedded_scientific_13_field_payload_is_unchanged: true
+      seal_must_close_renamed_file_handle_after_flush_retain_verified_parent_chain_for_handle_relative_final_reopen_then_close_reopened_file_and_all_parent_handles_after_complete_verification: true
+      seal_returned_13_field_payload_envelope_sha256_and_public_crosswalk_values_must_be_derived_only_from_complete_reopened_envelope_bytes_not_from_preinstall_memory_or_temp_bytes: true
+      seal_may_return_only_after_path_regular_file_identity_stable_size_complete_bytes_strict_envelope_schema_all_nested_hashes_both_own_hashes_numerical_evidence_id_crosswalk_and_byte_reserialization_checks_pass: true
+      any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action: invalid_execution_retain_attempt_and_start_any_scientific_retry_under_new_attempt_id
+      durable_create_once_file_protocol:
+        qualification_runtime_platform_system_exact_ref: outputs.canonical_nested_schemas.windows_runtime_identity.platform_system_exact
+        selected_install_profile_exact: windows_ntfs_ntcreatefile_filerenameinfo_v1
+        opening_seal_windows_runtime_identity_and_repair_protocol_hash_deterministically_select_the_exact_profile_without_adding_or_changing_public_fields: true
+        posix_linkat_v1_is_defined_for_portability_but_is_not_selectable_in_this_frozen_windows_qualification_runtime: true
+        scope_exact: local_restricted_three_grid_evidence_envelope_files_and_their_local_restricted_and_three_grid_gate_evidence_directory_components_only
+        staged_public_closing_manifest_failure_receipt_and_public_destination_install_protocols_remain_exactly_R2_and_are_not_governed_or_changed_by_this_local_durable_contract: true
+        checkpoint_reopens_are_read_only_validation_and_do_not_change_any_R2_staged_or_public_install_primitive: true
+        common_order_exact: [strict_parent_reopen, missing_directory_create_once_and_directory_entry_durable_sync, exclusive_sibling_temp_create, temp_file_identity_capture_and_destination_path_case_prebind, complete_canonical_envelope_byte_write, file_flush_and_durable_sync, close_initial_temp_write_handle, preinstall_temp_handle_relative_reopen_and_verification, atomic_no_clobber_install, installed_file_flush, parent_directory_entry_durable_sync, close_renamed_file_handle_while_retaining_verified_parent_chain, installed_file_handle_relative_reopen_and_complete_verification, close_reopened_file_and_all_parent_handles]
+        sibling_temp_must_be_attempt_unique_same_parent_same_filesystem_non_reparse_regular_file_and_created_exclusively: true
+        overwrite_truncate_replace_delete_rename_adopt_hardlink_or_recursive_cleanup_of_installed_evidence_forbidden: true
+        installed_identity_fields_exact_ref: qualification.three_grid_gate_evidence_protocol.local_restricted_persistence.installed_file_identity_fields_exact
+        installed_identity_must_be_captured_from_temp_and_embedded_before_write_then_verified_after_install_and_at_every_disk_reopen_checkpoint: true
+        installed_link_count_trajectory_exact: temp_capture_one_then_platform_install_transition_then_final_one_and_every_checkpoint_one
+        install_failure_state_machine:
+          preexisting_final_before_evaluator_or_install: collision_invalid_execution_never_adopt_even_if_byte_identical
+          failure_before_install_success: retain_temp_and_attempt_evidence_no_primitive_fallback_no_same_final_retry
+          install_success_until_complete_postinstall_flush_parent_sync_and_reopen_verification: any_crash_or_failure_is_indeterminate_after_install_retain_everything_for_audit_read_only_forensic_reopen_only_no_delete_rollback_overwrite_or_same_final_retry_same_attempt_may_never_resume_reanchor_publish_or_advance_qualification_new_attempt_id_only_after_manual_audit
+          complete_postinstall_reopen_verification_before_first_external_envelope_sha_anchor_is_durably_persisted: any_crash_or_failure_is_invalid_execution_retain_everything_same_attempt_may_never_resume_reanchor_or_publish_new_attempt_only_after_manual_audit
+          at_or_after_first_external_envelope_sha_anchor: any_missing_changed_or_mismatched_local_envelope_or_external_anchor_is_invalid_execution_retain_everything_without_same_attempt_repair_reanchor_or_scientific_retry
+          any_scientific_retry: new_attempt_id_only_after_manual_audit
+        windows:
+          profile_id_exact: windows_ntfs_ntcreatefile_filerenameinfo_v1
+          trusted_namespace_bootstrap_exact: one_absolute_NT_path_open_of_trusted_workspace_root_per_initial_install_or_fresh_checkpoint_verification_session_then_attempt_root_and_all_descendants_opened_only_by_RootDirectory_relative_descent
+          trusted_workspace_root_bootstrap_object_attributes_exact: RootDirectory_NULL_ObjectName_exact_NT_path_derived_from_fixed_launcher_workspace_root_argument_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40
+          trusted_workspace_root_bootstrap_create_disposition_exact: {symbol: FILE_OPEN, uint32_hex: "00000001"}
+          trusted_workspace_root_bootstrap_create_options_exact: {symbolic_or: FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020, uint32_hex: "00200021"}
+          every_fresh_checkpoint_session_must_close_all_prior_handles_open_workspace_root_once_then_parent_relative_redescend_and_reverify_every_directory_identity_before_final_file_open: true
+          absolute_path_open_below_verified_attempt_root_after_bootstrap_forbidden: true
+          share_access_for_every_workspace_directory_temp_preinstall_and_final_reopen_exact: FILE_SHARE_READ_0x1_bitwise_OR_FILE_SHARE_WRITE_0x2_equal_0x3_and_explicitly_without_FILE_SHARE_DELETE_0x4
+          share_delete_absence_must_be_mechanically_verified_for_every_open_and_no_handle_with_DELETE_desired_access_may_overlap_an_incompatible_second_open: true
+          desired_access_by_open_kind_exact:
+            trusted_workspace_root_bootstrap: {symbolic_or: READ_CONTROL_0x00020000_bitwise_OR_SYNCHRONIZE_0x00100000_bitwise_OR_FILE_LIST_DIRECTORY_0x00000001_bitwise_OR_FILE_ADD_FILE_0x00000002_bitwise_OR_FILE_ADD_SUBDIRECTORY_0x00000004_bitwise_OR_FILE_READ_EA_0x00000008_bitwise_OR_FILE_WRITE_EA_0x00000010_bitwise_OR_FILE_TRAVERSE_0x00000020_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_OR_FILE_WRITE_ATTRIBUTES_0x00000100, uint32_hex: "001201bf"}
+            attempt_root_or_descendant_directory_create_or_reopen: {symbolic_or: READ_CONTROL_0x00020000_bitwise_OR_SYNCHRONIZE_0x00100000_bitwise_OR_FILE_LIST_DIRECTORY_0x00000001_bitwise_OR_FILE_ADD_FILE_0x00000002_bitwise_OR_FILE_ADD_SUBDIRECTORY_0x00000004_bitwise_OR_FILE_READ_EA_0x00000008_bitwise_OR_FILE_WRITE_EA_0x00000010_bitwise_OR_FILE_TRAVERSE_0x00000020_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_OR_FILE_WRITE_ATTRIBUTES_0x00000100, uint32_hex: "001201bf"}
+            exclusive_temp_create_and_preinstall_reopen_for_same_handle_install: {symbolic_or: GENERIC_READ_0x80000000_bitwise_OR_GENERIC_WRITE_0x40000000_bitwise_OR_DELETE_0x00010000_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_OR_SYNCHRONIZE_0x00100000, uint32_hex: "c0110080"}
+            installed_final_read_only_reopen: {symbolic_or: GENERIC_READ_0x80000000_bitwise_OR_FILE_READ_ATTRIBUTES_0x00000080_bitwise_OR_SYNCHRONIZE_0x00100000, uint32_hex: "80100080"}
+          FILE_SYNCHRONOUS_IO_NONALERT_requires_SYNCHRONIZE_in_every_matching_desired_access_mask: true
+          generic_access_high_bits_for_directory_NtCreateFile_forbidden: true
+          every_directory_handle_passed_to_FlushFileBuffers_must_have_the_fully_expanded_FILE_GENERIC_WRITE_specific_rights_0x00120116_as_a_subset_of_granted_access: true
+          every_file_handle_passed_to_FlushFileBuffers_requires_GENERIC_WRITE_in_its_desired_access_mask: true
+          filesystem_capability_gate_exact: GetVolumeInformationByHandleW_on_workspace_attempt_root_and_evidence_parent_handles_must_report_exact_NTFS_and_identical_volume_serial_plus_NtQueryVolumeInformationFile_FileFsDeviceInformation_DeviceType_FILE_DEVICE_DISK_0x00000007_and_Characteristics_bitwise_AND_FILE_REMOTE_DEVICE_0x00000010_equal_zero
+          local_nonremote_predicate_exact: DeviceType_equal_FILE_DEVICE_DISK_0x00000007_and_Characteristics_bitwise_AND_FILE_REMOTE_DEVICE_0x00000010_equal_zero_on_workspace_attempt_root_and_evidence_parent_handles
+          remote_SMB_NFS_ReFS_FAT_unknown_or_nonlocal_filesystem_action: fail_closed_before_grid_evaluator
+          descendant_namespace_primitives_exact: NtCreateFile_RootDirectory_relative_open_and_create_plus_SetFileInformationByHandle_FileRenameInfo_RootDirectory_relative_install
+          verified_workspace_root_handle_is_the_only_absolute_namespace_anchor: true
+          path_based_CreateDirectoryW_CreateFileW_or_MoveFileExW_for_descendant_directory_temp_destination_or_install_forbidden: true
+          object_attributes_exact: RootDirectory_verified_parent_handle_ObjectName_single_UTF16_leaf_component_Attributes_OBJ_DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40
+          ntcreatefile_common_structure_contract_exact:
+            OBJECT_ATTRIBUTES_Length: sizeof_OBJECT_ATTRIBUTES_for_active_architecture
+            OBJECT_ATTRIBUTES_SecurityDescriptor: null
+            OBJECT_ATTRIBUTES_SecurityQualityOfService: null
+            OBJECT_ATTRIBUTES_Attributes_uint32_hex: "00001000"
+            UNICODE_STRING_Length: exact_ObjectName_UTF16LE_byte_length_without_terminator_reject_odd_or_over_65534
+            UNICODE_STRING_MaximumLength: exactly_equal_Length_no_implicit_terminator_capacity
+            UNICODE_STRING_Buffer: exact_absolute_workspace_root_or_single_leaf_UTF16_code_units_matching_ObjectName_kind
+            AllocationSize: null
+            EaBuffer: null
+            EaLength_uint32_hex: "00000000"
+            IO_STATUS_BLOCK_Status_initial: zero_initialized_before_call_then_NT_SUCCESS_required_after_call
+          ntcreatefile_call_parameter_fields_exact: [root_directory_kind, object_name_kind, desired_access_uint32_hex, share_access_uint32_hex, file_attributes_symbol, file_attributes_uint32_hex, create_disposition_symbol, create_disposition_uint32_hex, create_options_symbolic_or, create_options_uint32_hex, allocation_size, ea_buffer, ea_length_uint32_hex, expected_io_status_information_symbol, expected_io_status_information_uint64_hex]
+          ntcreatefile_call_parameter_matrix_exact:
+            trusted_workspace_root_bootstrap:
+              root_directory_kind: null
+              object_name_kind: exact_NT_ObjectName_derived_only_from_fixed_launcher_workspace_root_argument_and_crosschecked_to_opening_repository_HEAD
+              desired_access_uint32_hex: "001201bf"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: zero_ignored_for_FILE_OPEN
+              file_attributes_uint32_hex: "00000000"
+              create_disposition_symbol: FILE_OPEN
+              create_disposition_uint32_hex: "00000001"
+              create_options_symbolic_or: FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020
+              create_options_uint32_hex: "00200021"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_OPENED
+              expected_io_status_information_uint64_hex: "0000000000000001"
+            existing_ancestor_or_evidence_directory_reopen:
+              root_directory_kind: verified_parent_directory_handle
+              object_name_kind: exact_safe_single_UTF16_leaf
+              desired_access_uint32_hex: "001201bf"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: zero_ignored_for_FILE_OPEN
+              file_attributes_uint32_hex: "00000000"
+              create_disposition_symbol: FILE_OPEN
+              create_disposition_uint32_hex: "00000001"
+              create_options_symbolic_or: FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020
+              create_options_uint32_hex: "00200021"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_OPENED
+              expected_io_status_information_uint64_hex: "0000000000000001"
+            missing_directory_create:
+              root_directory_kind: verified_parent_directory_handle
+              object_name_kind: exact_safe_single_UTF16_leaf
+              desired_access_uint32_hex: "001201bf"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: FILE_ATTRIBUTE_DIRECTORY
+              file_attributes_uint32_hex: "00000010"
+              create_disposition_symbol: FILE_CREATE
+              create_disposition_uint32_hex: "00000002"
+              create_options_symbolic_or: FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020
+              create_options_uint32_hex: "00200021"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_CREATED
+              expected_io_status_information_uint64_hex: "0000000000000002"
+            exclusive_temp_create:
+              root_directory_kind: verified_evidence_parent_directory_handle
+              object_name_kind: exact_attempt_unique_safe_single_UTF16_temp_leaf
+              desired_access_uint32_hex: "c0110080"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: FILE_ATTRIBUTE_NORMAL
+              file_attributes_uint32_hex: "00000080"
+              create_disposition_symbol: FILE_CREATE
+              create_disposition_uint32_hex: "00000002"
+              create_options_symbolic_or: FILE_NON_DIRECTORY_FILE_0x00000040_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_WRITE_THROUGH_0x00000002
+              create_options_uint32_hex: "00200042"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_CREATED
+              expected_io_status_information_uint64_hex: "0000000000000002"
+            temp_preinstall_reopen:
+              root_directory_kind: verified_evidence_parent_directory_handle
+              object_name_kind: exact_stored_case_safe_single_UTF16_temp_leaf
+              desired_access_uint32_hex: "c0110080"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: zero_ignored_for_FILE_OPEN
+              file_attributes_uint32_hex: "00000000"
+              create_disposition_symbol: FILE_OPEN
+              create_disposition_uint32_hex: "00000001"
+              create_options_symbolic_or: FILE_NON_DIRECTORY_FILE_0x00000040_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_WRITE_THROUGH_0x00000002_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020
+              create_options_uint32_hex: "00200062"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_OPENED
+              expected_io_status_information_uint64_hex: "0000000000000001"
+            installed_final_read_only_reopen:
+              root_directory_kind: verified_evidence_parent_directory_handle
+              object_name_kind: exact_stored_case_safe_single_UTF16_final_leaf
+              desired_access_uint32_hex: "80100080"
+              share_access_uint32_hex: "00000003"
+              file_attributes_symbol: zero_ignored_for_FILE_OPEN
+              file_attributes_uint32_hex: "00000000"
+              create_disposition_symbol: FILE_OPEN
+              create_disposition_uint32_hex: "00000001"
+              create_options_symbolic_or: FILE_NON_DIRECTORY_FILE_0x00000040_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020
+              create_options_uint32_hex: "00200060"
+              allocation_size: null
+              ea_buffer: null
+              ea_length_uint32_hex: "00000000"
+              expected_io_status_information_symbol: FILE_OPENED
+              expected_io_status_information_uint64_hex: "0000000000000001"
+          every_NtCreateFile_call_must_match_exactly_one_parameter_matrix_row_and_no_unlisted_default_or_implicit_argument_is_permitted: true
+          missing_OBJ_DONT_REPARSE_or_present_OBJ_CASE_INSENSITIVE_or_unsupported_semantics_action: fail_closed_before_grid_evaluator
+          object_name_must_be_single_leaf_without_separator_dot_dot_alias_or_case_normalization: true
+          directory_create_exact: NtCreateFile_with_exact_object_attributes_exact_directory_desired_access_and_share_access_FILE_CREATE_FILE_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_SYNCHRONOUS_IO_NONALERT
+          directory_reopen_exact: NtCreateFile_with_exact_object_attributes_exact_directory_desired_access_and_share_access_FILE_OPEN_FILE_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_SYNCHRONOUS_IO_NONALERT
+          directory_entry_durable_sync_exact: FlushFileBuffers_must_return_success_on_created_directory_and_verified_parent_handles_after_each_new_directory_entry
+          directory_durability_capability_gate_must_pass_before_any_grid_evaluator_call: true
+          directory_FlushFileBuffers_claim_scope_exact: local_NTFS_capability_gated_empirical_durability_contract_not_claimed_as_documented_POSIX_fsync_equivalent
+          unsupported_directory_flush_or_filesystem_semantics_action: fail_closed_before_grid_evaluator_without_treating_rename_or_write_through_flags_as_directory_durability
+          python_fsync_directory_noop_or_skipped_directory_flush_forbidden: true
+          temp_create_exact: NtCreateFile_with_exact_object_attributes_exact_temp_desired_access_and_share_access_for_attempt_unique_temp_leaf_FILE_CREATE_FILE_NON_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_WRITE_THROUGH
+          temp_create_result_exact: NT_SUCCESS_and_IoStatusBlock_Information_FILE_CREATED
+          temp_initial_state_exact: EndOfFile_zero_DeletePending_false_NumberOfLinks_one_Directory_false_and_FileAttributeTagInfo_not_reparse
+          temp_preinstall_reopen_exact: after_closing_the_initial_temp_write_handle_same_parent_RootDirectory_relative_same_case_OBJ_DONT_REPARSE_exact_temp_desired_access_and_share_access_FILE_OPEN_FILE_NON_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_WRITE_THROUGH_FILE_SYNCHRONOUS_IO_NONALERT_then_live_FileIdInfo_and_FileStandardInfo_must_equal_embedded_expected_temp_identity_before_envelope_parse_or_trust_and_this_single_handle_is_used_for_FileRenameInfo_install
+          file_durable_sync_exact: kernel32_FlushFileBuffers_must_succeed_before_install_and_before_close
+          atomic_no_clobber_install_exact: SetFileInformationByHandle_FileRenameInfo_on_open_temp_handle_with_FILE_RENAME_INFO_ReplaceIfExists_FALSE_RootDirectory_verified_parent_handle_and_exact_destination_component
+          FileRenameInfoEx_class_22_if_used_union_flags_must_equal_zero_without_REPLACE_POSIX_or_any_other_flag: true
+          rename_destination_must_be_safe_single_leaf_and_ReplaceIfExists_FALSE_or_union_Flags_zero: true
+          install_must_fail_if_destination_exists: true
+          installed_file_flush_exact: kernel32_FlushFileBuffers_on_the_original_renamed_file_handle_must_succeed_before_parent_FlushFileBuffers
+          NtFlushBuffersFile_NtFlushBuffersFileEx_or_any_other_NtFlush_durability_call_forbidden: true
+          durability_flush_api_exact: kernel32_FlushFileBuffers_only
+          identity_capture_exact: GetFileInformationByHandleEx_FileIdInfo_VolumeSerialNumber_and_FileId_plus_FileStandardInfo_NumberOfLinks
+          parent_identity_capture_exact: GetFileInformationByHandleEx_FileIdInfo_on_each_verified_workspace_attempt_local_restricted_and_three_grid_gate_evidence_directory_handle_before_descending_or_creating_a_child_and_again_before_final_file_open
+          parent_identity_source_and_crosscheck_exact: FileIdInfo_VolumeSerialNumber_canonical_u64_decimal_and_FILE_ID_128_lowercase_32_hex_must_equal_embedded_parent_identity_same_platform_branch_and_child_volume_serial_with_path_stat_or_synthetic_st_ino_source_forbidden_in_qualification
+          path_and_case_capture_exact: GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_GUID_plus_GetFileInformationByHandleEx_FileNameInfo_exact_UTF16_relative_component_case
+          canonical_volume_guid_path_grammar_exact: windows_extended_length_prefix_then_Volume_braced_GUID_8_4_4_4_12_hex_then_backslash_then_one_or_more_exact_case_UTF16_NFC_safe_components
+          fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact: replace_exact_leading_two_backslashes_question_mark_backslash_with_single_backslash_question_mark_question_mark_backslash_preserve_all_remaining_UTF16_code_units_and_reject_any_other_prefix
+          DOS_drive_UNC_incomplete_volume_GUID_dot_dot_dot_empty_or_repeated_separator_forward_slash_NUL_or_non_NFC_canonical_path_forbidden: true
+          synthetic_windows_path_fixture_must_use_a_complete_fake_volume_GUID_path_and_may_not_use_Path_resolve_drive_letter_output: true
+          installed_reopen_must_retain_the_verified_parent_chain_after_closing_only_the_renamed_file_handle_then_use_same_case_sensitive_OBJ_DONT_REPARSE_NtCreateFile_RootDirectory_relative_exact_final_reopen_desired_access_and_share_access_FILE_OPEN_FILE_NON_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_SYNCHRONOUS_IO_NONALERT_and_verify_same_volume_serial_file_id_link_count_one_final_path_exact_case_complete_bytes_and_stable_size_before_closing_all_handles: true
+          stored_case_verification_exact: verified_parent_FileIdExtdDirectoryInfo_enumeration_plus_GetFileInformationByHandleEx_FileNameInfo_must_equal_exact_destination_UTF16_leaf_case_and_same_FileId
+          volume_serial_file_id_final_path_and_exact_case_components_must_match_install_record_at_every_checkpoint: true
+        posix:
+          profile_id_exact: posix_linkat_v1
+          selectable_in_current_windows_qualification_runtime: false
+          trusted_workspace_root_bootstrap_exact: open_exact_fixed_launcher_workspace_root_argument_once_with_O_RDONLY_O_DIRECTORY_O_NOFOLLOW_O_CLOEXEC_then_fstat_and_bind_to_opening_repository_HEAD
+          every_fresh_checkpoint_session_must_close_all_prior_handles_open_the_fixed_workspace_root_once_then_openat_parent_relative_redescend_every_frozen_directory_component: true
+          each_of_nine_directory_identity_chain_records_must_come_from_fstat_on_its_independently_open_live_directory_handle_with_canonical_st_dev_and_st_ino_before_opening_the_next_child: true
+          absolute_open_below_root_chdir_environment_current_directory_envelope_path_or_path_stat_identity_source_forbidden: true
+          single_writer_and_verified_parent_identity_required: true
+          directory_create_exact: mkdirat_verified_parent_once_then_openat_child_O_DIRECTORY_O_NOFOLLOW
+          temp_create_exact: openat_same_parent_O_CREAT_O_EXCL_O_NOFOLLOW
+          file_durable_sync_exact: fsync_file_before_install
+          atomic_no_clobber_install_exact: linkat_verified_parent_temp_component_to_same_verified_parent_destination_component_flags_zero_must_fail_EEXIST_if_destination_exists_then_unlinkat_temp_component
+          link_count_trajectory_exact: temp_pre_link_st_nlink_one_then_after_linkat_both_names_same_st_dev_st_ino_and_st_nlink_two_then_after_unlinkat_temp_destination_st_nlink_one
+          ordinary_rename_renameat_or_replace_install_forbidden: true
+          parent_directory_fsync_required_after_each_mkdirat_linkat_success_and_unlinkat_temp_cleanup: true
+          installed_reopen_exact: openat_same_verified_parent_O_RDONLY_O_NOFOLLOW_then_fstat_before_and_after_complete_read
+          installed_identity_exact: st_dev_and_st_ino_equal_post_linkat_destination_identity_and_st_nlink_equal_one_after_unlinkat_temp
+          stored_case_verification_exact: readdir_on_verified_parent_must_return_exact_destination_leaf_bytes_and_lstat_identity
+          st_dev_st_ino_canonical_path_exact_case_components_and_st_nlink_one_must_match_install_record_at_every_checkpoint: true
+          install_profile_must_be_selected_and_capability_verified_before_first_grid_evaluator_and_may_not_fallback_during_attempt: true
+      disk_reopen_checkpoints_exact:
+        - before_seal_return
+        - qualification_result_finalize
+        - staged_local_scientific_payload_identity_construction
+        - qualification_closing_seal_construction
+        - qualification_manifest_construction
+        - qualification_manifest_staged_reopen_validation
+        - before_initial_public_materialization
+        - before_every_same_attempt_public_materialization_retry
+      every_checkpoint_must_discard_in_memory_payload_temp_bytes_and_cached_file_handle_then_reopen_the_exact_installed_path_from_disk: true
+      every_checkpoint_must_revalidate_exact_file_set_presence_stable_identity_and_link_count_complete_bytes_strict_envelope_and_embedded_13_field_schema_three_resolution_hashes_two_pair_hashes_both_own_hashes_numerical_evidence_id_canonical_reserialization_and_cross_snapshot_bindings: true
+      before_first_external_anchor_checkpoint_must_return_reopened_envelope_sha_for_immediate_durable_snapshot_gate_anchor_without_permitting_restart_reanchor: true
+      every_checkpoint_at_or_after_first_external_anchor_must_rederive_envelope_sha_from_reopened_file_and_compare_to_independently_frozen_snapshot_gate_fit_attempt_and_staged_local_presence_values: true
+      checkpoint_replay_of_grid_evaluator_or_reconstruction_from_fit_result_gate_manifest_or_public_sha_forbidden: true
+      missing_corrupt_changed_or_extra_file_may_not_be_recreated_replaced_substituted_or_repaired_under_same_attempt: true
+      presence_sha_null_truth_table_exact:
+        grid_evidence_required:
+          condition: selected_start_nonnull_and_all_upstream_stability_hessian_and_branching_prerequisites_passed
+          exact_local_file_presence: required
+          exact_local_file_payload: complete_six_field_envelope_with_installed_identity_embedded_sealed_13_fields_and_three_resolution_preimages_required
+          local_file_three_grid_gate_evidence_envelope_sha256: required_recomputed_envelope_own_sha256
+          embedded_three_grid_gate_evidence_sha256: required_recomputed_embedded_13_field_own_sha256
+          reconstructed_numerical_evidence_id: required_equal_embedded_existing_evaluator_return_identity_numerical_evidence_id
+          snapshot_gate_three_grid_gate_evidence_sha256_or_null: required_equal_complete_envelope_own_sha256
+          fit_attempt_three_grid_gate_evidence_sha256_or_null: required_equal_complete_envelope_own_sha256
+          staged_local_presence_map_value: required_equal_complete_envelope_own_sha256
+          snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null: required_equal_embedded_diagnostic_50_to_25_own_sha256
+          snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null: required_equal_embedded_primary_25_to_12_5_value
+          snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null: required_equal_embedded_primary_25_to_12_5_value
+        grid_evidence_forbidden:
+          condition: any_required_upstream_stability_hessian_or_branching_prerequisite_failed_or_not_run
+          exact_local_file_presence: forbidden
+          exact_local_file_payload: absent
+          local_file_three_grid_gate_evidence_envelope_sha256: absent_with_file
+          embedded_three_grid_gate_evidence_sha256: absent_with_file
+          reconstructed_numerical_evidence_id: absent_with_file
+          snapshot_gate_three_grid_gate_evidence_sha256_or_null: null
+          fit_attempt_three_grid_gate_evidence_sha256_or_null: null
+          staged_local_presence_map_value: null
+          snapshot_gate_grid_50_to_25_diagnostic_payload_sha256_or_null: null
+          snapshot_gate_grid_25_to_12_5_expected_count_relative_difference_hex_or_null: null
+          snapshot_gate_grid_25_to_12_5_density_l1_hex_or_null: null
+      any_presence_sha_null_state_other_than_exact_truth_table_action: invalid_execution_without_qualification_result
+      same_attempt_grid_evaluator_rerun_or_evidence_recompute_reseal_replace_substitute_or_alternate_path_forbidden: true
+      all_installed_evidence_files_and_attempt_directories_must_be_retained_after_invalid_execution_publication_failure_successful_public_materialization_result_commit_and_remote_tag: true
+      public_schema_public_path_and_public_file_count_must_remain_unchanged_and_local_file_path_or_bytes_may_not_be_published: true
   any_valid_numerical_gate_failure_action: publish_target_blind_numerical_negative_and_keep_stage4_blocked
   partial_success_adoption_allowed: false
   threshold_relaxation_after_results_allowed: false
@@ -1982,6 +2438,8 @@ qualification_execution_seal:
       remote_repository_slug: Justin-147/SeismoFlux
       upstream_branch: origin/codex/stage2-etas-numerical-repair
       remote_identity_and_tag_objects_verified_with_network: true
+      fixed_workspace_root_argument_must_open_the_exact_worktree_whose_HEAD_upstream_remote_code_tag_and_protocol_package_blobs_are_verified_here: true
+      absolute_workspace_root_path_remains_local_restricted_and_may_not_enter_opening_or_public_artifacts: true
     protocol_package_paths:
       - .gitignore
       - configs/background_etas_numerical_repair.yaml
@@ -2009,6 +2467,9 @@ qualification_execution_seal:
     created_after_opening_seal_and_before_any_fit_input_bundle_finalization_or_fit: true
     isolated_launcher_contract:
       command_prefix: [.venv/Scripts/python.exe, -I, -B]
+      qualification_local_restricted_workspace_root_cli_option_exact: --workspace-root
+      workspace_root_option_must_occur_exactly_once_and_equal_the_fixed_root_argument_contract_before_any_project_import_or_evidence_open: true
+      workspace_root_argument_must_not_come_from_environment_current_directory_or_envelope: true
       verified_executable_and_adjacent_pyvenv_cfg_sha256_required: true
       sys_flags_required: {isolated: 1, no_user_site: 1, dont_write_bytecode: 1}
       sys_prefix_must_resolve_from_verified_pyvenv_cfg_to_workspace_venv: true
@@ -2333,10 +2794,11 @@ content_addressing:
       recomputable_from_public_manifest_same_snapshot_receipts_diagnostic_rows_and_gate_result: true
     three_grid_gate_evidence_sha256:
       local_generation_cardinality: zero_or_one_per_snapshot_after_selected_start_and_upstream_stability_gates
-      public_embedding: own_sha256_only_in_same_snapshot_gate_and_fit_attempt
-      exact_bytes: canonical_three_grid_gate_evidence_bytes_without_own_sha256
-      includes_ref: qualification.three_grid_gate_evidence_protocol.evidence_identity_fields_exact
-      fields_must_equal_evidence_fields_excluding_own_sha256: true
+      public_embedding: complete_envelope_own_sha256_only_in_same_snapshot_gate_fit_attempt_and_presence_map
+      exact_bytes: canonical_json_v1_of_envelope_identity_fields_exact
+      includes_ref: qualification.three_grid_gate_evidence_protocol.local_restricted_persistence.envelope_identity_fields_exact
+      fields_must_equal_complete_envelope_fields_excluding_envelope_own_sha256: true
+      embedded_13_field_own_sha256_remains_recomputed_inside_envelope_but_is_not_the_public_crosswalk_value: true
       absent_iff_same_snapshot_three_grid_gate_evidence_sha256_or_null_is_null: true
     etas_parameter_snapshot_sha256:
       existence: qualification_status_evaluable_only
@@ -3365,6 +3827,7 @@ outputs:
       values: lowercase_hex_length_64_or_null
       value_present_iff_same_snapshot_gate_and_fit_attempt_three_grid_gate_evidence_sha256_or_null_is_present: true
       every_present_value_must_equal_recomputed_same_snapshot_local_evidence_own_sha256: true
+      R3_present_value_exact_source: same_snapshot_complete_envelope_three_grid_gate_evidence_envelope_sha256
       every_null_value_requires_local_evidence_absent_and_same_snapshot_grid_metric_fields_null: true
       content_sha256_formula: sha256_seismoflux_canonical_json_v1_of_complete_snapshot_ordered_nullable_map
     final_clean_repository_identity:
@@ -3652,7 +4115,7 @@ outputs:
       hessian_condition_number_value_and_nonfinite_kind_exact_source: same_snapshot_closing_receipt.returned_fit_result_canonical_payload.stability.hessian_only_when_hessian_minimum_gate_passes_else_both_null
       branching_ratio_exact_source: frozen_ETASModelSpec.branching_ratio_of_same_selected_physical_parameters_only_when_all_hessian_gates_pass_else_null
       branching_ratio_must_equal_returned_uncertainty_branching_ratio_estimate_when_uncertainty_present: true
-      three_grid_gate_evidence_sha256_exact_source: same_snapshot_frozen_three_grid_gate_evidence_payload
+      three_grid_gate_evidence_sha256_exact_source: same_snapshot_reopened_complete_six_field_envelope_three_grid_gate_evidence_envelope_sha256
       grid_25_to_12_5_expected_count_relative_difference_exact_source: same_snapshot_three_grid_gate_evidence.primary_25_to_12_5.relative_expected_count_difference_hex
       grid_25_to_12_5_density_l1_exact_source: same_snapshot_three_grid_gate_evidence.primary_25_to_12_5.density_l1_difference_hex
       grid_50_to_25_diagnostic_payload_sha256_exact_source: same_snapshot_three_grid_gate_evidence.diagnostic_50_to_25.diagnostic_payload_sha256
