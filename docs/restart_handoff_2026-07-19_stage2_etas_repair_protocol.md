@@ -2,22 +2,21 @@
 
 更新时间：2026-07-23（Asia/Shanghai）
 
-## R3 协议勘误续接覆盖（当前有效）
+## R4 协议勘误续接覆盖（当前有效）
 
-原始协议标签 `v0.2.2-background-etas-repair-protocol`、R1 标签 `v0.2.2-background-etas-repair-protocol-r1` 与 R2 标签 `v0.2.2-background-etas-repair-protocol-r2` 均已提交、推送并完成远端核验，保持不可变。R2 annotated tag object 为 `903c80ed64295311f8d7870b4847f56d67caee51`，精确 peel 到提交 `5a5902a83645c217ea11a3bd99eb70b535f0e4df`。Stage 2R-A 随后仍在未访问真实 fit 源或阶段 4 正式目标时发现：完整 three-grid 13 字段 evidence 只有进程内 preimage，没有 attempt-local create-once 文件和跨重启磁盘复验合同。当前插入第三个最小协议勘误门控：
+原始比较基线为 `dae6403`。原始标签 `v0.2.2-background-etas-repair-protocol`、R1 标签 `v0.2.2-background-etas-repair-protocol-r1`、R2 标签 `v0.2.2-background-etas-repair-protocol-r2` 与 R3 标签 `v0.2.2-background-etas-repair-protocol-r3` 均已冻结且保持不可变。R2 annotated tag object `903c80ed64295311f8d7870b4847f56d67caee51` 精确 peel 到提交 `5a5902a83645c217ea11a3bd99eb70b535f0e4df`；R3 annotated tag object `bd77f35d3d676893c6e83f385c810c89965f6257` 精确 peel 到提交 `8ccbf12dd971ee9e683b544e336c76b2a254eb60`。R3 的 three-grid complete-envelope、outer-SHA、九级身份链、fresh checkpoint 与 descendant handle-relative 合同继续作为比较基线，但 R3 冻结后原生只读探针证明其首个 absolute bootstrap 不可执行：`\??\Volume{GUID}\suffix + OBJ_DONT_REPARSE` 稳定得到 `STATUS_REPARSE_POINT_ENCOUNTERED`。该 R3 alias 规则只作不可变 NO-GO 历史保留，R4 中禁止实现、fallback 或验收；R3 不能恢复 Stage 2R-A。当前插入仅修平台 anchor 的 R4 最小勘误门控：
 
-- 勘误分支：`codex/stage2-etas-repair-protocol-r3`；实现主分支仍为 `codex/stage2-etas-numerical-repair`；
-- 精确勘误基线：R2 tag object `903c80ed64295311f8d7870b4847f56d67caee51` / peeled commit `5a5902a83645c217ea11a3bd99eb70b535f0e4df`；
-- 待冻结 annotated tag：`v0.2.2-background-etas-repair-protocol-r3`；
-- R3 的持久化改动：冻结 `attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/{snapshot_id}.json` 的 6 字段 complete envelope；它嵌入平台文件身份、sealed 既有 13 字段、三个 6 字段 resolution 前像、与 `pipeline_etas.py` 逐字段一致的 `numerical_evidence_id` crosswalk 和 envelope own SHA；outer own SHA 的 canonical JSON v1 前像恰好是显式前五字段 `envelope_identity_fields_exact`，排除第六个 own-SHA 字段；
-- R3 的显式 hash-binding 语义勘误：snapshot gate、fit-attempt 和五快照 presence map 中既有 nullable SHA 字段改为锚定包含安装身份的 outer envelope SHA；字段名、类型、公开 Schema、路径和文件数不变，embedded 13-field own SHA 只在 envelope 内重算；
-- Windows 资格运行唯一选择 `windows_ntfs_ntcreatefile_filerenameinfo_v1`，每个初始安装或 fresh checkpoint session 只 bootstrap 一次绝对 NT workspace root，以下全部 handle-relative、case-sensitive、`OBJ_DONT_REPARSE`；directory/temp/final DesiredAccess 精确为 `0x001201bf/0xc0110080/0x80100080`，目录禁止 GENERIC 高位，CreateDisposition/CreateOptions 分开冻结；ShareAccess、`FileFsDeviceInformation` 本地非远程谓词、parent `FileIdInfo` 128-bit FileId/u64/null 分支、temp/preinstall/final identity、no-replace rename 和 kernel32 `FlushFileBuffers` 必须全通过。POSIX `linkat` profile 只定义不选择；
-- `installed_file_identity` 还冻结从 workspace root 到 evidence directory 的九级有序目录身份链及其 SHA；可信本地 supervisor 必须恰好一次传入 `--workspace-root`，opening seal 将其绑定到相同 HEAD/upstream/code-tag/protocol blobs。Windows 严格使用 `\\?\Volume{GUID}` canonical path 并唯一转换为 `\??\Volume{GUID}` NT ObjectName，`FILE_ID_128` 按 `Identifier[0..15]` 原始顺序；六类 `NtCreateFile` 调用使用完整参数矩阵。POSIX fresh session 从固定 root 绝对 open 一次、以下只 `openat`，九级记录逐 live fd `fstat`；
-- R1 signed `row/column` 与 R2 publication-path 合同继续有效；禁止借 R3 修改网格、事件、KDE、初值、优化器、objective、门限、源访问、adapter 合同、目标边界、科学输入、公开 Schema 或公开路径；
-- 必须先完成 R3 定向/静态验收、normalized R2→R3 deep compare、提交、推送与远端标签核验，再恢复 Stage 2R-A；
-- Stage 2R-A 的在建代码不得在 R3 标签之前生成 runtime baseline、code diff receipt、真实 bundle 或资格结果。
+- 勘误分支：`codex/stage2-etas-repair-protocol-r4`；实现主分支仍为 `codex/stage2-etas-numerical-repair`；
+- 精确勘误基线：R3 tag object `bd77f35d3d676893c6e83f385c810c89965f6257` / peeled commit `8ccbf12dd971ee9e683b544e336c76b2a254eb60`；
+- 目标 annotated tag：`v0.2.2-background-etas-repair-protocol-r4`，当前尚未创建且未获创建授权；
+- CLI 仍只接受严格 `\\?\Volume{GUID}\suffix`。每个 fresh session 以 `NtOpenSymbolicLinkObject`/`NtQuerySymbolicLinkObject` 查询 explicit global `\GLOBAL??\Volume{GUID}` 得到权威 `T0`；link-open 固定 RootDirectory NULL、无尾斜杠 exact ObjectName、OA Attributes 0 且无 case-insensitive、Security NULL、输入 Unicode Length/MaximumLength 精确相等且无隐含 NUL。query 输出固定 `ReturnedLength == TargetName.Length + 2`、`MaximumLength >= ReturnedLength`；`T0` 只取 `Buffer[0:TargetName.Length]`，后两字节必须恰为 UTF-16 NUL 且不得进入 `T0`。这个 Attributes 0 仅属于 symbolic-link metadata open，不是 root `NtCreateFile` fallback。再用 `QueryDosDeviceW("Volume{GUID}")` 独立复核：256 WCHAR 起，仅 `ERROR_INSUFFICIENT_BUFFER` 倍增，最大 32768 WCHAR/8 次；按 returned WCHAR count 解析完整双-NUL `MULTI_SZ`，第一项非空，禁止 `buffer.value` 截断；只选第一项，后续旧映射可存在但不得选择；
+- pre/post global target exact UTF-16 bytes 必须相等，pre/post effective 第一项均必须等于 `T0`；`T0` 是严格 NFC 绝对 `\Device\...` 安全路径，不得 hardcode `HarddiskVolume` 数字，禁止 `\??`/`\DosDevices`/`\GLOBAL??`/UNC/MUP、dot、任何 C0 control（包括 NUL/CR/LF）、`/`、重复或尾随 separator；
+- selected profile ID 仍为 `windows_ntfs_ntcreatefile_filerenameinfo_v1`；root ObjectName 为 `T0 + 原 suffix`，仍用 `RootDirectory=NULL + OBJ_DONT_REPARSE`、无 case-insensitive、R3 原 access/share/disposition/options；禁止 alias、bootstrap-only `Attributes=0` retry、`QueryDosDeviceW` 供源、hardcode/cache device name 或 Win32 fallback；
+- live root handle 必须同时回核 GUID final path、NT final path；`FileIdInfo` u64 VolumeSerial/FileId 逐 API比较 launcher fixture/认证目录链，`GetVolumeInformationByHandleW` DWORD serial 逐 API 比较同一 fixture handle 并用于 NTFS crosscheck，禁止两种 serial 跨 API 等同或截断；另核对 disk/nonremote、root nonreparse、opening HEAD/upstream/code-tag/protocol blobs，再做 post-query。device target 严格 session-local/nonpersistent，每 session 重派生；任一失败均在 evaluator 前 `invalid_execution`；
+- root 以下全部 descendants 继续使用 parent-handle-relative `OBJ_DONT_REPARSE`。R4 不改变 R3 的科学、Schema、公开路径、模型、网格、KDE、25 初值、objective、优化器、门限、outer SHA、证据 DAG、publication 或阶段化失败状态；第一轮终审发现的 generic failure action 只被机械收窄为“唯一委派既有 `install_failure_state_machine`”，不改变其中任何 phase/status/recovery 权限；
+- 当前 R4 的本地工程回归已完成：第一轮三路、第二轮差异、第三轮文档均曾 NO-GO；第四轮清零后发现并机械修复 strict mypy 固定四元组错误；第五轮同五哈希三路再次全部 `P0=0/P1=0/P2=0`。修复后 R4 专属 `72 passed, 69 deselected in 22.90s`、四项边界 `4 passed in 8.19s`、完整协议 `141 passed in 91.96s`、关联 `173 passed in 107.06s`、YAML/Ruff/format/strict mypy/diff 均通过；唯一最终全量 `1329 passed, 2 skipped in 423.18s`、无 failure/error。历史入文前 `72 passed, 69 deselected in 24.98s` 与 `4 passed in 8.05s` 保留；回填后时长只记 Git-ignored 实时交接。状态仍为 `R4_NOT_ACCEPTED_NO_COMMIT`，只因本次回填后的边界/静态/独立文档范围终审以及提交、推送、tag 尚未完成；远端 tag 核验前禁止恢复 Stage 2R-A。
 
-原协议、R1 和 R2 冻结过程仅作为后文历史证据保留；当前续接必须执行本节和第 5 节的 R3 步骤。其余目标盲、资源、停止条件和后续阶段边界继续有效。Stage 4 formal target consumer 调用仍为 0，assessment row 物化仍为 0，阶段 9 锁定测试：未运行。
+原协议至 R3 的冻结过程仅作为后文历史证据保留；当前续接必须执行本节和第 5 节的 R4 步骤。其余目标盲、资源、停止条件和后续阶段边界继续有效。Stage 4 formal target consumer 调用仍为 0，assessment row 物化仍为 0，阶段 9 锁定测试：未运行。
 
 ## 1. 工作目标与唯一蓝图
 
@@ -34,17 +33,17 @@
 
 ## 2. 当前工作线和仓库现场
 
-- 工作线：阶段 2 ETAS 数值修复（R3 three-grid local persistence 协议勘误子阶段）
-- 当前勘误分支：`codex/stage2-etas-repair-protocol-r3`；后续实现主分支：`codex/stage2-etas-numerical-repair`
-- 原始协议基底：`dae6403`（`Finalize Stage 4 R2 blocked protocol`）；R1 提交 `da916454c908e0cbe4a7526f56a8f837331a3c7c`；R3 精确基底为 R2 tag object `903c80ed64295311f8d7870b4847f56d67caee51` / peeled commit `5a5902a83645c217ea11a3bd99eb70b535f0e4df`
-- 计划中的本阶段标签：`v0.2.2-background-etas-repair-protocol-r3`
-- 协议状态：原协议、R1、R2 已远端冻结；R3 第一至第四轮及 pre-bind P1 均保留为负证据。construction snapshot 已提前到 source factory 完成时，最终限定与静态检查通过，同一五文件快照的语义、公式/R2 差异、平台三路终审均为 `P0=0/P1=0/P2=0`；唯一最终受控全量 `1258 passed, 2 skipped`、无 failure/error。本地工程验收允许提交；R3 提交、推送和远端 annotated tag 尚未完成，故 Stage 2R-A 仍暂停
+- 工作线：阶段 2 ETAS 数值修复（R4 Windows direct-device bootstrap 协议勘误子阶段）
+- 当前勘误分支：`codex/stage2-etas-repair-protocol-r4`；后续实现主分支：`codex/stage2-etas-numerical-repair`
+- R4 精确基底：R3 tag object `bd77f35d3d676893c6e83f385c810c89965f6257` / peeled commit `8ccbf12dd971ee9e683b544e336c76b2a254eb60`
+- 计划中的本阶段标签：`v0.2.2-background-etas-repair-protocol-r4`（尚未创建）
+- 协议状态：R3 因 native alias bootstrap 失败保持不可变 NO-GO；R4 explicit-global primitive 已真调用证明。固定四元组机械类型修复后的第五轮三路、完整协议、关联、严格静态与唯一最终受控全量均已通过；JUnit size `218812`、SHA-256 `f5224e0b6183fc78262d6aeb22ee0a62b7c29a993c24979c840cba3ecf741d5a`。状态 `R4_NOT_ACCEPTED_NO_COMMIT` 现在只表示回填后复核和 Git/远端冻结未完成；Stage 2R-A 继续暂停
 - 真实阶段 2 拟合源：本工作线尚未重新打开或查询
 - Stage 4 formal target consumer 调用：0
 - assessment row 物化：0
 - 阶段 9 锁定测试：未运行
 
-当前 R3 只允许修改且尚未提交的文件：
+当前 R4 只允许修改且尚未提交的文件：
 
 - `configs/background_etas_numerical_repair.yaml`
 - `docs/background_etas_numerical_repair_protocol.md`
@@ -61,7 +60,7 @@
 - `docs/phase2_etas_numerical_repair_protocol_acceptance.md`
 - `tests/unit/test_background_etas_numerical_repair_protocol.py`
 
-其中 `.gitignore` 与 start manifest 在 R3 中保持与 R2 blob 完全相同，配置、主协议、验收记录和协议测试随勘误更新。本交接文档位于 package 外，只提供恢复现场。上述五项 R3 改动须在同一次勘误提交中完整保留，不得在验收前推送标签。
+其中 `.gitignore` 与 start manifest 在 R4 中保持与 R3 blob 完全相同，配置、主协议、验收记录和协议测试随勘误更新。本交接文档位于 package 外，只提供恢复现场。上述五项 R4 改动只有在成功的 ad-hoc 原生观察被 tracked permanent pytest 固化并通过正式限定、独立终审和正式验收后才可作为一个提交；当前禁止提交、推送或打标签。
 
 ## 3. 已完成内容
 
@@ -89,7 +88,7 @@
 - 最后核验于 2026-07-23：新增目录链/checkpoint 定向启动前整机 CPU 三次采样为 `53.2%/48.8%/54.0%`，低于 70% 阻断线；pytest 采用单进程、数值库单线程，结束后没有本工作线 Python 重任务；
 - 运行时 baseline 已设计覆盖 Python、NumPy、SciPy、stdlib、PE image 和原生依赖的文件身份。
 
-### 3.4 R3 three-grid complete envelope 勘误修复状态
+### 3.4 R3 three-grid complete envelope 勘误状态（历史，冻结但平台 NO-GO）
 
 - complete envelope 路径固定为 `data/processed/stage2R/etas_numerical_repair_fit_input/attempts/{attempt_id}/local_restricted/three_grid_gate_evidence/{snapshot_id}.json`，五个 filename 只能是冻结快照 ID；outer 6 字段中嵌入 sealed 原 13 字段、三个 resolution 前像、严格 crosswalk、安装身份和 envelope SHA；outer SHA 的 `envelope_identity_fields_exact` 前像恰为前五字段，排除第六 own-SHA 字段；
 - fresh reopen 必须从完整 bytes 重建真实 resolution/convergence/gate dataclass，核对 sealed 顶层与 nested snapshot/parameter 身份，再重算三个 resolution SHA、两个 pair SHA、13 字段 own SHA、源码 property 与独立 crosswalk 的 `numerical_evidence_id`、outer SHA；不得 evaluator replay；
@@ -109,7 +108,24 @@
 
 第二轮终审失败也必须保留：公式/持久化 `P0=0/P1=2/P2=1`，证据闭包 `P0=0/P1=2/P2=0`，平台合同 `P0=0/P1=3/P2=0`。公式审计确认主公式正确但真实 dataclass/sibling binding/presence map 执行闭包不足；证据审计复现 `PUBLIC_CROSSWALK_UNCHANGED=True`、replacement identity 改变且级联重写文件仍被旧 verifier 接受；平台审计确认 DesiredAccess、本地非远程谓词和 parent identity 类型不完整。三路均 NO-GO。
 
-第二轮后的上一版修订曾完成协议 `36 passed`、关联 `68 passed`，但第三轮独立语义 `P0=1/P1=2/P2=1` 与平台 `P0=1/P1=4/P2=1` 终审否决；随后版本完成完整协议 `58 passed in 60.16s`、关联 `90 passed in 66.95s`/`90 passed in 60.85s`，又被第四轮语义 `P0=0/P1=1/P2=1`、公式/差异 `P0=0/P1=0/P2=1`、平台 `P0=0/P1=3/P2=2` 否决。第四轮后再修订先行通过关键反例 `33 passed, 34 deselected in 32.34s`、完整协议 `67 passed in 60.76s`、关联 `99 passed in 61.24s`；新增目录链/root/platform 后的中间版本为完整协议 `70 passed in 67.63s`、关联 `102 passed in 67.52s`。external-registry 初版定向 `7 passed, 63 deselected in 11.85s`、完整协议 `70 passed in 67.16s`、关联 `102 passed in 69.30s`，但平台终审以 `P0=0/P1=1/P2=0` 否决其 pre-bind source mutation 窗口。当前 construction-snapshot 版本定向 `7 passed, 63 deselected in 11.48s`、完整协议 `70 passed in 67.56s`、关联 `102 passed in 70.99s`；Ruff check/format、单文件 strict mypy、YAML parse 与 `git diff --check` 全部通过。最终同哈希三路终审全部 `P0=0/P1=0/P2=0`；唯一最终受控全量 `1258 passed, 2 skipped in 427.68s`、无 failure/error。JUnit 路径 `data/interim/protocol-r3-final-full-nontarget.junit.xml`，XML `tests=1260/failures=0/errors=0/skipped=2/time=427.638`，size `205485`、SHA-256 `e02d6d050101f3f07e9a62fe418a6d2fdcde3084a0c77c5011f7dfec67f908ef`。两个 skip 仅为未分发的本地受限 Stage 3/4 工件；启动 CPU `55.7%/50.3%/47.3%`，affinity `0x3F0000`、`BelowNormal`、数值库单线程。工作树仍只允许精确五个 tracked 文件，下一步是最终文档守卫、提交、推送和远端标签核验。
+第二轮后的上一版修订曾完成协议 `36 passed`、关联 `68 passed`，但第三轮独立语义 `P0=1/P1=2/P2=1` 与平台 `P0=1/P1=4/P2=1` 终审否决；随后版本完成完整协议 `58 passed in 60.16s`、关联 `90 passed in 66.95s`/`90 passed in 60.85s`，又被第四轮语义 `P0=0/P1=1/P2=1`、公式/差异 `P0=0/P1=0/P2=1`、平台 `P0=0/P1=3/P2=2` 否决。第四轮后再修订先行通过关键反例 `33 passed, 34 deselected in 32.34s`、完整协议 `67 passed in 60.76s`、关联 `99 passed in 61.24s`；新增目录链/root/platform 后的中间版本为完整协议 `70 passed in 67.63s`、关联 `102 passed in 67.52s`。external-registry 初版定向 `7 passed, 63 deselected in 11.85s`、完整协议 `70 passed in 67.16s`、关联 `102 passed in 69.30s`，但平台终审以 `P0=0/P1=1/P2=0` 否决其 pre-bind source mutation 窗口。冻结 construction-snapshot 版本定向 `7 passed, 63 deselected in 11.48s`、完整协议 `70 passed in 67.56s`、关联 `102 passed in 70.99s`；Ruff check/format、单文件 strict mypy、YAML parse 与 `git diff --check` 全部通过。当时同哈希三路终审全部 `P0=0/P1=0/P2=0`，唯一最终受控全量 `1258 passed, 2 skipped in 427.68s`、无 failure/error；JUnit size `205485`、SHA-256 `e02d6d050101f3f07e9a62fe418a6d2fdcde3084a0c77c5011f7dfec67f908ef`。这些结果已随 R3 commit/tag 冻结，但没有执行所声明的 native alias bootstrap；更晚的 2×2 探针使平台 PASS 失效，R3 当前必须解释为证据/工程历史通过而 native platform NO-GO。
+
+### 3.4a R4 direct-device bootstrap 草案状态（当前）
+
+- R3 负证据矩阵：`Attributes=0` 配合 `CreateOptions=0x00000021/0x00200021` 两格均成功但属于禁止降级；`OBJ_DONT_REPARSE` 两格均返回 `0xC000050B`、`Information=0`、Win32 `4395`；
+- ignored 证据：`probe_ntcreatefile_bootstrap.py` size `5031` / SHA `0c188d843e18a9a0dc006506c6ff39e6d6f79587b835b4a0620a7e01c5795c1c`；`probe_output_redacted.jsonl` size `1160` / SHA `3ceeafb1898b9265c35fc538df74a75bfa1978520d6ce371a450bf2222107acf`；`README.md` size `3074` / SHA `13eef2706fe582a606ec95d5ece7ed57ceea8e000a953d70a44de3cde19ffe4b`；三者均在 `data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/` 且命中 `.gitignore:25 data/interim/**`；
+- 先行探针只覆盖进程有效 `\??` namespace，不能声称排除 shadow；direct-device 四格成功只证明方向可行。随后 explicit-global ad-hoc 非变更强化探针成功：global open/query、`QueryDosDeviceW` cardinality 1 与 `T0` byte-equal、direct `FILE_OPENED`、GUID/NT path equal、pre/post no-drift 全部满足；
+- 被第一轮终审否决的旧限定快照曾取得 R4 专属 `41 passed, 69 deselected`、四个既有边界守卫 `4 passed`，以及 YAML strict parse、R3→R4 path-only 差异守卫、Ruff/format、py_compile、`git diff --check` 通过；这些数字只保留为工程历史；
+- 首轮 tracked 定向负证据完整保留：`39 passed / 1 failed / 2 collection-setup errors`。两个 setup error 是超长/孤代理负例的 pytest 自动 ID 编码；native 失败依次暴露 `NtQuerySymbolicLinkObject ReturnedLength=48`、`TargetName.Length=46` 的尾随 UTF-16 NUL边界，以及同一卷 `FileIdInfo` u64 serial `15908439068185257866` 与 `GetVolumeInformationByHandleW` DWORD `3324045194` 不同的 API 类型域。首轮原始 stdout/JUnit 未保存，故该摘要是负观察而非稳定 node inventory；修正后的 41 项才是当时完整收集结果，但已被第一轮终审整体否决；
+- 第一轮独立终审：平台 `P0=0/P1=4/P2=3`（R3 alias 旧命令、launcher/root-binding scope、失败状态、日志泄露及边界/表述）；R3→R4 差异 `P0=0/P1=1/P2=1`（状态漂移、path-only allowlist）；文档/证据 `P0=0/P1=2/P2=3`（状态漂移、空历史映射可接受、原始负日志/全 sink nonpersistence/非 Windows skip 边界）。三路均 NO-GO；
+- tracked Windows permanent node 只能称为 non-mutating exact-access primitive probe：正式 R4 平台验收必须在 Windows 实际执行且 `skipped=0`；它不冒充 Stage 2R-A descendant handle-relative repository identity 或九级认证链生产实现。修订后 launcher fixture handle 必须贯穿 same-API crosswalk 与 post-query，所有失败信息不得展开 `T0`/GUID/NT path；
+- 第一轮终审修复后的限定曾为 R4 专属 `66 passed, 69 deselected in 9.69s`、四项边界 `4 passed in 9.02s`；第二轮复审平台 `P0=0/P1=0/P2=0`（聚焦 `21 passed in 5.75s`、native 0 skip）、文档 `P0=0/P1=0/P2=0`，但差异 `P0=0/P1=1/P2=0`（聚焦 `6 passed in 7.47s`），证明 expected overlay 仍可自借 current，故总门控继续 NO-GO；
+- 第二轮差异 P1 已修复：expected protocol 只从 R3 深拷贝和独立 literal/constants 构造，直接比较 `current == expected_current`；6 个真实协议变异反例覆盖 probe SHA、indexed matrix、scalar→mapping、extra sibling、truthy guard 和 resolver nested drift。关键 8 节点为 `8 passed, 133 deselected in 17.75s`，当前 R4 专属为 `72 passed, 69 deselected in 24.98s`；native node 在 Windows 实际执行无 skip；
+- 第三轮复审平台 `P0=0/P1=0/P2=0`（聚焦 `22 passed in 23.32s`、native 0 skip）、差异 `P0=0/P1=0/P2=0`（聚焦 `8 passed in 18.35s`），但文档 `P0=0/P1=1/P2=1`：当前边界结果仍写 `9.02s` 而权威复验为 `8.05s`，另有“当前 66 项”旧措辞，因此总门控继续 NO-GO；
+- 第四轮复审同五哈希三路全部 `P0=0/P1=0/P2=0`：文档线清零；平台聚焦 `22 passed in 39.69s`、native 0 skip；差异聚焦 `8 passed in 35.77s`，exact overlay、structured diff 与 6 个真实 mutation 全闭合。随后完整协议 `141 passed in 97.25s`、关联 `173 passed in 97.54s`、严格 YAML `2 passed in 4.59s`、Ruff/format/diff 通过；strict mypy 以固定四元组 index 类型单错停止，最终全量未启动；
+- 第五轮同五哈希三路全部 `P0=0/P1=0/P2=0`：文档线清零；平台/差异线分别因 CPU 首样本 `79.8%`、`76.00%` 阻断聚焦 pytest，但均机械证明唯一 cast 运行时恒等且协议/平台内容未变；外层同快照 72 项限定与四项边界受控通过；
+- 最终回归：完整协议 `141 passed in 91.96s`，关联 `173 passed in 107.06s`，严格 YAML `2 passed in 5.20s`，Ruff/format、strict mypy 216 files、diff 全部通过；唯一最终受控全量 `1329 passed, 2 skipped in 423.18s`，JUnit `tests=1331/failures=0/errors=0/skipped=2`；
+- 当前停止条件：只运行本次回填后的四项边界、静态检查并计算最终五哈希，随后执行独立文档/范围终审。清零即按验收授权提交、推送和 annotated R4 tag；不得再次运行唯一最终全量，也不得用 `Attributes=0`、alias、QueryDosDevice authority、hardcode/cache 或 Win32 fallback 绕过。
 
 ### 3.5 R2 publication-path 勘误状态（历史，继续有效）
 
@@ -157,9 +173,11 @@
 
 ## 4. 中断前审计发现及当前修复状态
 
-### 4.0 Three-grid 完整 preimage 持久化：R3 当前门控
+### 4.0 Three-grid 完整 preimage 持久化：R3 历史合同与 R4 当前平台门控
 
-R2 已把 gate/fit-attempt/staged-local 中的 nullable three-grid own SHA 交叉闭合，但完整前像没有固定磁盘落点。首轮 R3 又错误地只持久化裸 13 字段，无法从文件重建 `ETASGridGateEvidence.numerical_evidence_id`；第二轮进一步证明把 identity 与 outer SHA 只放在同一文件中仍无法抵抗跨重启替换。当前修订使用 6 字段 outer envelope，complete-envelope own SHA 只覆盖显式前五字段，完整嵌入三个 resolution 前像、sealed 13 字段、源码同公式 crosswalk 和安装身份，并让三个既有外部 nullable SHA 字段锚定 outer SHA。这样替换身份必改变 outer SHA并被旧 gate/fit/presence 拒绝。状态窗口互斥：install 成功至 post-install flush/parent-sync/final-reopen 完整验证之间为终态 `indeterminate_after_install`，只允许只读取证，禁止同 attempt resume/reanchor/publish/推进资格；完整验证后至首锚耐久落盘前为 `invalid_execution`，不得 resume/reanchor；首锚后 envelope/anchor 任一漂移也为 `invalid_execution`，不得同 attempt 修复。八 checkpoint 只读 fresh reopen，anchor 后 expected SHA 只能来自独立冻结外部记录。R2 staged/public 安装协议保持不变，但 hash-binding 来源是显式 R3 语义勘误。
+R2 已把 gate/fit-attempt/staged-local 中的 nullable three-grid own SHA 交叉闭合，但完整前像没有固定磁盘落点。首轮 R3 又错误地只持久化裸 13 字段，无法从文件重建 `ETASGridGateEvidence.numerical_evidence_id`；第二轮进一步证明把 identity 与 outer SHA 只放在同一文件中仍无法抵抗跨重启替换。R3 最终冻结版本使用 6 字段 outer envelope，complete-envelope own SHA 只覆盖显式前五字段，完整嵌入三个 resolution 前像、sealed 13 字段、源码同公式 crosswalk 和安装身份，并让三个既有外部 nullable SHA 字段锚定 outer SHA。这样替换身份必改变 outer SHA并被旧 gate/fit/presence 拒绝。状态窗口互斥：install 成功至 post-install flush/parent-sync/final-reopen 完整验证之间为终态 `indeterminate_after_install`，只允许只读取证，禁止同 attempt resume/reanchor/publish/推进资格；完整验证后至首锚耐久落盘前为 `invalid_execution`，不得 resume/reanchor；首锚后 envelope/anchor 任一漂移也为 `invalid_execution`，不得同 attempt 修复。八 checkpoint 只读 fresh reopen，anchor 后 expected SHA 只能来自独立冻结外部记录。R2 staged/public 安装协议保持不变，但 hash-binding 来源是显式 R3 语义勘误。
+
+上述 complete-envelope 合同已经随 R3 冻结；R4 不重开其科学或证据设计，只替换 R3 失败的 absolute root anchor。当前平台门控是把 explicit-global ad-hoc 成功观察固化为 permanent pytest，并机械拒绝 global/effective mismatch、第二项选择、pre/post drift、malformed target、GUID/NT path 或身份/filesystem/device/reparse mismatch，以及任一 alias/Attributes-zero root retry/Win32 fallback/cache/persistence。未完成该 tracked acceptance 和独立审计前，R4 保持 NO-GO。
 
 ### 4.0a Qualification publication 路径闭包：R2 历史门控
 
@@ -213,7 +231,7 @@ R1 中 `staged_public_payload_identity` 已正确冻结 pre-closing 7(+2) 文件
 
 因此 count、gradient、spread、Hessian、branching 或 grid 任一层失败均只有一个无歧义的下游状态，不会制造重复或虚构失败码。
 
-### 4.4 修复代码边界与文档漂移保护已通过最终复跑
+### 4.4 R3 历史修复代码边界与文档漂移保护（不构成当前 R4 复验）
 
 - 协议测试从冻结 Git blob 和当前 `etas_fit.py` 中分别剔除唯一允许修改的 `ETASParameterBounds.from_transformed` 完整源码区间；其余源码字节与 AST 必须完全相等，未来修复不能暗改同类其他成员或模块其他节点；
 - 验收记录明确列出恰好六个 protocol package 路径；
@@ -221,12 +239,15 @@ R1 中 `staged_public_payload_identity` 已正确冻结 pre-closing 7(+2) 文件
 
 ## 5. 精确续接步骤
 
-1. 先执行 `git status --short`、`git rev-parse HEAD`、R2 tag object/peeled commit 核验和远端标签查询；原始、R1、R2 标签只能核验、不得移动；
-2. R3 专属、完整协议、关联回归、Ruff、mypy、`git diff --check`、同哈希三路终审和唯一最终受控全量均已完成；不得再次运行全量。提交前只运行文档守卫/静态检查并确认精确五文件 diff；
-3. 把上述五项勘误作为一个提交推送到 `origin/codex/stage2-etas-repair-protocol-r3`；
-4. 创建并推送 annotated tag `v0.2.2-background-etas-repair-protocol-r3`，再用网络查询确认远端勘误分支和 peeled tag commit 均等于本地 `HEAD`；
-5. 只有第 4 步已由远端证据满足后，才把 R3 勘误提交整合到实现主分支并继续阶段 2R-A；不得在此之前打开真实阶段 2 fit 源或阶段 4 目标；
-6. 阶段 2R-A 仍须独立完成测试、验收、提交、推送和代码标签核验，不能把本次协议验收当作代码实现验收。
+1. 先执行 `git status --short`、`git rev-parse HEAD`，核验 R3 tag object `bd77f35d3d676893c6e83f385c810c89965f6257` peel 到 `8ccbf12dd971ee9e683b544e336c76b2a254eb60`；原始至 R3 标签只能核验、不得移动。
+2. 确认 diff 只含配置、主协议、验收记录、本交接和协议测试五个授权 tracked 文件；`.gitignore`、start manifest 与全部非授权路径必须与 R3 相同。ignored probe 只读核验，不得加入 Git。
+3. 已完成：固定四元组修复后的 R4 专属限定、四项边界和第五轮三路独立终审；第五轮三路全部 `P0=0/P1=0/P2=0`。
+4. 已完成：完整协议、关联、YAML/Ruff/strict mypy/diff 与唯一最终受控非目标全量；唯一全量不得重跑。
+5. 当前只运行本次回填后的四项文档边界、Ruff/format/py_compile/diff，计算最终五哈希并执行独立文档/范围终审；结果时长只追加 Git-ignored 实时交接，不反写 tracked 文档。
+6. 第 5 步清零后，本验收授权把精确五项 R4 勘误作为单一提交推送到 `origin/codex/stage2-etas-repair-protocol-r4`；不得夹带 ignored runner/JUnit/probe。
+7. 仅在提交/推送复核完成后创建并推送 annotated tag `v0.2.2-background-etas-repair-protocol-r4`，再远端查询确认 tag object 类型、peeled commit、分支 HEAD 与 protocol-package blobs。
+8. 只有第 7 步全部满足后，才把 R4 勘误整合到实现主分支并继续 Stage 2R-A；不得在此之前打开真实阶段 2 fit 源或 Stage 4 目标。
+9. Stage 2R-A 仍须独立完成实现、测试、验收、提交、推送和代码标签核验，不能把 R4 协议验收当作代码实现验收。
 
 ## 6. 后续阶段计划
 
@@ -241,7 +262,7 @@ R1 中 `staged_public_payload_identity` 已正确冻结 pre-closing 7(+2) 文件
 - 在修复代码标签远端核验后才允许访问真实 fit-only 输入；
 - 受控资源运行五快照 × 五起点；
 - 生成静态 SVG 和离线交互 HTML 数值诊断；
-- 当前尚未生成任何实际模型预测效果静态图或交互页；R3 只冻结诊断/展示合同，不得把协议示意图冒充效果结果；
+- 当前尚未生成任何实际模型预测效果静态图或交互页；R3/R4 只冻结诊断、证据和平台合同，不得把协议示意图冒充效果结果；
 - `evaluable` 或稳定 `not_evaluable` 都必须冻结结果标签；
 - 若 `not_evaluable`，正式停止 ETAS 路线并保持阶段 4 阻塞，不针对结果继续调参。
 
@@ -274,14 +295,12 @@ R1 中 `staged_public_payload_identity` 已正确冻结 pre-closing 7(+2) 文件
 
 ## 8. 交接完成判据
 
-本交接文档记录可续接现场。R3 阶段 2 协议勘误只有在以下各项全部成立时才完成：
+本交接文档记录可续接现场。R4 阶段 2 协议勘误只有在以下各项全部成立时才完成：
 
-- three-grid 6 字段 complete envelope（含原 13 字段、三个 resolution 前像、源码同公式 crosswalk、持久文件身份和九级目录身份链）、presence/SHA/null 真值表、独立 live-chain/root source、平台目录/文件 durability 和八个 fresh-reopen 节点通过机械测试；
-- normalized R2→R3 deep compare 证明科学规则、公开 Schema/字段类型/路径/文件数精确未变，并只放行明确登记的 outer-SHA hash-source 语义节点；
-- qualification common 9(+2) staged/final/rollback/retry 路径闭包通过机械测试和独立审计；
-- 三网格/Shapely runtime closure 通过机械测试和独立审计；
-- adapter local payload 和 gate-skip closure 通过机械测试和独立审计；
-- 本轮专属、协议文件、关联与静态限定复验通过，新的三路独立终审全部清零；两次无效/停止全量尝试保留但不计验收，随后由外层一次最终受控全量通过并回填；
-- 正式验收文档填写真实、无未来承诺；
-- 提交和推送成功（本文件写入时待外层 Git 操作确认）；
-- annotated protocol tag 推送成功且远端解析到预期提交（本文件写入时待外层网络核验）。
+- R3 commit/tag 精确核验且保持不可变；R3 native NO-GO 的 2×2 matrix 与三份 ignored 证据 size/SHA 完整保留；
+- CLI strict Volume GUID parse、explicit-global link OA/Unicode query、`QueryDosDeviceW` 第一项、pre/post no-drift、direct `\Device\...` grammar、direct root `OBJ_DONT_REPARSE` open、GUID/NT/FileId/serial/NTFS/disk/nonremote/nonreparse/opening identity 交叉核验与 session-local nonpersistence 全部进入 permanent tests；
+- alias、effective 第二项、`Attributes=0` root retry、QueryDosDevice authority、hardcode/cache/persistence、Win32 fallback 及每个 malformed/drift/mismatch 分支均在 evaluator 前机械落为 `invalid_execution`；root 以下 descendants 仍严格 parent-handle-relative `OBJ_DONT_REPARSE`；
+- normalized R3→R4 deep compare 只放行 revision/tag/comparison metadata、Windows resolver/platform、对应文档和测试；科学输入、Schema、公开路径、模型、网格、KDE、初值、objective、优化器、门限、outer SHA、证据 DAG、publication 和失败状态全部不变；
+- R4 送审前限定通过，平台、差异/不变性、文档/证据三路独立终审全部 `P0=0/P1=0/P2=0`；随后完整协议、关联、YAML/Ruff/strict mypy/`git diff --check` 均通过，并在受控资源条件下完成唯一一次最终非目标全量且真实回填；
+- 正式验收文档真实回填并明确允许提交；本文件写入时该条件尚未满足，当前仍 `R4_NOT_ACCEPTED_NO_COMMIT`；
+- 之后单一允许文件集提交、推送成功，annotated R4 protocol tag 推送成功且远端解析到预期提交。当前这些 Git/远端步骤均未执行。

@@ -2,20 +2,23 @@ from __future__ import annotations
 
 import ast
 import base64
+import ctypes
 import hashlib
 import json
 import os
 import re
 import subprocess
+import sys
 import types
 import unicodedata
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from importlib.metadata import distribution
-from itertools import count
+from itertools import count, product
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, ClassVar, cast
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -54,6 +57,10 @@ R1_PROTOCOL_COMMIT = "da916454c908e0cbe4a7526f56a8f837331a3c7c"
 R2_PROTOCOL_TAG = "v0.2.2-background-etas-repair-protocol-r2"
 R2_PROTOCOL_TAG_OBJECT = "903c80ed64295311f8d7870b4847f56d67caee51"
 R2_PROTOCOL_COMMIT = "5a5902a83645c217ea11a3bd99eb70b535f0e4df"
+R3_PROTOCOL_TAG = "v0.2.2-background-etas-repair-protocol-r3"
+R3_PROTOCOL_TAG_OBJECT = "bd77f35d3d676893c6e83f385c810c89965f6257"
+R3_PROTOCOL_COMMIT = "8ccbf12dd971ee9e683b544e336c76b2a254eb60"
+R4_PROTOCOL_TAG = "v0.2.2-background-etas-repair-protocol-r4"
 
 SNAPSHOT_ORDER = ("fold_1", "fold_2", "fold_3", "fold_4", "final_validation")
 SYNTHETIC_WINDOWS_VOLUME_GUID_PREFIX = r"\\?\Volume{00000000-0000-0000-0000-000000000001}"
@@ -61,6 +68,31 @@ WINDOWS_VOLUME_GUID_PATH_PATTERN = re.compile(
     r"^\\\\\?\\Volume\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
     r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}\\(.+)$"
 )
+WINDOWS_VOLUME_GUID_ROOT_AND_SUFFIX_PATTERN = re.compile(
+    r"^(\\\\\?\\Volume\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+    r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\})(\\.+)$"
+)
+R4_SESSION_LOCAL_NONPERSISTENCE_SINKS = (
+    "envelope",
+    "receipt",
+    "log",
+    "public_artifact",
+    "cache",
+    "restart_state",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class _StructuredDifference:
+    change_kind: str
+    current_type: str
+    baseline_type: str
+    current_value: object
+    baseline_value: object
+
+
+_DEEP_DIFF_MISSING = object()
+_DEEP_DIFF_MISSING_VALUE = "<missing>"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1127,6 +1159,515 @@ def _validate_platform_canonical_path(
     return value
 
 
+def _assert_r4_native_redacted(condition: bool, message: str) -> None:
+    if not condition:
+        raise AssertionError(f"{message}; sensitive operands redacted")
+
+
+def _assert_r4_native_utf16_equal_redacted(
+    left: str,
+    right: str,
+    *,
+    message: str,
+) -> None:
+    try:
+        equal = left.encode("utf-16-le", errors="strict") == right.encode(
+            "utf-16-le", errors="strict"
+        )
+    except UnicodeEncodeError as error:
+        raise AssertionError(f"{message}; sensitive operands redacted") from error
+    _assert_r4_native_redacted(equal, message)
+
+
+def _parse_r4_query_dos_device_multisz(
+    raw_buffer: str,
+    *,
+    returned_count: int,
+    supplied_capacity: int,
+) -> tuple[str, ...]:
+    if (
+        not isinstance(raw_buffer, str)
+        or isinstance(returned_count, bool)
+        or not isinstance(returned_count, int)
+        or returned_count <= 0
+        or isinstance(supplied_capacity, bool)
+        or not isinstance(supplied_capacity, int)
+        or supplied_capacity <= 0
+        or returned_count > supplied_capacity
+        or len(raw_buffer) < returned_count
+    ):
+        raise ValueError("QueryDosDevice returned count is outside the supplied WCHAR buffer")
+    accepted = raw_buffer[:returned_count]
+    if not accepted.endswith("\0\0") or accepted.endswith("\0\0\0"):
+        raise ValueError("QueryDosDevice MULTI_SZ must have exactly two terminal NUL WCHARs")
+    targets = tuple(accepted[:-2].split("\0"))
+    if not targets or any(not target for target in targets):
+        raise ValueError("QueryDosDevice MULTI_SZ contains an empty string item")
+    return targets
+
+
+def _query_r4_dos_device_first_target_bounded(
+    volume_guid_name: str,
+    *,
+    query_once: Callable[[str, int], tuple[int, str, int]],
+) -> tuple[str, tuple[str, ...]]:
+    capacity = 256
+    maximum_capacity = 32768
+    maximum_call_count = 8
+    for call_index in range(maximum_call_count):
+        returned_count, raw_buffer, last_error = query_once(volume_guid_name, capacity)
+        if returned_count != 0:
+            targets = _parse_r4_query_dos_device_multisz(
+                raw_buffer,
+                returned_count=returned_count,
+                supplied_capacity=capacity,
+            )
+            return targets[0], targets
+        if last_error != 122:
+            raise AssertionError("QueryDosDeviceW failed with a non-ERROR_INSUFFICIENT_BUFFER code")
+        if call_index == maximum_call_count - 1 or capacity == maximum_capacity:
+            break
+        capacity *= 2
+        if capacity > maximum_capacity:
+            break
+    raise AssertionError("QueryDosDeviceW MULTI_SZ exceeds the frozen call/capacity bound")
+
+
+def _get_r4_final_path_name_bounded(
+    query_once: Callable[[int], tuple[int, str | None, int]],
+) -> str:
+    capacity = 512
+    maximum_capacity = 32768
+    while capacity <= maximum_capacity:
+        returned_length, value, last_error = query_once(capacity)
+        if returned_length == 0:
+            raise AssertionError(f"GetFinalPathNameByHandleW failed with error {last_error}")
+        if returned_length < capacity:
+            if value is None or len(value) != returned_length:
+                raise AssertionError("GetFinalPathNameByHandleW returned an inconsistent value")
+            return value
+        if returned_length <= capacity:
+            raise AssertionError(
+                "GetFinalPathNameByHandleW insufficient-buffer length did not grow"
+            )
+        # On insufficient buffer this return value already includes the terminal NUL.
+        capacity = returned_length
+    raise AssertionError("GetFinalPathNameByHandleW result exceeds the frozen bound")
+
+
+def _deep_diff_type(value: object) -> str:
+    return "missing" if value is _DEEP_DIFF_MISSING else type(value).__name__
+
+
+def _deep_diff_value(value: object) -> object:
+    return _DEEP_DIFF_MISSING_VALUE if value is _DEEP_DIFF_MISSING else deepcopy(value)
+
+
+def _collect_structured_differences(
+    current: object,
+    baseline: object,
+) -> dict[tuple[str | int, ...], _StructuredDifference]:
+    differences: dict[tuple[str | int, ...], _StructuredDifference] = {}
+
+    def record(
+        path: tuple[str | int, ...],
+        current_value: object,
+        baseline_value: object,
+        change_kind: str,
+    ) -> None:
+        differences[path] = _StructuredDifference(
+            change_kind=change_kind,
+            current_type=_deep_diff_type(current_value),
+            baseline_type=_deep_diff_type(baseline_value),
+            current_value=_deep_diff_value(current_value),
+            baseline_value=_deep_diff_value(baseline_value),
+        )
+
+    def walk(
+        current_value: object,
+        baseline_value: object,
+        path: tuple[str | int, ...],
+    ) -> None:
+        if current_value is _DEEP_DIFF_MISSING or baseline_value is _DEEP_DIFF_MISSING:
+            present = baseline_value if current_value is _DEEP_DIFF_MISSING else current_value
+            if isinstance(present, dict) and present:
+                for key in sorted(present, key=str):
+                    walk(
+                        _DEEP_DIFF_MISSING if current_value is _DEEP_DIFF_MISSING else present[key],
+                        _DEEP_DIFF_MISSING
+                        if baseline_value is _DEEP_DIFF_MISSING
+                        else present[key],
+                        (*path, str(key)),
+                    )
+                return
+            if isinstance(present, list) and present:
+                for index, item in enumerate(present):
+                    walk(
+                        _DEEP_DIFF_MISSING if current_value is _DEEP_DIFF_MISSING else item,
+                        _DEEP_DIFF_MISSING if baseline_value is _DEEP_DIFF_MISSING else item,
+                        (*path, index),
+                    )
+                return
+            record(
+                path,
+                current_value,
+                baseline_value,
+                "removed" if current_value is _DEEP_DIFF_MISSING else "added",
+            )
+            return
+        if type(current_value) is not type(baseline_value):
+            record(path, current_value, baseline_value, "type_changed")
+            return
+        if isinstance(current_value, dict):
+            baseline_mapping = cast(dict[object, object], baseline_value)
+            for key in sorted(set(current_value) | set(baseline_mapping), key=str):
+                walk(
+                    current_value.get(key, _DEEP_DIFF_MISSING),
+                    baseline_mapping.get(key, _DEEP_DIFF_MISSING),
+                    (*path, str(key)),
+                )
+            return
+        if isinstance(current_value, list):
+            baseline_list = cast(list[object], baseline_value)
+            for index in range(max(len(current_value), len(baseline_list))):
+                walk(
+                    current_value[index] if index < len(current_value) else _DEEP_DIFF_MISSING,
+                    baseline_list[index] if index < len(baseline_list) else _DEEP_DIFF_MISSING,
+                    (*path, index),
+                )
+            return
+        if current_value != baseline_value:
+            record(path, current_value, baseline_value, "value_changed")
+
+    walk(current, baseline, ())
+    return differences
+
+
+def _select_r4_install_failure_state_key(
+    *,
+    preexisting_final: bool,
+    install_succeeded: bool,
+    postinstall_reopen_verified: bool,
+    first_external_anchor_persisted: bool,
+) -> str:
+    state = (
+        preexisting_final,
+        install_succeeded,
+        postinstall_reopen_verified,
+        first_external_anchor_persisted,
+    )
+    truth_table = {
+        (True, False, False, False): "preexisting_final_before_evaluator_or_install",
+        (False, False, False, False): "failure_before_install_success",
+        (
+            False,
+            True,
+            False,
+            False,
+        ): "install_success_until_complete_postinstall_flush_parent_sync_and_reopen_verification",
+        (
+            False,
+            True,
+            True,
+            False,
+        ): (
+            "complete_postinstall_reopen_verification_before_first_external_envelope_sha_"
+            "anchor_is_durably_persisted"
+        ),
+        (
+            False,
+            True,
+            True,
+            True,
+        ): "at_or_after_first_external_envelope_sha_anchor",
+    }
+    if state not in truth_table:
+        raise ValueError("install failure phase booleans are contradictory")
+    return truth_table[state]
+
+
+def _synthetic_r4_windows_bootstrap_observation(
+    *,
+    session_id: str = "synthetic-session-a",
+) -> dict[str, Any]:
+    volume_guid = "Volume{00000000-0000-0000-0000-000000000001}"
+    launcher_path = rf"\\?\{volume_guid}\synthetic_workspace"
+    direct_target = r"\Device\VolumeDeviceObject"
+    root_object_name = rf"{direct_target}\synthetic_workspace"
+    file_id = "00112233445566778899aabbccddeeff"
+    file_id_info_volume_serial = "15908439068185257866"
+    volume_information_serial = "305419896"
+    return {
+        "launcher_path": launcher_path,
+        "authority_link_name": rf"\GLOBAL??\{volume_guid}",
+        "authority_link_open_attributes": 0,
+        "authority_link_desired_access": 0x00000001,
+        "global_target_pre": direct_target,
+        "global_target_post": direct_target,
+        "query_dos_device_name": volume_guid,
+        "query_dos_device_targets_pre": [
+            direct_target,
+            r"\Device\HistoricalVolumeDeviceObject",
+        ],
+        "query_dos_device_targets_post": [
+            direct_target,
+            r"\Device\HistoricalVolumeDeviceObject",
+        ],
+        "effective_selected_target": direct_target,
+        "query_dos_device_used_as_authority": False,
+        "workspace_root_open_api": "NtCreateFile",
+        "workspace_root_object_name": root_object_name,
+        "workspace_root_object_attributes": 0x00001000,
+        "workspace_root_create_options": 0x00200021,
+        "workspace_root_create_disposition": 0x00000001,
+        "workspace_root_io_status_information": 0x0000000000000001,
+        "alias_open_attempted": False,
+        "hardcoded_or_cached_device_name_used": False,
+        "win32_path_api_fallback_attempted": False,
+        "handle_final_path_guid": launcher_path,
+        "handle_final_path_nt": root_object_name,
+        "expected_root_file_id": file_id,
+        "handle_root_file_id": file_id,
+        "expected_file_id_info_volume_serial": file_id_info_volume_serial,
+        "file_id_info_volume_serial": file_id_info_volume_serial,
+        "expected_volume_information_serial": volume_information_serial,
+        "volume_information_volume_serial": volume_information_serial,
+        "filesystem_name": "NTFS",
+        "device_type": 0x00000007,
+        "device_characteristics": 0,
+        "file_attributes": 0x00000010,
+        "reparse_tag": 0,
+        "session_derivation_observation": {
+            "session_id": session_id,
+            "authority_query_call_id": f"{session_id}:global-query:1",
+            "effective_query_call_id": f"{session_id}:effective-query:1",
+            "derivation_source": "fresh_native_queries_in_this_session",
+        },
+        "session_local_device_target_sink_observations": {
+            sink: None for sink in R4_SESSION_LOCAL_NONPERSISTENCE_SINKS
+        },
+    }
+
+
+def _validate_r4_windows_direct_device_target(value: object) -> str:
+    if not isinstance(value, str):
+        raise ValueError("direct device target must be a string")
+    try:
+        encoded = value.encode("utf-16-le", errors="strict")
+    except UnicodeEncodeError as error:
+        raise ValueError("direct device target must be exact valid UTF-16 text") from error
+    if (
+        not encoded
+        or len(encoded) % 2 != 0
+        or len(encoded) > 65534
+        or value != unicodedata.normalize("NFC", value)
+        or any(ord(character) < 0x20 for character in value)
+        or "/" in value
+    ):
+        raise ValueError("direct device target must be exact NUL-free NFC UTF-16 text")
+    forbidden_prefixes = ("\\??\\", "\\DosDevices\\", "\\GLOBAL??\\", "\\UNC\\")
+    if (
+        any(value.startswith(prefix) for prefix in forbidden_prefixes)
+        or value
+        in {
+            r"\Device\Mup",
+        }
+        or value.startswith("\\Device\\Mup\\")
+    ):
+        raise ValueError("direct device target uses a forbidden alias or remote namespace")
+    if not value.startswith("\\Device\\"):
+        raise ValueError("direct device target must use the absolute Device namespace")
+    components = value[len("\\Device\\") :].split("\\")
+    if any(not component or component in {".", ".."} for component in components):
+        raise ValueError("direct device target has a dot, repeated, or trailing component")
+    return value
+
+
+def _validate_r4_windows_bootstrap_observation(observation: dict[str, Any]) -> dict[str, str]:
+    launcher_path = observation["launcher_path"]
+    if not isinstance(launcher_path, str) or launcher_path != unicodedata.normalize(
+        "NFC", launcher_path
+    ):
+        raise ValueError("launcher path must be exact NFC text")
+    match = WINDOWS_VOLUME_GUID_ROOT_AND_SUFFIX_PATTERN.fullmatch(launcher_path)
+    if match is None or "/" in launcher_path or "\0" in launcher_path:
+        raise ValueError("launcher path must be a strict Volume GUID path with a suffix")
+    volume_guid_root, suffix = match.groups()
+    suffix_components = suffix[1:].split("\\")
+    if any(not component or component in {".", ".."} for component in suffix_components):
+        raise ValueError("launcher suffix must contain only safe exact-case components")
+    volume_guid_name = volume_guid_root[len("\\\\?\\") :]
+    expected_authority_link = rf"\GLOBAL??\{volume_guid_name}"
+    if observation["authority_link_name"] != expected_authority_link:
+        raise ValueError("authority link must use the explicit global Object Manager namespace")
+    if observation["authority_link_open_attributes"] != 0:
+        raise ValueError("the symbolic-link query itself must use Attributes zero")
+    if observation["authority_link_desired_access"] != 0x00000001:
+        raise ValueError("the symbolic-link authority open must request SYMBOLIC_LINK_QUERY")
+    if observation["query_dos_device_name"] != volume_guid_name:
+        raise ValueError("QueryDosDevice must receive only the parsed Volume GUID name")
+
+    pre_targets = observation["query_dos_device_targets_pre"]
+    post_targets = observation["query_dos_device_targets_post"]
+    if (
+        not isinstance(pre_targets, list)
+        or not pre_targets
+        or not isinstance(post_targets, list)
+        or not post_targets
+        or any(
+            not isinstance(target, str) or not target for target in [*pre_targets, *post_targets]
+        )
+    ):
+        raise ValueError("QueryDosDevice must return a nonempty parsed MULTI_SZ")
+    selected_target = observation["effective_selected_target"]
+    if selected_target != pre_targets[0]:
+        raise ValueError("only the first QueryDosDevice MULTI_SZ entry may be selected")
+    target_t0 = _validate_r4_windows_direct_device_target(observation["global_target_pre"])
+    try:
+        target_t0_bytes = target_t0.encode("utf-16-le", errors="strict")
+        effective_pre_bytes = pre_targets[0].encode("utf-16-le", errors="strict")
+        global_post_bytes = observation["global_target_post"].encode("utf-16-le", errors="strict")
+        effective_post_bytes = post_targets[0].encode("utf-16-le", errors="strict")
+    except UnicodeEncodeError as error:
+        raise ValueError("resolver mappings must be exact valid UTF-16 text") from error
+    if target_t0_bytes != effective_pre_bytes:
+        raise ValueError("global authority and effective first target differ before open")
+    if global_post_bytes != target_t0_bytes or effective_post_bytes != target_t0_bytes:
+        raise ValueError("global or effective target drifted across the root open")
+    if observation["query_dos_device_used_as_authority"] is not False:
+        raise ValueError("QueryDosDevice is a crosscheck and may not become authority")
+
+    expected_root_object_name = f"{target_t0}{suffix}"
+    try:
+        root_object_name_bytes = expected_root_object_name.encode("utf-16-le", errors="strict")
+    except UnicodeEncodeError as error:
+        raise ValueError("workspace root ObjectName must be exact valid UTF-16 text") from error
+    if (
+        not root_object_name_bytes
+        or len(root_object_name_bytes) % 2 != 0
+        or len(root_object_name_bytes) > 65534
+    ):
+        raise ValueError("workspace root ObjectName exceeds the UNICODE_STRING byte bound")
+    if observation["workspace_root_object_name"] != expected_root_object_name:
+        raise ValueError("workspace root ObjectName is not T0 plus the exact launcher suffix")
+    if observation["workspace_root_open_api"] != "NtCreateFile":
+        raise ValueError("workspace root must be opened by NtCreateFile")
+    if observation["workspace_root_object_attributes"] != 0x00001000:
+        raise ValueError("workspace root open must keep OBJ_DONT_REPARSE without retry")
+    if observation["workspace_root_create_options"] != 0x00200021:
+        raise ValueError("workspace root create options drifted")
+    if observation["workspace_root_create_disposition"] != 0x00000001:
+        raise ValueError("workspace root disposition must be FILE_OPEN")
+    if observation["workspace_root_io_status_information"] != 0x0000000000000001:
+        raise ValueError("workspace root open must report FILE_OPENED")
+    if any(
+        observation[field] is not False
+        for field in (
+            "alias_open_attempted",
+            "hardcoded_or_cached_device_name_used",
+            "win32_path_api_fallback_attempted",
+        )
+    ):
+        raise ValueError("alias, cached device, and Win32 path fallback are forbidden")
+
+    if observation["handle_final_path_guid"] != launcher_path:
+        raise ValueError("handle Volume GUID final path differs from launcher input")
+    if observation["handle_final_path_nt"] != expected_root_object_name:
+        raise ValueError("handle NT final path differs from the direct root ObjectName")
+    expected_file_id = observation["expected_root_file_id"]
+    observed_file_id = observation["handle_root_file_id"]
+    if (
+        not isinstance(expected_file_id, str)
+        or re.fullmatch(r"[0-9a-f]{32}", expected_file_id) is None
+        or observed_file_id != expected_file_id
+    ):
+        raise ValueError("root FileId does not equal the frozen live identity")
+    expected_file_id_serial = observation["expected_file_id_info_volume_serial"]
+    expected_volume_information_serial = observation["expected_volume_information_serial"]
+    if (
+        not _is_canonical_unsigned_decimal(expected_file_id_serial, maximum=(1 << 64) - 1)
+        or observation["file_id_info_volume_serial"] != expected_file_id_serial
+    ):
+        raise ValueError("FileIdInfo volume serial crosscheck failed")
+    if (
+        not _is_canonical_unsigned_decimal(
+            expected_volume_information_serial, maximum=(1 << 32) - 1
+        )
+        or observation["volume_information_volume_serial"] != expected_volume_information_serial
+    ):
+        raise ValueError("GetVolumeInformation volume serial crosscheck failed")
+    if observation["filesystem_name"] != "NTFS":
+        raise ValueError("filesystem must be exact NTFS")
+    if observation["device_type"] != 0x00000007:
+        raise ValueError("device type must be FILE_DEVICE_DISK")
+    if not isinstance(observation["device_characteristics"], int) or (
+        observation["device_characteristics"] & 0x00000010
+    ):
+        raise ValueError("remote device characteristics are forbidden")
+    if not isinstance(observation["file_attributes"], int) or (
+        observation["file_attributes"] & 0x00000400
+    ):
+        raise ValueError("workspace root handle must not identify a reparse point")
+    if observation["reparse_tag"] != 0:
+        raise ValueError("workspace root reparse tag must be zero")
+    derivation = observation["session_derivation_observation"]
+    if not isinstance(derivation, dict) or set(derivation) != {
+        "session_id",
+        "authority_query_call_id",
+        "effective_query_call_id",
+        "derivation_source",
+    }:
+        raise ValueError("session-local target requires an exact fresh derivation observation")
+    session_id = derivation["session_id"]
+    authority_call_id = derivation["authority_query_call_id"]
+    effective_call_id = derivation["effective_query_call_id"]
+    if (
+        not isinstance(session_id, str)
+        or not session_id
+        or not isinstance(authority_call_id, str)
+        or not authority_call_id.startswith(f"{session_id}:global-query:")
+        or not isinstance(effective_call_id, str)
+        or not effective_call_id.startswith(f"{session_id}:effective-query:")
+        or authority_call_id == effective_call_id
+        or derivation["derivation_source"] != "fresh_native_queries_in_this_session"
+    ):
+        raise ValueError("session-local target was not freshly derived in this session")
+    sinks = observation["session_local_device_target_sink_observations"]
+    if (
+        not isinstance(sinks, dict)
+        or tuple(sinks) != R4_SESSION_LOCAL_NONPERSISTENCE_SINKS
+        or any(sinks[sink] is not None for sink in R4_SESSION_LOCAL_NONPERSISTENCE_SINKS)
+    ):
+        raise ValueError("session-local device target may not enter any persistence sink")
+    return {
+        "authority_link_name": expected_authority_link,
+        "direct_target_t0": target_t0,
+        "root_object_name": expected_root_object_name,
+    }
+
+
+def _validate_r4_cross_session_fresh_derivation(
+    first: dict[str, Any],
+    second: dict[str, Any],
+) -> None:
+    _validate_r4_windows_bootstrap_observation(first)
+    _validate_r4_windows_bootstrap_observation(second)
+    first_derivation = cast(dict[str, str], first["session_derivation_observation"])
+    second_derivation = cast(dict[str, str], second["session_derivation_observation"])
+    if first_derivation["session_id"] == second_derivation["session_id"]:
+        raise ValueError("fresh sessions must have distinct session derivation identities")
+    first_calls = {
+        first_derivation["authority_query_call_id"],
+        first_derivation["effective_query_call_id"],
+    }
+    second_calls = {
+        second_derivation["authority_query_call_id"],
+        second_derivation["effective_query_call_id"],
+    }
+    if first_calls & second_calls:
+        raise ValueError("fresh sessions may not reuse resolver query observations")
+
+
 def _verify_directory_identity_chain(
     persistence: dict[str, Any],
     installed_identity: dict[str, object],
@@ -1960,32 +2501,33 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     protocol = _load_yaml(PROTOCOL_PATH)
 
     assert protocol["protocol_version"] == "0.2.2"
-    assert protocol["protocol_revision"] == "r3"
+    assert protocol["protocol_revision"] == "r4"
     assert protocol["stage"] == "2-ETAS-R"
     assert protocol["status"] == "preregistered_target_blind_before_any_repair_fit"
     assert protocol["preregistered_on"] == "2026-07-17"
-    assert protocol["revised_on"] == "2026-07-19"
+    assert protocol["revised_on"] == "2026-07-23"
     assert protocol["revision_reason"] == (
-        "freeze_attempt_local_complete_three_grid_envelope_identity_durability_and_"
-        "fresh_disk_reopen_without_changing_any_scientific_input_public_schema_or_fit_rule"
+        "correct_the_windows_workspace_root_namespace_bootstrap_to_a_verified_direct_NT_"
+        "device_path_while_preserving_OBJ_DONT_REPARSE_and_every_scientific_schema_path_"
+        "model_and_fit_contract"
     )
     revision_base = protocol["revision_base"]
     assert revision_base == {
-        "protocol_tag": R2_PROTOCOL_TAG,
-        "protocol_tag_object": R2_PROTOCOL_TAG_OBJECT,
-        "protocol_commit": R2_PROTOCOL_COMMIT,
+        "protocol_tag": R3_PROTOCOL_TAG,
+        "protocol_tag_object": R3_PROTOCOL_TAG_OBJECT,
+        "protocol_commit": R3_PROTOCOL_COMMIT,
         "protocol_tag_object_type_exact": "annotated_tag",
         "protocol_tag_must_peel_exactly_to_protocol_commit": True,
-        "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r3_freeze": True,
+        "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r4_freeze": True,
     }
     tag_type = subprocess.run(
-        ["git", "cat-file", "-t", R2_PROTOCOL_TAG],
+        ["git", "cat-file", "-t", R3_PROTOCOL_TAG],
         check=True,
         capture_output=True,
         text=True,
     ).stdout.strip()
     peeled_commit = subprocess.run(
-        ["git", "rev-parse", f"{R2_PROTOCOL_TAG}^{{}}"],
+        ["git", "rev-parse", f"{R3_PROTOCOL_TAG}^{{}}"],
         check=True,
         capture_output=True,
         text=True,
@@ -1993,16 +2535,16 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     assert tag_type == "tag"
     assert (
         subprocess.run(
-            ["git", "rev-parse", R2_PROTOCOL_TAG],
+            ["git", "rev-parse", R3_PROTOCOL_TAG],
             check=True,
             capture_output=True,
             text=True,
         ).stdout.strip()
-        == R2_PROTOCOL_TAG_OBJECT
+        == R3_PROTOCOL_TAG_OBJECT
     )
-    assert peeled_commit == R2_PROTOCOL_COMMIT
+    assert peeled_commit == R3_PROTOCOL_COMMIT
     publication = protocol["publication"]
-    assert publication["protocol_tag"] == "v0.2.2-background-etas-repair-protocol-r3"
+    assert publication["protocol_tag"] == R4_PROTOCOL_TAG
     assert publication["qualification_code_tag"] == "v0.2.2-background-etas-repair-code"
     assert publication["qualification_result_tag"] == (
         "v0.2.2-background-etas-numerical-qualification"
@@ -2015,9 +2557,7 @@ def test_repair_protocol_is_independent_target_blind_and_not_yet_executed() -> N
     assert publication["negative_result_requires_same_qualification_result_tag"] is True
     assert publication["adapter_code_tag_allowed_only_after_positive_qualification_result_tag"]
     assert publication["new_stage4_revision_requires_comparator_receipt_tag"] is True
-    assert protocol["repair_code_scope_from_protocol_tag"]["comparison_base"] == (
-        "v0.2.2-background-etas-repair-protocol-r3"
-    )
+    assert protocol["repair_code_scope_from_protocol_tag"]["comparison_base"] == (R4_PROTOCOL_TAG)
     assert publication["exact_order"] == [
         "protocol_commit_push_and_remote_tag_verification",
         "repair_code_and_tests_commit_push_and_remote_tag_verification",
@@ -4950,8 +5490,13 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
     assert root_argument["cli_option"] == "--workspace-root"
     assert root_argument["occurrence_count_exact"] == 1
     assert root_argument["public_artifact_value"] == "forbidden_local_restricted_only"
-    assert root_argument["windows_nt_object_name_example"] == (
-        r"\??\Volume{11111111-2222-3333-4444-555555555555}\repo"
+    assert "windows_nt_object_name_derivation_exact" not in root_argument
+    assert "windows_nt_object_name_example" not in root_argument
+    assert root_argument["windows_global_volume_guid_link_object_name_example"] == (
+        r"\GLOBAL??\Volume{11111111-2222-3333-4444-555555555555}"
+    )
+    assert root_argument["windows_direct_nt_device_root_object_name_example"] == (
+        r"\Device\VolumeDeviceObject\repo"
     )
     assert root_argument[
         "any_drive_UNC_DOS_device_alias_environment_current_directory_or_envelope_"
@@ -5084,6 +5629,13 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
         "preinstall_memory_or_temp_bytes" not in persistence
     )
 
+    assert persistence[
+        "any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action"
+    ] == (
+        "select_the_unique_phase_specific_status_from_durable_create_once_file_protocol."
+        "install_failure_state_machine_without_any_blanket_override_then_retain_attempt_"
+        "and_start_any_scientific_retry_only_under_the_authorized_new_attempt_boundary"
+    )
     durability = persistence["durable_create_once_file_protocol"]
     assert durability["selected_install_profile_exact"] == (
         "windows_ntfs_ntcreatefile_filerenameinfo_v1"
@@ -5145,14 +5697,14 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
     windows = durability["windows"]
     assert windows["profile_id_exact"] == "windows_ntfs_ntcreatefile_filerenameinfo_v1"
     assert windows["trusted_namespace_bootstrap_exact"] == (
-        "one_absolute_NT_path_open_of_trusted_workspace_root_per_initial_install_or_fresh_"
-        "checkpoint_verification_session_then_attempt_root_and_all_descendants_opened_only_"
-        "by_RootDirectory_relative_descent"
+        "every_initial_install_or_fresh_checkpoint_session_rederives_one_authoritatively_"
+        "verified_direct_NT_device_workspace_root_ObjectName_then_opens_it_once_and_opens_"
+        "attempt_root_and_all_descendants_only_by_RootDirectory_relative_descent"
     )
     assert windows["trusted_workspace_root_bootstrap_object_attributes_exact"] == (
-        "RootDirectory_NULL_ObjectName_exact_NT_path_derived_from_fixed_launcher_workspace_"
-        "root_argument_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_"
-        "0x1000_without_OBJ_CASE_INSENSITIVE_0x40"
+        "RootDirectory_NULL_ObjectName_fresh_verified_direct_NT_device_target_T0_plus_"
+        "original_launcher_suffix_and_bound_to_opening_repository_HEAD_Attributes_OBJ_"
+        "DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40"
     )
     assert "trusted_workspace_root_bootstrap_create_disposition_and_options_exact" not in windows
     assert windows["trusted_workspace_root_bootstrap_create_disposition_exact"] == {
@@ -5264,7 +5816,8 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
         ),
         "UNICODE_STRING_MaximumLength": ("exactly_equal_Length_no_implicit_terminator_capacity"),
         "UNICODE_STRING_Buffer": (
-            "exact_absolute_workspace_root_or_single_leaf_UTF16_code_units_matching_ObjectName_kind"
+            "exact_fresh_verified_direct_NT_device_workspace_root_or_single_leaf_UTF16_"
+            "code_units_matching_ObjectName_kind"
         ),
         "AllocationSize": None,
         "EaBuffer": None,
@@ -5314,8 +5867,8 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
         "trusted_workspace_root_bootstrap": {
             "root_directory_kind": None,
             "object_name_kind": (
-                "exact_NT_ObjectName_derived_only_from_fixed_launcher_workspace_root_"
-                "argument_and_crosschecked_to_opening_repository_HEAD"
+                "exact_fresh_verified_direct_NT_device_target_T0_plus_original_launcher_"
+                "suffix_crosschecked_to_both_launcher_namespaces_and_opening_repository_HEAD"
             ),
             "desired_access_uint32_hex": "001201bf",
             "file_attributes_symbol": "zero_ignored_for_FILE_OPEN",
@@ -5447,9 +6000,8 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
     assert windows[
         "fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact"
     ] == (
-        "replace_exact_leading_two_backslashes_question_mark_backslash_with_single_"
-        "backslash_question_mark_question_mark_backslash_preserve_all_remaining_UTF16_"
-        "code_units_and_reject_any_other_prefix"
+        "forbidden_R3_alias_conversion_replaced_by_fresh_session_global_link_authority_"
+        "effective_map_crosscheck_and_direct_NT_device_ObjectName_construction"
     )
     assert windows[
         "DOS_drive_UNC_incomplete_volume_GUID_dot_dot_dot_empty_or_repeated_separator_"
@@ -5570,6 +6122,1163 @@ def test_three_grid_evidence_is_attempt_local_create_once_durable_and_reopened()
             "allowed_responsibilities"
         ]
     )
+
+
+def _expected_r4_windows_resolver_contract_exact() -> dict[str, object]:
+    return {
+        "launcher_input_kind_exact": (
+            "strict_canonical_absolute_Win32_Volume_GUID_path_with_nonempty_exact_case_suffix"
+        ),
+        "authority_link_namespace_exact": (
+            "explicit_global_Object_Manager_Volume_GUID_symbolic_link"
+        ),
+        "authority_link_object_name_exact": r"\GLOBAL??\Volume{parsed-launcher-guid}",
+        "authority_api_order_exact": ["NtOpenSymbolicLinkObject", "NtQuerySymbolicLinkObject"],
+        "authority_open_desired_access_exact": {
+            "symbol": "SYMBOLIC_LINK_QUERY",
+            "uint32_hex": "00000001",
+        },
+        "authority_link_open_object_attributes_exact": {
+            "RootDirectory": None,
+            "ObjectName": "exact_explicit_global_Volume_GUID_link_without_trailing_backslash",
+            "Attributes_uint32_hex": "00000000",
+            "Attributes_semantics": (
+                "no_OBJ_CASE_INSENSITIVE_and_no_OBJ_DONT_REPARSE_for_opening_the_symbolic_"
+                "link_object_itself"
+            ),
+            "SecurityDescriptor": None,
+            "SecurityQualityOfService": None,
+            "UNICODE_STRING_Length": (
+                "exact_ObjectName_UTF16LE_byte_length_without_terminator_reject_odd_or_over_65534"
+            ),
+            "UNICODE_STRING_MaximumLength": (
+                "exactly_equal_Length_no_implicit_terminator_capacity"
+            ),
+            "UNICODE_STRING_Buffer": (
+                "exact_global_link_ObjectName_UTF16_code_units_without_trailing_backslash_or_"
+                "implicit_NUL"
+            ),
+            "Attributes_zero_scope_exact": (
+                "symbolic_link_metadata_open_only_never_a_workspace_root_NtCreateFile_fallback"
+            ),
+        },
+        "authority_link_query_target_unicode_string_exact": {
+            "ReturnedLength": (
+                "strict_even_uint32_between_4_and_65534_equal_to_TargetName_Length_plus_2"
+            ),
+            "TargetName_Length": (
+                "strict_even_uint16_between_2_and_65532_equal_to_exact_target_UTF16LE_byte_"
+                "length_without_terminator"
+            ),
+            "TargetName_MaximumLength": (
+                "caller_allocated_even_capacity_at_least_ReturnedLength_without_trusting_"
+                "implicit_NUL"
+            ),
+            "accepted_target_bytes": (
+                "Buffer_slice_from_byte_zero_through_TargetName_Length_exclusive_only"
+            ),
+            "Buffer_slice_from_TargetName_Length_through_ReturnedLength_exclusive_must_"
+            "equal_exact_UTF16_NUL_two_zero_bytes_and_must_not_enter_T0": True,
+            "trailing_unreturned_buffer_capacity_must_not_enter_T0": True,
+        },
+        "authority_query_result_T0_exact": (
+            "exact_UTF16_target_bytes_returned_for_the_explicit_global_Volume_GUID_link"
+        ),
+        "effective_map_crosscheck_api_exact": "QueryDosDeviceW",
+        "effective_map_crosscheck_argument_exact": (
+            "Volume_braced_GUID_without_prefix_suffix_or_trailing_backslash"
+        ),
+        "effective_map_crosscheck_result_type_exact": "MULTI_SZ",
+        "effective_map_selected_entry_exact": "first_string_only",
+        "effective_map_first_entry_comparison_exact": (
+            "exact_UTF16_byte_equality_to_authoritative_T0_without_case_or_path_normalization"
+        ),
+        "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact": {
+            "initial_capacity_wchars": 256,
+            "capacity_growth_factor": 2,
+            "maximum_capacity_wchars": 32768,
+            "maximum_call_count": 8,
+            "growth_trigger_exact": "ERROR_INSUFFICIENT_BUFFER_only",
+            "any_other_error_or_exhausted_bound_action": "invalid_execution_before_grid_evaluator",
+            "returned_count_unit_exact": "WCHAR_count_not_bytes",
+            "returned_count_rule": "strict_positive_not_greater_than_supplied_capacity",
+            "accepted_buffer_slice_exact": (
+                "all_WCHARs_from_index_zero_through_returned_count_exclusive"
+            ),
+            "required_termination_exact": (
+                "accepted_slice_ends_with_exactly_the_MULTI_SZ_terminal_double_NUL"
+            ),
+            "parse_rule_exact": (
+                "split_the_complete_returned_slice_on_NUL_preserve_every_nonempty_entry_in_"
+                "order_and_remove_only_the_final_two_terminal_NULs"
+            ),
+            "first_entry_must_be_nonempty": True,
+            "empty_entry_before_terminal_forbidden": True,
+            "ctypes_buffer_value_or_any_first_NUL_truncated_reader_forbidden": True,
+        },
+        "later_historical_mapping_entries_allowed_but_never_selectable_or_authoritative": True,
+        "preopen_global_target_and_effective_first_entry_must_equal_same_T0": True,
+        "postopen_global_target_and_effective_first_entry_must_equal_same_T0": True,
+        "preopen_and_postopen_global_target_exact_UTF16_bytes_must_be_equal": True,
+        "direct_nt_device_target_grammar_exact": {
+            "encoding": "exact_UTF16_without_NUL",
+            "normalization": "unicode_NFC",
+            "absolute_prefix_exact": "\\Device\\",
+            "component_count": "one_or_more_nonempty_components",
+            "component_rule": (
+                "every_component_is_nonempty_not_dot_or_dot_dot_and_contains_no_C0_control_"
+                "NUL_or_forward_slash"
+            ),
+            "separator_rule": (
+                "exactly_one_backslash_between_components_without_repeated_or_trailing_separator"
+            ),
+            "forbidden_namespace_prefixes_exact": [
+                "\\??\\",
+                "\\DosDevices\\",
+                "\\GLOBAL??\\",
+                "\\UNC\\",
+                "\\Device\\Mup",
+                "\\Device\\Mup\\",
+            ],
+            "hardcoded_cached_or_HarddiskVolume_numeric_pattern_dependency_forbidden": True,
+        },
+        "constructed_root_object_name_exact": (
+            "T0_plus_the_original_launcher_suffix_preserving_every_exact_UTF16_code_unit_"
+            "and_separator_boundary_once"
+        ),
+        "QueryDosDeviceW_is_independent_crosscheck_only_and_may_not_supply_or_override_T0": True,
+        "resolver_order_exact": [
+            "strict_launcher_parse",
+            "global_link_prequery_T0",
+            "QueryDosDeviceW_prequery_first_entry_crosscheck",
+            "T0_grammar_validation",
+            "direct_root_ObjectName_construction",
+            "direct_root_NtCreateFile_open",
+            "live_handle_crosschecks",
+            "global_link_postquery_same_T0",
+            "QueryDosDeviceW_postquery_first_entry_same_T0",
+            "accept_session_root",
+        ],
+        "retained_root_handle_crosschecks_before_close_exact": [
+            "GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_GUID_equals_exact_"
+            "launcher_input",
+            "GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_NT_equals_exact_"
+            "constructed_root_ObjectName",
+            "GetFileInformationByHandleEx_FileIdInfo_u64_VolumeSerialNumber_and_FileId_"
+            "equal_same_API_launcher_fixture_and_authenticated_directory_chain_values",
+            "GetVolumeInformationByHandleW_exact_NTFS_and_DWORD_serial_equal_same_API_"
+            "launcher_fixture_value",
+            "NtQueryVolumeInformationFile_FileFsDeviceInformation_FILE_DEVICE_DISK_and_not_"
+            "FILE_REMOTE_DEVICE",
+            "GetFileInformationByHandleEx_FileAttributeTagInfo_not_reparse",
+            "handle_relative_opening_repository_HEAD_upstream_remote_repair_code_tag_and_"
+            "protocol_package_blobs",
+        ],
+        "volume_serial_cross_API_contract_exact": {
+            "FileIdInfo_VolumeSerialNumber": (
+                "canonical_u64_compared_only_to_FileIdInfo_u64_from_same_launcher_fixture_and_"
+                "authenticated_directory_chain"
+            ),
+            "GetVolumeInformationByHandleW_volume_serial": (
+                "canonical_DWORD_compared_only_to_GetVolumeInformationByHandleW_DWORD_from_"
+                "same_launcher_fixture_handle_and_used_with_filesystem_crosscheck"
+            ),
+            "FileIdInfo_u64_must_not_equal_or_be_truncated_to_GetVolumeInformationByHandleW_"
+            "DWORD": True,
+            "first_native_mismatch_observation_exact": {
+                "FileIdInfo_u64_decimal": "15908439068185257866",
+                "GetVolumeInformationByHandleW_DWORD_decimal": "3324045194",
+                "values_intentionally_not_equal": True,
+            },
+            "any_cross_API_equality_cast_or_truncation_action": (
+                "invalid_execution_before_grid_evaluator"
+            ),
+        },
+        "root_handle_must_remain_live_from_direct_open_through_all_crosschecks_and_both_"
+        "postqueries": True,
+        "direct_device_target_is_strictly_session_local_nonpersistent_and_must_be_rederived_"
+        "every_session": True,
+        "direct_device_target_may_not_enter_envelope_receipt_log_public_artifact_cache_or_"
+        "restart_state": True,
+        "any_alias_open_hardcoded_or_cached_device_name_QueryDosDevice_authority_ATTRIBUTES_"
+        "zero_retry_or_Win32_path_API_fallback_forbidden": True,
+        "any_resolver_query_parse_drift_open_or_crosscheck_failure_action": (
+            "invalid_execution_before_grid_evaluator"
+        ),
+    }
+
+
+def test_r4_windows_bootstrap_resolver_contract_is_exact() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    persistence = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    windows = persistence["durable_create_once_file_protocol"]["windows"]
+    resolver = windows["fresh_session_volume_guid_to_direct_nt_device_resolver_exact"]
+    assert resolver == _expected_r4_windows_resolver_contract_exact()
+    assert windows["r3_bootstrap_contract_disposition_exact"] == (
+        "immutable_NO_GO_due_to_native_STATUS_REPARSE_POINT_ENCOUNTERED_before_any_grid_evaluator"
+    )
+    assert windows["r3_failed_bootstrap_object_name_kind_exact"] == (
+        "process_effective_backslash_question_question_Volume_GUID_link_plus_original_"
+        "launcher_suffix"
+    )
+    probe = windows["r3_native_probe_evidence_exact"]
+    assert probe["matrix_fields_exact"] == [
+        "object_attributes_uint32_hex",
+        "create_options_uint32_hex",
+        "ntstatus_hex",
+        "io_status_information_uint64_hex",
+        "win32_error",
+        "result",
+    ]
+    assert [row["ntstatus_hex"] for row in probe["matrix_exact"]] == [
+        "00000000",
+        "00000000",
+        "c000050b",
+        "c000050b",
+    ]
+    assert probe[
+        "r4_strengthened_explicit_global_ad_hoc_non_mutating_exact_access_probe_observation_exact"
+    ] == (
+        "global_link_open_and_query_succeeded_QueryDosDeviceW_MULTISZ_cardinality_one_and_"
+        "first_target_byte_equal_to_global_T0_direct_open_FILE_OPENED_GUID_and_NT_final_"
+        "paths_equal_expected_and_pre_post_targets_did_not_drift"
+    )
+    assert probe["r4_strengthened_probe_acceptance_limit_exact"] == (
+        "ad_hoc_observation_succeeded_first_tracked_native_run_exposed_two_protocol_"
+        "mismatches_and_collection_ID_errors_corrections_are_applied_and_tracked_native_"
+        "rerun_completed_before_first_independent_audit_but_formal_R4_acceptance_still_pending"
+    )
+    assert probe["r4_first_tracked_native_negative_observations_exact"] == {
+        "NtQuerySymbolicLinkObject": {
+            "ReturnedLength_bytes": 48,
+            "TargetName_Length_bytes": 46,
+            "finding": "ReturnedLength_includes_one_trailing_UTF16_NUL",
+        },
+        "volume_serial_APIs": {
+            "FileIdInfo_u64_decimal": "15908439068185257866",
+            "GetVolumeInformationByHandleW_DWORD_decimal": "3324045194",
+            "finding": "values_are_distinct_and_must_be_compared_only_with_same_API_fixture_values",
+        },
+        "protocol_corrections_applied": [
+            "ReturnedLength_equals_TargetName_Length_plus_2_and_T0_excludes_NUL",
+            "volume_serial_comparisons_are_same_API_only_without_cross_API_equality_cast_or_"
+            "truncation",
+        ],
+        "first_tracked_summary_exact": "39_passed_1_failed_2_collection_setup_errors",
+        "first_tracked_raw_log_or_JUnit_persisted": False,
+        "first_tracked_summary_is_negative_observation_not_a_stable_node_inventory": True,
+        "pre_first_independent_audit_tracked_native_rerun_completed": True,
+        "pre_first_independent_audit_selected_test_count_exact": 41,
+        "formal_R4_acceptance_pending": True,
+    }
+    assert probe["r4_tracked_native_permanent_test_scope_exact"] == (
+        "non_mutating_exact_access_global_link_QueryDosDevice_direct_root_and_live_handle_"
+        "identity_capability_crosschecks_only"
+    )
+    assert probe[
+        "r4_tracked_native_test_does_not_claim_descendant_handle_relative_repository_"
+        "identity_or_authenticated_nine_directory_chain_implementation"
+    ]
+    assert probe[
+        "r4_native_failure_reporting_must_redact_T0_direct_ObjectName_and_launcher_GUID_"
+        "path_operands"
+    ]
+    assert (
+        windows[
+            "trusted_workspace_root_bootstrap_OBJECT_ATTRIBUTES_Attributes_must_equal_OBJ_DONT_"
+            "REPARSE_0x1000_and_retry_with_Attributes_zero_is_forbidden"
+        ]
+        is True
+    )
+    root_row = windows["ntcreatefile_call_parameter_matrix_exact"][
+        "trusted_workspace_root_bootstrap"
+    ]
+    assert root_row["object_name_kind"] == (
+        "exact_fresh_verified_direct_NT_device_target_T0_plus_original_launcher_suffix_"
+        "crosschecked_to_both_launcher_namespaces_and_opening_repository_HEAD"
+    )
+    assert root_row["create_options_uint32_hex"] == "00200021"
+    assert (
+        windows["ntcreatefile_common_structure_contract_exact"][
+            "OBJECT_ATTRIBUTES_Attributes_uint32_hex"
+        ]
+        == "00001000"
+    )
+    assert windows["path_and_case_capture_exact"] == (
+        "GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_with_both_VOLUME_NAME_GUID_and_"
+        "VOLUME_NAME_NT_plus_GetFileInformationByHandleEx_FileNameInfo_exact_UTF16_relative_"
+        "component_case"
+    )
+    assert all(
+        "device_target" not in field and "device_name" not in field
+        for field in persistence["installed_file_identity_fields_exact"]
+    )
+
+
+def test_r4_query_dos_device_raw_multisz_driver_preserves_all_entries_and_selects_first() -> None:
+    calls: list[int] = []
+    accepted = "\\Device\\First\0\\Device\\Historical\0\0"
+
+    def query_once(_name: str, capacity: int) -> tuple[int, str, int]:
+        calls.append(capacity)
+        if capacity == 256:
+            return 0, "", 122
+        return len(accepted), accepted + "ignored-capacity-tail", 0
+
+    selected, targets = _query_r4_dos_device_first_target_bounded(
+        "Volume{synthetic}",
+        query_once=query_once,
+    )
+    assert calls == [256, 512]
+    assert targets == (r"\Device\First", r"\Device\Historical")
+    assert selected == targets[0]
+    assert selected != targets[1]
+
+
+@pytest.mark.parametrize(
+    "raw",
+    (
+        "\\Device\\First\0\0\\Device\\Historical\0\0",
+        "\\Device\\First\0",
+        "\\Device\\First\0\0\0",
+    ),
+    ids=("empty_before_terminal", "single_nul", "triple_nul"),
+)
+def test_r4_query_dos_device_raw_multisz_rejects_malformed_termination(raw: str) -> None:
+    with pytest.raises(ValueError, match="MULTI_SZ"):
+        _parse_r4_query_dos_device_multisz(
+            raw,
+            returned_count=len(raw),
+            supplied_capacity=len(raw),
+        )
+
+
+@pytest.mark.parametrize(
+    ("returned_count", "supplied_capacity"),
+    ((0, 256), (257, 256)),
+    ids=("zero_count", "over_capacity_count"),
+)
+def test_r4_query_dos_device_raw_multisz_rejects_invalid_count(
+    returned_count: int,
+    supplied_capacity: int,
+) -> None:
+    with pytest.raises(ValueError, match="returned count"):
+        _parse_r4_query_dos_device_multisz(
+            "x" * max(returned_count, 1),
+            returned_count=returned_count,
+            supplied_capacity=supplied_capacity,
+        )
+
+
+def test_r4_query_dos_device_bounded_driver_rejects_non_122_error() -> None:
+    def query_once(_name: str, _capacity: int) -> tuple[int, str, int]:
+        return 0, "", 5
+
+    with pytest.raises(AssertionError, match="non-ERROR_INSUFFICIENT_BUFFER"):
+        _query_r4_dos_device_first_target_bounded(
+            "Volume{synthetic}",
+            query_once=query_once,
+        )
+
+
+def test_r4_query_dos_device_bounded_driver_rejects_eight_call_exhaustion() -> None:
+    capacities: list[int] = []
+
+    def query_once(_name: str, capacity: int) -> tuple[int, str, int]:
+        capacities.append(capacity)
+        return 0, "", 122
+
+    with pytest.raises(AssertionError, match="call/capacity bound"):
+        _query_r4_dos_device_first_target_bounded(
+            "Volume{synthetic}",
+            query_once=query_once,
+        )
+    assert capacities == [256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
+
+
+def test_r4_get_final_path_uses_required_length_including_nul_without_plus_one() -> None:
+    capacities: list[int] = []
+
+    def query_once(capacity: int) -> tuple[int, str | None, int]:
+        capacities.append(capacity)
+        if len(capacities) == 1:
+            return 513, None, 122
+        return 512, "x" * 512, 0
+
+    assert len(_get_r4_final_path_name_bounded(query_once)) == 512
+    assert capacities == [512, 513]
+
+
+def test_r4_native_failure_receipt_redacts_device_guid_and_nt_operands() -> None:
+    sensitive_device = r"\Device\HostSpecificSensitiveTarget"
+    sensitive_guid = r"\\?\Volume{aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee}\host-specific-worktree"
+    with pytest.raises(AssertionError) as failure:
+        _assert_r4_native_utf16_equal_redacted(
+            sensitive_device,
+            sensitive_guid,
+            message="synthetic native crosscheck mismatch",
+        )
+    failure_receipt = json.dumps(
+        {"outcome": "invalid_execution", "message": str(failure.value)},
+        sort_keys=True,
+    )
+    assert sensitive_device not in failure_receipt
+    assert sensitive_guid not in failure_receipt
+    assert "HostSpecificSensitiveTarget" not in failure_receipt
+    assert "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee" not in failure_receipt
+    assert "sensitive operands redacted" in failure_receipt
+
+
+def test_r4_native_source_never_expands_sensitive_operands_in_assert_or_failure_message() -> None:
+    module = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    function = next(
+        node
+        for node in module.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        and node.name
+        == (
+            "test_r4_windows_native_non_mutating_exact_access_global_link_direct_open_"
+            "and_r3_failure"
+        )
+    )
+    sensitive_names = {
+        "value",
+        "link_name",
+        "target",
+        "volume_guid_name",
+        "launcher_guid_path",
+        "volume_guid_root",
+        "global_link_name",
+        "r3_alias_object_name",
+        "global_target_before",
+        "global_target_after",
+        "direct_object_name",
+        "observed_guid_path",
+        "observed_nt_path",
+        "object_name",
+    }
+    for node in ast.walk(function):
+        if isinstance(node, ast.Assert):
+            referenced = {child.id for child in ast.walk(node) if isinstance(child, ast.Name)}
+            assert referenced.isdisjoint(sensitive_names)
+        if isinstance(node, ast.Raise) and node.exc is not None:
+            referenced = {child.id for child in ast.walk(node.exc) if isinstance(child, ast.Name)}
+            assert referenced.isdisjoint(sensitive_names)
+
+
+def test_r4_non_windows_native_skip_cannot_satisfy_platform_acceptance() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    probe = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]["durable_create_once_file_protocol"]["windows"]["r3_native_probe_evidence_exact"]
+    assert probe[
+        "r4_platform_acceptance_requires_sys_platform_win32_and_the_native_node_to_execute_"
+        "without_skip"
+    ]
+    truth_table = {
+        (platform, outcome): platform == "win32" and outcome == "passed"
+        for platform, outcome in product(
+            ("win32", "linux", "darwin"),
+            ("passed", "skipped", "failed"),
+        )
+    }
+    assert truth_table[("win32", "passed")]
+    assert not any(
+        accepted
+        for (platform, outcome), accepted in truth_table.items()
+        if platform != "win32" or outcome == "skipped"
+    )
+
+
+def test_r4_synthetic_bootstrap_accepts_global_authority_first_multisz_and_live_identity() -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    resolved = _validate_r4_windows_bootstrap_observation(observation)
+    assert resolved == {
+        "authority_link_name": (r"\GLOBAL??\Volume{00000000-0000-0000-0000-000000000001}"),
+        "direct_target_t0": r"\Device\VolumeDeviceObject",
+        "root_object_name": r"\Device\VolumeDeviceObject\synthetic_workspace",
+    }
+    assert observation["expected_root_file_id"] == observation["handle_root_file_id"]
+    assert (
+        observation["expected_file_id_info_volume_serial"]
+        == observation["file_id_info_volume_serial"]
+    )
+    assert (
+        observation["expected_volume_information_serial"]
+        == observation["volume_information_volume_serial"]
+    )
+
+
+def test_r4_synthetic_bootstrap_rejects_global_vs_effective_target_mismatch() -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation["query_dos_device_targets_pre"][0] = r"\Device\DifferentVolumeDeviceObject"
+    observation["effective_selected_target"] = observation["query_dos_device_targets_pre"][0]
+    with pytest.raises(ValueError, match="global authority and effective first target differ"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+def test_r4_synthetic_bootstrap_must_select_first_multisz_entry_not_second() -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation["effective_selected_target"] = observation["query_dos_device_targets_pre"][1]
+    with pytest.raises(ValueError, match="only the first QueryDosDevice MULTI_SZ entry"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("query_dos_device_targets_pre", "query_dos_device_targets_post"),
+)
+def test_r4_synthetic_bootstrap_rejects_any_empty_multisz_item(field: str) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    cast(list[str], observation[field]).insert(1, "")
+    with pytest.raises(ValueError, match="nonempty parsed MULTI_SZ"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize("drift_kind", ["global", "effective_first"])
+def test_r4_synthetic_bootstrap_rejects_pre_post_mapping_drift(drift_kind: str) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    if drift_kind == "global":
+        observation["global_target_post"] = r"\Device\DriftedVolumeDeviceObject"
+    else:
+        observation["query_dos_device_targets_post"][0] = r"\Device\DriftedVolumeDeviceObject"
+    with pytest.raises(ValueError, match="drifted across the root open"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize(
+    "malformed_target",
+    [
+        r"C:\synthetic",
+        r"\\server\share",
+        r"\UNC\server\share",
+        r"\Device\Mup",
+        r"\Device\Mup\server\share",
+        r"\??\Volume{00000000-0000-0000-0000-000000000001}",
+        r"\GLOBAL??\Volume{00000000-0000-0000-0000-000000000001}",
+        r"\Device\VolumeDeviceObject\.",
+        r"\Device\VolumeDeviceObject\..",
+        r"\Device\\VolumeDeviceObject",
+        "\\Device\\VolumeDeviceObject\\",
+        "\\Device\\Volume\0DeviceObject",
+        "\\Device\\VolumeDeviceObject\n",
+        "\\Device\\\ud800",
+        "\\Device\\" + ("x" * 32768),
+    ],
+    ids=[
+        "dos_drive",
+        "unc_path",
+        "unc_namespace",
+        "mup_exact",
+        "mup_descendant",
+        "process_alias",
+        "global_alias",
+        "dot_component",
+        "dotdot_component",
+        "repeated_separator",
+        "trailing_separator",
+        "nul",
+        "c0_lf",
+        "lone_surrogate",
+        "overlong_unicode_string",
+    ],
+)
+def test_r4_synthetic_bootstrap_rejects_malformed_direct_device_target(
+    malformed_target: str,
+) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    for field in ("global_target_pre", "global_target_post", "effective_selected_target"):
+        observation[field] = malformed_target
+    observation["query_dos_device_targets_pre"][0] = malformed_target
+    observation["query_dos_device_targets_post"][0] = malformed_target
+    observation["workspace_root_object_name"] = f"{malformed_target}\\synthetic_workspace"
+    observation["handle_final_path_nt"] = observation["workspace_root_object_name"]
+    with pytest.raises(ValueError, match="direct device target"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+def test_r4_synthetic_bootstrap_rejects_constructed_root_unicode_string_overflow() -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    long_but_valid_target = "\\Device\\" + ("x" * 32740)
+    assert len(long_but_valid_target.encode("utf-16-le")) <= 65534
+    for field in ("global_target_pre", "global_target_post", "effective_selected_target"):
+        observation[field] = long_but_valid_target
+    observation["query_dos_device_targets_pre"][0] = long_but_valid_target
+    observation["query_dos_device_targets_post"][0] = long_but_valid_target
+    observation["workspace_root_object_name"] = f"{long_but_valid_target}\\synthetic_workspace"
+    observation["handle_final_path_nt"] = observation["workspace_root_object_name"]
+    with pytest.raises(ValueError, match="workspace root ObjectName exceeds"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value"),
+    [
+        (
+            "handle_final_path_guid",
+            r"\\?\Volume{00000000-0000-0000-0000-000000000002}\synthetic_workspace",
+        ),
+        ("handle_final_path_nt", r"\Device\OtherVolume\synthetic_workspace"),
+    ],
+)
+def test_r4_synthetic_bootstrap_rejects_wrong_guid_or_nt_final_path(
+    field: str,
+    wrong_value: str,
+) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation[field] = wrong_value
+    with pytest.raises(ValueError, match="handle .* final path differs"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value", "message"),
+    [
+        ("handle_root_file_id", "ffeeddccbbaa99887766554433221100", "root FileId"),
+        ("file_id_info_volume_serial", "305419897", "volume serial"),
+        ("volume_information_volume_serial", "305419897", "volume serial"),
+        ("filesystem_name", "ReFS", "filesystem"),
+        ("device_type", 0x00000014, "device type"),
+        ("device_characteristics", 0x00000010, "remote device"),
+        ("file_attributes", 0x00000410, "reparse point"),
+        ("reparse_tag", 0xA000000C, "reparse tag"),
+    ],
+)
+def test_r4_synthetic_bootstrap_rejects_wrong_live_identity_or_capability(
+    field: str,
+    wrong_value: object,
+    message: str,
+) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation[field] = wrong_value
+    with pytest.raises(ValueError, match=message):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value"),
+    [
+        ("workspace_root_object_attributes", 0),
+        ("alias_open_attempted", True),
+        ("hardcoded_or_cached_device_name_used", True),
+        ("query_dos_device_used_as_authority", True),
+        ("win32_path_api_fallback_attempted", True),
+        ("workspace_root_open_api", "CreateFileW"),
+    ],
+)
+def test_r4_synthetic_bootstrap_forbids_attributes_zero_alias_or_win32_fallback(
+    field: str,
+    wrong_value: object,
+) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation[field] = wrong_value
+    with pytest.raises(ValueError):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+@pytest.mark.parametrize("sink", R4_SESSION_LOCAL_NONPERSISTENCE_SINKS)
+def test_r4_synthetic_bootstrap_forbids_each_session_local_persistence_sink(
+    sink: str,
+) -> None:
+    observation = _synthetic_r4_windows_bootstrap_observation()
+    observation["session_local_device_target_sink_observations"][sink] = (
+        r"\Device\VolumeDeviceObject"
+    )
+    with pytest.raises(ValueError, match="any persistence sink"):
+        _validate_r4_windows_bootstrap_observation(observation)
+
+
+def test_r4_synthetic_bootstrap_requires_fresh_derivation_across_sessions() -> None:
+    first = _synthetic_r4_windows_bootstrap_observation(session_id="synthetic-session-a")
+    second = _synthetic_r4_windows_bootstrap_observation(session_id="synthetic-session-b")
+    _validate_r4_cross_session_fresh_derivation(first, second)
+
+    reused = deepcopy(first)
+    with pytest.raises(ValueError, match="distinct session derivation identities"):
+        _validate_r4_cross_session_fresh_derivation(first, reused)
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="R4 native bootstrap regression is Windows-only"
+)
+def test_r4_windows_native_non_mutating_exact_access_global_link_direct_open_and_r3_failure(
+    request: pytest.FixtureRequest,
+) -> None:
+    """Primitive probe only; not descendant repository identity or chain implementation."""
+
+    class _UNICODE_STRING(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("Length", ctypes.c_ushort),
+            ("MaximumLength", ctypes.c_ushort),
+            ("Buffer", ctypes.c_void_p),
+        ]
+
+    class _OBJECT_ATTRIBUTES(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("Length", ctypes.c_ulong),
+            ("RootDirectory", ctypes.c_void_p),
+            ("ObjectName", ctypes.POINTER(_UNICODE_STRING)),
+            ("Attributes", ctypes.c_ulong),
+            ("SecurityDescriptor", ctypes.c_void_p),
+            ("SecurityQualityOfService", ctypes.c_void_p),
+        ]
+
+    class _IO_STATUS_UNION(ctypes.Union):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("Status", ctypes.c_long),
+            ("Pointer", ctypes.c_void_p),
+        ]
+
+    class _IO_STATUS_BLOCK(ctypes.Structure):
+        _anonymous_ = ("value",)
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("value", _IO_STATUS_UNION),
+            ("Information", ctypes.c_size_t),
+        ]
+
+    class _FILE_ID_128(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [("Identifier", ctypes.c_ubyte * 16)]
+
+    class _FILE_ID_INFO(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("VolumeSerialNumber", ctypes.c_ulonglong),
+            ("FileId", _FILE_ID_128),
+        ]
+
+    class _FILE_STANDARD_INFO(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("AllocationSize", ctypes.c_longlong),
+            ("EndOfFile", ctypes.c_longlong),
+            ("NumberOfLinks", ctypes.c_ulong),
+            ("DeletePending", ctypes.c_ubyte),
+            ("Directory", ctypes.c_ubyte),
+        ]
+
+    class _FILE_ATTRIBUTE_TAG_INFO(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("FileAttributes", ctypes.c_ulong),
+            ("ReparseTag", ctypes.c_ulong),
+        ]
+
+    class _FILE_FS_DEVICE_INFORMATION(ctypes.Structure):
+        _fields_: ClassVar[list[tuple[str, Any]]] = [
+            ("DeviceType", ctypes.c_ulong),
+            ("Characteristics", ctypes.c_ulong),
+        ]
+
+    ntdll = ctypes.WinDLL("ntdll", use_last_error=True)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    nt_open_symbolic_link = ntdll.NtOpenSymbolicLinkObject
+    nt_open_symbolic_link.argtypes = [
+        ctypes.POINTER(ctypes.c_void_p),
+        ctypes.c_ulong,
+        ctypes.POINTER(_OBJECT_ATTRIBUTES),
+    ]
+    nt_open_symbolic_link.restype = ctypes.c_long
+    nt_query_symbolic_link = ntdll.NtQuerySymbolicLinkObject
+    nt_query_symbolic_link.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(_UNICODE_STRING),
+        ctypes.POINTER(ctypes.c_ulong),
+    ]
+    nt_query_symbolic_link.restype = ctypes.c_long
+    nt_create_file = ntdll.NtCreateFile
+    nt_create_file.argtypes = [
+        ctypes.POINTER(ctypes.c_void_p),
+        ctypes.c_ulong,
+        ctypes.POINTER(_OBJECT_ATTRIBUTES),
+        ctypes.POINTER(_IO_STATUS_BLOCK),
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+        ctypes.c_ulong,
+        ctypes.c_ulong,
+        ctypes.c_ulong,
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+    ]
+    nt_create_file.restype = ctypes.c_long
+    nt_query_volume = ntdll.NtQueryVolumeInformationFile
+    nt_query_volume.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(_IO_STATUS_BLOCK),
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+        ctypes.c_int,
+    ]
+    nt_query_volume.restype = ctypes.c_long
+    query_dos_device = kernel32.QueryDosDeviceW
+    query_dos_device.argtypes = [ctypes.c_wchar_p, ctypes.c_void_p, ctypes.c_ulong]
+    query_dos_device.restype = ctypes.c_ulong
+    get_final_path = kernel32.GetFinalPathNameByHandleW
+    get_final_path.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong]
+    get_final_path.restype = ctypes.c_ulong
+    get_file_information = kernel32.GetFileInformationByHandleEx
+    get_file_information.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+    ]
+    get_file_information.restype = ctypes.c_int
+    get_volume_information = kernel32.GetVolumeInformationByHandleW
+    get_volume_information.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+        ctypes.POINTER(ctypes.c_ulong),
+        ctypes.POINTER(ctypes.c_ulong),
+        ctypes.POINTER(ctypes.c_ulong),
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+    ]
+    get_volume_information.restype = ctypes.c_int
+    create_file = kernel32.CreateFileW
+    create_file.argtypes = [
+        ctypes.c_wchar_p,
+        ctypes.c_ulong,
+        ctypes.c_ulong,
+        ctypes.c_void_p,
+        ctypes.c_ulong,
+        ctypes.c_ulong,
+        ctypes.c_void_p,
+    ]
+    create_file.restype = ctypes.c_void_p
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [ctypes.c_void_p]
+    close_handle.restype = ctypes.c_int
+
+    invalid_handle_value = ctypes.c_void_p(-1).value
+
+    def close_existing_handle(handle: ctypes.c_void_p) -> None:
+        if handle.value not in {None, invalid_handle_value}:
+            assert close_handle(handle), ctypes.get_last_error()
+            handle.value = None
+
+    def exact_input_unicode_string(value: str) -> tuple[_UNICODE_STRING, ctypes.Array[Any]]:
+        _assert_r4_native_redacted("\0" not in value, "native ObjectName contains NUL")
+        encoded = value.encode("utf-16-le", errors="strict")
+        _assert_r4_native_redacted(
+            bool(encoded) and len(encoded) % 2 == 0 and len(encoded) <= 65534,
+            "native ObjectName violates the UNICODE_STRING bound",
+        )
+        backing = ctypes.create_string_buffer(encoded, len(encoded))
+        name = _UNICODE_STRING(len(encoded), len(encoded), ctypes.addressof(backing))
+        return name, backing
+
+    def object_attributes(name: _UNICODE_STRING, *, attributes: int) -> _OBJECT_ATTRIBUTES:
+        return _OBJECT_ATTRIBUTES(
+            ctypes.sizeof(_OBJECT_ATTRIBUTES),
+            None,
+            ctypes.pointer(name),
+            attributes,
+            None,
+            None,
+        )
+
+    def query_global_link_target(link_name: str) -> str:
+        _assert_r4_native_redacted(
+            link_name.startswith("\\GLOBAL??\\Volume{") and not link_name.endswith("\\"),
+            "global link ObjectName grammar mismatch",
+        )
+        name, backing = exact_input_unicode_string(link_name)
+        attributes = object_attributes(name, attributes=0)
+        assert attributes.RootDirectory is None
+        assert attributes.Attributes == 0
+        assert attributes.SecurityDescriptor is None
+        assert attributes.SecurityQualityOfService is None
+        link_handle = ctypes.c_void_p()
+        status = int(
+            nt_open_symbolic_link(
+                ctypes.byref(link_handle),
+                0x00000001,
+                ctypes.byref(attributes),
+            )
+        )
+        _assert_r4_native_redacted(
+            backing.raw == link_name.encode("utf-16-le"),
+            "global link input bytes changed",
+        )
+        try:
+            assert status == 0, f"NtOpenSymbolicLinkObject=0x{status & 0xFFFFFFFF:08x}"
+            assert link_handle.value not in {None, invalid_handle_value}
+            target_capacity = 65534
+            target_buffer = ctypes.create_string_buffer(target_capacity)
+            target_name = _UNICODE_STRING(0, target_capacity, ctypes.addressof(target_buffer))
+            returned_length = ctypes.c_ulong()
+            status = int(
+                nt_query_symbolic_link(
+                    link_handle,
+                    ctypes.byref(target_name),
+                    ctypes.byref(returned_length),
+                )
+            )
+            assert status == 0, f"NtQuerySymbolicLinkObject=0x{status & 0xFFFFFFFF:08x}"
+            assert returned_length.value == target_name.Length + 2
+            assert 4 <= returned_length.value <= 65534
+            assert returned_length.value % 2 == 0
+            assert target_name.MaximumLength >= returned_length.value
+            assert 2 <= target_name.Length <= 65532 and target_name.Length % 2 == 0
+            target_bytes = ctypes.string_at(target_name.Buffer, target_name.Length)
+            trailing_bytes = ctypes.string_at(
+                target_name.Buffer + target_name.Length,
+                returned_length.value - target_name.Length,
+            )
+            assert trailing_bytes == b"\x00\x00"
+            target = target_bytes.decode("utf-16-le", errors="strict")
+            _assert_r4_native_redacted(
+                "\0" not in target,
+                "global link target contains an embedded NUL",
+            )
+            return target
+        finally:
+            close_existing_handle(link_handle)
+
+    def query_effective_targets(volume_guid_name: str) -> tuple[str, ...]:
+        _assert_r4_native_redacted(
+            volume_guid_name.startswith("Volume{") and volume_guid_name.endswith("}"),
+            "QueryDosDevice argument grammar mismatch",
+        )
+
+        def query_once(_name: str, capacity: int) -> tuple[int, str, int]:
+            buffer = ctypes.create_unicode_buffer(capacity)
+            ctypes.set_last_error(0)
+            count = int(query_dos_device(volume_guid_name, ctypes.byref(buffer), capacity))
+            last_error = ctypes.get_last_error()
+            readable_count = min(count, capacity) if count > 0 else 0
+            raw = "".join(buffer[index] for index in range(readable_count))
+            return count, raw, last_error
+
+        selected, targets = _query_r4_dos_device_first_target_bounded(
+            volume_guid_name,
+            query_once=query_once,
+        )
+        _assert_r4_native_redacted(
+            selected == targets[0],
+            "QueryDosDevice selected a non-first mapping",
+        )
+        return targets
+
+    def final_path_name(handle: ctypes.c_void_p, volume_flag: int) -> str:
+        def query_once(capacity: int) -> tuple[int, str | None, int]:
+            buffer = ctypes.create_unicode_buffer(capacity)
+            ctypes.set_last_error(0)
+            length = int(get_final_path(handle, ctypes.byref(buffer), capacity, volume_flag))
+            last_error = ctypes.get_last_error()
+            value = ctypes.wstring_at(buffer, length) if 0 < length < capacity else None
+            return length, value, last_error
+
+        return _get_r4_final_path_name_bounded(query_once)
+
+    def native_open_directory(
+        object_name: str,
+        *,
+        attributes_value: int,
+    ) -> tuple[int, _IO_STATUS_BLOCK, ctypes.c_void_p]:
+        name, backing = exact_input_unicode_string(object_name)
+        attributes = object_attributes(name, attributes=attributes_value)
+        io_status = _IO_STATUS_BLOCK()
+        handle = ctypes.c_void_p()
+        status = int(
+            nt_create_file(
+                ctypes.byref(handle),
+                0x001201BF,
+                ctypes.byref(attributes),
+                ctypes.byref(io_status),
+                None,
+                0,
+                0x00000003,
+                0x00000001,
+                0x00200021,
+                None,
+                0,
+            )
+        )
+        _assert_r4_native_redacted(
+            backing.raw == object_name.encode("utf-16-le"),
+            "NtCreateFile ObjectName input bytes changed",
+        )
+        return status, io_status, handle
+
+    # This read-only Win32 handle only discovers the test fixture's canonical Volume GUID.
+    # The protocol bootstrap under test below is exclusively the direct NtCreateFile call.
+    launcher_raw_handle = create_file(
+        str(Path.cwd()),
+        0x00000080,
+        0x00000007,
+        None,
+        0x00000003,
+        0x02200000,
+        None,
+    )
+    launcher_handle = ctypes.c_void_p(launcher_raw_handle)
+    assert launcher_handle.value not in {None, invalid_handle_value}, ctypes.get_last_error()
+    request.addfinalizer(lambda: close_existing_handle(launcher_handle))
+    try:
+        launcher_guid_path = final_path_name(launcher_handle, 0x00000001)
+        launcher_file_id = _FILE_ID_INFO()
+        assert get_file_information(
+            launcher_handle,
+            18,
+            ctypes.byref(launcher_file_id),
+            ctypes.sizeof(launcher_file_id),
+        ), ctypes.get_last_error()
+        launcher_file_id_bytes = bytes(launcher_file_id.FileId.Identifier)
+        launcher_file_id_volume_serial = int(launcher_file_id.VolumeSerialNumber)
+        launcher_volume_information_serial = ctypes.c_ulong()
+        launcher_maximum_component_length = ctypes.c_ulong()
+        launcher_filesystem_flags = ctypes.c_ulong()
+        launcher_filesystem_name = ctypes.create_unicode_buffer(64)
+        assert get_volume_information(
+            launcher_handle,
+            None,
+            0,
+            ctypes.byref(launcher_volume_information_serial),
+            ctypes.byref(launcher_maximum_component_length),
+            ctypes.byref(launcher_filesystem_flags),
+            ctypes.byref(launcher_filesystem_name),
+            len(launcher_filesystem_name),
+        ), ctypes.get_last_error()
+        assert launcher_filesystem_name.value == "NTFS"
+    finally:
+        _assert_r4_native_redacted(
+            launcher_handle.value not in {None, invalid_handle_value},
+            "launcher fixture handle closed before direct-root crosschecks",
+        )
+    launcher_match = cast(
+        re.Match[str],
+        WINDOWS_VOLUME_GUID_ROOT_AND_SUFFIX_PATTERN.fullmatch(launcher_guid_path),
+    )
+    _assert_r4_native_redacted(
+        launcher_match is not None,
+        "launcher Volume GUID path grammar mismatch",
+    )
+    volume_guid_root, suffix = launcher_match.groups()
+    volume_guid_name = volume_guid_root[len("\\\\?\\") :]
+    global_link_name = rf"\GLOBAL??\{volume_guid_name}"
+
+    r3_alias_object_name = rf"\??\{volume_guid_name}{suffix}"
+    r3_status, r3_io_status, r3_handle = native_open_directory(
+        r3_alias_object_name,
+        attributes_value=0x00001000,
+    )
+    try:
+        assert r3_status & 0xFFFFFFFF == 0xC000050B
+        assert int(r3_io_status.Information) == 0
+    finally:
+        close_existing_handle(r3_handle)
+
+    global_target_before = query_global_link_target(global_link_name)
+    _validate_r4_windows_direct_device_target(global_target_before)
+    effective_targets_before = query_effective_targets(volume_guid_name)
+    _assert_r4_native_utf16_equal_redacted(
+        effective_targets_before[0],
+        global_target_before,
+        message="pre-open effective/global target mismatch",
+    )
+    direct_object_name = f"{global_target_before}{suffix}"
+    status, io_status, root_handle = native_open_directory(
+        direct_object_name,
+        attributes_value=0x00001000,
+    )
+    try:
+        assert status == 0, f"NtCreateFile=0x{status & 0xFFFFFFFF:08x}"
+        assert root_handle.value not in {None, invalid_handle_value}
+        assert int(io_status.Status) == 0
+        assert int(io_status.Information) == 0x0000000000000001
+        observed_guid_path = final_path_name(root_handle, 0x00000001)
+        observed_nt_path = final_path_name(root_handle, 0x00000002)
+        _assert_r4_native_utf16_equal_redacted(
+            observed_guid_path,
+            launcher_guid_path,
+            message="direct-root GUID final-path mismatch",
+        )
+        _assert_r4_native_utf16_equal_redacted(
+            observed_nt_path,
+            direct_object_name,
+            message="direct-root NT final-path mismatch",
+        )
+
+        file_id = _FILE_ID_INFO()
+        assert get_file_information(
+            root_handle,
+            18,
+            ctypes.byref(file_id),
+            ctypes.sizeof(file_id),
+        ), ctypes.get_last_error()
+        assert len(bytes(file_id.FileId.Identifier).hex()) == 32
+        assert bytes(file_id.FileId.Identifier) == launcher_file_id_bytes
+        assert int(file_id.VolumeSerialNumber) == launcher_file_id_volume_serial
+        standard = _FILE_STANDARD_INFO()
+        assert get_file_information(
+            root_handle,
+            1,
+            ctypes.byref(standard),
+            ctypes.sizeof(standard),
+        ), ctypes.get_last_error()
+        assert bool(standard.Directory) and not bool(standard.DeletePending)
+        attributes = _FILE_ATTRIBUTE_TAG_INFO()
+        assert get_file_information(
+            root_handle,
+            9,
+            ctypes.byref(attributes),
+            ctypes.sizeof(attributes),
+        ), ctypes.get_last_error()
+        assert int(attributes.FileAttributes) & 0x00000400 == 0
+        assert int(attributes.ReparseTag) == 0
+
+        volume_serial = ctypes.c_ulong()
+        maximum_component_length = ctypes.c_ulong()
+        filesystem_flags = ctypes.c_ulong()
+        filesystem_name = ctypes.create_unicode_buffer(64)
+        assert get_volume_information(
+            root_handle,
+            None,
+            0,
+            ctypes.byref(volume_serial),
+            ctypes.byref(maximum_component_length),
+            ctypes.byref(filesystem_flags),
+            ctypes.byref(filesystem_name),
+            len(filesystem_name),
+        ), ctypes.get_last_error()
+        assert filesystem_name.value == "NTFS"
+        assert int(volume_serial.value) == int(launcher_volume_information_serial.value)
+
+        device = _FILE_FS_DEVICE_INFORMATION()
+        volume_io_status = _IO_STATUS_BLOCK()
+        volume_status = int(
+            nt_query_volume(
+                root_handle,
+                ctypes.byref(volume_io_status),
+                ctypes.byref(device),
+                ctypes.sizeof(device),
+                4,
+            )
+        )
+        assert volume_status == 0
+        assert int(volume_io_status.Status) == 0
+        assert int(device.DeviceType) == 0x00000007
+        assert int(device.Characteristics) & 0x00000010 == 0
+
+        global_target_after = query_global_link_target(global_link_name)
+        effective_targets_after = query_effective_targets(volume_guid_name)
+        _assert_r4_native_utf16_equal_redacted(
+            global_target_after,
+            global_target_before,
+            message="global target drifted across direct-root access",
+        )
+        _assert_r4_native_redacted(
+            bool(effective_targets_before) and bool(effective_targets_after),
+            "effective mapping list became empty",
+        )
+        _assert_r4_native_utf16_equal_redacted(
+            effective_targets_after[0],
+            global_target_after,
+            message="post-open effective/global target mismatch",
+        )
+    finally:
+        close_existing_handle(root_handle)
 
 
 def test_three_grid_envelope_synthetic_canonical_round_trip_matches_pipeline_formula(
@@ -6572,6 +8281,62 @@ def test_three_grid_indeterminate_after_install_is_terminal() -> None:
         assert terminal_requirement in indeterminate_action
 
 
+def test_r4_install_failure_state_machine_phase_truth_table_is_mutually_exclusive() -> None:
+    protocol = _load_yaml(PROTOCOL_PATH)
+    state_machine = protocol["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]["durable_create_once_file_protocol"]["install_failure_state_machine"]
+    expected_valid_states = {
+        (True, False, False, False): "preexisting_final_before_evaluator_or_install",
+        (False, False, False, False): "failure_before_install_success",
+        (
+            False,
+            True,
+            False,
+            False,
+        ): "install_success_until_complete_postinstall_flush_parent_sync_and_reopen_verification",
+        (
+            False,
+            True,
+            True,
+            False,
+        ): (
+            "complete_postinstall_reopen_verification_before_first_external_envelope_sha_"
+            "anchor_is_durably_persisted"
+        ),
+        (
+            False,
+            True,
+            True,
+            True,
+        ): "at_or_after_first_external_envelope_sha_anchor",
+    }
+    observed_valid_states: set[str] = set()
+    for raw_values in product((False, True), repeat=4):
+        values = cast(tuple[bool, bool, bool, bool], raw_values)
+        kwargs = dict(
+            zip(
+                (
+                    "preexisting_final",
+                    "install_succeeded",
+                    "postinstall_reopen_verified",
+                    "first_external_anchor_persisted",
+                ),
+                values,
+                strict=True,
+            )
+        )
+        if values in expected_valid_states:
+            selected = _select_r4_install_failure_state_key(**kwargs)
+            assert selected == expected_valid_states[values]
+            assert selected in state_machine
+            observed_valid_states.add(selected)
+        else:
+            with pytest.raises(ValueError, match="contradictory"):
+                _select_r4_install_failure_state_key(**kwargs)
+    assert observed_valid_states == set(expected_valid_states.values())
+
+
 def test_three_grid_pre_anchor_restart_may_not_adopt_or_reanchor_installed_file(
     tmp_path: Path,
 ) -> None:
@@ -6607,240 +8372,808 @@ def test_three_grid_pre_anchor_restart_may_not_adopt_or_reanchor_installed_file(
     ].startswith("any_crash_or_failure_is_invalid_execution")
 
 
-def test_r3_is_a_minimal_engineering_erratum_from_exact_r2_tag_and_commit() -> None:
+def test_r4_is_a_minimal_bootstrap_erratum_from_exact_r3_tag_and_commit() -> None:
     current = _load_yaml(PROTOCOL_PATH)
-    r2 = _load_yaml_at_revision(R2_PROTOCOL_COMMIT, PROTOCOL_PATH)
+    r3 = _load_yaml_at_revision(R3_PROTOCOL_COMMIT, PROTOCOL_PATH)
 
-    assert current["revision_base"]["protocol_tag"] == R2_PROTOCOL_TAG
-    assert current["revision_base"]["protocol_tag_object"] == R2_PROTOCOL_TAG_OBJECT
-    assert current["revision_base"]["protocol_commit"] == R2_PROTOCOL_COMMIT
-    assert (
-        current["qualification"]["per_snapshot_conjunctive_requirements"]
-        == r2["qualification"]["per_snapshot_conjunctive_requirements"]
-    )
-    assert (
-        current["qualification_execution_seal"][
-            "qualification_result_tag_diff_from_repair_code_tag"
-        ]
-        == r2["qualification_execution_seal"]["qualification_result_tag_diff_from_repair_code_tag"]
-    )
-
-    missing = object()
-    differences: set[tuple[str, ...]] = set()
-
-    def collect_differences(
-        left: object,
-        right: object,
-        path: tuple[str, ...] = (),
-    ) -> None:
-        if left is missing or right is missing:
-            differences.add(path)
-            return
-        if isinstance(left, dict) and isinstance(right, dict):
-            for key in set(left) | set(right):
-                collect_differences(
-                    left.get(key, missing),
-                    right.get(key, missing),
-                    (*path, str(key)),
-                )
-            return
-        if left != right:
-            differences.add(path)
-
-    collect_differences(current, r2)
-    responsibility_paths = {
-        (
-            "repair_code_scope_from_protocol_tag",
-            "new_repair_module_execution_rules",
-            module_path,
-            "allowed_responsibilities",
-        )
-        for module_path in (
-            "src/seismoflux/background/etas_numerical_repair_io.py",
-            "src/seismoflux/background/etas_numerical_repair_evidence.py",
-        )
+    assert current["revision_base"] == {
+        "protocol_tag": R3_PROTOCOL_TAG,
+        "protocol_tag_object": R3_PROTOCOL_TAG_OBJECT,
+        "protocol_commit": R3_PROTOCOL_COMMIT,
+        "protocol_tag_object_type_exact": "annotated_tag",
+        "protocol_tag_must_peel_exactly_to_protocol_commit": True,
+        "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r4_freeze": True,
     }
-    hash_source_semantic_paths = {
+
+    differences = _collect_structured_differences(current, r3)
+    assert any(any(isinstance(component, int) for component in path) for path in differences)
+    windows_prefix = (
+        "qualification",
+        "three_grid_gate_evidence_protocol",
+        "local_restricted_persistence",
+        "durable_create_once_file_protocol",
+        "windows",
+    )
+    resolver_prefix = (
+        *windows_prefix,
+        "fresh_session_volume_guid_to_direct_nt_device_resolver_exact",
+    )
+    resolver_leaf_suffixes = {
+        ("launcher_input_kind_exact",),
+        ("authority_link_namespace_exact",),
+        ("authority_link_object_name_exact",),
+        ("authority_api_order_exact",),
+        ("authority_open_desired_access_exact", "symbol"),
+        ("authority_open_desired_access_exact", "uint32_hex"),
+        ("authority_link_open_object_attributes_exact", "RootDirectory"),
+        ("authority_link_open_object_attributes_exact", "ObjectName"),
+        ("authority_link_open_object_attributes_exact", "Attributes_uint32_hex"),
+        ("authority_link_open_object_attributes_exact", "Attributes_semantics"),
+        ("authority_link_open_object_attributes_exact", "SecurityDescriptor"),
+        ("authority_link_open_object_attributes_exact", "SecurityQualityOfService"),
+        ("authority_link_open_object_attributes_exact", "UNICODE_STRING_Length"),
+        ("authority_link_open_object_attributes_exact", "UNICODE_STRING_MaximumLength"),
+        ("authority_link_open_object_attributes_exact", "UNICODE_STRING_Buffer"),
+        ("authority_link_open_object_attributes_exact", "Attributes_zero_scope_exact"),
+        ("authority_link_query_target_unicode_string_exact", "ReturnedLength"),
+        ("authority_link_query_target_unicode_string_exact", "TargetName_Length"),
+        ("authority_link_query_target_unicode_string_exact", "TargetName_MaximumLength"),
+        ("authority_link_query_target_unicode_string_exact", "accepted_target_bytes"),
         (
-            "qualification",
-            "three_grid_gate_evidence_protocol",
-            "evidence_payload_is_local_restricted_but_its_sha256_is_public_in_same_snapshot_gate_and_fit_attempt",
+            "authority_link_query_target_unicode_string_exact",
+            "Buffer_slice_from_TargetName_Length_through_ReturnedLength_exclusive_must_"
+            "equal_exact_UTF16_NUL_two_zero_bytes_and_must_not_enter_T0",
         ),
         (
-            "qualification",
-            "three_grid_gate_evidence_protocol",
-            "embedded_13_field_evidence_payload_is_local_restricted_and_its_own_sha256_is_not_an_external_identity_anchor",
+            "authority_link_query_target_unicode_string_exact",
+            "trailing_unreturned_buffer_capacity_must_not_enter_T0",
+        ),
+        ("authority_query_result_T0_exact",),
+        ("effective_map_crosscheck_api_exact",),
+        ("effective_map_crosscheck_argument_exact",),
+        ("effective_map_crosscheck_result_type_exact",),
+        ("effective_map_selected_entry_exact",),
+        ("effective_map_first_entry_comparison_exact",),
+        (
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "initial_capacity_wchars",
         ),
         (
-            "qualification",
-            "three_grid_gate_evidence_protocol",
-            "complete_six_field_envelope_own_sha256_is_public_in_same_snapshot_gate_fit_attempt_and_presence_map_without_changing_field_names_types_paths_or_file_counts",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "capacity_growth_factor",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "public_embedding",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "maximum_capacity_wchars",
+        ),
+        ("effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact", "maximum_call_count"),
+        ("effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact", "growth_trigger_exact"),
+        (
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "any_other_error_or_exhausted_bound_action",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "exact_bytes",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "returned_count_unit_exact",
+        ),
+        ("effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact", "returned_count_rule"),
+        (
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "accepted_buffer_slice_exact",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "includes_ref",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "required_termination_exact",
+        ),
+        ("effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact", "parse_rule_exact"),
+        (
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "first_entry_must_be_nonempty",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "fields_must_equal_evidence_fields_excluding_own_sha256",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "empty_entry_before_terminal_forbidden",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "fields_must_equal_complete_envelope_fields_excluding_envelope_own_sha256",
+            "effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact",
+            "ctypes_buffer_value_or_any_first_NUL_truncated_reader_forbidden",
+        ),
+        ("later_historical_mapping_entries_allowed_but_never_selectable_or_authoritative",),
+        ("preopen_global_target_and_effective_first_entry_must_equal_same_T0",),
+        ("postopen_global_target_and_effective_first_entry_must_equal_same_T0",),
+        ("preopen_and_postopen_global_target_exact_UTF16_bytes_must_be_equal",),
+        ("direct_nt_device_target_grammar_exact", "encoding"),
+        ("direct_nt_device_target_grammar_exact", "normalization"),
+        ("direct_nt_device_target_grammar_exact", "absolute_prefix_exact"),
+        ("direct_nt_device_target_grammar_exact", "component_count"),
+        ("direct_nt_device_target_grammar_exact", "component_rule"),
+        ("direct_nt_device_target_grammar_exact", "separator_rule"),
+        ("direct_nt_device_target_grammar_exact", "forbidden_namespace_prefixes_exact"),
+        (
+            "direct_nt_device_target_grammar_exact",
+            "hardcoded_cached_or_HarddiskVolume_numeric_pattern_dependency_forbidden",
+        ),
+        ("constructed_root_object_name_exact",),
+        ("QueryDosDeviceW_is_independent_crosscheck_only_and_may_not_supply_or_override_T0",),
+        ("resolver_order_exact",),
+        ("retained_root_handle_crosschecks_before_close_exact",),
+        ("volume_serial_cross_API_contract_exact", "FileIdInfo_VolumeSerialNumber"),
+        (
+            "volume_serial_cross_API_contract_exact",
+            "GetVolumeInformationByHandleW_volume_serial",
         ),
         (
-            "content_addressing",
-            "identities",
-            "three_grid_gate_evidence_sha256",
-            "embedded_13_field_own_sha256_remains_recomputed_inside_envelope_but_is_not_the_public_crosswalk_value",
+            "volume_serial_cross_API_contract_exact",
+            "FileIdInfo_u64_must_not_equal_or_be_truncated_to_GetVolumeInformationByHandleW_DWORD",
         ),
         (
-            "outputs",
-            "canonical_nested_schemas",
-            "three_grid_gate_evidence_presence_and_sha256_by_snapshot",
-            "R3_present_value_exact_source",
+            "volume_serial_cross_API_contract_exact",
+            "first_native_mismatch_observation_exact",
+            "FileIdInfo_u64_decimal",
         ),
         (
-            "outputs",
-            "public_qualification_manifest_schema",
-            "snapshot_gate_result_derivation_and_crosswalk",
-            "three_grid_gate_evidence_sha256_exact_source",
+            "volume_serial_cross_API_contract_exact",
+            "first_native_mismatch_observation_exact",
+            "GetVolumeInformationByHandleW_DWORD_decimal",
+        ),
+        (
+            "volume_serial_cross_API_contract_exact",
+            "first_native_mismatch_observation_exact",
+            "values_intentionally_not_equal",
+        ),
+        (
+            "volume_serial_cross_API_contract_exact",
+            "any_cross_API_equality_cast_or_truncation_action",
+        ),
+        (
+            "root_handle_must_remain_live_from_direct_open_through_all_crosschecks_and_both_"
+            "postqueries",
+        ),
+        (
+            "direct_device_target_is_strictly_session_local_nonpersistent_and_must_be_"
+            "rederived_every_session",
+        ),
+        (
+            "direct_device_target_may_not_enter_envelope_receipt_log_public_artifact_cache_or_"
+            "restart_state",
+        ),
+        (
+            "any_alias_open_hardcoded_or_cached_device_name_QueryDosDevice_authority_"
+            "ATTRIBUTES_zero_retry_or_Win32_path_API_fallback_forbidden",
+        ),
+        ("any_resolver_query_parse_drift_open_or_crosscheck_failure_action",),
+    }
+    probe_prefix = (*windows_prefix, "r3_native_probe_evidence_exact")
+    probe_leaf_suffixes = {
+        ("git_ignored_by_exact_rule",),
+        *(
+            (kind, field)
+            for kind in ("script", "output", "readme")
+            for field in ("path", "size_bytes", "sha256")
+        ),
+        ("matrix_fields_exact",),
+        ("matrix_exact",),
+        ("first_probe_scope_limitation_exact",),
+        ("independent_direct_device_feasibility_observation_exact",),
+        (
+            "r4_strengthened_explicit_global_ad_hoc_non_mutating_exact_access_probe_"
+            "observation_exact",
+        ),
+        ("r4_strengthened_probe_acceptance_limit_exact",),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "NtQuerySymbolicLinkObject",
+            "ReturnedLength_bytes",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "NtQuerySymbolicLinkObject",
+            "TargetName_Length_bytes",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "NtQuerySymbolicLinkObject",
+            "finding",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "volume_serial_APIs",
+            "FileIdInfo_u64_decimal",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "volume_serial_APIs",
+            "GetVolumeInformationByHandleW_DWORD_decimal",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "volume_serial_APIs",
+            "finding",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "protocol_corrections_applied",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "first_tracked_summary_exact",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "first_tracked_raw_log_or_JUnit_persisted",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "first_tracked_summary_is_negative_observation_not_a_stable_node_inventory",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "pre_first_independent_audit_tracked_native_rerun_completed",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "pre_first_independent_audit_selected_test_count_exact",
+        ),
+        (
+            "r4_first_tracked_native_negative_observations_exact",
+            "formal_R4_acceptance_pending",
+        ),
+        ("r4_tracked_native_permanent_test_scope_exact",),
+        (
+            "r4_tracked_native_test_does_not_claim_descendant_handle_relative_repository_"
+            "identity_or_authenticated_nine_directory_chain_implementation",
+        ),
+        (
+            "r4_platform_acceptance_requires_sys_platform_win32_and_the_native_node_to_"
+            "execute_without_skip",
+        ),
+        (
+            "r4_native_failure_reporting_must_redact_T0_direct_ObjectName_and_launcher_GUID_"
+            "path_operands",
         ),
     }
-    root_binding_semantic_paths = {
+    fixed_root_prefix = (
+        "qualification",
+        "three_grid_gate_evidence_protocol",
+        "local_restricted_persistence",
+        "fixed_workspace_root_argument_contract_exact",
+    )
+    fixed_root_changed_keys = {
+        "windows_cli_parse_exact",
+        "windows_global_volume_guid_link_object_name_derivation_exact",
+        "windows_global_volume_guid_link_object_name_example",
+        "windows_direct_nt_device_root_object_name_derivation_exact",
+        "windows_direct_nt_device_root_object_name_example",
+        "windows_nt_object_name_derivation_exact",
+        "windows_nt_object_name_example",
+    }
+    windows_changed_leaf_suffixes = {
+        ("fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact",),
         (
-            "qualification_execution_seal",
-            "opening_seal",
-            "repository_requirements",
-            "fixed_workspace_root_argument_must_open_the_exact_worktree_whose_HEAD_upstream_"
-            "remote_code_tag_and_protocol_package_blobs_are_verified_here",
+            "ntcreatefile_call_parameter_matrix_exact",
+            "trusted_workspace_root_bootstrap",
+            "object_name_kind",
         ),
+        ("ntcreatefile_common_structure_contract_exact", "UNICODE_STRING_Buffer"),
+        ("path_and_case_capture_exact",),
+        ("r3_bootstrap_contract_disposition_exact",),
+        ("r3_failed_bootstrap_object_name_kind_exact",),
+        ("trusted_namespace_bootstrap_exact",),
         (
-            "qualification_execution_seal",
-            "opening_seal",
-            "repository_requirements",
-            "absolute_workspace_root_path_remains_local_restricted_and_may_not_enter_"
-            "opening_or_public_artifacts",
+            "trusted_workspace_root_bootstrap_OBJECT_ATTRIBUTES_Attributes_must_equal_OBJ_"
+            "DONT_REPARSE_0x1000_and_retry_with_Attributes_zero_is_forbidden",
         ),
-        (
-            "qualification_execution_seal",
-            "optimizer_runtime_code_seal",
-            "isolated_launcher_contract",
-            "qualification_local_restricted_workspace_root_cli_option_exact",
-        ),
-        (
-            "qualification_execution_seal",
-            "optimizer_runtime_code_seal",
-            "isolated_launcher_contract",
-            "workspace_root_option_must_occur_exactly_once_and_equal_the_fixed_root_"
-            "argument_contract_before_any_project_import_or_evidence_open",
-        ),
-        (
-            "qualification_execution_seal",
-            "optimizer_runtime_code_seal",
-            "isolated_launcher_contract",
-            "workspace_root_argument_must_not_come_from_environment_current_directory_or_envelope",
-        ),
+        ("trusted_workspace_root_bootstrap_object_attributes_exact",),
     }
     exact_allowed_paths = {
         ("protocol_revision",),
+        ("revised_on",),
         ("revision_reason",),
-        ("revision_base",),
+        ("revision_base", "protocol_tag"),
+        ("revision_base", "protocol_tag_object"),
+        ("revision_base", "protocol_commit"),
+        (
+            "revision_base",
+            "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r3_freeze",
+        ),
+        (
+            "revision_base",
+            "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r4_freeze",
+        ),
         ("publication", "protocol_tag"),
         ("repair_code_scope_from_protocol_tag", "comparison_base"),
         (
             "qualification",
             "three_grid_gate_evidence_protocol",
             "local_restricted_persistence",
+            "any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action",
         ),
-        *hash_source_semantic_paths,
-        *root_binding_semantic_paths,
-        *responsibility_paths,
+        *((*resolver_prefix, *suffix) for suffix in resolver_leaf_suffixes),
+        *((*probe_prefix, *suffix) for suffix in probe_leaf_suffixes),
+        *((*windows_prefix, *suffix) for suffix in windows_changed_leaf_suffixes),
+        *((*fixed_root_prefix, key) for key in fixed_root_changed_keys),
     }
-    assert differences == exact_allowed_paths
-
-    grid_protocol = current["qualification"]["three_grid_gate_evidence_protocol"]
-    assert grid_protocol[
-        "embedded_13_field_evidence_payload_is_local_restricted_and_its_own_sha256_is_not_an_external_identity_anchor"
-    ]
-    assert grid_protocol[
-        "complete_six_field_envelope_own_sha256_is_public_in_same_snapshot_gate_fit_attempt_and_presence_map_without_changing_field_names_types_paths_or_file_counts"
-    ]
-    assert (
-        "evidence_payload_is_local_restricted_but_its_sha256_is_public_in_same_snapshot_gate_and_fit_attempt"
-        not in grid_protocol
-    )
-    three_grid_identity = current["content_addressing"]["identities"][
-        "three_grid_gate_evidence_sha256"
-    ]
-    assert three_grid_identity["public_embedding"] == (
-        "complete_envelope_own_sha256_only_in_same_snapshot_gate_fit_attempt_and_presence_map"
-    )
-    assert three_grid_identity["exact_bytes"] == (
-        "canonical_json_v1_of_envelope_identity_fields_exact"
-    )
-    assert three_grid_identity["includes_ref"] == (
-        "qualification.three_grid_gate_evidence_protocol.local_restricted_persistence."
-        "envelope_identity_fields_exact"
-    )
-    persistence = current["qualification"]["three_grid_gate_evidence_protocol"][
+    current_persistence_exact = current["qualification"]["three_grid_gate_evidence_protocol"][
         "local_restricted_persistence"
     ]
-    assert (
-        persistence["envelope_identity_fields_exact"] == persistence["envelope_fields_exact"][:-1]
-    )
-    assert three_grid_identity[
-        "embedded_13_field_own_sha256_remains_recomputed_inside_envelope_but_is_not_the_public_crosswalk_value"
+    current_windows_exact = current_persistence_exact["durable_create_once_file_protocol"][
+        "windows"
     ]
-    presence_schema = current["outputs"]["canonical_nested_schemas"][
-        "three_grid_gate_evidence_presence_and_sha256_by_snapshot"
-    ]
-    assert presence_schema["R3_present_value_exact_source"] == (
-        "same_snapshot_complete_envelope_three_grid_gate_evidence_envelope_sha256"
-    )
-
-    for path in root_binding_semantic_paths:
-        current_value: Any = current
-        for component in path:
-            current_value = current_value[component]
-        if path[-1] == "qualification_local_restricted_workspace_root_cli_option_exact":
-            assert current_value == "--workspace-root"
-        else:
-            assert current_value is True
-
-    responsibility = (
-        "complete_three_grid_local_restricted_create_once_persistence_and_disk_reopen_validation"
-    )
-    for path in responsibility_paths:
-        current_values: Any = current
-        r2_values: Any = r2
-        for component in path:
-            current_values = current_values[component]
-            r2_values = r2_values[component]
-        assert current_values == [*r2_values, responsibility]
-
+    expected_fixed_root = {
+        "cli_option": "--workspace-root",
+        "occurrence_count_exact": 1,
+        "source": (
+            "trusted_local_supervisor_argument_outside_envelope_environment_and_current_directory"
+        ),
+        "qualification_value": (
+            "canonical_absolute_Win32_Volume_GUID_path_of_the_exact_worktree_root_whose_"
+            "HEAD_upstream_protocol_package_blobs_and_remote_repair_code_tag_are_verified_"
+            "by_opening_seal"
+        ),
+        "public_artifact_value": "forbidden_local_restricted_only",
+        "live_root_identity_crosswalk": (
+            "independently_captured_root_handle_record_must_equal_authenticated_ordered_"
+            "directory_identity_chain_record_zero_before_evidence_acceptance"
+        ),
+        "windows_cli_parse_exact": (
+            "split_the_strict_Win32_Volume_GUID_root_from_the_nonempty_exact_case_suffix_"
+            "without_normalizing_any_suffix_UTF16_code_unit"
+        ),
+        "windows_global_volume_guid_link_object_name_derivation_exact": (
+            "construct_the_explicit_global_Object_Manager_link_name_from_the_parsed_Volume_"
+            "GUID_root_without_using_the_process_effective_backslash_question_question_alias"
+        ),
+        "windows_global_volume_guid_link_object_name_example": (
+            r"\GLOBAL??\Volume{11111111-2222-3333-4444-555555555555}"
+        ),
+        "windows_direct_nt_device_root_object_name_derivation_exact": (
+            "fresh_authoritative_global_link_target_T0_plus_the_original_exact_case_launcher_suffix"
+        ),
+        "windows_direct_nt_device_root_object_name_example": (r"\Device\VolumeDeviceObject\repo"),
+        "any_drive_UNC_DOS_device_alias_environment_current_directory_or_envelope_derived_"
+        "root_forbidden": True,
+    }
     assert (
-        current["qualification_execution_seal"]["qualification_public_result_staging"]
-        == r2["qualification_execution_seal"]["qualification_public_result_staging"]
+        current_persistence_exact["fixed_workspace_root_argument_contract_exact"]
+        == expected_fixed_root
     )
+    expected_probe = {
+        "git_ignored_by_exact_rule": ".gitignore:25:data/interim/**",
+        "script": {
+            "path": (
+                "data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/"
+                "probe_ntcreatefile_bootstrap.py"
+            ),
+            "size_bytes": 5031,
+            "sha256": "0c188d843e18a9a0dc006506c6ff39e6d6f79587b835b4a0620a7e01c5795c1c",
+        },
+        "output": {
+            "path": (
+                "data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/"
+                "probe_output_redacted.jsonl"
+            ),
+            "size_bytes": 1160,
+            "sha256": "3ceeafb1898b9265c35fc538df74a75bfa1978520d6ce371a450bf2222107acf",
+        },
+        "readme": {
+            "path": "data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/README.md",
+            "size_bytes": 3074,
+            "sha256": "13eef2706fe582a606ec95d5ece7ed57ceea8e000a953d70a44de3cde19ffe4b",
+        },
+        "matrix_fields_exact": [
+            "object_attributes_uint32_hex",
+            "create_options_uint32_hex",
+            "ntstatus_hex",
+            "io_status_information_uint64_hex",
+            "win32_error",
+            "result",
+        ],
+        "matrix_exact": [
+            {
+                "object_attributes_uint32_hex": "00000000",
+                "create_options_uint32_hex": "00000021",
+                "ntstatus_hex": "00000000",
+                "io_status_information_uint64_hex": "0000000000000001",
+                "win32_error": 0,
+                "result": "success_FILE_OPENED",
+            },
+            {
+                "object_attributes_uint32_hex": "00000000",
+                "create_options_uint32_hex": "00200021",
+                "ntstatus_hex": "00000000",
+                "io_status_information_uint64_hex": "0000000000000001",
+                "win32_error": 0,
+                "result": "success_FILE_OPENED",
+            },
+            {
+                "object_attributes_uint32_hex": "00001000",
+                "create_options_uint32_hex": "00000021",
+                "ntstatus_hex": "c000050b",
+                "io_status_information_uint64_hex": "0000000000000000",
+                "win32_error": 4395,
+                "result": "failure_STATUS_REPARSE_POINT_ENCOUNTERED",
+            },
+            {
+                "object_attributes_uint32_hex": "00001000",
+                "create_options_uint32_hex": "00200021",
+                "ntstatus_hex": "c000050b",
+                "io_status_information_uint64_hex": "0000000000000000",
+                "win32_error": 4395,
+                "result": "failure_STATUS_REPARSE_POINT_ENCOUNTERED",
+            },
+        ],
+        "first_probe_scope_limitation_exact": (
+            "observed_only_the_process_effective_backslash_question_question_namespace_and_"
+            "did_not_rule_out_a_process_local_shadow_of_the_global_Volume_GUID_link"
+        ),
+        "independent_direct_device_feasibility_observation_exact": (
+            "current_Volume_GUID_link_target_plus_original_suffix_with_OBJ_DONT_REPARSE_"
+            "succeeded_in_all_four_followup_cells_but_does_not_replace_R4_acceptance"
+        ),
+        "r4_strengthened_explicit_global_ad_hoc_non_mutating_exact_access_probe_observation_"
+        "exact": (
+            "global_link_open_and_query_succeeded_QueryDosDeviceW_MULTISZ_cardinality_one_"
+            "and_first_target_byte_equal_to_global_T0_direct_open_FILE_OPENED_GUID_and_NT_"
+            "final_paths_equal_expected_and_pre_post_targets_did_not_drift"
+        ),
+        "r4_strengthened_probe_acceptance_limit_exact": (
+            "ad_hoc_observation_succeeded_first_tracked_native_run_exposed_two_protocol_"
+            "mismatches_and_collection_ID_errors_corrections_are_applied_and_tracked_native_"
+            "rerun_completed_before_first_independent_audit_but_formal_R4_acceptance_still_"
+            "pending"
+        ),
+        "r4_first_tracked_native_negative_observations_exact": {
+            "NtQuerySymbolicLinkObject": {
+                "ReturnedLength_bytes": 48,
+                "TargetName_Length_bytes": 46,
+                "finding": "ReturnedLength_includes_one_trailing_UTF16_NUL",
+            },
+            "volume_serial_APIs": {
+                "FileIdInfo_u64_decimal": "15908439068185257866",
+                "GetVolumeInformationByHandleW_DWORD_decimal": "3324045194",
+                "finding": (
+                    "values_are_distinct_and_must_be_compared_only_with_same_API_fixture_values"
+                ),
+            },
+            "protocol_corrections_applied": [
+                "ReturnedLength_equals_TargetName_Length_plus_2_and_T0_excludes_NUL",
+                "volume_serial_comparisons_are_same_API_only_without_cross_API_equality_cast_"
+                "or_truncation",
+            ],
+            "first_tracked_summary_exact": "39_passed_1_failed_2_collection_setup_errors",
+            "first_tracked_raw_log_or_JUnit_persisted": False,
+            "first_tracked_summary_is_negative_observation_not_a_stable_node_inventory": True,
+            "pre_first_independent_audit_tracked_native_rerun_completed": True,
+            "pre_first_independent_audit_selected_test_count_exact": 41,
+            "formal_R4_acceptance_pending": True,
+        },
+        "r4_tracked_native_permanent_test_scope_exact": (
+            "non_mutating_exact_access_global_link_QueryDosDevice_direct_root_and_live_handle_"
+            "identity_capability_crosschecks_only"
+        ),
+        "r4_tracked_native_test_does_not_claim_descendant_handle_relative_repository_"
+        "identity_or_authenticated_nine_directory_chain_implementation": True,
+        "r4_platform_acceptance_requires_sys_platform_win32_and_the_native_node_to_execute_"
+        "without_skip": True,
+        "r4_native_failure_reporting_must_redact_T0_direct_ObjectName_and_launcher_GUID_path_"
+        "operands": True,
+    }
+    assert current_windows_exact["r3_native_probe_evidence_exact"] == expected_probe
+
+    expected_current = deepcopy(r3)
+    expected_current["protocol_revision"] = "r4"
+    expected_current["revised_on"] = "2026-07-23"
+    expected_current["revision_reason"] = (
+        "correct_the_windows_workspace_root_namespace_bootstrap_to_a_verified_direct_NT_"
+        "device_path_while_preserving_OBJ_DONT_REPARSE_and_every_scientific_schema_path_"
+        "model_and_fit_contract"
+    )
+    expected_current["revision_base"] = {
+        "protocol_tag": R3_PROTOCOL_TAG,
+        "protocol_tag_object": R3_PROTOCOL_TAG_OBJECT,
+        "protocol_commit": R3_PROTOCOL_COMMIT,
+        "protocol_tag_object_type_exact": "annotated_tag",
+        "protocol_tag_must_peel_exactly_to_protocol_commit": True,
+        "remote_protocol_tag_and_peeled_commit_must_be_verified_before_r4_freeze": True,
+    }
+    expected_current["publication"]["protocol_tag"] = R4_PROTOCOL_TAG
+    expected_current["repair_code_scope_from_protocol_tag"]["comparison_base"] = R4_PROTOCOL_TAG
+    expected_persistence = expected_current["qualification"]["three_grid_gate_evidence_protocol"][
+        "local_restricted_persistence"
+    ]
+    expected_persistence["fixed_workspace_root_argument_contract_exact"] = expected_fixed_root
+    expected_persistence[
+        "any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action"
+    ] = (
+        "select_the_unique_phase_specific_status_from_durable_create_once_file_protocol."
+        "install_failure_state_machine_without_any_blanket_override_then_retain_attempt_"
+        "and_start_any_scientific_retry_only_under_the_authorized_new_attempt_boundary"
+    )
+    expected_windows = expected_persistence["durable_create_once_file_protocol"]["windows"]
+    expected_windows["r3_bootstrap_contract_disposition_exact"] = (
+        "immutable_NO_GO_due_to_native_STATUS_REPARSE_POINT_ENCOUNTERED_before_any_grid_evaluator"
+    )
+    expected_windows["r3_failed_bootstrap_object_name_kind_exact"] = (
+        "process_effective_backslash_question_question_Volume_GUID_link_plus_original_"
+        "launcher_suffix"
+    )
+    expected_windows["r3_native_probe_evidence_exact"] = expected_probe
+    expected_windows["trusted_namespace_bootstrap_exact"] = (
+        "every_initial_install_or_fresh_checkpoint_session_rederives_one_authoritatively_"
+        "verified_direct_NT_device_workspace_root_ObjectName_then_opens_it_once_and_opens_"
+        "attempt_root_and_all_descendants_only_by_RootDirectory_relative_descent"
+    )
+    expected_windows["fresh_session_volume_guid_to_direct_nt_device_resolver_exact"] = (
+        _expected_r4_windows_resolver_contract_exact()
+    )
+    expected_windows["trusted_workspace_root_bootstrap_object_attributes_exact"] = (
+        "RootDirectory_NULL_ObjectName_fresh_verified_direct_NT_device_target_T0_plus_original_"
+        "launcher_suffix_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_"
+        "0x1000_without_OBJ_CASE_INSENSITIVE_0x40"
+    )
+    expected_windows["path_and_case_capture_exact"] = (
+        "GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_with_both_VOLUME_NAME_GUID_and_"
+        "VOLUME_NAME_NT_plus_GetFileInformationByHandleEx_FileNameInfo_exact_UTF16_relative_"
+        "component_case"
+    )
+    expected_windows[
+        "fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact"
+    ] = (
+        "forbidden_R3_alias_conversion_replaced_by_fresh_session_global_link_authority_"
+        "effective_map_crosscheck_and_direct_NT_device_ObjectName_construction"
+    )
+    expected_windows[
+        "trusted_workspace_root_bootstrap_OBJECT_ATTRIBUTES_Attributes_must_equal_OBJ_DONT_"
+        "REPARSE_0x1000_and_retry_with_Attributes_zero_is_forbidden"
+    ] = True
+    expected_windows["ntcreatefile_common_structure_contract_exact"]["UNICODE_STRING_Buffer"] = (
+        "exact_fresh_verified_direct_NT_device_workspace_root_or_single_leaf_UTF16_code_units_"
+        "matching_ObjectName_kind"
+    )
+    expected_windows["ntcreatefile_call_parameter_matrix_exact"][
+        "trusted_workspace_root_bootstrap"
+    ]["object_name_kind"] = (
+        "exact_fresh_verified_direct_NT_device_target_T0_plus_original_launcher_suffix_"
+        "crosschecked_to_both_launcher_namespaces_and_opening_repository_HEAD"
+    )
+
+    expected_differences = _collect_structured_differences(expected_current, r3)
+    assert current == expected_current
+    assert differences == expected_differences
+    assert all(
+        any(path[: len(allowed)] == allowed for path in differences)
+        for allowed in exact_allowed_paths
+    )
+    matrix_create_options_path = (
+        *probe_prefix,
+        "matrix_exact",
+        0,
+        "create_options_uint32_hex",
+    )
+    assert differences[matrix_create_options_path] == _StructuredDifference(
+        change_kind="added",
+        current_type="str",
+        baseline_type="missing",
+        current_value="00000021",
+        baseline_value=_DEEP_DIFF_MISSING_VALUE,
+    )
+
+    for protected_key in (
+        "input_bindings",
+        "local_restricted_input_identities",
+        "fit_input_bundle",
+        "etas_model",
+        "randomness",
+        "optimizer",
+        "numerical_regression",
+        "content_addressing",
+        "outputs",
+        "adapter_contract",
+    ):
+        assert current[protected_key] == r3[protected_key]
+    assert current["qualification_execution_seal"] == r3["qualification_execution_seal"]
+
+    current_grid = deepcopy(current["qualification"]["three_grid_gate_evidence_protocol"])
+    r3_grid = deepcopy(r3["qualification"]["three_grid_gate_evidence_protocol"])
+    current_persistence = current_grid["local_restricted_persistence"]
+    r3_persistence = r3_grid["local_restricted_persistence"]
+    current_persistence.pop("fixed_workspace_root_argument_contract_exact")
+    r3_persistence.pop("fixed_workspace_root_argument_contract_exact")
+    current_persistence.pop(
+        "any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action"
+    )
+    r3_persistence.pop("any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action")
+    current_persistence["durable_create_once_file_protocol"].pop("windows")
+    r3_persistence["durable_create_once_file_protocol"].pop("windows")
+    assert current_grid == r3_grid
+    assert (
+        current["qualification_execution_seal"]["opening_seal"]["protocol_package_paths"]
+        == r3["qualification_execution_seal"]["opening_seal"]["protocol_package_paths"]
+    )
+
+
+def _r4_structured_diff_mutation_fixture() -> tuple[
+    dict[str, object],
+    dict[str, object],
+    dict[tuple[str | int, ...], _StructuredDifference],
+]:
+    baseline: dict[str, object] = {
+        "probe": {
+            "sha256": "0" * 64,
+            "matrix_exact": [{"create_options_uint32_hex": "00000000"}],
+            "scalar_exact": "historical",
+        }
+    }
+    expected_current: dict[str, object] = {
+        "probe": {
+            "sha256": "a" * 64,
+            "matrix_exact": [{"create_options_uint32_hex": "00000021"}],
+            "scalar_exact": "r4",
+        }
+    }
+    return (
+        baseline,
+        expected_current,
+        _collect_structured_differences(expected_current, baseline),
+    )
+
+
+def test_r4_structured_diff_rejects_same_path_probe_sha_mutation() -> None:
+    baseline, expected_current, expected_differences = _r4_structured_diff_mutation_fixture()
+    tampered = deepcopy(expected_current)
+    cast(dict[str, object], tampered["probe"])["sha256"] = "b" * 64
+
+    observed = _collect_structured_differences(tampered, baseline)
+
+    assert observed != expected_differences
+    assert observed[("probe", "sha256")] == _StructuredDifference(
+        change_kind="value_changed",
+        current_type="str",
+        baseline_type="str",
+        current_value="b" * 64,
+        baseline_value="0" * 64,
+    )
+
+
+def test_r4_structured_diff_rejects_indexed_matrix_value_mutation() -> None:
+    baseline, expected_current, expected_differences = _r4_structured_diff_mutation_fixture()
+    tampered = deepcopy(expected_current)
+    matrix = cast(
+        list[dict[str, object]], cast(dict[str, object], tampered["probe"])["matrix_exact"]
+    )
+    matrix[0]["create_options_uint32_hex"] = "00200021"
+
+    observed = _collect_structured_differences(tampered, baseline)
+
+    assert observed != expected_differences
+    assert observed[("probe", "matrix_exact", 0, "create_options_uint32_hex")].current_value == (
+        "00200021"
+    )
+
+
+def test_r4_structured_diff_rejects_allowed_scalar_to_mapping_type_mutation() -> None:
+    baseline, expected_current, expected_differences = _r4_structured_diff_mutation_fixture()
+    tampered = deepcopy(expected_current)
+    cast(dict[str, object], tampered["probe"])["scalar_exact"] = {"nested": "r4"}
+
+    observed = _collect_structured_differences(tampered, baseline)
+
+    assert observed != expected_differences
+    assert observed[("probe", "scalar_exact")] == _StructuredDifference(
+        change_kind="type_changed",
+        current_type="dict",
+        baseline_type="str",
+        current_value={"nested": "r4"},
+        baseline_value="historical",
+    )
+
+
+def test_r4_structured_diff_rejects_extra_sibling_mutation() -> None:
+    baseline, expected_current, expected_differences = _r4_structured_diff_mutation_fixture()
+    tampered = deepcopy(expected_current)
+    cast(dict[str, object], tampered["probe"])["unexpected_sibling"] = True
+
+    observed = _collect_structured_differences(tampered, baseline)
+
+    assert observed != expected_differences
+    assert observed[("probe", "unexpected_sibling")] == _StructuredDifference(
+        change_kind="added",
+        current_type="bool",
+        baseline_type="missing",
+        current_value=True,
+        baseline_value=_DEEP_DIFF_MISSING_VALUE,
+    )
+
+
+def _r4_windows_mapping(protocol: dict[str, Any]) -> dict[str, Any]:
+    return cast(
+        dict[str, Any],
+        protocol["qualification"]["three_grid_gate_evidence_protocol"][
+            "local_restricted_persistence"
+        ]["durable_create_once_file_protocol"]["windows"],
+    )
+
+
+def _assert_r4_real_protocol_mutation_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+    tampered: dict[str, Any],
+) -> None:
+    original_loader = _load_yaml
+
+    def load_tampered(path: Path) -> dict[str, Any]:
+        if path == PROTOCOL_PATH:
+            return deepcopy(tampered)
+        return original_loader(path)
+
+    monkeypatch.setattr(sys.modules[__name__], "_load_yaml", load_tampered)
+    with pytest.raises(AssertionError):
+        test_r4_is_a_minimal_bootstrap_erratum_from_exact_r3_tag_and_commit()
+
+
+def test_r4_real_protocol_exact_overlay_rejects_probe_sha_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    probe = cast(dict[str, Any], _r4_windows_mapping(tampered)["r3_native_probe_evidence_exact"])
+    cast(dict[str, Any], probe["script"])["sha256"] = "b" * 64
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
+
+
+def test_r4_real_protocol_exact_overlay_rejects_indexed_matrix_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    probe = cast(dict[str, Any], _r4_windows_mapping(tampered)["r3_native_probe_evidence_exact"])
+    matrix = cast(list[dict[str, Any]], probe["matrix_exact"])
+    matrix[0]["create_options_uint32_hex"] = "00200021"
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
+
+
+def test_r4_real_protocol_exact_overlay_rejects_scalar_to_mapping_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    _r4_windows_mapping(tampered)["path_and_case_capture_exact"] = {
+        "VOLUME_NAME_GUID_and_VOLUME_NAME_NT": True,
+        "unexpected_nested_contract": "accepted",
+    }
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
+
+
+def test_r4_real_protocol_exact_overlay_rejects_extra_sibling_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    _r4_windows_mapping(tampered)["unexpected_sibling"] = True
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
+
+
+def test_r4_real_protocol_exact_overlay_rejects_truthy_guard_type_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    _r4_windows_mapping(tampered)[
+        "trusted_workspace_root_bootstrap_OBJECT_ATTRIBUTES_Attributes_must_equal_OBJ_DONT_"
+        "REPARSE_0x1000_and_retry_with_Attributes_zero_is_forbidden"
+    ] = "truthy_but_not_boolean"
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
+
+
+def test_r4_real_protocol_exact_overlay_rejects_resolver_nested_value_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tampered = _load_yaml(PROTOCOL_PATH)
+    resolver = cast(
+        dict[str, Any],
+        _r4_windows_mapping(tampered)[
+            "fresh_session_volume_guid_to_direct_nt_device_resolver_exact"
+        ],
+    )
+    buffer_contract = cast(
+        dict[str, Any], resolver["effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact"]
+    )
+    buffer_contract["maximum_call_count"] = 9
+    _assert_r4_real_protocol_mutation_is_rejected(monkeypatch, tampered)
 
 
 def test_issue_forecast_seed_context_exact_bytes_and_reference_vector() -> None:
@@ -8302,7 +10635,10 @@ def test_adapter_local_restricted_payloads_have_strict_byte_and_source_closure()
 def test_protocol_document_states_the_same_stop_boundary() -> None:
     document = PROTOCOL_DOCUMENT_PATH.read_text(encoding="utf-8")
     for required in (
-        "v0.2.2-background-etas-repair-protocol-r3",
+        R4_PROTOCOL_TAG,
+        R3_PROTOCOL_TAG,
+        R3_PROTOCOL_TAG_OBJECT,
+        R3_PROTOCOL_COMMIT,
         R2_PROTOCOL_TAG_OBJECT,
         R2_PROTOCOL_COMMIT,
         "Stage 4 formal target consumer 调用 0",
@@ -8344,7 +10680,6 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
     handoff = RESTART_HANDOFF_PATH.read_text(encoding="utf-8")
     protocol_document = PROTOCOL_DOCUMENT_PATH.read_text(encoding="utf-8")
     fullwidth_colon = "\uff1a"
-    fullwidth_left_parenthesis = "\uff08"
 
     package_paths = protocol["qualification_execution_seal"]["opening_seal"][
         "protocol_package_paths"
@@ -8366,6 +10701,9 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
         assert "v0.2.2-background-etas-repair-protocol-r1" in document
         assert "v0.2.2-background-etas-repair-protocol-r2" in document
         assert "v0.2.2-background-etas-repair-protocol-r3" in document
+        assert R4_PROTOCOL_TAG in document
+        assert R3_PROTOCOL_TAG_OBJECT in document
+        assert R3_PROTOCOL_COMMIT in document
         assert R2_PROTOCOL_TAG_OBJECT in document
         assert R2_PROTOCOL_COMMIT in document
         assert "codex/stage2-etas-numerical-repair" in document
@@ -8405,14 +10743,23 @@ def test_acceptance_and_restart_handoff_share_the_frozen_boundaries() -> None:
             assert second_round_count in document
         assert "INVALID/STOPPED" in document
         assert "R2→R3" in document
+        assert "R3→R4" in document
 
-    assert (
-        f"状态{fullwidth_colon}未通过{fullwidth_left_parenthesis}第四轮独立终审仍发现 P1/P2"
-        in acceptance
-    )
+    assert f"状态{fullwidth_colon}`R4_NOT_ACCEPTED_NO_COMMIT`" in acceptance
+    assert "P0=0/P1=1/P2=1" in acceptance
     assert "之后补填" not in acceptance
     assert "文档同步后的最终限定复跑、三路独立复审" not in acceptance
-    assert "最终限定复跑和静态检查已经完成" in acceptance
+    assert "第一轮三路独立终审已明确 NO-GO" in acceptance
+    assert "最终受控回归仍未授权" in acceptance
+    for current_document in (protocol_document, acceptance, handoff):
+        assert "72 passed, 69 deselected in 24.98s" in current_document
+        assert "4 passed in 8.05s" in current_document
+        assert "禁止实现、fallback 或验收" in current_document
+    assert "41 passed, 69 deselected in 6.21s" in acceptance
+    assert "41 passed, 69 deselected in 6.36s" in acceptance
+    assert "4 passed in 8.10s" in acceptance
+    assert "4 passed in 9.25s" in acceptance
+    assert "39 passed / 1 failed / 2 collection-setup errors" in acceptance
     for r3_evidence in (
         "ModuleNotFoundError: scripts",
         "1 error in 14.17s",

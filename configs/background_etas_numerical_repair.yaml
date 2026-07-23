@@ -1,24 +1,24 @@
 schema_version: 1
 protocol_version: 0.2.2
-protocol_revision: r3
+protocol_revision: r4
 stage: 2-ETAS-R
 experiment_family: background_etas_numerical_repair
 status: preregistered_target_blind_before_any_repair_fit
 preregistered_on: '2026-07-17'
-revised_on: '2026-07-19'
-revision_reason: freeze_attempt_local_complete_three_grid_envelope_identity_durability_and_fresh_disk_reopen_without_changing_any_scientific_input_public_schema_or_fit_rule
+revised_on: '2026-07-23'
+revision_reason: correct_the_windows_workspace_root_namespace_bootstrap_to_a_verified_direct_NT_device_path_while_preserving_OBJ_DONT_REPARSE_and_every_scientific_schema_path_model_and_fit_contract
 blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
 
 revision_base:
-  protocol_tag: v0.2.2-background-etas-repair-protocol-r2
-  protocol_tag_object: 903c80ed64295311f8d7870b4847f56d67caee51
-  protocol_commit: 5a5902a83645c217ea11a3bd99eb70b535f0e4df
+  protocol_tag: v0.2.2-background-etas-repair-protocol-r3
+  protocol_tag_object: bd77f35d3d676893c6e83f385c810c89965f6257
+  protocol_commit: 8ccbf12dd971ee9e683b544e336c76b2a254eb60
   protocol_tag_object_type_exact: annotated_tag
   protocol_tag_must_peel_exactly_to_protocol_commit: true
-  remote_protocol_tag_and_peeled_commit_must_be_verified_before_r3_freeze: true
+  remote_protocol_tag_and_peeled_commit_must_be_verified_before_r4_freeze: true
 
 publication:
-  protocol_tag: v0.2.2-background-etas-repair-protocol-r3
+  protocol_tag: v0.2.2-background-etas-repair-protocol-r4
   qualification_code_tag: v0.2.2-background-etas-repair-code
   qualification_result_tag: v0.2.2-background-etas-numerical-qualification
   comparator_adapter_code_tag: v0.2.2-background-etas-comparator-adapter
@@ -67,7 +67,7 @@ purpose:
   kde_remains_secondary_comparator_and_is_never_an_etas_substitute: true
 
 repair_code_scope_from_protocol_tag:
-  comparison_base: v0.2.2-background-etas-repair-protocol-r3
+  comparison_base: v0.2.2-background-etas-repair-protocol-r4
   allowed_changed_or_added_paths:
     - src/seismoflux/background/etas_fit.py
     - src/seismoflux/background/etas_numerical_repair.py
@@ -1825,8 +1825,11 @@ qualification:
         qualification_value: canonical_absolute_Win32_Volume_GUID_path_of_the_exact_worktree_root_whose_HEAD_upstream_protocol_package_blobs_and_remote_repair_code_tag_are_verified_by_opening_seal
         public_artifact_value: forbidden_local_restricted_only
         live_root_identity_crosswalk: independently_captured_root_handle_record_must_equal_authenticated_ordered_directory_identity_chain_record_zero_before_evidence_acceptance
-        windows_nt_object_name_derivation_exact: replace_exact_leading_two_backslashes_question_mark_backslash_with_single_backslash_question_mark_question_mark_backslash_and_preserve_Volume_GUID_and_every_exact_case_suffix_UTF16_code_unit
-        windows_nt_object_name_example: "\\??\\Volume{11111111-2222-3333-4444-555555555555}\\repo"
+        windows_cli_parse_exact: split_the_strict_Win32_Volume_GUID_root_from_the_nonempty_exact_case_suffix_without_normalizing_any_suffix_UTF16_code_unit
+        windows_global_volume_guid_link_object_name_derivation_exact: construct_the_explicit_global_Object_Manager_link_name_from_the_parsed_Volume_GUID_root_without_using_the_process_effective_backslash_question_question_alias
+        windows_global_volume_guid_link_object_name_example: '\GLOBAL??\Volume{11111111-2222-3333-4444-555555555555}'
+        windows_direct_nt_device_root_object_name_derivation_exact: fresh_authoritative_global_link_target_T0_plus_the_original_exact_case_launcher_suffix
+        windows_direct_nt_device_root_object_name_example: '\Device\VolumeDeviceObject\repo'
         any_drive_UNC_DOS_device_alias_environment_current_directory_or_envelope_derived_root_forbidden: true
       opening_repository_root_crosswalk_exact: launcher_workspace_root_handle_must_host_the_same_worktree_for_which_opening_seal_verifies_HEAD_upstream_repair_code_tag_and_all_protocol_package_blobs_and_authenticated_chain_record_zero_must_equal_that_live_handle_identity
       fresh_checkpoint_expected_directory_identity_source_exact: complete_envelope_chain_whose_outer_sha_must_equal_independently_frozen_gate_fit_and_presence_anchors_with_pre_anchor_restart_permanently_forbidden
@@ -1943,7 +1946,7 @@ qualification:
       seal_must_close_renamed_file_handle_after_flush_retain_verified_parent_chain_for_handle_relative_final_reopen_then_close_reopened_file_and_all_parent_handles_after_complete_verification: true
       seal_returned_13_field_payload_envelope_sha256_and_public_crosswalk_values_must_be_derived_only_from_complete_reopened_envelope_bytes_not_from_preinstall_memory_or_temp_bytes: true
       seal_may_return_only_after_path_regular_file_identity_stable_size_complete_bytes_strict_envelope_schema_all_nested_hashes_both_own_hashes_numerical_evidence_id_crosswalk_and_byte_reserialization_checks_pass: true
-      any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action: invalid_execution_retain_attempt_and_start_any_scientific_retry_under_new_attempt_id
+      any_create_write_flush_install_reopen_schema_hash_or_byte_failure_action: select_the_unique_phase_specific_status_from_durable_create_once_file_protocol.install_failure_state_machine_without_any_blanket_override_then_retain_attempt_and_start_any_scientific_retry_only_under_the_authorized_new_attempt_boundary
       durable_create_once_file_protocol:
         qualification_runtime_platform_system_exact_ref: outputs.canonical_nested_schemas.windows_runtime_identity.platform_system_exact
         selected_install_profile_exact: windows_ntfs_ntcreatefile_filerenameinfo_v1
@@ -1967,8 +1970,112 @@ qualification:
           any_scientific_retry: new_attempt_id_only_after_manual_audit
         windows:
           profile_id_exact: windows_ntfs_ntcreatefile_filerenameinfo_v1
-          trusted_namespace_bootstrap_exact: one_absolute_NT_path_open_of_trusted_workspace_root_per_initial_install_or_fresh_checkpoint_verification_session_then_attempt_root_and_all_descendants_opened_only_by_RootDirectory_relative_descent
-          trusted_workspace_root_bootstrap_object_attributes_exact: RootDirectory_NULL_ObjectName_exact_NT_path_derived_from_fixed_launcher_workspace_root_argument_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40
+          r3_bootstrap_contract_disposition_exact: immutable_NO_GO_due_to_native_STATUS_REPARSE_POINT_ENCOUNTERED_before_any_grid_evaluator
+          r3_failed_bootstrap_object_name_kind_exact: process_effective_backslash_question_question_Volume_GUID_link_plus_original_launcher_suffix
+          r3_native_probe_evidence_exact:
+            git_ignored_by_exact_rule: '.gitignore:25:data/interim/**'
+            script: {path: data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/probe_ntcreatefile_bootstrap.py, size_bytes: 5031, sha256: 0c188d843e18a9a0dc006506c6ff39e6d6f79587b835b4a0620a7e01c5795c1c}
+            output: {path: data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/probe_output_redacted.jsonl, size_bytes: 1160, sha256: 3ceeafb1898b9265c35fc538df74a75bfa1978520d6ce371a450bf2222107acf}
+            readme: {path: data/interim/stage2/etas_numerical_repair/r3_bootstrap_probe/README.md, size_bytes: 3074, sha256: 13eef2706fe582a606ec95d5ece7ed57ceea8e000a953d70a44de3cde19ffe4b}
+            matrix_fields_exact: [object_attributes_uint32_hex, create_options_uint32_hex, ntstatus_hex, io_status_information_uint64_hex, win32_error, result]
+            matrix_exact:
+              - {object_attributes_uint32_hex: "00000000", create_options_uint32_hex: "00000021", ntstatus_hex: "00000000", io_status_information_uint64_hex: "0000000000000001", win32_error: 0, result: success_FILE_OPENED}
+              - {object_attributes_uint32_hex: "00000000", create_options_uint32_hex: "00200021", ntstatus_hex: "00000000", io_status_information_uint64_hex: "0000000000000001", win32_error: 0, result: success_FILE_OPENED}
+              - {object_attributes_uint32_hex: "00001000", create_options_uint32_hex: "00000021", ntstatus_hex: "c000050b", io_status_information_uint64_hex: "0000000000000000", win32_error: 4395, result: failure_STATUS_REPARSE_POINT_ENCOUNTERED}
+              - {object_attributes_uint32_hex: "00001000", create_options_uint32_hex: "00200021", ntstatus_hex: "c000050b", io_status_information_uint64_hex: "0000000000000000", win32_error: 4395, result: failure_STATUS_REPARSE_POINT_ENCOUNTERED}
+            first_probe_scope_limitation_exact: observed_only_the_process_effective_backslash_question_question_namespace_and_did_not_rule_out_a_process_local_shadow_of_the_global_Volume_GUID_link
+            independent_direct_device_feasibility_observation_exact: current_Volume_GUID_link_target_plus_original_suffix_with_OBJ_DONT_REPARSE_succeeded_in_all_four_followup_cells_but_does_not_replace_R4_acceptance
+            r4_strengthened_explicit_global_ad_hoc_non_mutating_exact_access_probe_observation_exact: global_link_open_and_query_succeeded_QueryDosDeviceW_MULTISZ_cardinality_one_and_first_target_byte_equal_to_global_T0_direct_open_FILE_OPENED_GUID_and_NT_final_paths_equal_expected_and_pre_post_targets_did_not_drift
+            r4_strengthened_probe_acceptance_limit_exact: ad_hoc_observation_succeeded_first_tracked_native_run_exposed_two_protocol_mismatches_and_collection_ID_errors_corrections_are_applied_and_tracked_native_rerun_completed_before_first_independent_audit_but_formal_R4_acceptance_still_pending
+            r4_first_tracked_native_negative_observations_exact:
+              NtQuerySymbolicLinkObject: {ReturnedLength_bytes: 48, TargetName_Length_bytes: 46, finding: ReturnedLength_includes_one_trailing_UTF16_NUL}
+              volume_serial_APIs: {FileIdInfo_u64_decimal: '15908439068185257866', GetVolumeInformationByHandleW_DWORD_decimal: '3324045194', finding: values_are_distinct_and_must_be_compared_only_with_same_API_fixture_values}
+              protocol_corrections_applied: [ReturnedLength_equals_TargetName_Length_plus_2_and_T0_excludes_NUL, volume_serial_comparisons_are_same_API_only_without_cross_API_equality_cast_or_truncation]
+              first_tracked_summary_exact: 39_passed_1_failed_2_collection_setup_errors
+              first_tracked_raw_log_or_JUnit_persisted: false
+              first_tracked_summary_is_negative_observation_not_a_stable_node_inventory: true
+              pre_first_independent_audit_tracked_native_rerun_completed: true
+              pre_first_independent_audit_selected_test_count_exact: 41
+              formal_R4_acceptance_pending: true
+            r4_tracked_native_permanent_test_scope_exact: non_mutating_exact_access_global_link_QueryDosDevice_direct_root_and_live_handle_identity_capability_crosschecks_only
+            r4_tracked_native_test_does_not_claim_descendant_handle_relative_repository_identity_or_authenticated_nine_directory_chain_implementation: true
+            r4_platform_acceptance_requires_sys_platform_win32_and_the_native_node_to_execute_without_skip: true
+            r4_native_failure_reporting_must_redact_T0_direct_ObjectName_and_launcher_GUID_path_operands: true
+          trusted_namespace_bootstrap_exact: every_initial_install_or_fresh_checkpoint_session_rederives_one_authoritatively_verified_direct_NT_device_workspace_root_ObjectName_then_opens_it_once_and_opens_attempt_root_and_all_descendants_only_by_RootDirectory_relative_descent
+          fresh_session_volume_guid_to_direct_nt_device_resolver_exact:
+            launcher_input_kind_exact: strict_canonical_absolute_Win32_Volume_GUID_path_with_nonempty_exact_case_suffix
+            authority_link_namespace_exact: explicit_global_Object_Manager_Volume_GUID_symbolic_link
+            authority_link_object_name_exact: '\GLOBAL??\Volume{parsed-launcher-guid}'
+            authority_api_order_exact: [NtOpenSymbolicLinkObject, NtQuerySymbolicLinkObject]
+            authority_open_desired_access_exact: {symbol: SYMBOLIC_LINK_QUERY, uint32_hex: "00000001"}
+            authority_link_open_object_attributes_exact:
+              RootDirectory: null
+              ObjectName: exact_explicit_global_Volume_GUID_link_without_trailing_backslash
+              Attributes_uint32_hex: "00000000"
+              Attributes_semantics: no_OBJ_CASE_INSENSITIVE_and_no_OBJ_DONT_REPARSE_for_opening_the_symbolic_link_object_itself
+              SecurityDescriptor: null
+              SecurityQualityOfService: null
+              UNICODE_STRING_Length: exact_ObjectName_UTF16LE_byte_length_without_terminator_reject_odd_or_over_65534
+              UNICODE_STRING_MaximumLength: exactly_equal_Length_no_implicit_terminator_capacity
+              UNICODE_STRING_Buffer: exact_global_link_ObjectName_UTF16_code_units_without_trailing_backslash_or_implicit_NUL
+              Attributes_zero_scope_exact: symbolic_link_metadata_open_only_never_a_workspace_root_NtCreateFile_fallback
+            authority_link_query_target_unicode_string_exact:
+              ReturnedLength: strict_even_uint32_between_4_and_65534_equal_to_TargetName_Length_plus_2
+              TargetName_Length: strict_even_uint16_between_2_and_65532_equal_to_exact_target_UTF16LE_byte_length_without_terminator
+              TargetName_MaximumLength: caller_allocated_even_capacity_at_least_ReturnedLength_without_trusting_implicit_NUL
+              accepted_target_bytes: Buffer_slice_from_byte_zero_through_TargetName_Length_exclusive_only
+              Buffer_slice_from_TargetName_Length_through_ReturnedLength_exclusive_must_equal_exact_UTF16_NUL_two_zero_bytes_and_must_not_enter_T0: true
+              trailing_unreturned_buffer_capacity_must_not_enter_T0: true
+            authority_query_result_T0_exact: exact_UTF16_target_bytes_returned_for_the_explicit_global_Volume_GUID_link
+            effective_map_crosscheck_api_exact: QueryDosDeviceW
+            effective_map_crosscheck_argument_exact: Volume_braced_GUID_without_prefix_suffix_or_trailing_backslash
+            effective_map_crosscheck_result_type_exact: MULTI_SZ
+            effective_map_QueryDosDeviceW_buffer_and_parse_contract_exact:
+              initial_capacity_wchars: 256
+              capacity_growth_factor: 2
+              maximum_capacity_wchars: 32768
+              maximum_call_count: 8
+              growth_trigger_exact: ERROR_INSUFFICIENT_BUFFER_only
+              any_other_error_or_exhausted_bound_action: invalid_execution_before_grid_evaluator
+              returned_count_unit_exact: WCHAR_count_not_bytes
+              returned_count_rule: strict_positive_not_greater_than_supplied_capacity
+              accepted_buffer_slice_exact: all_WCHARs_from_index_zero_through_returned_count_exclusive
+              required_termination_exact: accepted_slice_ends_with_exactly_the_MULTI_SZ_terminal_double_NUL
+              parse_rule_exact: split_the_complete_returned_slice_on_NUL_preserve_every_nonempty_entry_in_order_and_remove_only_the_final_two_terminal_NULs
+              first_entry_must_be_nonempty: true
+              empty_entry_before_terminal_forbidden: true
+              ctypes_buffer_value_or_any_first_NUL_truncated_reader_forbidden: true
+            effective_map_selected_entry_exact: first_string_only
+            effective_map_first_entry_comparison_exact: exact_UTF16_byte_equality_to_authoritative_T0_without_case_or_path_normalization
+            later_historical_mapping_entries_allowed_but_never_selectable_or_authoritative: true
+            preopen_global_target_and_effective_first_entry_must_equal_same_T0: true
+            postopen_global_target_and_effective_first_entry_must_equal_same_T0: true
+            preopen_and_postopen_global_target_exact_UTF16_bytes_must_be_equal: true
+            direct_nt_device_target_grammar_exact:
+              encoding: exact_UTF16_without_NUL
+              normalization: unicode_NFC
+              absolute_prefix_exact: '\Device\'
+              component_count: one_or_more_nonempty_components
+              component_rule: every_component_is_nonempty_not_dot_or_dot_dot_and_contains_no_C0_control_NUL_or_forward_slash
+              separator_rule: exactly_one_backslash_between_components_without_repeated_or_trailing_separator
+              forbidden_namespace_prefixes_exact: ['\??\', '\DosDevices\', '\GLOBAL??\', '\UNC\', '\Device\Mup', '\Device\Mup\']
+              hardcoded_cached_or_HarddiskVolume_numeric_pattern_dependency_forbidden: true
+            constructed_root_object_name_exact: T0_plus_the_original_launcher_suffix_preserving_every_exact_UTF16_code_unit_and_separator_boundary_once
+            QueryDosDeviceW_is_independent_crosscheck_only_and_may_not_supply_or_override_T0: true
+            resolver_order_exact: [strict_launcher_parse, global_link_prequery_T0, QueryDosDeviceW_prequery_first_entry_crosscheck, T0_grammar_validation, direct_root_ObjectName_construction, direct_root_NtCreateFile_open, live_handle_crosschecks, global_link_postquery_same_T0, QueryDosDeviceW_postquery_first_entry_same_T0, accept_session_root]
+            retained_root_handle_crosschecks_before_close_exact: [GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_GUID_equals_exact_launcher_input, GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_NT_equals_exact_constructed_root_ObjectName, GetFileInformationByHandleEx_FileIdInfo_u64_VolumeSerialNumber_and_FileId_equal_same_API_launcher_fixture_and_authenticated_directory_chain_values, GetVolumeInformationByHandleW_exact_NTFS_and_DWORD_serial_equal_same_API_launcher_fixture_value, NtQueryVolumeInformationFile_FileFsDeviceInformation_FILE_DEVICE_DISK_and_not_FILE_REMOTE_DEVICE, GetFileInformationByHandleEx_FileAttributeTagInfo_not_reparse, handle_relative_opening_repository_HEAD_upstream_remote_repair_code_tag_and_protocol_package_blobs]
+            volume_serial_cross_API_contract_exact:
+              FileIdInfo_VolumeSerialNumber: canonical_u64_compared_only_to_FileIdInfo_u64_from_same_launcher_fixture_and_authenticated_directory_chain
+              GetVolumeInformationByHandleW_volume_serial: canonical_DWORD_compared_only_to_GetVolumeInformationByHandleW_DWORD_from_same_launcher_fixture_handle_and_used_with_filesystem_crosscheck
+              FileIdInfo_u64_must_not_equal_or_be_truncated_to_GetVolumeInformationByHandleW_DWORD: true
+              first_native_mismatch_observation_exact: {FileIdInfo_u64_decimal: '15908439068185257866', GetVolumeInformationByHandleW_DWORD_decimal: '3324045194', values_intentionally_not_equal: true}
+              any_cross_API_equality_cast_or_truncation_action: invalid_execution_before_grid_evaluator
+            root_handle_must_remain_live_from_direct_open_through_all_crosschecks_and_both_postqueries: true
+            direct_device_target_is_strictly_session_local_nonpersistent_and_must_be_rederived_every_session: true
+            direct_device_target_may_not_enter_envelope_receipt_log_public_artifact_cache_or_restart_state: true
+            any_alias_open_hardcoded_or_cached_device_name_QueryDosDevice_authority_ATTRIBUTES_zero_retry_or_Win32_path_API_fallback_forbidden: true
+            any_resolver_query_parse_drift_open_or_crosscheck_failure_action: invalid_execution_before_grid_evaluator
+          trusted_workspace_root_bootstrap_object_attributes_exact: RootDirectory_NULL_ObjectName_fresh_verified_direct_NT_device_target_T0_plus_original_launcher_suffix_and_bound_to_opening_repository_HEAD_Attributes_OBJ_DONT_REPARSE_0x1000_without_OBJ_CASE_INSENSITIVE_0x40
           trusted_workspace_root_bootstrap_create_disposition_exact: {symbol: FILE_OPEN, uint32_hex: "00000001"}
           trusted_workspace_root_bootstrap_create_options_exact: {symbolic_or: FILE_DIRECTORY_FILE_0x00000001_bitwise_OR_FILE_OPEN_REPARSE_POINT_0x00200000_bitwise_OR_FILE_SYNCHRONOUS_IO_NONALERT_0x00000020, uint32_hex: "00200021"}
           every_fresh_checkpoint_session_must_close_all_prior_handles_open_workspace_root_once_then_parent_relative_redescend_and_reverify_every_directory_identity_before_final_file_open: true
@@ -1998,7 +2105,7 @@ qualification:
             OBJECT_ATTRIBUTES_Attributes_uint32_hex: "00001000"
             UNICODE_STRING_Length: exact_ObjectName_UTF16LE_byte_length_without_terminator_reject_odd_or_over_65534
             UNICODE_STRING_MaximumLength: exactly_equal_Length_no_implicit_terminator_capacity
-            UNICODE_STRING_Buffer: exact_absolute_workspace_root_or_single_leaf_UTF16_code_units_matching_ObjectName_kind
+            UNICODE_STRING_Buffer: exact_fresh_verified_direct_NT_device_workspace_root_or_single_leaf_UTF16_code_units_matching_ObjectName_kind
             AllocationSize: null
             EaBuffer: null
             EaLength_uint32_hex: "00000000"
@@ -2007,7 +2114,7 @@ qualification:
           ntcreatefile_call_parameter_matrix_exact:
             trusted_workspace_root_bootstrap:
               root_directory_kind: null
-              object_name_kind: exact_NT_ObjectName_derived_only_from_fixed_launcher_workspace_root_argument_and_crosschecked_to_opening_repository_HEAD
+              object_name_kind: exact_fresh_verified_direct_NT_device_target_T0_plus_original_launcher_suffix_crosschecked_to_both_launcher_namespaces_and_opening_repository_HEAD
               desired_access_uint32_hex: "001201bf"
               share_access_uint32_hex: "00000003"
               file_attributes_symbol: zero_ignored_for_FILE_OPEN
@@ -2102,6 +2209,7 @@ qualification:
               expected_io_status_information_symbol: FILE_OPENED
               expected_io_status_information_uint64_hex: "0000000000000001"
           every_NtCreateFile_call_must_match_exactly_one_parameter_matrix_row_and_no_unlisted_default_or_implicit_argument_is_permitted: true
+          trusted_workspace_root_bootstrap_OBJECT_ATTRIBUTES_Attributes_must_equal_OBJ_DONT_REPARSE_0x1000_and_retry_with_Attributes_zero_is_forbidden: true
           missing_OBJ_DONT_REPARSE_or_present_OBJ_CASE_INSENSITIVE_or_unsupported_semantics_action: fail_closed_before_grid_evaluator
           object_name_must_be_single_leaf_without_separator_dot_dot_alias_or_case_normalization: true
           directory_create_exact: NtCreateFile_with_exact_object_attributes_exact_directory_desired_access_and_share_access_FILE_CREATE_FILE_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_SYNCHRONOUS_IO_NONALERT
@@ -2126,9 +2234,9 @@ qualification:
           identity_capture_exact: GetFileInformationByHandleEx_FileIdInfo_VolumeSerialNumber_and_FileId_plus_FileStandardInfo_NumberOfLinks
           parent_identity_capture_exact: GetFileInformationByHandleEx_FileIdInfo_on_each_verified_workspace_attempt_local_restricted_and_three_grid_gate_evidence_directory_handle_before_descending_or_creating_a_child_and_again_before_final_file_open
           parent_identity_source_and_crosscheck_exact: FileIdInfo_VolumeSerialNumber_canonical_u64_decimal_and_FILE_ID_128_lowercase_32_hex_must_equal_embedded_parent_identity_same_platform_branch_and_child_volume_serial_with_path_stat_or_synthetic_st_ino_source_forbidden_in_qualification
-          path_and_case_capture_exact: GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_VOLUME_NAME_GUID_plus_GetFileInformationByHandleEx_FileNameInfo_exact_UTF16_relative_component_case
+          path_and_case_capture_exact: GetFinalPathNameByHandleW_FILE_NAME_NORMALIZED_with_both_VOLUME_NAME_GUID_and_VOLUME_NAME_NT_plus_GetFileInformationByHandleEx_FileNameInfo_exact_UTF16_relative_component_case
           canonical_volume_guid_path_grammar_exact: windows_extended_length_prefix_then_Volume_braced_GUID_8_4_4_4_12_hex_then_backslash_then_one_or_more_exact_case_UTF16_NFC_safe_components
-          fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact: replace_exact_leading_two_backslashes_question_mark_backslash_with_single_backslash_question_mark_question_mark_backslash_preserve_all_remaining_UTF16_code_units_and_reject_any_other_prefix
+          fixed_launcher_Win32_Volume_GUID_path_to_NtCreateFile_NT_ObjectName_conversion_exact: forbidden_R3_alias_conversion_replaced_by_fresh_session_global_link_authority_effective_map_crosscheck_and_direct_NT_device_ObjectName_construction
           DOS_drive_UNC_incomplete_volume_GUID_dot_dot_dot_empty_or_repeated_separator_forward_slash_NUL_or_non_NFC_canonical_path_forbidden: true
           synthetic_windows_path_fixture_must_use_a_complete_fake_volume_GUID_path_and_may_not_use_Path_resolve_drive_letter_output: true
           installed_reopen_must_retain_the_verified_parent_chain_after_closing_only_the_renamed_file_handle_then_use_same_case_sensitive_OBJ_DONT_REPARSE_NtCreateFile_RootDirectory_relative_exact_final_reopen_desired_access_and_share_access_FILE_OPEN_FILE_NON_DIRECTORY_FILE_FILE_OPEN_REPARSE_POINT_FILE_SYNCHRONOUS_IO_NONALERT_and_verify_same_volume_serial_file_id_link_count_one_final_path_exact_case_complete_bytes_and_stable_size_before_closing_all_handles: true
