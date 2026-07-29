@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import math
@@ -12,6 +13,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "anomaly_increment_kde_dev.yaml"
 PROTOCOL_DOCUMENT_PATH = ROOT / "docs" / "anomaly_increment_kde_dev_protocol.md"
+EXECUTABILITY_AMENDMENT_PATH = ROOT / "docs" / "phase4_kde_development_executability_amendment.md"
 
 EXPECTED_TOP_LEVEL = {
     "schema_version",
@@ -49,6 +51,7 @@ PUBLIC_JSON_ALLOWLIST = {
     "data/manifests/anomaly_increment_r2_feature_set.json",
     "data/manifests/anomaly_increment_r2_fold_manifest.json",
     "data/manifests/anomaly_increment_r2_spatial_strata.json",
+    "data/manifests/background_local_support_manifest.json",
     "data/manifests/background_local_support_model_registry.json",
     "data/manifests/etas_numerical_qualification_result.json",
 }
@@ -134,12 +137,83 @@ def _all_mapping_keys(value: object) -> set[str]:
     return keys
 
 
+def _module_paths(module: str) -> set[Path]:
+    source_root = ROOT / "src"
+    parts = module.split(".")
+    paths: set[Path] = set()
+    for index in range(1, len(parts)):
+        package_init = source_root.joinpath(*parts[:index], "__init__.py")
+        if package_init.is_file():
+            paths.add(package_init)
+    module_file = source_root.joinpath(*parts).with_suffix(".py")
+    package_file = source_root.joinpath(*parts, "__init__.py")
+    if module_file.is_file():
+        paths.add(module_file)
+    elif package_file.is_file():
+        paths.add(package_file)
+    return paths
+
+
+def _module_name(path: Path) -> str:
+    relative = path.relative_to(ROOT / "src").with_suffix("")
+    parts = list(relative.parts)
+    if parts[-1] == "__init__":
+        parts.pop()
+    return ".".join(parts)
+
+
+def _internal_import_closure(entry_paths: set[str]) -> set[str]:
+    source_root = ROOT / "src"
+    queue: list[Path] = []
+    for relative_path in entry_paths:
+        path = ROOT / relative_path
+        queue.extend(_module_paths(_module_name(path)))
+    seen: set[Path] = set()
+    while queue:
+        path = queue.pop().resolve()
+        if path in seen:
+            continue
+        assert path.is_relative_to(source_root.resolve())
+        seen.add(path)
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        current_module = _module_name(path)
+        current_package = (
+            current_module if path.name == "__init__.py" else current_module.rpartition(".")[0]
+        )
+        for node in ast.walk(tree):
+            modules: list[str] = []
+            if isinstance(node, ast.Import):
+                modules.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                if node.level:
+                    package_parts = current_package.split(".")
+                    keep = len(package_parts) - (node.level - 1)
+                    prefix = package_parts[:keep]
+                    base_parts = [*prefix, *(node.module.split(".") if node.module else [])]
+                    base_module = ".".join(base_parts)
+                else:
+                    base_module = node.module or ""
+                modules.append(base_module)
+                for alias in node.names:
+                    candidate = f"{base_module}.{alias.name}"
+                    if _module_paths(candidate):
+                        modules.append(candidate)
+            for module in modules:
+                if not module.startswith("seismoflux"):
+                    continue
+                for imported_path in _module_paths(module):
+                    resolved = imported_path.resolve()
+                    if resolved not in seen:
+                        queue.append(resolved)
+    return {path.relative_to(ROOT.resolve()).as_posix() for path in seen}
+
+
 def test_protocol_is_unique_target_blind_and_has_exact_stage_identity() -> None:
     config = _load_yaml()
 
     assert set(config) == EXPECTED_TOP_LEVEL
     assert config["schema_version"] == 1
-    assert config["protocol_version"] == "0.4.2"
+    assert config["protocol_version"] == "0.4.3"
     assert config["stage"] == "4A"
     assert config["experiment_id"] == "stage4-kde-development-v1"
     assert config["gate_id"] == "S4-KDE-DEV"
@@ -157,9 +231,17 @@ def test_protocol_is_unique_target_blind_and_has_exact_stage_identity() -> None:
         freeze["expected_code_tag"],
         freeze["expected_result_tag"],
     } == {
-        "v0.3.2-kde-anomaly-increment-protocol",
-        "v0.3.2-kde-anomaly-increment-code",
-        "v0.3.2-kde-anomaly-increment-result",
+        "v0.3.3-kde-anomaly-increment-protocol",
+        "v0.3.3-kde-anomaly-increment-code",
+        "v0.3.3-kde-anomaly-increment-result",
+    }
+    assert freeze["supersedes"] == {
+        "protocol_version": "0.4.2",
+        "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
+        "expected_code_tag": "v0.3.2-kde-anomaly-increment-code",
+        "expected_result_tag": "v0.3.2-kde-anomaly-increment-result",
+        "status": "historical_superseded_before_target_read",
+        "historical_evidence_is_immutable": True,
     }
     assert freeze["protocol_tests_and_documents_allowed_before_protocol_tag"] is True
     assert (
@@ -184,6 +266,7 @@ def test_authority_and_q2_negative_route_pruning_are_exact() -> None:
         authority["research_protocol"],
         authority["research_protocol_document"],
         authority["science_value_policy"],
+        authority["executability_amendment"],
     ):
         assert _sha256(identity["path"]) == identity["sha256"]
 
@@ -206,6 +289,7 @@ def test_public_input_identities_and_inherited_contracts_are_byte_exact() -> Non
 
     public_identities = (
         "background_registry",
+        "background_local_support_manifest",
         "stage3_registry",
         "feature_dictionary",
         "inherited_contract_allowlist",
@@ -235,7 +319,50 @@ def test_public_input_identities_and_inherited_contracts_are_byte_exact() -> Non
     assert stage3["aggregate"]["snapshot_count"] == 205
     assert stage3["aggregate"]["feature_row_count"] == 3_217_885
 
+    support_manifest = _load_json(inputs["background_local_support_manifest"]["path"])
+    assert support_manifest["manifest_id"] == "local-support-bundle-69cecbee9093a21d"
+    fold4_support = next(
+        item for item in support_manifest["snapshots"] if item["snapshot_id"] == "fold_4"
+    )
+    assert fold4_support["support"]["support_id"] == "local-support-788851371baf0e3b"
+    assert fold4_support["support"]["retained_area_fraction"] == 1.0
+    assert fold4_support["support"]["retained_selected_event_count"] == 5237
+
+    background_registry = _load_json(inputs["background_registry"]["path"])
+    historical = inputs["background_registry"]["historical_untracked_declarations"]
+    assert historical["expected_input_manifest_inclusion"] == "forbidden"
+    assert historical["presence_required"] is False
+    assert historical["runtime_read"] == "forbidden"
+    runtime_top_level_paths = {
+        value["path"]
+        for value in inputs.values()
+        if isinstance(value, dict) and isinstance(value.get("path"), str)
+    }
+    for declaration in (historical["model_manifest"], historical["poisson_kde"]):
+        assert declaration["path"] not in runtime_top_level_paths
+        assert not (ROOT / declaration["path"]).exists()
+    assert _all_mapping_keys(background_registry).isdisjoint(
+        {
+            "training_x_km",
+            "training_y_km",
+            "kernel_centers",
+            "kernel_center_x_km",
+            "kernel_center_y_km",
+            "ordered_25km_cell_ids",
+            "ordered_25km_cell_masses",
+        }
+    )
+
     inherited = _load_json(inputs["inherited_contract_allowlist"]["path"])
+    assert inherited["protocol_version"] == "0.4.3"
+    assert inherited["supersedes"]["status"] == "historical_superseded_before_target_read"
+    support_contract = inherited["background_rematerialization_contract"]
+    assert support_contract["local_support_manifest"] == {
+        "path": "data/manifests/background_local_support_manifest.json",
+        "file_sha256": ("632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d"),
+        "manifest_id": "local-support-bundle-69cecbee9093a21d",
+    }
+    assert support_contract["second_catalog_open"] == "forbidden"
     assert inherited["old_r2_execution_authority_reused"] is False
     assert inherited["old_r2_randomness_reused"] is False
     assert inherited["stage4a_loader_must_reject_any_pointer_outside_allowlist"] is True
@@ -249,14 +376,36 @@ def test_public_input_identities_and_inherited_contracts_are_byte_exact() -> Non
         not in inherited["source_contracts"]["feature"]["allowed_json_pointers"]
     )
     forbidden = set(inherited["forbidden_inherited_semantics"])
-    assert {"authorization", "attempt", "execution_seal", "old_random_stream"} <= forbidden
+    assert {
+        "authorization",
+        "attempt",
+        "bandwidth_selection",
+        "directory_registry_reconstruction",
+        "execution_seal",
+        "final_validation_background",
+        "old_gate_semantics",
+        "old_random_stream",
+    } <= forbidden
 
 
 def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
     primitives = _load_yaml()["inputs"]["reusable_scientific_primitives"]
     allowlist = primitives["exact_symbol_allowlist"]
 
-    assert set(allowlist) == {"evaluation", "model", "preprocessing", "integration"}
+    assert set(allowlist) == {
+        "evaluation",
+        "model",
+        "preprocessing",
+        "integration",
+        "background_catalog",
+        "background_workflow",
+        "background_local_support",
+        "background_local_support_manifest",
+        "background_poisson",
+        "background_grid",
+        "background_artifacts",
+        "stage3_placebo_features",
+    }
     assert primitives["any_unlisted_module_or_symbol"] == "forbidden"
     assert set(allowlist["evaluation"]["symbols"]) == {
         "information_gain_per_physical_event",
@@ -267,6 +416,48 @@ def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
     for identity in allowlist.values():
         assert _sha256(identity["path"]) == identity["sha256"]
         assert set(identity["symbols"])
+    assert allowlist["background_catalog"]["symbols"] == [
+        "load_study_area",
+        "load_earthquake_catalog",
+    ]
+    assert allowlist["background_workflow"]["symbols"] == [
+        "catalog_completeness_events",
+        "historical_training_mask",
+    ]
+    assert allowlist["background_local_support"]["symbols"] == [
+        "build_local_support_snapshot",
+        "build_local_support_manifest",
+        "LocalSupportCellLocator",
+    ]
+    assert allowlist["background_local_support_manifest"]["symbols"] == [
+        "load_background_local_support_manifest",
+        "validate_background_local_support_study_area",
+    ]
+    assert allowlist["background_grid"]["symbols"] == [
+        "build_equal_area_grid_family",
+        "diagnose_three_grid_convergence",
+    ]
+    assert allowlist["background_poisson"]["symbols"] == [
+        "SpatialQuadrature",
+        "fit_spatial_poisson_family",
+        "evaluate_spatial_poisson_family_cell_masses",
+    ]
+    assert allowlist["stage3_placebo_features"]["symbols"] == [
+        "rebuild_time_placebo_features",
+        "rebuild_space_placebo_features",
+    ]
+    dependencies = primitives["transitive_dependency_file_hashes"]
+    assert primitives["transitive_dependencies_are_import_only_not_direct_api_authority"] is True
+    for identity in dependencies.values():
+        assert _sha256(identity["path"]) == identity["sha256"]
+    direct_paths = {identity["path"] for identity in allowlist.values()}
+    transitive_paths = {identity["path"] for identity in dependencies.values()}
+    assert direct_paths.isdisjoint(transitive_paths)
+    assert _internal_import_closure(direct_paths) == direct_paths | transitive_paths
+    assert "src/seismoflux/anomaly_increment/contracts.py" in transitive_paths
+    assert "src/seismoflux/background/local_support_runtime.py" not in (
+        direct_paths | transitive_paths
+    )
 
     explicitly_forbidden = set(
         primitives["explicitly_forbidden_old_r2_orchestrators_and_semantics"]
@@ -274,10 +465,17 @@ def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
     assert {
         "src/seismoflux/anomaly_increment/scoring_pipeline.py",
         "src/seismoflux/anomaly_increment/formal_run.py",
-        "src/seismoflux/anomaly_increment/placebo.py",
+        "src/seismoflux/anomaly_increment/placebo_source.py",
+        "src/seismoflux/anomaly_increment/placebo_runtime.py",
+        "formal_runtime_call.local_support_runtime.build_local_support_runtime",
+        "placebo.TimeBijection",
+        "placebo.SpaceBijection",
+        "placebo.build_time_bijection",
+        "placebo.build_space_bijection",
         "evaluation.evaluate_g2",
         "evaluation.same_recall_union_area_relative_reduction",
         "evaluation.stratified_five_horizon_bootstrap_indices",
+        "poisson.select_kde_bandwidth",
         "preregistration.Stage4SeedContext",
     } <= explicitly_forbidden
 
@@ -294,11 +492,40 @@ def test_background_variants_and_feature_contrasts_are_frozen() -> None:
     )
     assert config["background"]["variant_id"] == selected["selection"]["selected_model_variant_id"]
     assert config["background"]["bandwidth_km"] == 75.0
+    poisson_snapshot = next(
+        item
+        for item in registry["science"]["poisson_kde"]["snapshots"]
+        if item["snapshot_id"] == "fold_4"
+    )
+    grid_gate = next(
+        item for item in poisson_snapshot["grid_gates"] if item["bandwidth_km"] == 75.0
+    )
+    model_evidence = next(
+        item
+        for item in registry["science"]["model_evidence"]
+        if item["model_variant_id"] == "spatial_poisson/gaussian_kde_bw75km"
+    )
+    model_snapshot = next(
+        item for item in model_evidence["snapshots"] if item["snapshot_id"] == "fold_4"
+    )
+    assert poisson_snapshot["training_event_count"] == 5237
+    assert poisson_snapshot["training_duration_days"] == 18261.666666666668
+    assert poisson_snapshot["rate_per_day"] == 0.2867755772565483
+    assert poisson_snapshot["training_evidence_id"] == (
+        "ed59aa557a816e43dd0af8f321ca689cee3ba6deac81eafa2b9e66f5b208af29"
+    )
+    assert model_snapshot["parameter_snapshot_id"] == (
+        "83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5"
+    )
+    assert grid_gate["normalization_mass"] == 0.9180536964403374
+    assert grid_gate["normalization_cell_mass_sum"] == 1.0
+    assert grid_gate["convergence"]["primary_25_to_12_5"]["coarse_total"] == 1.000341874485772
+    assert poisson_snapshot["supported_area_km2"] == 9415305.754432771
     snapshot = config["inputs"]["development_background_snapshot"]
     assert snapshot == {
-        "source": "inputs.background_model_payload",
+        "source": "inputs.background_rematerialization",
         "snapshot_id": "fold_4",
-        "parameter_snapshot_id": (
+        "parameter_snapshot_id_expected_crosscheck": (
             "83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5"
         ),
         "fit_end_utc": "2019-12-31T16:00:00Z",
@@ -316,6 +543,151 @@ def test_background_variants_and_feature_contrasts_are_frozen() -> None:
     assert config["background"]["spatial_snapshot_for_every_stage4a_fold"] == (
         "inputs.development_background_snapshot"
     )
+    assert config["inputs"]["background_registry"]["role"] == ("identity_and_audit_summary_only")
+    assert config["inputs"]["background_registry"]["inference_payload"] is False
+
+    rematerialization = config["inputs"]["background_rematerialization"]
+    assert rematerialization["catalog_open_count"] == 1
+    assert rematerialization["same_in_memory_catalog_for_background_training_and_scoring"] is True
+    assert rematerialization["second_catalog_open"] == "forbidden"
+    assert rematerialization["support_reconstruction_subset"] == {
+        "snapshot_id": "fold_4",
+        "origin_time_utc_lte": "2019-12-31T16:00:00Z",
+        "available_at_lte": "2019-12-31T16:00:00Z",
+        "inside_study_area": True,
+        "magnitude_filter": "all_catalog_magnitudes_no_prefilter",
+        "m_gte_4_prefilter_before_support_construction": "forbidden",
+        "purpose": "completeness_and_fold4_support_reconstruction",
+    }
+    assert "magnitude_gte" not in rematerialization["support_reconstruction_subset"]
+    assert rematerialization["kde_training_subset"] == {
+        "source": "same_in_memory_catalog_and_reconstructed_fold4_support",
+        "selection": "workflow.historical_training_mask",
+        "origin_time_utc_lte": "2019-12-31T16:00:00Z",
+        "available_at_lte": "2019-12-31T16:00:00Z",
+        "magnitude_gte": 4.0,
+        "spatial_domain": "reconstructed_fold4_retained_support",
+    }
+    fold4_construction = rematerialization["fold4_only_support_construction"]
+    assert fold4_construction["constructed_snapshot_ids"] == ["fold_4"]
+    assert fold4_construction["fold_1_fold_2_fold_3_construction"] == "forbidden"
+    assert fold4_construction["final_validation_construction"] == "forbidden"
+    assert fold4_construction["formal_runtime_import_or_call_of_local_support_runtime"] == (
+        "forbidden"
+    )
+    comparison = fold4_construction["actual_vs_public_manifest_comparison"]
+    assert comparison["comparison"] == "recursive_exact_all_dataclass_fields_and_ordered_cells"
+    assert comparison["partial_or_digest_only_comparison"] == "forbidden"
+    synthetic = fold4_construction["synthetic_equivalence_gate"]
+    assert synthetic["allowed_scope"] == "synthetic_test_only"
+    assert synthetic["required_equivalence"] == (
+        "full_fold4_runtime_snapshot_dataclass_fields_and_arrays"
+    )
+    assert _sha256(synthetic["reference_file"]["path"]) == (synthetic["reference_file"]["sha256"])
+    assert synthetic["reference_file"]["role"] == (
+        "synthetic_reference_only_not_formal_import_closure"
+    )
+    assert rematerialization["fixed_fit"]["bandwidths_km"] == [75.0]
+    assert rematerialization["fixed_fit"]["chunk_size"] == 256
+    assert rematerialization["fixed_fit"]["bandwidth_reselection"] == "forbidden"
+    assert rematerialization["fixed_fit"]["final_validation_snapshot_use"] == "forbidden"
+    identity = rematerialization["upstream_canonical_identity_recomputation"]
+    assert identity["upstream_protocol_sha256"] == (
+        "c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a"
+    )
+    assert identity["upstream_authorization_id"] == (
+        "a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53"
+    )
+    assert identity["model_id"] == "spatial_poisson"
+    assert identity["model_variant_id"] == "spatial_poisson/gaussian_kde_bw75km"
+    assert identity["training_evidence_id_schema_fields_in_order"] == [
+        "protocol_sha256",
+        "snapshot_id",
+        "support_id",
+        "selected_mc",
+        "supported_area_km2",
+        "compensator_domain_id",
+        "authorization_id",
+        "training_event_ids",
+        "training_origin_days",
+        "training_available_days",
+        "training_x_km",
+        "training_y_km",
+        "training_duration_days",
+        "rate_per_day",
+    ]
+    assert identity["parameter_snapshot_id_schema_fields_in_order"] == [
+        "protocol_sha256",
+        "model_id",
+        "model_variant_id",
+        "snapshot_id",
+        "support_id",
+        "selected_mc",
+        "supported_area_km2",
+        "compensator_domain_id",
+        "authorization_id",
+        "training_event_ids",
+        "training_x_km",
+        "training_y_km",
+        "training_duration_days",
+        "rate_per_day",
+        "bandwidth_km",
+        "normalization_mass",
+    ]
+    assert identity["compensator_domain_id_schema"]["schema"] == (
+        "seismoflux_local_support_compensator_domain_v1"
+    )
+    assert identity["compensator_domain_id_schema"]["fields_in_order"] == [
+        "schema",
+        "study_area_sha256",
+        "retained_fixed_cell_ids",
+        "grids",
+    ]
+    assert identity["compensator_domain_id_schema"]["grid_fields_in_order"] == [
+        "cell_size_km",
+        "cells",
+    ]
+    assert identity["compensator_domain_id_schema"]["cell_fields_in_order"] == [
+        "cell_id",
+        "representative_x_m",
+        "representative_y_m",
+        "clipped_area_m2",
+    ]
+    assert identity["ids_must_be_computed_from_runtime_values_before_public_crosscheck"]
+    assert identity["copying_expected_digest_into_receipt"] == "forbidden"
+    training_rows = rematerialization["historical_training_rows_sha256_schema"]
+    assert training_rows["method"] == "sha256_of_background_artifacts_canonical_json_bytes"
+    assert training_rows["row_order"] == "source_catalog_row_index_ascending_after_fold4_mask"
+    assert training_rows["row_fields_in_order"] == [
+        "event_id",
+        "origin_time_utc",
+        "available_at_utc",
+        "x_km",
+        "y_km",
+        "magnitude",
+        "support_cell_id",
+        "support_status",
+        "selected_for_fold4_training",
+    ]
+    public = rematerialization["public_registry_expected_crosschecks"]
+    assert public["role"] == "expected_values_only_not_verification_payload"
+    assert public["training_event_count"] == 5237
+    assert public["training_evidence_id"] == poisson_snapshot["training_evidence_id"]
+    assert public["parameter_snapshot_id"] == model_snapshot["parameter_snapshot_id"]
+    assert public["three_grid_gate"] == grid_gate["convergence"]
+    receipt = rematerialization["runtime_identity_receipt"]
+    assert receipt["historical_training_rows_sha256"] == (
+        "required_generated_after_single_catalog_open"
+    )
+    assert receipt["independently_recomputed_training_evidence_id"] == "required"
+    assert receipt["independently_recomputed_parameter_snapshot_id"] == "required"
+    assert receipt["independently_recomputed_compensator_domain_id"] == "required"
+    assert receipt["full_three_grid_gate_fields"] == "required"
+    assert receipt["ordered_25km_cell_id_mass_sha256"] == (
+        "required_generated_after_single_catalog_open"
+    )
+    assert rematerialization["post_cutoff_catalog_rows_do_not_change_background_identity"] is True
+    assert rematerialization["selected_historical_row_change_action"] == "fail_closed"
 
     variants = config["variants"]
     assert list(variants) == ["B0", "C0", "B1", "B2", "contribution_contrasts"]
@@ -417,6 +789,31 @@ def test_same_condition_model_calendar_alarm_and_randomness_are_frozen() -> None
     ]
     assert randomness["bootstrap"]["failed_replication_action"] == (
         "evidence_insufficient_no_drop_or_replacement"
+    )
+    mappings = randomness["stage4a_mapping_dtos"]
+    assert mappings["context_protocol_version"] == "0.4.3"
+    assert mappings["construction_uses_only_stage4a_pcg64_context"] is True
+    assert mappings["placebo_features_contract"] == ("structural_duck_typing_no_isinstance_checks")
+    assert mappings["TimeMappingDTO"]["consumed_structural_fields"] == [
+        "recipient_issue_ids",
+        "pairs",
+    ]
+    assert mappings["SpaceMappingDTO"]["consumed_structural_fields"] == [
+        "entity_state_ids",
+        "donor_state_ids",
+        "permuted_coordinate_pairs",
+        "moved_entity_row_count",
+        "no_effect",
+    ]
+    assert set(mappings["forbidden_direct_import_or_call"]) == {
+        "placebo.TimeBijection",
+        "placebo.SpaceBijection",
+        "placebo.build_time_bijection",
+        "placebo.build_space_bijection",
+        "preregistration.Stage4SeedContext",
+    }
+    assert mappings["legacy_placebo_module_role"] == (
+        "transitive_import_only_for_placebo_features_annotations"
     )
     bootstrap = randomness["bootstrap"]
     assert bootstrap["population"] == (
@@ -583,7 +980,17 @@ def test_target_access_resource_and_visualization_boundaries_fail_closed() -> No
     assert access["target_use"]["spatial_refinement"] == "forbidden"
     assert access["target_use"]["alarm_threshold_selection"] == "forbidden"
     roles = access["earthquake_catalog_roles"]
-    assert roles["frozen_spatial_kde"]["catalog_rebuild_in_stage4a"] == "forbidden"
+    assert roles["frozen_spatial_kde"]["catalog_rebuild_in_stage4a"] == (
+        "only_exact_preregistered_rematerialization"
+    )
+    assert roles["frozen_spatial_kde"]["public_registry_role"] == (
+        "identity_and_audit_summary_only"
+    )
+    assert (
+        roles["frozen_spatial_kde"]["historical_untracked_model_declarations_runtime_role"]
+        == "forbidden"
+    )
+    assert roles["frozen_spatial_kde"]["second_catalog_open"] == "forbidden"
     assert roles["fold_rate_head_training"]["assessment_rows_allowed"] is False
     assert roles["assessment_targets"]["use_outside_scoring_and_hit_miss"] == "forbidden"
 
@@ -716,6 +1123,9 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
         "expected_code_tag_name",
         "exact_allowed_seal_commit_changed_paths",
         "runner_and_scientific_module_sha256",
+        "exact_symbol_allowlist_and_transitive_dependency_file_sha256",
+        "stage4a_mapping_dto_schema_and_builder_sha256",
+        "fold4_only_background_adapter_sha256",
         "environment_lock_sha256",
         "randomness_manifest_sha256",
         "initial_zero_attempt_ledger_sha256",
@@ -737,7 +1147,7 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
     assert graph["seal_commit"]["any_other_changed_path"] == "forbidden"
     assert graph["seal_commit"]["self_commit_hash_embedded_in_tracked_tree"] == "forbidden"
     assert graph["code_tag"] == {
-        "name": "v0.3.2-kde-anomaly-increment-code",
+        "name": "v0.3.3-kde-anomaly-increment-code",
         "points_to": "C",
     }
     assert graph["preflight_remote_verification"] == [
@@ -750,6 +1160,13 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
     assert "source_commit" in control["input_identity_seal"]["derivation"]
     assert "code_commit" not in control["input_identity_seal"]["derivation"]
     assert control["expected_input_manifest"]["created_and_committed_at_code_tag"] is True
+    assert {
+        "all_runtime_input_paths_and_sha256_excluding_historical_untracked_declarations",
+        ("historical_untracked_model_declarations_inclusion_forbidden_and_presence_not_required"),
+        "background_local_support_manifest_sha256_and_manifest_id",
+        "background_rematerialization_independent_identity_schemas_and_expected_crosschecks",
+        "one_catalog_open_shared_in_memory_contract",
+    } <= set(control["expected_input_manifest"]["binds"])
     assert (
         control["expected_input_manifest"][
             "generated_only_from_protocol_declared_identities_without_opening_real_inputs"
@@ -783,7 +1200,19 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
     assert control["runtime_target_read_ledger"][
         "atomically_created_at_preflight_start_with_operation_count_zero"
     ]
-    assert control["runtime_target_read_ledger"]["maximum_logical_target_open_sessions"] == 1
+    target_ledger = control["runtime_target_read_ledger"]
+    assert target_ledger["path"].endswith("target_read_ledger.json")
+    assert target_ledger["storage"] == "single_canonical_json_mapping_not_append_only_jsonl"
+    assert target_ledger["transition"] == "atomic_compare_and_swap_zero_to_single_open"
+    assert target_ledger["open_transition_requires_registered_same_identity_attempt_ledger"]
+    assert target_ledger["opened_state_is_immutable_no_rewrite_or_rollback"]
+    assert target_ledger["opened_state_logical_open_count"] == 1
+    assert {
+        "entry_hash",
+        "previous_zero_ledger_hash",
+        "logical_open_count",
+    } <= set(target_ledger["opened_state_required_fields"])
+    assert target_ledger["maximum_logical_target_open_sessions"] == 1
     assert control["preflight_receipt"]["target_bytes_read_during_preflight"] is False
     assert control["preflight_receipt"]["binds_zero_target_read_ledger_sha256_and_operation_count"]
     assert control["attempt_start_sequence"] == [
@@ -793,14 +1222,28 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
         "verify_preflight_receipt_and_zero_target_read_count",
         "atomically_register_single_attempt",
         "verify_runtime_target_read_ledger_remains_zero_and_bound_to_preflight_receipt",
-        "open_target_once_through_single_adapter",
+        (
+            "atomic_compare_and_swap_target_read_ledger_zero_to_one_after_verifying_"
+            "registered_same_identity_attempt"
+        ),
+        "open_catalog_once_through_single_adapter_and_reuse_same_in_memory_catalog",
     ]
-    assert control["attempt_start_sequence"][-1] == ("open_target_once_through_single_adapter")
+    assert control["attempt_start_sequence"][-1] == (
+        "open_catalog_once_through_single_adapter_and_reuse_same_in_memory_catalog"
+    )
     assert control["resume"]["same_identity_only"] is True
     assert control["resume"]["completed_checkpoint_deletion_replacement_or_recompute"] == (
         "forbidden"
     )
     assert control["direct_target_reader_outside_single_adapter"] == "forbidden"
+    assert {
+        "historical_training_rows_sha256",
+        "independently_recomputed_training_evidence_id",
+        "independently_recomputed_parameter_snapshot_id",
+        "independently_recomputed_compensator_domain_id",
+        "full_three_grid_gate_fields",
+        "ordered_25km_cell_id_mass_sha256",
+    } <= set(control["result_manifest_must_record"])
 
 
 def test_science_value_gate_is_mandatory_and_no_scores_are_embedded() -> None:
@@ -881,3 +1324,17 @@ def test_science_value_gate_is_mandatory_and_no_scores_are_embedded() -> None:
         assert token in blueprint_text
     assert "科学价值复审" in agents_text
     assert "没有实质推动时停止继续堆叠工程" in agents_text
+
+    amendment_text = EXECUTABILITY_AMENDMENT_PATH.read_text(encoding="utf-8")
+    for token in (
+        "0.4.3",
+        "v0.3.3-kde-anomaly-increment-protocol",
+        "historical_superseded_before_target_read",
+        "no_material_progress",
+        "decision`: `adjust",
+        "science_value_category`: `necessary_enabler",
+        "decision`: `continue_to_thin_code_freeze",
+        "P0/P1/P2 = 0/0/0",
+        "ordered_25km_cell_id_mass_sha256",
+    ):
+        assert token in amendment_text

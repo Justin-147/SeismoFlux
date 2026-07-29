@@ -1,7 +1,7 @@
 schema_version: 1
-protocol_version: 1.2.0
+protocol_version: 1.2.1
 data_contract_version: 0.1.0
-status: stage_4_kde_anomaly_amendment_preregistered_before_target_read
+status: stage_4_kde_anomaly_executability_amendment_preregistered_before_target_read
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
@@ -10,6 +10,23 @@ stage_4_amendment:
   registered_before_formal_target_read: true
   formal_target_read_count_at_amendment: 0
   formal_scoring_count_at_amendment: 0
+  execution_protocol_version: 0.4.3
+  protocol_tag: v0.3.3-kde-anomaly-increment-protocol
+  expected_code_tag: v0.3.3-kde-anomaly-increment-code
+  expected_result_tag: v0.3.3-kde-anomaly-increment-result
+  superseded_history:
+    execution_protocol_version: 0.4.2
+    tags: v0.3.2-kde-anomaly-increment-protocol_code_result
+    status: historical_superseded_before_target_read
+  public_background_registry_and_model_json_role: identity_and_audit_summary_only
+  background_inference_payload_source: exact_fold4_75km_in_memory_rematerialization
+  background_local_support_manifest:
+    path: data/manifests/background_local_support_manifest.json
+    sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    manifest_id: local-support-bundle-69cecbee9093a21d
+  one_catalog_open_shared_by_rematerialization_training_and_scoring: true
+  target_read_ledger: single_canonical_json_zero_to_one_cas
+  bandwidth_mc_support_or_final_validation_change: forbidden
   etas_qualification_result_tag: v0.2.2-background-etas-qualification-result
   etas_status: not_evaluable_not_scored
   etas_scientific_value_rejection_forbidden: true

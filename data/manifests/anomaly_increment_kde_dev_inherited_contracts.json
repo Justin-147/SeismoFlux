@@ -1,8 +1,58 @@
 {
   "schema_version": 1,
-  "protocol_version": "0.4.2",
+  "protocol_version": "0.4.3",
   "experiment_id": "stage4-kde-development-v1",
   "status": "target_blind_allowlist_only_no_execution_authority",
+  "supersedes": {
+    "protocol_version": "0.4.2",
+    "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
+    "status": "historical_superseded_before_target_read",
+    "historical_evidence_is_immutable": true
+  },
+  "background_rematerialization_contract": {
+    "local_support_manifest": {
+      "path": "data/manifests/background_local_support_manifest.json",
+      "file_sha256": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d",
+      "manifest_id": "local-support-bundle-69cecbee9093a21d"
+    },
+    "public_registry_role": "expected_identity_crosschecks_only_not_verification_or_inference_payload",
+    "historical_untracked_model_declarations": {
+      "presence_required": false,
+      "expected_input_manifest_inclusion": "forbidden",
+      "runtime_read": "forbidden"
+    },
+    "catalog_session": "one_registered_open_then_same_in_memory_catalog_for_rematerialization_training_and_scoring",
+    "second_catalog_open": "forbidden",
+    "fold4_only_adapter": {
+      "constructed_snapshot_ids": [
+        "fold_4"
+      ],
+      "fold_1_fold_2_fold_3_and_final_validation_construction": "forbidden",
+      "support_reconstruction_magnitude_filter": "all_catalog_magnitudes_before_mc_and_support_diagnosis",
+      "magnitude_gte_4_prefilter_before_support_construction": "forbidden",
+      "kde_training_magnitude_gte": 4.0,
+      "formal_runtime_full_local_support_runtime_call": "forbidden",
+      "full_runtime_reference_scope": "synthetic_equivalence_test_only"
+    },
+    "runtime_identity": {
+      "training_evidence_id": "independently_recomputed_from_upstream_canonical_payload_then_public_crosscheck",
+      "parameter_snapshot_id": "independently_recomputed_from_upstream_canonical_payload_then_public_crosscheck",
+      "compensator_domain_id": "independently_recomputed_from_v1_canonical_payload_then_public_crosscheck",
+      "historical_training_rows_sha256": "required_runtime_receipt",
+      "expected_digest_copying_into_receipt": "forbidden"
+    },
+    "bandwidth_or_support_reselection": "forbidden",
+    "final_validation_snapshot_use": "forbidden"
+  },
+  "stage4a_placebo_mapping_contract": {
+    "namespace": "src/seismoflux/anomaly_increment/kde_dev_placebo_mapping.py",
+    "types": [
+      "TimeMappingDTO",
+      "SpaceMappingDTO"
+    ],
+    "legacy_placebo_module_role": "hash_sealed_import_only_transitive_dependency",
+    "legacy_types_or_builders_direct_call": "forbidden"
+  },
   "source_contracts": {
     "fold": {
       "path": "data/manifests/anomaly_increment_r2_fold_manifest.json",
@@ -54,6 +104,10 @@
     "ledger",
     "old_random_stream",
     "old_result_identity",
+    "bandwidth_selection",
+    "directory_registry_reconstruction",
+    "final_validation_background",
+    "old_gate_semantics",
     "scoring_permission",
     "target_read_permission"
   ],

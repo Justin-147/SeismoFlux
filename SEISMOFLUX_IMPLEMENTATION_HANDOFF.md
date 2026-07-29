@@ -700,6 +700,29 @@ R^*=\arg\max_R
 - 按地区和窗口报告增量，并执行去最大贡献区的稳健性检查；
 - 不读取独立正式验证目标或锁定测试，不加入新 ETAS 候选、树模型、弱监督、自监督、断层交互或大型神经网络。
 
+阶段 4A 当前唯一执行协议为 `0.4.3`，标签为
+`v0.3.3-kde-anomaly-increment-{protocol,code,result}`。`0.4.2` /
+`v0.3.2-kde-anomaly-increment-*` 因目标读取前发现可执行性矛盾而保留为 `superseded` 历史证据，
+不得再提供执行授权：公开背景 registry 只作身份与审计摘要，不是 KDE 验证或推理 payload；历史
+模型路径只作不要求存在且运行时禁读的未跟踪声明。唯一注册目录读取会话必须先从同一内存 catalog
+中选择 `origin_time_utc/available_at <= 2019-12-31T16:00:00Z`、研究区内的全部目录震级，重建并
+核验 `fold_4` 支持与 Mc；支持重建前按 `M>=4` 过滤禁止。然后 KDE 训练才在重建的保留支持域内取
+`M>=4` 事件，以预选 75 km 带宽重物化 KDE，并让该 catalog 继续供训练和评分；禁止第二次打开、
+重选带宽、改变 Mc/支持域/积分域或使用 `final_validation`。本地支持合同固定为
+`data/manifests/background_local_support_manifest.json`（SHA-256
+`632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d`，
+manifest ID `local-support-bundle-69cecbee9093a21d`），重物化必须按机器协议逐项复现事件数、时长、
+日率、训练/参数身份、归一化质量、三网格收敛、support/domain ID、Mc、面积和有序 cell-mass
+receipt；2019 截止后变化不得改变背景身份，历史入选行变化必须失败关闭。
+
+target-read ledger 是 Git-ignored 的单个 canonical `.json` mapping，只允许在已注册且身份相同的
+attempt ledger 核验后，从零态原子 CAS 到 `logical_open_count=1`，并记录 entry hash 与前序零态
+hash；打开态不可改写、回退或再次打开。背景与 Stage 3 置乱代码只准使用 `0.4.3` 精确整文件哈希/
+symbol allowlist；完整 `local_support_runtime.build_local_support_runtime` 仅可作纯合成测试参照，
+正式运行只能用底层原语构造 `fold_4`。旧 R2 scoring/formal orchestrator、`placebo_source.py`、
+`placebo_runtime.py`、带宽选择、旧 gate 和旧随机语义继续禁止；`placebo.py` 仅为哈希封印的
+import-only 传递依赖，其旧 DTO 与 build 函数不得直接调用。本修订不改变下列任何科学门。
+
 阶段 4A 交付：系数与效应图、信息增益、置乱分布、Molchan 图、固定面积召回曲线、目标盲预测展示和本地历史回溯展示。
 
 阶段 4A 的通过必须包含 600,000 平方公里固定面积严格召回至少提高 5 个百分点且 95% 区间排除无改善；“达到同召回所需面积下降”只作描述，不能替代本门。动态轨迹 `B2` 未超过单期快照 `B1` 时，只否定动态轨迹；若 `B1` 相对 KDE 和覆盖控制独立通过全部信息增益、置乱、固定面积和跨折/跨区门，可保留 `B1` 作为唯一待独立验证候选。只有 `B1`、`B2` 都没有合法增量时，才把当前异常路线判为未发现增量。

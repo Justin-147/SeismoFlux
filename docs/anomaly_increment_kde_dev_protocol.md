@@ -1,11 +1,17 @@
 # 阶段 4A：75 km KDE + 异常开发科学筛查协议
 
 - 协议 ID：`stage4-kde-development-v1`
+- 协议版本：`0.4.3`
 - 门控：`S4-KDE-DEV`
 - 机器协议：`configs/anomaly_increment_kde_dev.yaml`
 - 本地草案日期：2026-07-30
-- 计划协议标签：`v0.3.2-kde-anomaly-increment-protocol`
+- 计划协议/代码/结果标签：`v0.3.3-kde-anomaly-increment-{protocol,code,result}`
 - 状态：目标盲、无成绩、尚未打开开发目标
+
+`0.4.2` / `v0.3.2-kde-anomaly-increment-*` 是目标读取前形成的历史版本，因把公开审计摘要误作
+可推理 KDE payload、并把单映射 CAS ledger 错写为 append-only `.jsonl` 而被本版本
+`superseded`。旧验收证据保持不可变，但不构成当前执行授权。修订原因、科学价值复审和精确差异见
+`docs/phase4_kde_development_executability_amendment.md`。
 
 ## 1. 这一步用外行能听懂的话在做什么
 
@@ -36,10 +42,15 @@ ETAS 执行路径不可评价，不能说明 ETAS 或历史地震聚集没有科
 
 本阶段只使用四类冻结数据：
 
-1. **历史地震目录**：空间 KDE 直接读取冻结的 `fold_4` 模型工件，该快照只使用截至
-   2019-12-31 的历史，不能改用截至 2023-06-30 的验证快照。每折训练行只用于拟合该折事件率；
-   评估行只用于未来 M5–6 评分。三种角色按 `origin_time` 和 `available_at` 截止规则分开。
-   地震目标只在协议与代码标签远端核验后，由唯一开发 attempt 打开；不得用震中造格网、候选、
+1. **历史地震目录**：公开 registry 只提供预期身份、选择与数值审计摘要，不是验证或推理
+   payload；历史声明的 model manifest 和 `poisson_kde.json` 在本 worktree 不存在，只保留为
+   不要求存在且运行时禁读的历史未跟踪声明。协议与代码标签远端核验后，唯一开发 attempt 只打开
+   一次目录；同一个内存 catalog 同时供 KDE 重物化、各折 rate-head 训练和目标评分，禁止第二次
+   打开。必须先用研究区内、`origin_time_utc/available_at <= 2019-12-31T16:00:00Z` 的全部目录
+   震级重建并核验 `fold_4` 支持与 Mc；在支持重建前按 `M>=4.0` 过滤禁止。然后 KDE 训练才在重建
+   的 `fold_4` 保留支持域内按 `historical_training_mask` 取 `M>=4.0` 事件，以固定 75 km 带宽和
+   `chunk_size=256` 在内存重物化。不能重选带宽、改变 Mc/支持域/积分域，也不能改用截至
+   2023-06-30 的 `final_validation`。评估行仍只用于未来 M5–6 评分；不得用震中造格网、候选、
    边界或阈值。
 2. **205 个冻结特征快照**：阶段 3 已按每个起报时刻的 `available_at` 从全部报告历史重建状态和
    轨迹，得到 3,217,885 行目标无关特征。205 是快照/报告日期数，不等于原始源文件数；较晚报告
@@ -50,6 +61,19 @@ ETAS 执行路径不可评价，不能说明 ETAS 或历史地震聚集没有科
 
 人工填写的预测地点、震级、时间、分析意见和自由文本全部禁止。主震级档
 `M5_6=[5.0,6.0)`；180/365 天和 M6+ 只作描述或稀疏探索，不能挽救主门。
+
+固定支持合同是
+`data/manifests/background_local_support_manifest.json`，SHA-256 为
+`632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d`，
+`manifest_id=local-support-bundle-69cecbee9093a21d`。重物化必须 fail-closed 同时复现：
+5237 个训练事件、18261.666666666668 天、日率 0.2867755772565483、训练 evidence ID
+`ed59aa557a816e43dd0af8f321ca689cee3ba6deac81eafa2b9e66f5b208af29`、参数快照 ID
+`83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5`、75 km normalization
+mass 0.9180536964403374、cell-mass sum 1.0、25→12.5 km coarse total
+1.000341874485772、25 km cell 数 15697、支持面积 9415305.754432771 km²，以及机器协议中的
+support/domain ID、公共 Mc=4 和面积比例=1。随后生成并绑定有序 cell ID 与质量的
+`ordered_25km_cell_id_mass_sha256` receipt。2019 截止后目录变化不得改变背景子集身份；任何历史
+入选行变化都失败关闭。
 
 205 个快照和 3,217,885 行是 Stage 3 冻结源库总量，不是本次 attempt 的样本量。Stage 4A 只按
 三个滚动折的训练/评估 issue 范围读取对应子集；留给正式验证或位于未来期的行不得进入本轮。
@@ -160,16 +184,35 @@ PCG64 子流；候选、比较器、窗口和指标不进入子种子，从而�
 远端 tag 核验后，运行时 CAS 登记才把已验证的 code-seal 哈希追加到账本。
 
 预期输入清单只能由协议已声明的路径与哈希生成，不能为生成它而打开真实输入。
-正式 preflight 先创建或核验同一身份且操作数为 0 的 target-read ledger，再把该 ledger 的哈希与
-计数绑定到 receipt；随后才以 CAS 登记唯一 attempt，并在 ledger 仍为 0 时由唯一 adapter 开启
-一个逻辑目标读取会话。target-read ledger 和 checkpoint 都用 hash chain 绑定协议、代码、输入、
-随机和 attempt 身份。
+正式 preflight 先原子创建或核验同一身份、`logical_open_count=0` 的单个 canonical JSON
+`target_read_ledger.json`，再把零态 ledger 哈希与计数绑定到 receipt；随后才以 CAS 登记唯一
+attempt。唯一 adapter 打开前必须核验 attempt ledger 已注册且身份相同，再把 target-read ledger
+从零态原子 CAS 为唯一打开态，记录 `entry_hash`、`previous_zero_ledger_hash` 和
+`logical_open_count=1`。打开态不可改写、回退或再次打开；同一个内存 catalog 供 KDE 重物化、
+训练和评分。checkpoint 继续绑定协议、代码、输入、随机和 attempt 身份。
 代码或身份改变不能恢复旧 attempt；相同身份的纯电源/进程中断最多恢复一次。
 
-代码阶段只允许按精确 symbol allowlist 复用旧模块中的底层信息增益、召回、Poisson 拟合、预处理和
-数值积分原语。旧 R2 的 `scoring_pipeline`、formal orchestrator、`evaluate_g2/evaluate_g3`、
-五窗口 Bootstrap、同召回面积二选一门、placebo 模块和 `Stage4SeedContext` 明确禁用，因为它们与
-本协议的三窗口、固定面积唯一主门、`maxT` 和根种子入上下文规则冲突。
+代码阶段只允许按整文件哈希和精确 symbol allowlist 复用底层信息增益、召回、Poisson 拟合、
+预处理和数值积分原语。背景重物化额外只开放
+`catalog.load_study_area/load_earthquake_catalog`、
+`workflow.catalog_completeness_events/historical_training_mask`、
+`local_support.build_local_support_snapshot/build_local_support_manifest/LocalSupportCellLocator`、
+`local_support_manifest.load_background_local_support_manifest/`
+`validate_background_local_support_study_area`、
+`poisson.SpatialQuadrature/fit_spatial_poisson_family/evaluate_spatial_poisson_family_cell_masses`、
+`grid.build_equal_area_grid_family/diagnose_three_grid_convergence` 和
+`artifacts.canonical_json_bytes`。正式运行只能用这些原语构造 `fold_4`；完整
+`local_support_runtime.build_local_support_runtime` 只允许在纯合成等价性测试中作为参照，正式
+运行不得导入或调用。置乱只直接开放
+整文件封印的 `placebo_features.rebuild_time_placebo_features/rebuild_space_placebo_features`；
+其传递依赖只获 import-only 身份，不获直接 API 授权。
+
+旧 R2 的 `scoring_pipeline`、formal orchestrator、`evaluate_g2/evaluate_g3`、五窗口
+Bootstrap、同召回面积二选一门、`placebo_source.py`、`placebo_runtime.py`、
+`select_kde_bandwidth`、旧 gate/随机流和 `Stage4SeedContext` 明确禁用；`placebo.py` 仅作为
+`placebo_features.py` 的哈希封印 import-only 传递依赖，不授权直接调用
+`TimeBijection`、`SpaceBijection` 或其 build 函数。它们与本协议的固定 75 km 身份、三窗口、
+固定面积唯一主门、`maxT` 和根种子入上下文规则冲突。
 
 ## 7. `S4-KDE-DEV` 通过条件
 

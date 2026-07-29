@@ -1,5 +1,5 @@
 schema_version: 1
-protocol_version: 0.4.2
+protocol_version: 0.4.3
 stage: 4A
 experiment_id: stage4-kde-development-v1
 gate_id: S4-KDE-DEV
@@ -10,23 +10,33 @@ language: zh-CN
 authority:
   blueprint:
     path: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
-    sha256: 34eeabc70a96582055aa9cf9d53c526dbdd6dd110b6853b964523efc5828ba77
+    sha256: ee15bd263056a0599e125831c6895723d21d57fd9fc26af6d37016e2b5df0347
   research_protocol:
     path: configs/research_protocol.yaml
-    sha256: c265d7fb039071a8e3750e2b9807ea4a1dbd91d00ac1d20c0d6a90bc7ac374e7
+    sha256: b59406a2fe3e5b1808df7c843ca36560aeaafbaaa611e9978ba3f8ec841ca273
   research_protocol_document:
     path: docs/research_protocol.md
-    sha256: 167c20f6a331e3b58516d4d62c70909a0184161177dfe7e8eaef1c7bf9bf5598
+    sha256: 7599d9d740c8998712e8e1297cfe646efbc10311658be806ded730a12a3d7cae
   science_value_policy:
     path: docs/scientific_value_review_and_model_composition.md
-    sha256: 83cf71bf4f6fdb185107fc92d5fc66209c8a04720f47cb2694d065a56464c2eb
+    sha256: e3ce75b88737a2456fcd21941728c3140dd9f8bae7a5059301595ec130948ae0
+  executability_amendment:
+    path: docs/phase4_kde_development_executability_amendment.md
+    sha256: 3891cb9b613eca8dee0168c2ef55f3f54f0e02bd90ef82e5450d807289aa448f
   sole_blueprint_wins_on_conflict: true
 
 freeze:
   branch: codex/stage2-etas-science-first
-  protocol_tag: v0.3.2-kde-anomaly-increment-protocol
-  expected_code_tag: v0.3.2-kde-anomaly-increment-code
-  expected_result_tag: v0.3.2-kde-anomaly-increment-result
+  protocol_tag: v0.3.3-kde-anomaly-increment-protocol
+  expected_code_tag: v0.3.3-kde-anomaly-increment-code
+  expected_result_tag: v0.3.3-kde-anomaly-increment-result
+  supersedes:
+    protocol_version: 0.4.2
+    protocol_tag: v0.3.2-kde-anomaly-increment-protocol
+    expected_code_tag: v0.3.2-kde-anomaly-increment-code
+    expected_result_tag: v0.3.2-kde-anomaly-increment-result
+    status: historical_superseded_before_target_read
+    historical_evidence_is_immutable: true
   protocol_tests_and_documents_allowed_before_protocol_tag: true
   protocol_commit_and_tag_required_before_scoring_implementation_and_real_input_adapter: true
   code_commit_and_tag_required_before_real_input_or_target_read: true
@@ -68,16 +78,201 @@ inputs:
     sha256: 774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b
     required_gate: G1-LS
     required_gate_status: passed
-  background_model_manifest:
-    path: models/registry/background_local_support/5c8fa982bb94b9ad/manifest.json
-    sha256: 1b8c67ac82a83d6885dee06ea32b8907b333c6118c5ec7968f7b779589447acf
-  background_model_payload:
-    path: models/registry/background_local_support/5c8fa982bb94b9ad/poisson_kde.json
-    sha256: 63db433a0ea490de2674cb84c485f8efd8215374d70f31f22810da29f0d7b142
+    role: identity_and_audit_summary_only
+    inference_payload: false
+    historical_untracked_declarations:
+      role: historical_paths_and_hashes_only_not_runtime_inputs
+      expected_input_manifest_inclusion: forbidden
+      presence_required: false
+      runtime_read: forbidden
+      model_manifest:
+        path: models/registry/background_local_support/5c8fa982bb94b9ad/manifest.json
+        historical_sha256: 1b8c67ac82a83d6885dee06ea32b8907b333c6118c5ec7968f7b779589447acf
+      poisson_kde:
+        path: models/registry/background_local_support/5c8fa982bb94b9ad/poisson_kde.json
+        historical_sha256: 63db433a0ea490de2674cb84c485f8efd8215374d70f31f22810da29f0d7b142
+  background_local_support_manifest:
+    path: data/manifests/background_local_support_manifest.json
+    sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    manifest_id: local-support-bundle-69cecbee9093a21d
+    role: frozen_target_blind_fold4_support_contract
+  background_rematerialization:
+    inference_payload_source: one_in_memory_catalog_rematerialization
+    adapter: stage4a_fold4_only_thin_adapter
+    adapter_source_at_code_freeze: src/seismoflux/anomaly_increment/kde_dev_background.py
+    catalog_source: inputs.development_earthquake_catalog
+    catalog_open_session: execution_control.runtime_target_read_ledger
+    catalog_open_count: 1
+    same_in_memory_catalog_for_background_training_and_scoring: true
+    second_catalog_open: forbidden
+    directory_enumeration_or_registry_directory_reconstruction: forbidden
+    fold4_only_support_construction:
+      full_in_memory_catalog_is_input: true
+      direct_primitives:
+        - local_support.build_local_support_snapshot
+        - local_support.build_local_support_manifest
+        - local_support.LocalSupportCellLocator
+        - local_support_manifest.load_background_local_support_manifest
+        - local_support_manifest.validate_background_local_support_study_area
+        - grid.build_equal_area_grid_family
+      constructed_snapshot_ids: [fold_4]
+      fold_1_fold_2_fold_3_construction: forbidden
+      final_validation_construction: forbidden
+      formal_runtime_import_or_call_of_local_support_runtime: forbidden
+      actual_vs_public_manifest_comparison:
+        actual: local_support.build_local_support_manifest_of_fold4_snapshot
+        expected: public_bundle_fixed_cells_joined_with_fold4_support_decision
+        comparison: recursive_exact_all_dataclass_fields_and_ordered_cells
+        partial_or_digest_only_comparison: forbidden
+      synthetic_equivalence_gate:
+        reference: local_support_runtime.build_local_support_runtime
+        reference_file:
+          path: src/seismoflux/background/local_support_runtime.py
+          sha256: ed52a1f27b20b0f03b6ad5f2a59a207390d41eb7661db108b224c857a9ebacc8
+          role: synthetic_reference_only_not_formal_import_closure
+        allowed_scope: synthetic_test_only
+        required_equivalence: full_fold4_runtime_snapshot_dataclass_fields_and_arrays
+        formal_input_bytes: forbidden
+    support_reconstruction_subset:
+      snapshot_id: fold_4
+      origin_time_utc_lte: '2019-12-31T16:00:00Z'
+      available_at_lte: '2019-12-31T16:00:00Z'
+      inside_study_area: true
+      magnitude_filter: all_catalog_magnitudes_no_prefilter
+      m_gte_4_prefilter_before_support_construction: forbidden
+      purpose: completeness_and_fold4_support_reconstruction
+    kde_training_subset:
+      source: same_in_memory_catalog_and_reconstructed_fold4_support
+      selection: workflow.historical_training_mask
+      origin_time_utc_lte: '2019-12-31T16:00:00Z'
+      available_at_lte: '2019-12-31T16:00:00Z'
+      magnitude_gte: 4.0
+      spatial_domain: reconstructed_fold4_retained_support
+    fixed_fit:
+      bandwidths_km: [75.0]
+      chunk_size: 256
+      bandwidth_reselection: forbidden
+      completeness_magnitude_change: forbidden
+      support_or_domain_change: forbidden
+      final_validation_snapshot_use: forbidden
+      output_scope: in_memory_only
+    upstream_canonical_identity_recomputation:
+      method: sha256_of_background_artifacts_canonical_json_bytes
+      upstream_protocol_sha256: c7d6488bd97f0017867573c8b99230d79091412322652af25badfe732606e76a
+      upstream_authorization_id: a7d0dc8f54643ec1c6cd3fd6425326a17ef8d7fb3071d6496adb73a9c9bc0f53
+      model_id: spatial_poisson
+      model_variant_id: spatial_poisson/gaussian_kde_bw75km
+      training_evidence_id_schema_fields_in_order:
+        - protocol_sha256
+        - snapshot_id
+        - support_id
+        - selected_mc
+        - supported_area_km2
+        - compensator_domain_id
+        - authorization_id
+        - training_event_ids
+        - training_origin_days
+        - training_available_days
+        - training_x_km
+        - training_y_km
+        - training_duration_days
+        - rate_per_day
+      parameter_snapshot_id_schema_fields_in_order:
+        - protocol_sha256
+        - model_id
+        - model_variant_id
+        - snapshot_id
+        - support_id
+        - selected_mc
+        - supported_area_km2
+        - compensator_domain_id
+        - authorization_id
+        - training_event_ids
+        - training_x_km
+        - training_y_km
+        - training_duration_days
+        - rate_per_day
+        - bandwidth_km
+        - normalization_mass
+      compensator_domain_id_schema:
+        schema: seismoflux_local_support_compensator_domain_v1
+        fields_in_order:
+          - schema
+          - study_area_sha256
+          - retained_fixed_cell_ids
+          - grids
+        grid_fields_in_order:
+          - cell_size_km
+          - cells
+        cell_fields_in_order:
+          - cell_id
+          - representative_x_m
+          - representative_y_m
+          - clipped_area_m2
+        independently_recomputed_with_canonical_json_bytes: true
+      ids_must_be_computed_from_runtime_values_before_public_crosscheck: true
+      copying_expected_digest_into_receipt: forbidden
+    historical_training_rows_sha256_schema:
+      method: sha256_of_background_artifacts_canonical_json_bytes
+      schema_version: stage4_fold4_historical_training_rows_v1
+      row_order: source_catalog_row_index_ascending_after_fold4_mask
+      row_fields_in_order:
+        - event_id
+        - origin_time_utc
+        - available_at_utc
+        - x_km
+        - y_km
+        - magnitude
+        - support_cell_id
+        - support_status
+        - selected_for_fold4_training
+      required_before_background_fit: true
+    public_registry_expected_crosschecks:
+      role: expected_values_only_not_verification_payload
+      training_event_count: 5237
+      training_duration_days: 18261.666666666668
+      rate_per_day: 0.2867755772565483
+      training_evidence_id: ed59aa557a816e43dd0af8f321ca689cee3ba6deac81eafa2b9e66f5b208af29
+      parameter_snapshot_id: 83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5
+      bandwidth_km: 75.0
+      normalization_mass: 0.9180536964403374
+      normalization_cell_mass_sum: 1.0
+      three_grid_gate:
+        diagnostic_50_to_25:
+          coarse_cell_size_km: 50.0
+          coarse_total: 1.0016502001174155
+          density_l1_difference: 0.010033669701284983
+          fine_cell_size_km: 25.0
+          fine_total: 1.000341874485772
+          relative_expected_count_difference: 0.0013078785013534119
+        primary_25_to_12_5:
+          coarse_cell_size_km: 25.0
+          coarse_total: 1.000341874485772
+          density_l1_difference: 0.0026734616661292622
+          fine_cell_size_km: 12.5
+          fine_total: 1.0
+          relative_expected_count_difference: 0.00034187448577194246
+      support_id: local-support-788851371baf0e3b
+      compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55
+      common_mc: 4.0
+      supported_area_fraction: 1.0
+      supported_area_km2: 9415305.754432771
+      grid_25km_cell_count: 15697
+    runtime_identity_receipt:
+      historical_training_rows_sha256: required_generated_after_single_catalog_open
+      independently_recomputed_training_evidence_id: required
+      independently_recomputed_parameter_snapshot_id: required
+      independently_recomputed_compensator_domain_id: required
+      full_three_grid_gate_fields: required
+      ordered_25km_cell_id_mass_sha256: required_generated_after_single_catalog_open
+      binds_exact_ordered_cell_ids_and_rematerialized_masses: true
+      created_before_background_is_used_for_training_or_scoring: true
+    post_cutoff_catalog_rows_do_not_change_background_identity: true
+    selected_historical_row_change_action: fail_closed
   development_background_snapshot:
-    source: inputs.background_model_payload
+    source: inputs.background_rematerialization
     snapshot_id: fold_4
-    parameter_snapshot_id: 83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5
+    parameter_snapshot_id_expected_crosscheck: 83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5
     fit_end_utc: '2019-12-31T16:00:00Z'
     support_id: local-support-788851371baf0e3b
     compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55
@@ -121,7 +316,7 @@ inputs:
     public_redistribution: forbidden
   inherited_contract_allowlist:
     path: data/manifests/anomaly_increment_kde_dev_inherited_contracts.json
-    sha256: 9d3b2585ce068ad13f80dac7489d6358a96b2adfc6fb4d30e5d9dd274653c99e
+    sha256: f19b8a8775f27e8589f4a46ab0aba06c9ceb1dd1ce14e303063832e380fcfe03
     old_execution_authority_reused: false
   inherited_fold_contract:
     path: data/manifests/anomaly_increment_r2_fold_manifest.json
@@ -200,19 +395,163 @@ inputs:
           - compare_integrals
           - spatial_grid_convergence
           - temporal_midpoint_convergence
+      background_catalog:
+        path: src/seismoflux/background/catalog.py
+        sha256: 2a422f7eaefc23c3aaf647b7bc0b7929ea52408e95ad23a7ca47fd7eed034686
+        symbols:
+          - load_study_area
+          - load_earthquake_catalog
+      background_workflow:
+        path: src/seismoflux/background/workflow.py
+        sha256: ee4092158f5b7fe2acf1a83e428b1fe3bd027686a8dfb077f38db2e0b9bb94bb
+        symbols:
+          - catalog_completeness_events
+          - historical_training_mask
+      background_local_support:
+        path: src/seismoflux/background/local_support.py
+        sha256: a66f6b113c9dd8da4b013a7869f0396dc3d643ac4fce63ebccefd374ce7e8aaa
+        symbols:
+          - build_local_support_snapshot
+          - build_local_support_manifest
+          - LocalSupportCellLocator
+      background_local_support_manifest:
+        path: src/seismoflux/background/local_support_manifest.py
+        sha256: 409485d0e77fcaf2f03994f863d905539ba18c8b646267cacdcf31f1ac587528
+        symbols:
+          - load_background_local_support_manifest
+          - validate_background_local_support_study_area
+      background_poisson:
+        path: src/seismoflux/background/poisson.py
+        sha256: 6df772afacc489b703087b282074b63d8163bb1da2114fdc3a6a6b9ee8e7e64c
+        symbols:
+          - SpatialQuadrature
+          - fit_spatial_poisson_family
+          - evaluate_spatial_poisson_family_cell_masses
+      background_grid:
+        path: src/seismoflux/background/grid.py
+        sha256: ab78e3176f14bd91c92dccb661af8af1d32345582c989212c2be8922085bc135
+        symbols:
+          - build_equal_area_grid_family
+          - diagnose_three_grid_convergence
+      background_artifacts:
+        path: src/seismoflux/background/artifacts.py
+        sha256: 1693147516c46eba3fbc6c416d705709ee84c1b1e91993fb551253930f2a53f0
+        symbols:
+          - canonical_json_bytes
+      stage3_placebo_features:
+        path: src/seismoflux/anomaly_increment/placebo_features.py
+        sha256: 011474437188615a9173afea6df29f0c12259ebb989e3a71f0efbc1ca575054a
+        symbols:
+          - rebuild_time_placebo_features
+          - rebuild_space_placebo_features
+    transitive_dependency_file_hashes:
+      seismoflux_package:
+        path: src/seismoflux/__init__.py
+        sha256: 20730c1202362ec858d599d617bd989c4c7989629e08a19f027218e39f85c7f4
+      anomaly_increment_package:
+        path: src/seismoflux/anomaly_increment/__init__.py
+        sha256: a3f35e725a394fbabc890bb7cde5c2e36c9d0525339e8df47dacfe9155c34760
+      anomaly_increment_contracts:
+        path: src/seismoflux/anomaly_increment/contracts.py
+        sha256: 1cdf8af5a2f0a08e53b8c612bc20b8c718517cc4b19705cd5369d948189e6ba1
+      background_package:
+        path: src/seismoflux/background/__init__.py
+        sha256: 79d4ae54543d8bc7195eafa5e02651ced2f6a72fac4abaa918779cd2120abda4
+      background_completeness:
+        path: src/seismoflux/background/completeness.py
+        sha256: d63d2f54902629a45b963ab1d6b3b3dfd80d9448a4d66a1854a51e03231e3007
+      background_config:
+        path: src/seismoflux/background/config.py
+        sha256: b76969f513748eaadda45c25e1d472f32ce94658dc283526207985373f58149f
+      background_etas_fit:
+        path: src/seismoflux/background/etas_fit.py
+        sha256: f2a400b5a98878b45942c2d18cb977d25e57f724ffde5ba579448203b7453183
+      background_scientific:
+        path: src/seismoflux/background/scientific.py
+        sha256: 6c90e00320b2279753e6842fbe294a550ca88d428f64cf92adae2edc38847491
+      background_etas:
+        path: src/seismoflux/background/etas.py
+        sha256: 75860cd433fd233d500e6010831ac8cd7afc5958e4bea2a1f9e9612452e61aa4
+      project_config:
+        path: src/seismoflux/config.py
+        sha256: 25822f76478f510cca5fbbbd6d21dcc72b12dd02eccc2d672b100fcd690b3d52
+      background_randomness:
+        path: src/seismoflux/background/randomness.py
+        sha256: bb8bc4b818ff31c7aab9839713f7663c0fd4cc5321ea6a6415ac116648360981
+      legacy_placebo_types_import_only:
+        path: src/seismoflux/anomaly_increment/placebo.py
+        sha256: ab1adf13bc6767399494dcb2e55d3e6ac2d075a3f97d269f6f717d144405d331
+      legacy_preregistration_import_only:
+        path: src/seismoflux/anomaly_increment/preregistration.py
+        sha256: 0650fc3662ec81662f33ff7aca72bffe37cb602e6f987336c463b70ef880398d
+      anomaly_grid:
+        path: src/seismoflux/features/anomaly/grid.py
+        sha256: bd349dfff894d039d67ab2b9f025e7682ffc571a42a5d6fc1c6ff44c842ad493
+      anomaly_nulls:
+        path: src/seismoflux/features/anomaly/nulls.py
+        sha256: 5d291b912a935f2ac42a5cb9bd921da1dfa2d706bc3808afa1843d0ba0865916
+      anomaly_snapshot:
+        path: src/seismoflux/features/anomaly/snapshot.py
+        sha256: 5d51a788d5b6d18d3ef6904514e2033914d2f38b62ec3b9c750743d572ac689e
+      anomaly_spatial:
+        path: src/seismoflux/features/anomaly/spatial.py
+        sha256: 743c902d4c45d67317f769b1e907201db540eb66f673a279faa5575d4b66988d
+      anomaly_state:
+        path: src/seismoflux/features/anomaly/state.py
+        sha256: d011274ba32ff914d608c1737eca351fdd0652ff0e84ff7aedca4af2d8c5c589
+      anomaly_trajectory:
+        path: src/seismoflux/features/anomaly/trajectory.py
+        sha256: 47e8f5ea6622c9e05e271ddd21da83f983b72a1c0224cdffc95c2af9a4e446eb
+      data_common:
+        path: src/seismoflux/data/common.py
+        sha256: d6685dd0db14a1feca842f03ec078cab9bd33f34d60738454b14bd4e40adc164
+      data_package:
+        path: src/seismoflux/data/__init__.py
+        sha256: 7e89f0ce71d6b770b177cea7fe4b368eae521291d7356b16232afade0be711ee
+      data_parquet:
+        path: src/seismoflux/data/parquet.py
+        sha256: 4a4ae50c1daf59e2d4dfabf4372f2d63d0070c470c7f5fe2624df25cea023f8d
+      data_settings:
+        path: src/seismoflux/data/settings.py
+        sha256: 57b810664b3d940cad286e484625e0490b8bb8775d3a4147098b2115fa8f48d4
+      features_package:
+        path: src/seismoflux/features/__init__.py
+        sha256: 0fa2c651992c1ba22030a75c57aa7cdbfce8d80cbe15f55b6925f1d39d84a53f
+      anomaly_features_package:
+        path: src/seismoflux/features/anomaly/__init__.py
+        sha256: 5160ca69b34593e908dd06b32b4e355697f4f9d06ac9e1a8302a240857c685e5
+      anomaly_config:
+        path: src/seismoflux/features/anomaly/config.py
+        sha256: 7be23adce6c7541ef2cd0ec1a2916f1212d3bd2e5455c7551b03e80fc4045948
+      anomaly_contracts:
+        path: src/seismoflux/features/anomaly/contracts.py
+        sha256: e8497922d965afa41a8ae7f8cc5843d0f1d277d324c55ab3d71eb810a799c3d9
+      anomaly_input:
+        path: src/seismoflux/features/anomaly/input.py
+        sha256: a2d0d020d82ef494bcf2c4dbb97088b8a763ff244837b2d71a72321e87d4f8b3
+    transitive_dependencies_are_import_only_not_direct_api_authority: true
     any_unlisted_module_or_symbol: forbidden
     explicitly_forbidden_old_r2_orchestrators_and_semantics:
       - src/seismoflux/anomaly_increment/scoring_pipeline.py
       - src/seismoflux/anomaly_increment/formal_preflight.py
       - src/seismoflux/anomaly_increment/formal_run.py
       - src/seismoflux/anomaly_increment/formal_production.py
-      - src/seismoflux/anomaly_increment/placebo.py
+      - src/seismoflux/anomaly_increment/placebo_source.py
+      - src/seismoflux/anomaly_increment/placebo_runtime.py
+      - formal_runtime_call.local_support_runtime.build_local_support_runtime
+      - placebo.TimeBijection
+      - placebo.SpaceBijection
+      - placebo.build_time_bijection
+      - placebo.build_space_bijection
       - evaluation.evaluate_g2
       - evaluation.evaluate_g3
       - evaluation.apply_preregistered_adoption_matrix
       - evaluation.same_recall_union_area_relative_reduction
       - evaluation.stratified_five_horizon_bootstrap_indices
       - preregistration.Stage4SeedContext
+      - poisson.select_kde_bandwidth
+      - any_bandwidth_selection_or_reselection
+      - any_old_gate_or_random_stream_semantics
     reason: >-
       old_R2_orchestrators_gates_bootstrap_placebos_and_seed_context_conflict_with_the_new
       _fixed_area_only_three_horizon_maxT_and_root_seed_bound_stage4a_contract
@@ -243,8 +582,14 @@ access_boundary:
   future_anomaly_reports: forbidden
   earthquake_catalog_roles:
     frozen_spatial_kde:
-      source: inputs.development_background_snapshot
-      catalog_rebuild_in_stage4a: forbidden
+      source: inputs.background_rematerialization
+      public_registry_role: identity_and_audit_summary_only
+      historical_untracked_model_declarations_runtime_role: forbidden
+      rematerialization: exact_fold4_75km_in_memory_only
+      catalog_open_session: same_single_registered_session_as_training_and_scoring
+      catalog_rebuild_in_stage4a: only_exact_preregistered_rematerialization
+      bandwidth_support_mc_or_final_validation_change: forbidden
+      second_catalog_open: forbidden
     fold_rate_head_training:
       selection: frozen_fold_training_exposures_only
       origin_time_rule: event_inside_training_target_exposure
@@ -451,6 +796,47 @@ randomness:
   code_freeze_randomness_manifest:
     path: data/manifests/anomaly_increment_kde_dev_randomness.json
     required_before_real_input_or_target_read: true
+  stage4a_mapping_dtos:
+    source_module_at_code_freeze: src/seismoflux/anomaly_increment/kde_dev_placebo_mapping.py
+    sealed_by_code_tag: true
+    namespace: stage4-kde-development-v1
+    context_protocol_version: 0.4.3
+    context_fields: randomness.canonical_context_fields
+    construction_uses_only_stage4a_pcg64_context: true
+    placebo_features_contract: structural_duck_typing_no_isinstance_checks
+    TimeMappingDTO:
+      stored_fields:
+        - recipient_issue_ids
+        - donor_issue_ids
+        - mapping_sha256
+        - fixed_point_count
+      consumed_structural_fields:
+        - recipient_issue_ids
+        - pairs
+      pairs: derived_zip_recipient_issue_ids_and_donor_issue_ids_strict
+    SpaceMappingDTO:
+      stored_fields:
+        - entity_state_ids
+        - donor_state_ids
+        - permuted_coordinate_pairs
+        - mapping_sha256
+        - fixed_point_count
+        - moved_entity_row_count
+        - no_effect
+        - coordinate_multiset_verified
+      consumed_structural_fields:
+        - entity_state_ids
+        - donor_state_ids
+        - permuted_coordinate_pairs
+        - moved_entity_row_count
+        - no_effect
+    forbidden_direct_import_or_call:
+      - placebo.TimeBijection
+      - placebo.SpaceBijection
+      - placebo.build_time_bijection
+      - placebo.build_space_bijection
+      - preregistration.Stage4SeedContext
+    legacy_placebo_module_role: transitive_import_only_for_placebo_features_annotations
   bootstrap:
     replications: 2000
     population: all_unique_M5_6_physical_event_ids_in_three_fold_three_horizon_union
@@ -712,8 +1098,12 @@ execution_control:
     created_and_committed_at_code_tag: true
     generated_only_from_protocol_declared_identities_without_opening_real_inputs: true
     binds:
-      - all_expected_input_paths_and_sha256
+      - all_runtime_input_paths_and_sha256_excluding_historical_untracked_declarations
+      - historical_untracked_model_declarations_inclusion_forbidden_and_presence_not_required
       - development_fold4_background_snapshot_identity
+      - background_local_support_manifest_sha256_and_manifest_id
+      - background_rematerialization_independent_identity_schemas_and_expected_crosschecks
+      - one_catalog_open_shared_in_memory_contract
       - inherited_contract_allowlist_sha256
       - study_area_and_target_declared_sha256
   input_identity_seal:
@@ -737,7 +1127,7 @@ execution_control:
       any_other_changed_path: forbidden
       self_commit_hash_embedded_in_tracked_tree: forbidden
     code_tag:
-      name: v0.3.2-kde-anomaly-increment-code
+      name: v0.3.3-kde-anomaly-increment-code
       points_to: C
     preflight_remote_verification:
       - tag_peels_to_C
@@ -756,6 +1146,9 @@ execution_control:
       - expected_code_tag_name
       - exact_allowed_seal_commit_changed_paths
       - runner_and_scientific_module_sha256
+      - exact_symbol_allowlist_and_transitive_dependency_file_sha256
+      - stage4a_mapping_dto_schema_and_builder_sha256
+      - fold4_only_background_adapter_sha256
       - environment_lock_sha256
       - randomness_manifest_sha256
       - initial_zero_attempt_ledger_sha256
@@ -782,10 +1175,20 @@ execution_control:
     runtime_registration_appends_verified_code_seal_sha256: true
     missing_or_nonzero_initial_ledger_action: fail_closed
   runtime_target_read_ledger:
-    path: data/interim/stage4/anomaly_increment_kde_dev/target_read_ledger.jsonl
+    path: data/interim/stage4/anomaly_increment_kde_dev/target_read_ledger.json
     gitignored_local_only: true
     atomically_created_at_preflight_start_with_operation_count_zero: true
-    append_only_hash_chain: true
+    storage: single_canonical_json_mapping_not_append_only_jsonl
+    zero_state_is_canonical_and_hash_bound: true
+    transition: atomic_compare_and_swap_zero_to_single_open
+    open_transition_requires_registered_same_identity_attempt_ledger: true
+    opened_state_is_immutable_no_rewrite_or_rollback: true
+    opened_state_required_fields:
+      - entry_hash
+      - previous_zero_ledger_hash
+      - logical_open_count
+      - protocol_code_input_randomness_and_attempt_identity
+    opened_state_logical_open_count: 1
     maximum_logical_target_open_sessions: 1
     records_metadata_and_hashes_not_target_rows: true
   preflight_receipt:
@@ -801,7 +1204,8 @@ execution_control:
     - verify_preflight_receipt_and_zero_target_read_count
     - atomically_register_single_attempt
     - verify_runtime_target_read_ledger_remains_zero_and_bound_to_preflight_receipt
-    - open_target_once_through_single_adapter
+    - atomic_compare_and_swap_target_read_ledger_zero_to_one_after_verifying_registered_same_identity_attempt
+    - open_catalog_once_through_single_adapter_and_reuse_same_in_memory_catalog
   checkpoint_root: data/interim/stage4/anomaly_increment_kde_dev/checkpoints
   checkpoint_identity_fields:
     - protocol_sha256
@@ -817,6 +1221,12 @@ execution_control:
     - code_seal_sha256
     - final_attempt_ledger_sha256_and_operation_count
     - final_target_read_ledger_sha256_and_logical_open_count
+    - historical_training_rows_sha256
+    - independently_recomputed_training_evidence_id
+    - independently_recomputed_parameter_snapshot_id
+    - independently_recomputed_compensator_domain_id
+    - full_three_grid_gate_fields
+    - ordered_25km_cell_id_mass_sha256
     - completed_checkpoint_identity_set_sha256
   direct_target_reader_outside_single_adapter: forbidden
 

@@ -110,3 +110,24 @@ Q2 的准确静态和离线交互判读分别见：
 
 - `docs/background_etas_numerical_qualification_interpretation.svg`；
 - `outputs/interactive/background_etas_numerical_qualification/interpretation.html`。
+
+## 6. Stage 4A 可执行性审计与 0.4.3 调整
+
+`0.4.2` 可执行性审计没有产生预测成绩。它发现公开背景 registry/model JSON 只有身份和数值审计
+摘要，不含可推理 KDE 状态，而旧协议又禁止目录重物化；同时旧 `.jsonl` target-read ledger
+措辞与已经目标盲实现的单 mapping `0→1` CAS 原语不一致。
+
+审计结果的科学价值字段是：
+
+- `science_value_category`: `no_material_progress`
+- `evidence`: 尚无直接效果证据；若沿旧合同继续实现，只会堆叠无法进入科学评分的工程。
+- `decision`: `adjust`
+- `next_scientific_test`: 在零目标读取状态冻结 `0.4.3`，只允许单目录会话、固定 fold_4/75 km
+  背景重物化和精确原语 allowlist，再进入薄 code freeze。
+- `stop_condition`: 若必须重选带宽、改变 Mc/支持域/final_validation、第二次打开目录、复活旧 R2
+  orchestrator 或改变科学门，则停止工程扩张。
+
+`0.4.3` 修复只有经独立复审 PASS 后，有限阶段价值才可另记为 `necessary_enabler` 并决定
+`continue_to_thin_code_freeze`；本轮复审 PASS 前保持 `no_material_progress + adjust`。该有限价值
+只表示执行矛盾已消除、紧邻的一次 Stage 4A 科学检验仍可实施，不能把协议测试或可执行性冒充预测
+提升。详细证据见 `docs/phase4_kde_development_executability_amendment.md`。
