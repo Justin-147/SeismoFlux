@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "protocol_version": "0.4.2",
+  "experiment_id": "stage4-kde-development-v1",
+  "status": "target_blind_allowlist_only_no_execution_authority",
+  "source_contracts": {
+    "fold": {
+      "path": "data/manifests/anomaly_increment_r2_fold_manifest.json",
+      "file_sha256": "74bb8c73751cab71c85e20609eb70d94902634fe946a3cb4316a83d7e9b051a1",
+      "content_sha256": "d3fd999d51ad66e3ea153d1b40d24d8f861993f0337d2de297ac297711f8eaf2",
+      "allowed_json_pointers": [
+        "/joint_macro_rolling_folds",
+        "/target_window_rule",
+        "/training_target_end_must_be_strictly_before_assessment_target_start"
+      ]
+    },
+    "feature": {
+      "path": "data/manifests/anomaly_increment_r2_feature_set.json",
+      "file_sha256": "89eb3d73eb1ffdb554dc4e72792aedd65473711ca061d197242a6cd560ca4675",
+      "content_sha256": "65b86aa50dc18ba6cab94f264c82772d588bac4ef9c466138a87a4e8e4995211",
+      "allowed_json_pointers": [
+        "/feature_sets",
+        "/preprocessing_contract/clipping",
+        "/preprocessing_contract/every_statistic_uses_only_current_fit_scope",
+        "/preprocessing_contract/exact_operation_order",
+        "/preprocessing_contract/null_is_not_zero",
+        "/preprocessing_contract/nullable",
+        "/preprocessing_contract/parameters_must_be_serialized_and_hashed",
+        "/preprocessing_contract/standardization",
+        "/preprocessing_contract/statistic_row_weighting",
+        "/preprocessing_contract/transform_by_logical_feature",
+        "/preprocessing_contract/validation_statistics_may_not_change_preprocessor",
+        "/selection"
+      ]
+    },
+    "spatial_strata": {
+      "path": "data/manifests/anomaly_increment_r2_spatial_strata.json",
+      "file_sha256": "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83",
+      "content_sha256": "0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2",
+      "allowed_json_pointers": [
+        "/aggregate/assigned_nonempty_zone_count",
+        "/aggregate/zone_set_sha256",
+        "/entity_permutation_group_policy",
+        "/local_artifacts",
+        "/topology_gate"
+      ]
+    }
+  },
+  "forbidden_inherited_semantics": [
+    "authorization",
+    "attempt",
+    "execution_seal",
+    "formal_validation_authority",
+    "ledger",
+    "old_random_stream",
+    "old_result_identity",
+    "scoring_permission",
+    "target_read_permission"
+  ],
+  "old_r2_execution_authority_reused": false,
+  "old_r2_randomness_reused": false,
+  "stage4a_loader_must_reject_any_pointer_outside_allowlist": true
+}

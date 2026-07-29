@@ -1,10 +1,73 @@
 schema_version: 1
-protocol_version: 1.1.0
+protocol_version: 1.2.0
 data_contract_version: 0.1.0
-status: stage_2_background_protocol_preregistered_before_scoring
+status: stage_4_kde_anomaly_amendment_preregistered_before_target_read
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
+stage_4_amendment:
+  amendment_frozen_on: '2026-07-30'
+  registered_before_formal_target_read: true
+  formal_target_read_count_at_amendment: 0
+  formal_scoring_count_at_amendment: 0
+  etas_qualification_result_tag: v0.2.2-background-etas-qualification-result
+  etas_status: not_evaluable_not_scored
+  etas_scientific_value_rejection_forbidden: true
+  primary_background:
+    variant_id: spatial_poisson/gaussian_kde_bw75km
+    gate: G1-LS
+    gate_passed: true
+    bandwidth_km: 75.0
+  confirmatory_variants:
+    - kde_background_no_increment
+    - kde_plus_coverage_controls
+    - kde_plus_snapshot_anomaly
+    - kde_plus_dynamic_anomaly
+  primary_horizons_days: [7, 30, 90]
+  primary_alarm_area_km2: 600000
+  development_rolling_folds: 3
+  bootstrap_replications: 2000
+  time_permutation_replications: 1000
+  space_permutation_replications: 1000
+  development_scientific_attempts_allowed: 1
+  development_gate_id: S4-KDE-DEV
+  development_pass_claim: signal_worth_one_independent_validation_not_G2_or_G3
+  stage4a_fixed_600000km2_recall_gain_is_mandatory: true
+  same_recall_area_reduction_is_descriptive_only_in_stage4a: true
+  snapshot_fallback_allowed_when_dynamic_trajectory_fails: true
+  stage4b_independent_validation_authorized: false
+  stage4b_authorization_requires:
+    - stage4a_science_gate_passed
+    - stage4a_science_value_review_completed
+    - stage4a_result_commit_pushed
+    - stage4a_result_tag_pushed
+    - stage4b_protocol_and_code_frozen_before_independent_target_read
+  old_r2_execution_authority_reused: false
+  locked_test_run: false
+  large_or_complex_model_entry_forbidden: true
+stage_science_value_review:
+  required_immediately_after_each_stage_result: true
+  categories:
+    - direct_improvement
+    - necessary_enabler
+    - no_material_progress
+  required_fields:
+    - science_value_category
+    - evidence
+    - decision
+    - next_scientific_test
+    - stop_condition
+  decisions:
+    - continue
+    - adjust
+    - stop
+  direct_improvement_requires_future_isolated_fixed_area_evidence: true
+  engineering_proxies_forbidden:
+    - test_count
+    - code_volume
+    - interface_completeness
+    - runtime_stability
+  no_material_progress_action: stop_engineering_expansion_and_reassess_route
 frozen_on: '2026-07-13'
 background_protocol_version: 0.2.0
 background_protocol_path: configs/background.yaml

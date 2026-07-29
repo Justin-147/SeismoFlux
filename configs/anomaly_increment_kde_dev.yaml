@@ -1,0 +1,989 @@
+schema_version: 1
+protocol_version: 0.4.2
+stage: 4A
+experiment_id: stage4-kde-development-v1
+gate_id: S4-KDE-DEV
+status: target_blind_protocol_accepted_locally_pending_remote_tag
+frozen_on: '2026-07-30'
+language: zh-CN
+
+authority:
+  blueprint:
+    path: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
+    sha256: 34eeabc70a96582055aa9cf9d53c526dbdd6dd110b6853b964523efc5828ba77
+  research_protocol:
+    path: configs/research_protocol.yaml
+    sha256: c265d7fb039071a8e3750e2b9807ea4a1dbd91d00ac1d20c0d6a90bc7ac374e7
+  research_protocol_document:
+    path: docs/research_protocol.md
+    sha256: 167c20f6a331e3b58516d4d62c70909a0184161177dfe7e8eaef1c7bf9bf5598
+  science_value_policy:
+    path: docs/scientific_value_review_and_model_composition.md
+    sha256: 83cf71bf4f6fdb185107fc92d5fc66209c8a04720f47cb2694d065a56464c2eb
+  sole_blueprint_wins_on_conflict: true
+
+freeze:
+  branch: codex/stage2-etas-science-first
+  protocol_tag: v0.3.2-kde-anomaly-increment-protocol
+  expected_code_tag: v0.3.2-kde-anomaly-increment-code
+  expected_result_tag: v0.3.2-kde-anomaly-increment-result
+  protocol_tests_and_documents_allowed_before_protocol_tag: true
+  protocol_commit_and_tag_required_before_scoring_implementation_and_real_input_adapter: true
+  code_commit_and_tag_required_before_real_input_or_target_read: true
+  result_commit_push_and_tag_required_before_stage4b_protocol: true
+  development_scientific_attempts_allowed: 1
+  attempt_identity: stage4-kde-development-v1-attempt-1
+  maximum_score_blind_code_correction_cycles_before_target_read: 1
+  maximum_same_identity_infrastructure_resumes: 1
+  post_target_read_code_config_or_identity_repairs_allowed: 0
+  old_r2_execution_authority_reused: false
+  old_r2_attempt_seal_ledger_and_random_stream_reused: false
+  stage4b_independent_validation_authorized: false
+  locked_test_authorized: false
+  scores_seen_before_freeze: false
+  target_counts_seen_before_freeze: false
+  development_target_reads_before_freeze: 0
+  locked_test_reads_before_freeze: 0
+
+science_question:
+  plain_language: >-
+    在历史地震多发区形成的75公里KDE底图上，加入截至起报日已经发布的动态异常，
+    能否在相同报警面积内稳定覆盖更多未来经目录去重的物理地震事件，并且这种改善不能由报告覆盖变化、
+    异常时间乱序或异常位置乱序解释？
+  primary_magnitude_bin: M5_6
+  primary_horizons_days: [7, 30, 90]
+  primary_alarm_area_km2: 600000
+  etas_status: not_evaluable_not_scored
+  etas_absence_is_not_zero_score: true
+  etas_scientific_value_rejection_forbidden: true
+
+inputs:
+  q2_etas_result:
+    path: data/manifests/etas_numerical_qualification_result.json
+    sha256: 9df3b3d99c5bd123392e441390d879a40d8653ba509f149db0c3a646e2a21748
+    result_tag: v0.2.2-background-etas-qualification-result
+    required_status: not_evaluable
+  background_registry:
+    path: data/manifests/background_local_support_model_registry.json
+    sha256: 774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b
+    required_gate: G1-LS
+    required_gate_status: passed
+  background_model_manifest:
+    path: models/registry/background_local_support/5c8fa982bb94b9ad/manifest.json
+    sha256: 1b8c67ac82a83d6885dee06ea32b8907b333c6118c5ec7968f7b779589447acf
+  background_model_payload:
+    path: models/registry/background_local_support/5c8fa982bb94b9ad/poisson_kde.json
+    sha256: 63db433a0ea490de2674cb84c485f8efd8215374d70f31f22810da29f0d7b142
+  development_background_snapshot:
+    source: inputs.background_model_payload
+    snapshot_id: fold_4
+    parameter_snapshot_id: 83a0c60d4b62ba6a6e849ac2d5f430001d054b7aec3af40f76193180a18bf4c5
+    fit_end_utc: '2019-12-31T16:00:00Z'
+    support_id: local-support-788851371baf0e3b
+    compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55
+    common_mc: 4.0
+    supported_area_fraction: 1.0
+    causal_for_all_stage4a_assessment_dates: true
+  final_validation_background_snapshot:
+    snapshot_id: final_validation
+    fit_end_utc: '2023-06-30T16:00:00Z'
+    use_in_stage4a: forbidden_future_backfill
+  stage3_registry:
+    path: data/manifests/anomaly_feature_registry.json
+    sha256: 65635e18ab94e5e114948a6a7a5d1533a665fee1f6f862abcc5498394f85ce00
+    required_status: accepted_feature_only_no_target_scoring
+  feature_dictionary:
+    path: data/manifests/anomaly_feature_dictionary.json
+    sha256: 60b08bed829a3e496bdbea14e3c0afa64809d69eb0a81532be88af7c7efbe050
+  stage3_feature_store:
+    path: >-
+      data/processed/stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541/anomaly_feature_store.parquet
+    sha256: cd383d52cbb85ebba0e495e58f6e3d50d350f952e5432d5cd21386f6224042ef
+    content_sha256: 9f2f25f3f0d27f435fc6e4ee191538f70b88de959d9b357cef464b6884f8bfc9
+    schema_sha256: 0d7a9eab211324fcf3d03f6a55ef0f5136a6132f0ce0c56a72cb0a92912e6808
+    row_count: 3217885
+    report_snapshot_count: 205
+  stage3_anomaly_state_history:
+    path: >-
+      data/processed/stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541/anomaly_state_history.parquet
+    sha256: d948d59851778ad4c73be398e521883520fdd87880b0604628986cee2cb2813a
+    content_sha256: d0dd59071d502c248573415d48d0d2addee5170228d820e0d07af1c1f2af8249
+    schema_sha256: b6986a78912d34ed90e83a6d72fc3dfbf8b4c0edf59217f969ae5e7fb33152d5
+  development_earthquake_catalog:
+    path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+    sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+    content_sha256: 2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404
+    schema_sha256: c88d20b32a2cb599f22d1921764757b617fe19b030a0f58585652e9f7c74f3c5
+    available_at_equals_origin_time_is_optimistic_assumption: true
+  study_area:
+    path: data/processed/china_mainland.geojson
+    sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    public_redistribution: forbidden
+  inherited_contract_allowlist:
+    path: data/manifests/anomaly_increment_kde_dev_inherited_contracts.json
+    sha256: 9d3b2585ce068ad13f80dac7489d6358a96b2adfc6fb4d30e5d9dd274653c99e
+    old_execution_authority_reused: false
+  inherited_fold_contract:
+    path: data/manifests/anomaly_increment_r2_fold_manifest.json
+    sha256: 74bb8c73751cab71c85e20609eb70d94902634fe946a3cb4316a83d7e9b051a1
+    content_sha256: d3fd999d51ad66e3ea153d1b40d24d8f861993f0337d2de297ac297711f8eaf2
+    inherited_sections_allowlist:
+      - joint_macro_rolling_folds
+      - target_window_rule
+      - training_target_end_must_be_strictly_before_assessment_target_start
+    role: target_blind_scientific_definition_only
+    allowlist_authority: inputs.inherited_contract_allowlist
+  inherited_feature_contract:
+    path: data/manifests/anomaly_increment_r2_feature_set.json
+    sha256: 89eb3d73eb1ffdb554dc4e72792aedd65473711ca061d197242a6cd560ca4675
+    content_sha256: 65b86aa50dc18ba6cab94f264c82772d588bac4ef9c466138a87a4e8e4995211
+    inherited_sections_allowlist:
+      - feature_sets
+      - selection
+      - preprocessing_contract.clipping
+      - preprocessing_contract.every_statistic_uses_only_current_fit_scope
+      - preprocessing_contract.exact_operation_order
+      - preprocessing_contract.null_is_not_zero
+      - preprocessing_contract.nullable
+      - preprocessing_contract.parameters_must_be_serialized_and_hashed
+      - preprocessing_contract.standardization
+      - preprocessing_contract.statistic_row_weighting
+      - preprocessing_contract.transform_by_logical_feature
+      - preprocessing_contract.validation_statistics_may_not_change_preprocessor
+    role: target_blind_scientific_definition_only
+    allowlist_authority: inputs.inherited_contract_allowlist
+  inherited_spatial_strata_contract:
+    path: data/manifests/anomaly_increment_r2_spatial_strata.json
+    sha256: 283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83
+    content_sha256: 0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2
+    required_nonempty_zone_count: 39
+    inherited_sections_allowlist:
+      - aggregate.zone_set_sha256
+      - aggregate.assigned_nonempty_zone_count
+      - topology_gate
+      - entity_permutation_group_policy
+      - local_artifacts
+    role: target_blind_spatial_placebo_and_regional_robustness_definition
+    allowlist_authority: inputs.inherited_contract_allowlist
+  reusable_scientific_primitives:
+    exact_symbol_allowlist:
+      evaluation:
+        path: src/seismoflux/anomaly_increment/evaluation.py
+        sha256: c5f77d108e6c0b81772c84722e83cfa2cbe2103c3349e106a31d0d9516c10691
+        symbols:
+          - information_gain_per_physical_event
+          - strict_recall
+          - same_area_recall_gain_percentage_points
+          - percentile_interval
+      model:
+        path: src/seismoflux/anomaly_increment/model.py
+        sha256: 2440d907bbd1ad132a970f4ca1ed5acbc12600aa1b20659dcb2e8f8963d03c58
+        symbols:
+          - fit_frozen_target_rate_head
+          - SharedPoissonObjective
+          - fit_shared_ridge_poisson
+          - conditional_intensity
+      preprocessing:
+        path: src/seismoflux/anomaly_increment/preprocessing.py
+        sha256: b4dbadd431c7c8e5366916365e3616e046d6cbc1d5f0c16fa7d893744491f856
+        symbols:
+          - fit_frozen_preprocessor
+          - FrozenPreprocessor
+      integration:
+        path: src/seismoflux/anomaly_increment/integration.py
+        sha256: 56df962386e22ab1a2e303da8b897f2cc5ca1e2112d1aa35a0fada45f58ab21a
+        symbols:
+          - lead_decay
+          - composite_midpoint_quadrature
+          - expand_midpoint_compensator_terms
+          - integrate_conditional_intensity
+          - compare_integrals
+          - spatial_grid_convergence
+          - temporal_midpoint_convergence
+    any_unlisted_module_or_symbol: forbidden
+    explicitly_forbidden_old_r2_orchestrators_and_semantics:
+      - src/seismoflux/anomaly_increment/scoring_pipeline.py
+      - src/seismoflux/anomaly_increment/formal_preflight.py
+      - src/seismoflux/anomaly_increment/formal_run.py
+      - src/seismoflux/anomaly_increment/formal_production.py
+      - src/seismoflux/anomaly_increment/placebo.py
+      - evaluation.evaluate_g2
+      - evaluation.evaluate_g3
+      - evaluation.apply_preregistered_adoption_matrix
+      - evaluation.same_recall_union_area_relative_reduction
+      - evaluation.stratified_five_horizon_bootstrap_indices
+      - preregistration.Stage4SeedContext
+    reason: >-
+      old_R2_orchestrators_gates_bootstrap_placebos_and_seed_context_conflict_with_the_new
+      _fixed_area_only_three_horizon_maxT_and_root_seed_bound_stage4a_contract
+  environment_lock:
+    path: uv.lock
+    sha256: 34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5
+
+access_boundary:
+  before_code_tag:
+    allowed: [tracked_public_metadata, synthetic_data]
+    real_processed_input_bytes: forbidden
+    development_target_bytes: forbidden
+    independent_validation_targets: forbidden
+    locked_test: forbidden
+  after_code_tag:
+    exact_hash_bound_non_target_input_verification: allowed
+    development_target_read: only_inside_single_registered_attempt
+    independent_validation_targets: forbidden
+    locked_test: forbidden
+  target_use:
+    scoring_hit_and_miss_only: true
+    grid_construction: forbidden
+    spatial_refinement: forbidden
+    boundary_construction: forbidden
+    alarm_threshold_selection: forbidden
+    hyperparameter_selection: forbidden
+  human_prediction_fields: forbidden
+  future_anomaly_reports: forbidden
+  earthquake_catalog_roles:
+    frozen_spatial_kde:
+      source: inputs.development_background_snapshot
+      catalog_rebuild_in_stage4a: forbidden
+    fold_rate_head_training:
+      selection: frozen_fold_training_exposures_only
+      origin_time_rule: event_inside_training_target_exposure
+      available_at_rule: available_at_lte_frozen_fold_fit_target_end
+      assessment_rows_allowed: false
+    assessment_targets:
+      selection: frozen_assessment_exposures_and_primary_magnitude_bin
+      interval: '(issue_time,issue_time+horizon_end]'
+      origin_time_and_available_at_must_satisfy_frozen_target_contract: true
+      use_outside_scoring_and_hit_miss: forbidden
+    one_physical_event_id_used_for_cross_window_pairing: true
+
+background:
+  variant_id: spatial_poisson/gaussian_kde_bw75km
+  bandwidth_km: 75.0
+  completeness_magnitude: 4.0
+  fixed_as_log_intensity_offset: true
+  fold_specific_rate_head_fit_on_training_exposures_only: true
+  spatial_snapshot_for_every_stage4a_fold: inputs.development_background_snapshot
+  final_validation_snapshot_backfill: forbidden
+  same_support_grid_rate_head_and_compensator_for_all_variants: true
+  unsupported_targets_count_as_misses_in_full_area_recall: true
+
+variants:
+  B0:
+    name: kde_background_no_increment
+    logical_feature_set: []
+    role: primary_background
+  C0:
+    name: kde_plus_coverage_controls
+    logical_feature_set: coverage_only
+    logical_feature_count: 9
+    role: reporting_system_confounding_control
+  B1:
+    name: kde_plus_snapshot_anomaly
+    logical_feature_set: snapshot
+    logical_feature_count: 17
+    role: snapshot_ablation
+  B2:
+    name: kde_plus_dynamic_anomaly
+    logical_feature_set: dynamic
+    logical_feature_count: 22
+    role: primary_challenger
+  contribution_contrasts:
+    full_dynamic_system: B2_minus_B0
+    reporting_coverage: C0_minus_B0
+    all_anomaly_beyond_coverage: B2_minus_C0
+    snapshot_anomaly_beyond_coverage: B1_minus_C0
+    trajectory_increment: B2_minus_B1
+
+features:
+  spatial_kernel: gaussian
+  confirmatory_radius_km: 200
+  trajectory_source: all_reports_available_at_lte_issue_time
+  future_backfill_forbidden: true
+  lead_decay_half_life_days: 90.0
+  report_coverage_controls_retained_in_C0_B1_B2: true
+  null_is_not_zero: true
+  preprocessing_fit_scope: each_training_fold_only
+  preprocessing_statistics_from_assessment_or_future: forbidden
+  feature_subset_search: forbidden
+  interpretation_groups:
+    reporting_coverage:
+      - current_to_trailing_station_reporting_coverage_proxy
+      - current_to_trailing_measurement_reporting_coverage_proxy
+      - distinct_reporting_station_count_reporting_coverage_proxy
+      - distinct_reporting_measurement_count_reporting_coverage_proxy
+      - days_since_previous_actual_report_reporting_coverage_proxy
+      - missing_expected_period_count_13w_reporting_coverage_proxy
+      - missing_expected_period_count_52w_reporting_coverage_proxy
+      - report_present_reporting_coverage_proxy
+      - report_row_count_reporting_coverage_proxy
+    anomaly_activity_and_continuity:
+      - reliability_weighted_listed_count
+      - first_seen_weighted_count
+      - not_continued_weighted_count
+      - age_mean_days
+    disciplinary_composition:
+      - discipline_shannon_normalized
+      - multidisciplinary_entity_weighted_fraction
+    spatial_form:
+      - concentration
+      - diffusion_radius_km
+    trajectory_shape:
+      - slope_4w_per_week
+      - slope_13w_per_week
+      - acceleration_4v13_per_week2
+      - surge_z_13w
+      - peak_drop_52w
+  feature_interpretation_outputs:
+    per_fold_standardized_coefficient_point_estimates: required
+    coefficient_across_three_folds_summary: median_min_max_no_confidence_interval_or_p_value
+    grouped_standardized_effect_distribution: required
+    fitted_model_group_zero_out_sensitivity_without_refit:
+      role: required_diagnostic_not_gate
+      metrics:
+        - delta_overall_macro_information_gain
+        - delta_fixed_600000km2_strict_recall_percentage_points
+        - target_free_cell_intensity_rank_spearman
+    causal_contribution_claim: forbidden
+
+model:
+  family: shared_ridge_poisson_point_process_increment
+  anomaly_intercept: forbidden
+  ridge_lambda: 1.0
+  coefficient_start: all_zero
+  optimizer:
+    method: L-BFGS-B
+    maxiter: 2000
+    maxfun: 100000
+    ftol: 1.0e-12
+    gtol: 1.0e-7
+  one_parameter_vector_per_variant_and_fold_shared_across_horizons: true
+  hyperparameter_search: forbidden
+  tree_or_neural_models: forbidden
+
+calendar:
+  issue_timezone: Asia/Shanghai
+  target_window_rule: '(T,T+h]'
+  primary_horizons_days: [7, 30, 90]
+  descriptive_only_horizons_days: [180, 365]
+  rolling_fold_count: 3
+  folds_source: inputs.inherited_fold_contract
+  folds_mutually_disjoint_by_target_band: true
+  training_target_end_strictly_before_assessment_target_start: true
+  random_split: forbidden
+
+alarm_region:
+  integration_grid_spacing_km: 25
+  grid_origin_xy_m: [0.0, 0.0]
+  grid_and_boundaries_target_independent: true
+  ranking: descending_integrated_conditional_intensity
+  tie_break: ascending_frozen_row_then_column_then_cell_id
+  primary_union_area_km2: 600000
+  study_area_km2: 9415305.754432771
+  primary_budget_fraction_of_study_area_approx: 0.06373
+  cell_area: exact_study_area_clipped_equal_area_cell_km2
+  selection: complete_ranked_prefix_with_cumulative_exact_area_lte_budget
+  partial_cell_selection: forbidden
+  skip_over_budget_cell_and_continue: forbidden
+  actual_selected_area_must_be_lte_budget: true
+  same_area_for_all_variants_and_placebos: true
+  area_expansion_after_score: forbidden
+  descriptive_area_recall_curve:
+    pass_eligible: false
+    budgets_km2:
+      start: 0
+      stop_inclusive: 960000
+      step: 625
+    selection: same_complete_prefix_rule
+    interpolation: forbidden
+    unreachable_same_recall_status: descriptive_unreachable
+  descriptive_molchan_curve:
+    pass_eligible: false
+    budgets: same_as_descriptive_area_recall_curve
+    selection: same_complete_prefix_rule
+    each_fold_horizon_miss_rate: >-
+      one_minus_strict_recall_over_all_unique_physical_targets_in_that_fold_horizon
+    unsupported_targets: counted_as_misses
+    each_fold_horizon_alarm_fraction: >-
+      sum_over_selected_issue_exposures(actual_selected_area_km2_times_horizon_duration)/
+      (study_area_km2_times_sum_over_issue_exposures(horizon_duration))
+    aggregation_order: arithmetic_mean_within_fold_across_7_30_90_then_across_three_folds
+    fold_horizon_weight: 0.1111111111111111
+    endpoints:
+      zero_budget_alarm_fraction: 0.0
+      zero_budget_miss_rate: 1.0
+      stop_budget_km2: 960000
+      beyond_stop: not_computed
+    interpolation: forbidden
+    label: descriptive_miss_rate_vs_alarm_spacetime_fraction
+  reference_example:
+    budget_km2: 700
+    cells:
+      - {cell_id: A, row: 0, column: 0, score: 0.9, exact_area_km2: 300}
+      - {cell_id: B, row: 0, column: 2, score: 0.8, exact_area_km2: 250}
+      - {cell_id: C, row: 0, column: 1, score: 0.8, exact_area_km2: 200}
+      - {cell_id: D, row: 1, column: 0, score: 0.7, exact_area_km2: 400}
+    expected_ranked_ids: [A, C, B, D]
+    expected_complete_prefix_ids: [A, C]
+    expected_exact_selected_area_km2: 500
+
+randomness:
+  root_seed: 147
+  generator: numpy.random.PCG64
+  derivation: sha256_canonical_context_first_16_bytes_big_endian_entropy
+  namespace: stage4-kde-development-v1
+  canonical_context_serialization: utf8_json_sorted_keys_compact_no_nan
+  canonical_context_fields:
+    - root_seed_decimal
+    - schema_version
+    - protocol_version
+    - namespace
+    - frozen_input_seal_sha256
+    - purpose
+    - fold_or_joint
+    - partition_role
+    - replication_index
+  candidate_comparator_horizon_and_metric_are_not_seed_fields: true
+  root_seed_is_included_as_canonical_context_field: true
+  pairing_scope: same_replication_across_variants_folds_horizons_and_metrics
+  worker_count_invariant: true
+  old_r2_randomness_manifest_reused: false
+  code_freeze_randomness_manifest:
+    path: data/manifests/anomaly_increment_kde_dev_randomness.json
+    required_before_real_input_or_target_read: true
+  bootstrap:
+    replications: 2000
+    population: all_unique_M5_6_physical_event_ids_in_three_fold_three_horizon_union
+    unit: deduplicated_physical_event_block_with_all_candidate_comparator_contributions
+    strata: fold_id_x_three_bit_7_30_90_horizon_membership_signature
+    sampling: with_replacement_within_each_stratum_same_stratum_sample_size
+    total_sample_size_each_replication: unchanged_unique_event_union_size
+    fold_horizon_marginal_event_counts_each_replication: preserved_exactly
+    same_multiplicity_vector_for_all_variants_comparators_and_metrics: true
+    singleton_stratum_action: deterministic_self_draw
+    zero_event_fold_horizon_replication_action: impossible_by_contract_otherwise_invalid
+    original_event_to_fold_and_horizon_membership_is_frozen_before_resampling: true
+    intervals:
+      marginal_percentile_95: required_diagnostic_not_gate
+      confirmatory_familywise_simultaneous:
+        method: bonferroni_two_sided_percentile
+        separate_endpoint_families:
+          overall_macro_information_gain:
+            - B1_minus_B0
+            - B1_minus_C0
+            - B2_minus_B0
+            - B2_minus_C0
+          fixed_600000km2_recall_gain:
+            - B1_minus_B0
+            - B1_minus_C0
+            - B2_minus_B0
+            - B2_minus_C0
+        familywise_confidence_level: 0.95
+        comparisons_per_family: 4
+        component_two_sided_confidence_level: 0.9875
+        lower_percentile: 0.00625
+        upper_percentile: 0.99375
+        same_paired_replications_for_all_family_members: true
+        gate_uses_simultaneous_lower_bounds_not_marginal_bounds: true
+    failed_replication_action: evidence_insufficient_no_drop_or_replacement
+  time_permutation:
+    replications: 1000
+    mapping: issue_to_issue_bijection_separate_within_fit_and_assessment_pools
+    coverage_and_background_fixed: true
+    snapshot_scientific_values_and_missingness_moved_together: true
+    trajectory_recomputed_from_pseudo_history: true
+    anomaly_coefficients_refit_each_replication: true
+  space_permutation:
+    replications: 1000
+    mapping: entity_coordinate_pair_bijection_within_frozen_target_blind_strata
+    coverage_background_and_noncoordinate_attributes_fixed: true
+    snapshot_and_trajectory_recomputed_at_200km: true
+    anomaly_coefficients_refit_each_replication: true
+  monte_carlo_p_value: '(1 + count(null >= observed)) / (replications + 1)'
+  maximum_failed_replication_fraction: 0.01
+  failed_permutation_replication_handling:
+    at_or_below_limit: count_as_null_greater_than_or_equal_observed
+    above_limit: evidence_insufficient
+    denominator_remains_configured_replications_plus_one: true
+    replacement_with_new_seed: forbidden
+
+evaluation:
+  primary_statistic: three_fold_three_horizon_equal_weight_macro_information_gain
+  candidate_variants: [B2, B1]
+  background_comparators: [B0, C0]
+  primary_magnitude_bin: M5_6
+  primary_magnitude_range: '[5.0,6.0)'
+  unique_physical_event_union_minimum: 20
+  independent_event_term_means: deduplicated_physical_event_id_not_statistical_independence
+  cell_statistic:
+    dimensions: fold_x_horizon
+    fold_order: [1, 2, 3]
+    horizon_order_days: [7, 30, 90]
+    value: point_process_information_gain_nats_per_unique_physical_event
+    minimum_unique_events_each_fold_horizon: 1
+    zero_event_action: evidence_insufficient_no_partial_macro
+  aggregation:
+    fold_macro: arithmetic_mean_of_7_30_90_cell_information_gains
+    overall_macro: arithmetic_mean_of_three_fold_macros
+    equivalent_weight_per_fold_horizon_cell: 0.1111111111111111
+    horizon_macro: arithmetic_mean_of_three_fold_cell_information_gains
+    recall_aggregation: same_fold_then_overall_equal_weight_order
+    null_replication_statistic: exact_same_overall_macro_after_refit
+    bootstrap_statistic: exact_same_overall_macro_and_recall_after_joint_event_block_resample
+    physical_event_block_shared_across_all_membership_cells: true
+    exposure_compensators_fixed_in_bootstrap: true
+  aggregation_reference_example:
+    fold_rows_horizons_7_30_90:
+      - [0.1, 0.2, 0.3]
+      - [0.0, 0.1, 0.2]
+      - [-0.1, 0.0, 0.1]
+    expected_fold_macros: [0.2, 0.1, 0.0]
+    expected_horizon_macros: [0.0, 0.1, 0.2]
+    expected_overall_macro: 0.1
+  horizon_point_estimate_must_be_positive: [7, 30, 90]
+  fold_positive_count_minimum: 2
+  fold_macro_median_must_be_positive: true
+  macro_information_gain_familywise_simultaneous_95pct_lower_must_be_positive: true
+  time_permutation_p_max: 0.05
+  space_permutation_p_max: 0.05
+  multiple_candidate_control:
+    method: paired_single_step_maxT
+    independent_null_families: [time_permutation, space_permutation]
+    candidate_statistics:
+      B1: overall_macro_ig_B1_minus_C0
+      B2: overall_macro_ig_B2_minus_C0
+    each_replication_family_statistic: max_of_B1_and_B2_candidate_statistics
+    adjusted_p_formula: >-
+      (1 + count(replication_family_max_gte_observed_candidate_statistic)) /
+      (configured_replications + 1)
+    required_for_adopted_candidate:
+      - adjusted_time_permutation_p_lte_0_05
+      - adjusted_space_permutation_p_lte_0_05
+    B0_role: required_direction_ci_and_practical_comparator_not_in_candidate_maxT_family
+    B2_minus_B1_role: component_adoption_gate_only_not_new_stage4a_positive
+    unadjusted_candidate_p_values: diagnostic_only_not_gate
+    B2_observed_invalid_handling:
+      shrink_family_to_B1_only: forbidden
+      B1_adoption_after_B2_invalid: forbidden
+      overall_status: evidence_insufficient
+      replacement_or_recompute: forbidden
+  practical_improvement:
+    pass_rule: fixed_600000_km2_recall_only
+    same_area_strict_recall_gain_percentage_points_minimum: 5.0
+    familywise_simultaneous_95pct_lower_must_be_positive: true
+    required_against: [B0, C0]
+    same_recall_union_area_relative_reduction:
+      role: descriptive_only_not_pass_eligible
+      reference_threshold: 0.10
+  candidate_common_gate:
+    required_candidate_comparator_pairs:
+      - B1_minus_B0
+      - B1_minus_C0
+      - B2_minus_B0
+      - B2_minus_C0
+    required_against_each_of_B0_and_C0:
+      - all_three_horizon_ig_point_estimates_positive
+      - at_least_two_of_three_fold_macros_positive
+      - three_fold_macro_median_positive
+      - overall_macro_ig_familywise_simultaneous_95pct_lower_positive
+      - fixed_600000km2_recall_gain_gte_5pp_and_familywise_simultaneous_95pct_lower_positive
+      - regional_robustness
+    required_once_per_candidate_for_anomaly_beyond_C0_maxT_family:
+      - maxT_adjusted_time_permutation_p_lte_0_05
+      - maxT_adjusted_space_permutation_p_lte_0_05
+  dynamic_additional_gate:
+    contrast: B2_minus_B1
+    at_least_two_of_three_fold_macros_positive: true
+    fold_macro_median_must_be_positive: true
+    failure_action: reject_dynamic_only_then_evaluate_snapshot
+  regional_robustness:
+    minimum_event_bearing_regions: 2
+    minimum_positive_event_bearing_regions: 2
+    leave_strongest_contribution_region_out_macro_ig_must_be_positive: true
+    leave_strongest_contribution_region_out_95pct_interval: required_diagnostic_not_gate
+    raw_region_event_bindings_publication: forbidden
+  full_study_area_target_denominator: true
+  support_conditional_recall_is_diagnostic_only: true
+  m6_plus:
+    role: exploratory
+    minimum_unique_physical_events_for_inference: 10
+
+decision_gate:
+  candidate_gate_applies_independently_to_B2_and_B1: true
+  statuses: [passed, failed, evidence_insufficient, invalid]
+  candidate_status_priority: [invalid, evidence_insufficient, failed, passed]
+  candidate_truth_table:
+    invalid:
+      reasons:
+        - candidate_fit_or_score_invalid
+        - candidate_nonfinite_primary_output
+      scientific_value_category: not_assigned_until_root_cause_review
+    evidence_insufficient:
+      reasons:
+        - unique_physical_event_union_below_20
+        - any_fold_horizon_has_zero_primary_events
+        - required_bootstrap_interval_undefined
+        - point_threshold_met_but_familywise_simultaneous_95pct_lower_includes_no_improvement
+        - permutation_failed_fraction_above_0_01
+        - fewer_than_two_event_bearing_regions
+    failed:
+      precondition: valid_and_evidence_sufficient
+      reasons:
+        - direction_or_fold_stability_gate_failed
+        - either_permutation_p_above_0_05
+        - fixed_area_5pp_practical_gate_failed
+        - coverage_adjusted_gate_failed
+        - regional_point_robustness_gate_failed
+    passed:
+      precondition: valid_evidence_sufficient_and_all_selected_candidate_gates_passed
+  candidate_validity:
+    B0_or_C0_invalid_action: overall_invalid
+    B1_invalid_action: overall_invalid_because_snapshot_candidate_and_dynamic_reference_are_lost
+    B2_invalid_action: overall_evidence_insufficient_no_candidate_adoption
+    no_candidate_may_pass_with_nonfinite_or_failed_fit_score: true
+  overall_status_resolution:
+    shared_invalid_conditions:
+      - leakage_or_target_derived_design
+      - shared_input_support_grid_background_or_seal_identity_mismatch
+      - nonfinite_shared_primary_output
+      - B0_or_C0_fit_or_score_invalid
+      - B1_invalid
+    B2_only_invalid_action: overall_evidence_insufficient_no_candidate_adoption
+    shared_invalid_precedes_candidate_adoption: true
+    explicit_B2_only_invalid_cases:
+      any_B1_status: overall_evidence_insufficient
+    resolution_order:
+      - any_shared_invalid_condition_means_overall_invalid
+      - any_adopted_candidate_passes_means_overall_passed
+      - no_adopted_candidate_and_any_evaluable_candidate_evidence_insufficient_or_B2_only_invalid_means_overall_evidence_insufficient
+      - both_candidates_valid_evidence_sufficient_and_no_adopted_candidate_means_overall_failed
+    nonselected_candidate_failed_status_cannot_override_adopted_pass: true
+  adoption_matrix:
+    - when_all:
+        - B2_common_gate_passes
+        - B2_minus_B1_dynamic_gate_passes
+      selected_candidate: B2
+      rejected_components: []
+    - when_all:
+        - B1_common_gate_passes
+        - B2_status_is_not_invalid
+        - B2_common_gate_or_B2_minus_B1_dynamic_gate_does_not_pass
+      selected_candidate: B1
+      rejected_components: [dynamic_trajectory]
+    - when_all:
+        - B1_common_gate_does_not_pass
+        - no_candidate_is_adoptable
+        - any_candidate_evidence_insufficient_or_B2_only_invalid
+      selected_candidate: B0
+      outcome: evidence_insufficient
+    - when_all:
+        - B1_and_B2_valid_and_evidence_sufficient
+        - no_candidate_is_adoptable
+      selected_candidate: B0
+      outcome: failed
+  passed:
+    claim: development_rolling_signal_worth_one_independent_validation
+    G2_or_G3_claim: forbidden
+    science_value_category: direct_improvement
+    evidence_scope: development_rolling_only
+    decision: continue_to_target_blind_stage4b_protocol_only
+  failed:
+    science_value_category: no_material_progress
+    decision: stop_anomaly_model_expansion_and_reassess
+  evidence_insufficient:
+    science_value_category: no_material_progress
+    decision: stop_model_expansion_and_wait_for_new_mature_evidence_or_reassess
+  invalid:
+    science_value_category: not_assigned_until_root_cause_review
+    decision: >-
+      same_identity_infrastructure_resume_only_if_no_identity_or_code_change;
+      otherwise_close_attempt_and_require_new_target_blind_protocol
+  automatic_stop_on:
+    - data_leakage
+    - target_derived_grid_boundary_or_threshold
+    - background_or_support_identity_mismatch
+    - improvement_only_from_larger_alarm_area
+    - improvement_only_in_one_fold_or_one_region
+  changing_features_folds_area_thresholds_or_models_after_result: forbidden
+
+execution_control:
+  expected_input_manifest:
+    path: data/manifests/anomaly_increment_kde_dev_input.json
+    created_and_committed_at_code_tag: true
+    generated_only_from_protocol_declared_identities_without_opening_real_inputs: true
+    binds:
+      - all_expected_input_paths_and_sha256
+      - development_fold4_background_snapshot_identity
+      - inherited_contract_allowlist_sha256
+      - study_area_and_target_declared_sha256
+  input_identity_seal:
+    derivation: >-
+      sha256(canonical_json(protocol_config_sha256,expected_input_manifest_sha256,
+      environment_lock_sha256,source_commit))
+    written_to_randomness_manifest_as_frozen_input_seal_sha256: true
+  code_freeze_commit_graph:
+    source_commit:
+      identity_symbol: S
+      contains_runner_scientific_modules_and_result_page_schemas: true
+      score_blind_tests_pass_before_creation: true
+    seal_commit:
+      identity_symbol: C
+      exact_parent: S
+      allowed_changed_paths_from_S:
+        - data/manifests/anomaly_increment_kde_dev_input.json
+        - data/manifests/anomaly_increment_kde_dev_randomness.json
+        - data/manifests/anomaly_increment_kde_dev_code_seal.json
+        - data/manifests/anomaly_increment_kde_dev_attempt_ledger.json
+      any_other_changed_path: forbidden
+      self_commit_hash_embedded_in_tracked_tree: forbidden
+    code_tag:
+      name: v0.3.2-kde-anomaly-increment-code
+      points_to: C
+    preflight_remote_verification:
+      - tag_peels_to_C
+      - C_has_exactly_one_parent_S
+      - C_minus_S_changed_paths_equal_allowed_changed_paths_from_S
+      - source_tree_module_and_schema_hashes_match_code_seal
+      - seal_artifact_cross_hashes_are_acyclic_and_match
+  code_seal:
+    path: data/manifests/anomaly_increment_kde_dev_code_seal.json
+    created_and_committed_at_code_tag: true
+    binds:
+      - protocol_config_sha256
+      - expected_input_manifest_sha256
+      - frozen_input_seal_sha256
+      - source_commit_S
+      - expected_code_tag_name
+      - exact_allowed_seal_commit_changed_paths
+      - runner_and_scientific_module_sha256
+      - environment_lock_sha256
+      - randomness_manifest_sha256
+      - initial_zero_attempt_ledger_sha256
+      - result_and_page_schema_sha256
+    must_not_bind:
+      - seal_commit_C_hash
+      - code_seal_own_sha256
+  initial_attempt_ledger:
+    path: data/manifests/anomaly_increment_kde_dev_attempt_ledger.json
+    created_and_committed_at_code_tag_with_operation_count_zero: true
+    append_only_hash_chain: true
+    maximum_registered_scientific_attempts: 1
+    initial_state: unregistered_zero_operations
+    initial_zero_payload_binds:
+      - protocol_config_sha256
+      - expected_input_manifest_sha256
+      - frozen_input_seal_sha256
+      - source_commit_S
+      - expected_code_tag_name
+    initial_zero_payload_must_not_bind:
+      - code_seal_sha256
+      - seal_commit_C_hash
+    registration: atomic_compare_and_swap_existing_zero_ledger_to_registered
+    runtime_registration_appends_verified_code_seal_sha256: true
+    missing_or_nonzero_initial_ledger_action: fail_closed
+  runtime_target_read_ledger:
+    path: data/interim/stage4/anomaly_increment_kde_dev/target_read_ledger.jsonl
+    gitignored_local_only: true
+    atomically_created_at_preflight_start_with_operation_count_zero: true
+    append_only_hash_chain: true
+    maximum_logical_target_open_sessions: 1
+    records_metadata_and_hashes_not_target_rows: true
+  preflight_receipt:
+    path: data/interim/stage4/anomaly_increment_kde_dev/preflight_receipt.json
+    requires_remote_code_tag_identity: true
+    verifies_non_target_inputs_before_attempt_registration: true
+    target_bytes_read_during_preflight: false
+    binds_zero_target_read_ledger_sha256_and_operation_count: true
+  attempt_start_sequence:
+    - verify_remote_code_tag_and_code_seal
+    - atomically_create_or_verify_same_identity_target_read_ledger_at_zero
+    - write_preflight_receipt_bound_to_zero_target_read_ledger
+    - verify_preflight_receipt_and_zero_target_read_count
+    - atomically_register_single_attempt
+    - verify_runtime_target_read_ledger_remains_zero_and_bound_to_preflight_receipt
+    - open_target_once_through_single_adapter
+  checkpoint_root: data/interim/stage4/anomaly_increment_kde_dev/checkpoints
+  checkpoint_identity_fields:
+    - protocol_sha256
+    - code_seal_sha256
+    - input_manifest_sha256
+    - randomness_manifest_sha256
+    - attempt_identity
+  resume:
+    same_identity_only: true
+    completed_checkpoint_deletion_replacement_or_recompute: forbidden
+    identity_or_code_change: close_invalid_and_require_new_target_blind_protocol
+  result_manifest_must_record:
+    - code_seal_sha256
+    - final_attempt_ledger_sha256_and_operation_count
+    - final_target_read_ledger_sha256_and_logical_open_count
+    - completed_checkpoint_identity_set_sha256
+  direct_target_reader_outside_single_adapter: forbidden
+
+science_value_review:
+  required_immediately_after_result: true
+  required_fields:
+    - science_value_category
+    - evidence
+    - decision
+    - next_scientific_test
+    - stop_condition
+  engineering_proxies_cannot_establish_progress:
+    - test_count
+    - code_volume
+    - interface_completeness
+    - runtime_stability
+  missing_review_blocks_stage_completion: true
+
+resources:
+  minimum_reserved_physical_cores: 2
+  maximum_logical_workers: 6
+  minimum_detected_physical_cores_to_run: 3
+  effective_worker_formula: max(1,min(6,physical_cores-2))
+  process_priority: below_normal
+  blas_threads_per_process: 1
+  receipt_must_record:
+    - detected_physical_cores
+    - detected_logical_processors
+    - effective_workers
+    - process_affinity
+    - process_priority
+    - OMP_NUM_THREADS
+    - OPENBLAS_NUM_THREADS
+    - MKL_NUM_THREADS
+  gpu:
+    allowed_only_if_numerically_equivalent_path_is_frozen_at_code_tag: true
+    new_backend_engineering_for_this_gate: forbidden
+    default: cpu_float64
+
+outputs:
+  result_manifest: data/manifests/anomaly_increment_kde_dev_result.json
+  result_manifest_required_fields:
+    - protocol_config_sha256
+    - code_commit_tag_and_seal_sha256
+    - input_manifest_sha256
+    - randomness_manifest_sha256
+    - attempt_and_target_read_ledger_hashes_and_counts
+    - per_fold_horizon_exposure_event_and_unsupported_miss_counts
+    - source_library_total_vs_attempt_used_snapshot_and_feature_row_counts_by_fold_with_unused_reason
+    - B0_C0_B1_B2_metrics_confidence_intervals_and_placebos
+    - familywise_simultaneous_95pct_IG_and_fixed_area_recall_bounds_with_marginal_diagnostic_labels
+    - paired_maxT_adjusted_time_and_space_p_values_with_unadjusted_diagnostic_labels
+    - candidate_gate_truth_table
+    - selected_candidate_or_background
+    - status_and_reason_codes
+    - output_artifact_sha256
+    - science_value_category
+    - evidence
+    - decision
+    - next_scientific_test
+    - stop_condition
+  acceptance: docs/phase4_kde_development_acceptance.md
+  static_science_summary: docs/anomaly_increment_kde_dev_results.svg
+  public_interactive_forecast: outputs/interactive/anomaly_increment_kde_dev_forecast/index.html
+  public_interactive_aggregate_results: outputs/interactive/anomaly_increment_kde_dev_results/index.html
+  public_stage4a_index_files_immutable_after_result_tag: true
+  local_full_fidelity_forecast: data/interim/stage4/anomaly_increment_kde_dev/forecast/index.html
+  local_retrospective: data/interim/stage4/anomaly_increment_kde_dev/retrospective/index.html
+  prospective_issue_root: outputs/prospective
+  target_free_forecast_status_policy:
+    applies_to:
+      - public_target_free_forecast
+      - local_full_fidelity_target_free_forecast
+    passed: selected_B1_or_B2_primary_with_B0_optional_comparator
+    failed_or_evidence_insufficient: B0_primary_B1_B2_default_off_and_labeled_not_adopted_diagnostic
+    invalid: do_not_publish_forecast_page
+  target_free_stage4a_pages_evidence_role: historical_or_development_replay_not_prospective_evidence
+  prospective_issue_contract:
+    activation: only_after_stage4a_result_tag_and_frozen_selected_or_B0_fallback_model
+    issue_time_must_precede_target_window: true
+    backfill: forbidden
+    overwrite_or_delete_after_issue: forbidden
+    required_identity_fields:
+      - issue_id
+      - issue_time_and_generation_time
+      - data_cutoff_and_7_30_90_day_windows
+      - input_manifest_sha256
+      - model_identity_and_payload_sha256
+      - protocol_config_sha256
+      - code_commit_tag_and_seal_sha256
+      - immutable_archive_path
+    target_payload_hit_miss_or_future_event_count: forbidden
+  schemas:
+    public_target_free_forecast:
+      required:
+        - issue_time_and_7_30_90_day_windows
+        - B0_C0_B1_B2_or_selected_candidate_relative_intensity_layers
+        - 600000km2_alarm_layer
+        - support_status
+        - historical_or_development_replay_not_prospective_evidence_warning
+        - relative_intensity_not_absolute_probability_notice
+        - research_development_not_operational_warning
+      forbidden:
+        - target_payload
+        - hit_or_miss
+        - future_event_count
+        - target_derived_failure_case
+      spatial_publication: rasterized_generalized_display_no_vector_geometry_or_coordinate_tooltip
+      status_policy: outputs.target_free_forecast_status_policy
+    public_aggregate_results:
+      required:
+        - final_status_selected_candidate_failed_gates_and_science_value_decision
+        - plain_language_data_and_model_flow
+        - B0_C0_B1_B2_comparisons
+        - confidence_intervals
+        - familywise_simultaneous_95pct_IG_and_fixed_area_recall_bounds_with_marginal_diagnostic_labels
+        - time_and_space_placebos
+        - paired_maxT_adjusted_time_and_space_p_values_with_unadjusted_diagnostic_labels
+        - fixed_600000km2_recall
+        - complete_area_recall_curve
+        - molchan_miss_rate_alarm_area_curve
+        - fold_and_region_robustness
+        - per_fold_horizon_event_and_exposure_counts
+        - source_library_total_vs_attempt_used_snapshot_and_feature_row_counts_by_fold_with_unused_reason
+        - maturity_end_and_full_study_area_denominator
+        - unsupported_target_miss_count
+        - feature_group_coefficients_effects_and_sensitivity
+        - research_development_not_operational_warning
+      forbidden:
+        - raw_target_rows
+        - raw_event_or_anomaly_identifiers
+        - raw_coordinates
+    local_historical_retrospective:
+      required:
+        - target_overlay
+        - hit_miss_and_failure_cases
+        - per_issue_and_per_horizon_drilldown
+        - historical_retrospective_not_prospective_warning
+      allowed: [local_raw_target_binding]
+      publication: forbidden_gitignored
+    local_full_fidelity_target_free_forecast:
+      required:
+        - exact_25km_alarm_cells
+        - exact_support_and_relative_intensity
+        - no_target_payload
+        - historical_or_development_replay_not_prospective_evidence_warning
+        - research_development_not_operational_warning
+      status_policy: outputs.target_free_forecast_status_policy
+  public_outputs_forbid:
+    - raw_event_identifiers
+    - raw_anomaly_identifiers
+    - raw_coordinates
+    - restricted_boundaries
+    - local_paths
+  retrospective_must_be_labeled_historical_not_prospective: true
+  static_science_summary_schema: same_required_scientific_fields_as_public_aggregate_results
+  plain_language_data_and_model_flow_required_content:
+    - frozen_75km_spatial_KDE_uses_history_only_through_2019_12_31
+    - each_fold_rate_head_uses_only_earthquakes_in_its_prior_training_exposures
+    - assessment_M5_6_earthquakes_are_used_only_for_scoring_and_hit_miss
+    - 205_causal_anomaly_snapshots_and_3217885_feature_rows
+    - source_library_totals_are_not_the_attempt_sample_size
+    - per_fold_actual_used_snapshot_and_feature_row_counts_with_future_or_validation_holdout_reasons
+    - reporting_coverage_controls
+    - M5_6_equals_5p0_lte_M_lt_6p0
+    - three_rolling_folds_x_7_30_90_day_horizons
+    - B0_to_C0_to_B1_to_B2_component_flow
+    - human_prediction_location_magnitude_time_and_free_text_forbidden
+  all_stage4a_pages_watermark: research_development_not_operational_warning
+  prospective_forecasts_append_only_no_backfill_or_overwrite: true
