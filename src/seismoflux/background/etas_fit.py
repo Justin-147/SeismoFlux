@@ -282,6 +282,12 @@ class ETASParameterBounds:
             raise ValueError("transformed ETAS parameter vector must have length five")
         if not np.all(np.isfinite(values)):
             raise ValueError("transformed ETAS parameters must be finite")
+        transformed_bounds = self.transformed()
+        if any(
+            value < lower or value > upper
+            for value, (lower, upper) in zip(values, transformed_bounds, strict=True)
+        ):
+            raise ValueError("transformed ETAS parameters are outside frozen bounds")
         try:
             with np.errstate(over="raise", invalid="raise"):
                 physical = np.exp(values)
@@ -289,12 +295,36 @@ class ETASParameterBounds:
             raise ValueError("transformed ETAS parameters overflow physical space") from error
         if not np.all(np.isfinite(physical)):
             raise ValueError("transformed ETAS parameters overflow physical space")
+        physical_bounds = (
+            self.background_rate_per_day,
+            self.productivity_k,
+            self.alpha,
+            self.c_days,
+            (self.p[0] - 1.0, self.p[1] - 1.0),
+        )
+        endpoint_indices: list[int | None] = []
+        for index, (value, transformed_limit, physical_limit) in enumerate(
+            zip(values, transformed_bounds, physical_bounds, strict=True)
+        ):
+            if value == transformed_limit[0]:
+                physical[index] = physical_limit[0]
+                endpoint_indices.append(0)
+            elif value == transformed_limit[1]:
+                physical[index] = physical_limit[1]
+                endpoint_indices.append(1)
+            else:
+                endpoint_indices.append(None)
+        p_endpoint_index = endpoint_indices[4]
         parameters = ETASParameters(
             background_rate_per_day=float(physical[0]),
             productivity_k=float(physical[1]),
             alpha=float(physical[2]),
             c_days=float(physical[3]),
-            p=1.0 + float(physical[4]),
+            p=(
+                self.p[p_endpoint_index]
+                if p_endpoint_index is not None
+                else 1.0 + float(physical[4])
+            ),
         )
         if not self.contains(parameters):
             raise ValueError("transformed ETAS parameters are outside frozen bounds")

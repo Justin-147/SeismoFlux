@@ -1179,3 +1179,144 @@ def test_optimizer_defaults_and_bounds_match_frozen_protocol() -> None:
         lower <= value <= upper
         for value, (lower, upper) in zip(first, transformed_bounds, strict=True)
     )
+
+
+def test_from_transformed_maps_exact_endpoints_to_exact_physical_bounds() -> None:
+    bounds = ETASParameterBounds()
+    transformed_bounds = bounds.transformed()
+
+    lower = bounds.from_transformed([limit[0] for limit in transformed_bounds])
+    upper = bounds.from_transformed([limit[1] for limit in transformed_bounds])
+
+    assert lower == ETASParameters(
+        background_rate_per_day=bounds.background_rate_per_day[0],
+        productivity_k=bounds.productivity_k[0],
+        alpha=bounds.alpha[0],
+        c_days=bounds.c_days[0],
+        p=bounds.p[0],
+    )
+    assert upper == ETASParameters(
+        background_rate_per_day=bounds.background_rate_per_day[1],
+        productivity_k=bounds.productivity_k[1],
+        alpha=bounds.alpha[1],
+        c_days=bounds.c_days[1],
+        p=bounds.p[1],
+    )
+
+
+def test_from_transformed_rejects_one_ulp_outside_each_frozen_endpoint() -> None:
+    bounds = ETASParameterBounds()
+    transformed_bounds = bounds.transformed()
+    midpoint = np.asarray(
+        [(lower + upper) / 2.0 for lower, upper in transformed_bounds],
+        dtype=np.float64,
+    )
+
+    for index, (lower, upper) in enumerate(transformed_bounds):
+        below = midpoint.copy()
+        below[index] = np.nextafter(lower, -np.inf)
+        with pytest.raises(ValueError, match="outside frozen bounds"):
+            bounds.from_transformed(below)
+
+        above = midpoint.copy()
+        above[index] = np.nextafter(upper, np.inf)
+        with pytest.raises(ValueError, match="outside frozen bounds"):
+            bounds.from_transformed(above)
+
+
+def test_from_transformed_preserves_plain_exp_for_non_endpoint_values() -> None:
+    bounds = ETASParameterBounds()
+    transformed_bounds = bounds.transformed()
+    values = np.asarray(
+        [
+            np.nextafter(lower, upper) if index % 2 == 0 else np.nextafter(upper, lower)
+            for index, (lower, upper) in enumerate(transformed_bounds)
+        ],
+        dtype=np.float64,
+    )
+
+    decoded = bounds.from_transformed(values)
+    plain = np.exp(values)
+    actual = (
+        decoded.background_rate_per_day,
+        decoded.productivity_k,
+        decoded.alpha,
+        decoded.c_days,
+        decoded.p,
+    )
+    expected = (
+        float(plain[0]),
+        float(plain[1]),
+        float(plain[2]),
+        float(plain[3]),
+        1.0 + float(plain[4]),
+    )
+
+    assert tuple(value.hex() for value in actual) == tuple(value.hex() for value in expected)
+
+
+@pytest.mark.parametrize("endpoint_name", ["background_rate_per_day", "c_days"])
+def test_objective_is_finite_at_repaired_background_and_c_upper_endpoints(
+    endpoint_name: str,
+) -> None:
+    bounds = ETASParameterBounds()
+    background_rate_per_day = 0.1
+    c_days = _parameters().c_days
+    if endpoint_name == "background_rate_per_day":
+        background_rate_per_day = bounds.background_rate_per_day[1]
+    else:
+        c_days = bounds.c_days[1]
+    parameters = ETASParameters(
+        background_rate_per_day=background_rate_per_day,
+        productivity_k=_parameters().productivity_k,
+        alpha=_parameters().alpha,
+        c_days=c_days,
+        p=_parameters().p,
+    )
+
+    value = etas_objective(_problem(), _spec(), bounds)(bounds.to_transformed(parameters))
+
+    assert math.isfinite(value)
+
+
+def test_from_transformed_endpoint_round_trip_remains_strictly_in_bounds() -> None:
+    bounds = ETASParameterBounds()
+    endpoint_parameters = (
+        ETASParameters(
+            background_rate_per_day=bounds.background_rate_per_day[0],
+            productivity_k=bounds.productivity_k[0],
+            alpha=bounds.alpha[0],
+            c_days=bounds.c_days[0],
+            p=bounds.p[0],
+        ),
+        ETASParameters(
+            background_rate_per_day=bounds.background_rate_per_day[1],
+            productivity_k=bounds.productivity_k[1],
+            alpha=bounds.alpha[1],
+            c_days=bounds.c_days[1],
+            p=bounds.p[1],
+        ),
+    )
+
+    for parameters in endpoint_parameters:
+        decoded = bounds.from_transformed(bounds.to_transformed(parameters))
+        assert decoded == parameters
+        assert bounds.contains(decoded)
+
+
+@pytest.mark.parametrize(
+    ("transformed", "message"),
+    [
+        (np.asarray([0.0, 0.0, 0.0, 0.0]), "length five"),
+        (np.asarray([[0.0, 0.0, 0.0, 0.0, 0.0]]), "length five"),
+        (np.asarray([np.nan, 0.0, 0.0, 0.0, 0.0]), "must be finite"),
+        (np.asarray([np.inf, 0.0, 0.0, 0.0, 0.0]), "must be finite"),
+        (np.asarray([-np.inf, 0.0, 0.0, 0.0, 0.0]), "must be finite"),
+    ],
+)
+def test_from_transformed_rejects_wrong_shape_and_nonfinite_values(
+    transformed: np.ndarray,
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        ETASParameterBounds().from_transformed(transformed)
