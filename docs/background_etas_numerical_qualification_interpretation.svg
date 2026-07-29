@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="470" viewBox="0 0 1040 470" role="img" aria-labelledby="title desc">
+  <title id="title">ETAS Q2 数值资格的准确判读</title>
+  <desc id="desc">二十五个冻结起点全部在初始向量处终止，因而没有参数快照，下游数值门没有计算。结论只是当前执行路径不可评价，下一步停止本 ETAS 修复并转向七十五公里 KDE 加动态异常检验。</desc>
+  <style>
+    text { font-family: Arial, "Microsoft YaHei", sans-serif; fill: #172033; }
+    .title { font-size: 24px; font-weight: 600; }
+    .label { font-size: 16px; font-weight: 600; }
+    .body { font-size: 15px; }
+    .small { font-size: 13px; fill: #4b5565; }
+    .line { stroke: #778195; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    .input { fill: #e9f2ff; stroke: #5f84b8; stroke-width: 1.5; }
+    .stop { fill: #fff0db; stroke: #cb7b20; stroke-width: 2; }
+    .na { fill: #edf0f4; stroke: #8b95a5; stroke-width: 1.5; }
+    .decision { fill: #e8f5ee; stroke: #2d8b62; stroke-width: 2; }
+    .warn { fill: #fff7e8; stroke: #cb7b20; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#778195"/>
+    </marker>
+  </defs>
+  <rect width="1040" height="470" fill="#f7f9fc"/>
+  <text x="30" y="42" class="title">ETAS Q2：真正发生了什么</text>
+  <text x="30" y="68" class="small">这是数值执行资格，不是地震预测命中率，也不是对 ETAS 科学价值的否定。</text>
+
+  <rect x="30" y="102" width="210" height="96" rx="10" class="input"/>
+  <text x="135" y="130" text-anchor="middle" class="label">冻结输入</text>
+  <text x="135" y="158" text-anchor="middle" class="body">5 个时间快照</text>
+  <text x="135" y="181" text-anchor="middle" class="body">每快照 5 个起点</text>
+
+  <path d="M240 150 H290" class="line"/>
+
+  <rect x="300" y="102" width="245" height="96" rx="10" class="stop"/>
+  <text x="422" y="130" text-anchor="middle" class="label">25/25 在起点终止</text>
+  <text x="422" y="158" text-anchor="middle" class="body">迭代次数 = 0</text>
+  <text x="422" y="181" text-anchor="middle" class="body">函数评价 = 1；终点 = 初始点</text>
+
+  <path d="M545 150 H595" class="line"/>
+
+  <rect x="605" y="102" width="190" height="96" rx="10" class="na"/>
+  <text x="700" y="130" text-anchor="middle" class="label">没有参数快照</text>
+  <text x="700" y="158" text-anchor="middle" class="body">没有可供下游</text>
+  <text x="700" y="181" text-anchor="middle" class="body">门控检查的拟合解</text>
+
+  <path d="M795 150 H845" class="line"/>
+
+  <rect x="855" y="102" width="155" height="96" rx="10" class="warn"/>
+  <text x="932" y="130" text-anchor="middle" class="label">唯一结论</text>
+  <text x="932" y="158" text-anchor="middle" class="body">当前执行路径</text>
+  <text x="932" y="181" text-anchor="middle" class="body">not_evaluable</text>
+
+  <text x="30" y="238" class="label">因此，下游门不是“算完后失败”，而是“未计算/不可用”：</text>
+
+  <rect x="30" y="260" width="225" height="58" rx="8" class="na"/>
+  <text x="142" y="286" text-anchor="middle" class="body">Hessian：未计算</text>
+  <text x="142" y="306" text-anchor="middle" class="small">没有收敛参数</text>
+
+  <rect x="275" y="260" width="225" height="58" rx="8" class="na"/>
+  <text x="387" y="286" text-anchor="middle" class="body">分支比：未计算</text>
+  <text x="387" y="306" text-anchor="middle" class="small">没有参数快照</text>
+
+  <rect x="520" y="260" width="225" height="58" rx="8" class="na"/>
+  <text x="632" y="286" text-anchor="middle" class="body">三网格：未计算</text>
+  <text x="632" y="306" text-anchor="middle" class="small">没有主拟合解</text>
+
+  <rect x="765" y="260" width="245" height="58" rx="8" class="na"/>
+  <text x="887" y="286" text-anchor="middle" class="body">局部父历史敏感性：未计算</text>
+  <text x="887" y="306" text-anchor="middle" class="small">fold 1 / fold 3 缺少主参数</text>
+
+  <rect x="30" y="356" width="980" height="76" rx="10" class="decision"/>
+  <text x="50" y="385" class="label">科学决策：停止当前 ETAS 修复，调整路线</text>
+  <text x="50" y="411" class="body">保留已有正证据的 75 km KDE；先冻结新的目标盲协议，再检验 KDE + 动态异常是否在相同报警面积下提高未来区域召回。</text>
+
+  <text x="30" y="457" class="small">禁止扩大解释：本图不证明 ETAS 无预测价值，不证明异常有效或无效，也不消费阶段 4 正式目标或锁定测试。</text>
+</svg>

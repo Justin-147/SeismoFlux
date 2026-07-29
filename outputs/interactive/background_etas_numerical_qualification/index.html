@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>ETAS资格检验</title>
+<style>body{font-family:Arial,"Microsoft YaHei";max-width:850px;margin:30px auto;background:#f5f7fb}
+.card{background:white;padding:20px;border-radius:10px}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.p,.f{color:white;padding:12px;border-radius:7px}.p{background:#2d9d78}.f{background:#d95d5d}</style>
+<div class="card"><h1>ETAS 数值资格检验</h1>
+<p>拟合稳定性，不是预测命中率；完全离线且无事件坐标。</p>
+<select id="s"></select><h2 id="t"></h2><div id="g" class="g"></div></div>
+<script id="d" type="application/json">{"overall": "not_evaluable", "rows": [{"snapshot_id": "fold_1", "status": "not_evaluable", "converged": 0, "hessian": false, "branching": false, "grid": false}, {"snapshot_id": "fold_2", "status": "not_evaluable", "converged": 0, "hessian": false, "branching": false, "grid": false}, {"snapshot_id": "fold_3", "status": "not_evaluable", "converged": 0, "hessian": false, "branching": false, "grid": false}, {"snapshot_id": "fold_4", "status": "not_evaluable", "converged": 0, "hessian": false, "branching": false, "grid": false}, {"snapshot_id": "final_validation", "status": "not_evaluable", "converged": 0, "hessian": false, "branching": false, "grid": false}]}</script><script>
+const d=JSON.parse(document.getElementById("d").textContent),s=document.getElementById("s");
+d.rows.forEach(r=>s.add(new Option(r.snapshot_id,r.snapshot_id)));
+function draw(){const r=d.rows.find(x=>x.snapshot_id===s.value);t.textContent="结论："+r.status;
+g.replaceChildren(...[["多起点",r.converged>=4],["Hessian",r.hessian],["分支比",r.branching],["三网格",r.grid]]
+.map(x=>Object.assign(document.createElement("div"),{className:x[1]?"p":"f",textContent:x[0]+"："+(x[1]?"通过":"未通过")})))}
+s.onchange=draw;draw()</script>

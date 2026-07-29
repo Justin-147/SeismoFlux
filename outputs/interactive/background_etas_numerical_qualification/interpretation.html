@@ -1,0 +1,90 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETAS Q2 准确判读</title>
+<style>
+  :root { color-scheme: light dark; font-family: Arial, "Microsoft YaHei", sans-serif; }
+  body { max-width: 960px; margin: 24px auto; padding: 0 16px; line-height: 1.55; }
+  h1 { font-size: 1.55rem; margin-bottom: 4px; }
+  .muted { opacity: .72; }
+  .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 22px 0; }
+  select { font: inherit; padding: 8px 10px; }
+  .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .box { border: 1px solid currentColor; border-radius: 9px; padding: 12px; min-height: 92px; }
+  .box strong { display: block; margin-bottom: 6px; }
+  .input { background: color-mix(in srgb, #4b8ad8 16%, transparent); }
+  .stop { background: color-mix(in srgb, #d98722 18%, transparent); }
+  .na { background: color-mix(in srgb, #8b95a5 18%, transparent); }
+  .decision { background: color-mix(in srgb, #2d8b62 18%, transparent); }
+  .gates { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 18px 0; }
+  .gate { border-top: 4px solid #8b95a5; padding: 10px 6px; }
+  .gate b { display: block; }
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid currentColor; }
+  .notice { border-left: 5px solid #d98722; padding: 10px 14px; margin-top: 20px; }
+  @media (max-width: 700px) {
+    .flow, .gates { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 430px) {
+    .flow, .gates { grid-template-columns: 1fr; }
+  }
+</style>
+<h1>ETAS Q2：当前执行路径不可评价</h1>
+<div class="muted">查看每个冻结快照发生了什么；这里展示的是数值执行资格，不是预测命中率。</div>
+
+<div class="controls">
+  <label for="snapshot">选择快照</label>
+  <select id="snapshot"></select>
+  <span id="range" class="muted"></span>
+</div>
+
+<div class="flow" aria-label="ETAS 数值资格执行链">
+  <div class="box input"><strong>冻结输入</strong><span id="input"></span></div>
+  <div class="box stop"><strong>5/5 在初始点终止</strong>迭代次数均为 0；每个起点只记录 1 次函数评价。</div>
+  <div class="box na"><strong>没有参数快照</strong>没有起点形成可供下游检查的拟合参数。</div>
+  <div class="box decision"><strong>协议结论</strong><code>not_evaluable</code>：当前冻结执行路径不可评价。</div>
+</div>
+
+<div class="gates" aria-label="下游门状态">
+  <div class="gate"><b>Hessian</b>未计算</div>
+  <div class="gate"><b>分支比</b>未计算</div>
+  <div class="gate"><b>三网格</b>未计算</div>
+  <div class="gate"><b>局部父历史敏感性</b><span id="sensitivity"></span></div>
+</div>
+
+<table>
+  <thead><tr><th>拟合事件</th><th>因果父历史</th><th>75 km KDE 训练事件</th><th>收敛起点</th></tr></thead>
+  <tbody><tr><td id="fit"></td><td id="parent"></td><td id="kde"></td><td>0 / 5</td></tr></tbody>
+</table>
+
+<div class="notice">
+  这不能解释为“ETAS 没有预测价值”。科学决策是停止本次 ETAS 修复，不重跑、不调参；下一步以已有正证据的 75 km KDE 为背景，检验动态异常能否在相同报警面积下提高未来区域召回。
+</div>
+
+<script id="data" type="application/json">
+[
+  {"id":"fold_1","fit":385,"parent":1875,"kde":3189,"gradient":[144.31,970.02],"sensitivity":"未计算：缺少主参数"},
+  {"id":"fold_2","fit":1287,"parent":2874,"kde":4182,"gradient":[614.17,21770.17],"sensitivity":"不要求"},
+  {"id":"fold_3","fit":1828,"parent":3592,"kde":4722,"gradient":[902.58,27139.32],"sensitivity":"未计算：缺少主参数"},
+  {"id":"fold_4","fit":2342,"parent":4263,"kde":5237,"gradient":[715.67,2014.88],"sensitivity":"不要求"},
+  {"id":"final_validation","fit":2734,"parent":4802,"kde":5629,"gradient":[1263.79,66342.82],"sensitivity":"不要求"}
+]
+</script>
+<script>
+  const rows = JSON.parse(document.getElementById("data").textContent);
+  const select = document.getElementById("snapshot");
+  rows.forEach((row) => select.add(new Option(row.id, row.id)));
+  const format = new Intl.NumberFormat("zh-CN");
+  function draw() {
+    const row = rows.find((item) => item.id === select.value);
+    document.getElementById("input").textContent = `${row.id}：5 个冻结起点`;
+    document.getElementById("fit").textContent = format.format(row.fit);
+    document.getElementById("parent").textContent = format.format(row.parent);
+    document.getElementById("kde").textContent = format.format(row.kde);
+    document.getElementById("range").textContent =
+      `初始点梯度范数范围 ${format.format(row.gradient[0])}–${format.format(row.gradient[1])}`;
+    document.getElementById("sensitivity").textContent = row.sensitivity;
+  }
+  select.addEventListener("change", draw);
+  draw();
+</script>
