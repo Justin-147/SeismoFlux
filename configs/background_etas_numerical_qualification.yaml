@@ -1,0 +1,207 @@
+schema_version: 1
+protocol_version: 0.2.2
+protocol_revision: science_first_q0
+stage: 2-ETAS-Q
+status: preregistered_target_blind
+frozen_on: '2026-07-29'
+blueprint: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md
+
+scientific_goal:
+  project_question: dynamic_anomalies_add_predictive_value_beyond_etas_under_fixed_alarm_area
+  immediate_question: etas_is_numerically_evaluable_on_all_five_frozen_local_support_snapshots
+  result_values: [evaluable, not_evaluable]
+  etas_evaluable_is_numerical_status_not_a_new_g1_ls_gate: true
+  g1_ls_remains_passed_by: spatial_poisson/gaussian_kde_bw75km
+  stage4_requires_evaluable_etas_as_primary_comparator: true
+  one_bounded_qualification_only: true
+  candidate_after_this_attempt_forbidden: true
+
+publication:
+  base_commit: 456419e647dc90b7ad39a01a7a7ccc3d097528f7
+  base_protocol_tag: v0.2.2-background-etas-repair-protocol-r4
+  protocol_tag: v0.2.2-background-etas-qualification-protocol
+  code_tag: v0.2.2-background-etas-qualification-code
+  result_tag: v0.2.2-background-etas-qualification-result
+  exact_order: [protocol, code, qualification_result]
+  every_step_requires: [tests, acceptance, commit, push, remote_annotated_tag]
+  positive_and_negative_results_use_same_result_tag: true
+  historical_r1_to_r5_evidence_is_immutable: true
+
+frozen_identity:
+  blueprint_sha256: 68820198d71b6dce3ee3e63a0a6e2bb2a8acd146fa8164704c72172182fa4f04
+  parent_protocol_path: configs/background_etas_numerical_repair.yaml
+  parent_protocol_sha256: 38a92ab3946d582977892fa79a237f775d4fac47ff59a6e0ec16600985964dc7
+  parent_background_path: configs/background_local_support.yaml
+  parent_background_sha256: 85c7c05f353e25d742e1d4d694012205bba8fa3a1b6f4e40722bbd17ad92fd1c
+  project_config_path: configs/base_local_support.yaml
+  project_config_sha256: 86e3282601f734235e42b15cc484472324475fe72fce9321c802a099aea6694a
+  uv_lock_path: uv.lock
+  uv_lock_sha256: 34188ff1d0aa38996233412d36ef65eb5076205c376634368ddd66582097efa5
+  catalog_path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+  catalog_sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+  study_area_path: data/processed/china_mainland.geojson
+  study_area_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+  support_manifest_path: data/manifests/background_local_support_manifest.json
+  support_manifest_sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+  issue_manifest_path: data/manifests/background_local_support_fold_manifest.json
+  issue_manifest_sha256: d7ae5266c9143ed0a67a9954da52039b2753f108698fb05477466a6d5b934e38
+  start_manifest_path: data/manifests/etas_numerical_repair_start_manifest.json
+  start_manifest_sha256: e674ca7e02f1da9fc5afd87812e34e2ae9447f47e496d3f772277b6cd68ef05e
+  start_vector_payload_sha256: 29275083fb4a6a1209ba2c6e0e1e6033ab5bb51dab7b2ffba689b04784d3acd5
+  production_fixture_path: tests/fixtures/background/etas_micro_reference.json
+  production_fixture_sha256: c6db5e4079f583f0ff12d24136459368614ab389765081ef8945594762cc7a04
+  independent_fixture_path: tests/fixtures/background/jss_japan_reference.json
+  independent_fixture_sha256: 28f66bdbc192be37923108b063036104d73c8ef32142a58e57e633a60be2e924
+
+target_blindness:
+  allowed_catalog_columns:
+    [physical_event_id, origin_time_utc, available_at, longitude, latitude, magnitude, inside_study_area]
+  per_snapshot_event_rule: origin_time_utc_lte_fit_end_and_available_at_lte_fit_end
+  anomaly_feature_read: false
+  stage4_target_read: false
+  assessment_event_read: false
+  prior_score_read: false
+  information_gain_computation: false
+  forecast_hit_computation: false
+  locked_test_read_or_run: false
+  formal_target_consumer_count: 0
+  public_event_id_or_coordinate_output: false
+
+snapshots:
+  order: [fold_1, fold_2, fold_3, fold_4, final_validation]
+  history_start_utc: '1970-01-01T00:00:00Z'
+  fit_start_utc: '2000-01-01T00:00:00Z'
+  common_mc: 4.0
+  entries:
+    - {snapshot_id: fold_1, fit_end_utc: '2004-12-31T16:00:00Z', support_id: local-support-f06e7c7496ea2357, compensator_domain_id: 154062341fe6e2b68625f90b832219617ce5c61b418a3ff31f4df36f50e8fb1f, retained_area_fraction: 0.9734474900209907, fit_event_count: 385, parent_event_count: 1875, immigrant_kde_training_event_count: 3189, include_eligible_unsupported_parent_history: true}
+    - {snapshot_id: fold_2, fit_end_utc: '2009-12-31T16:00:00Z', support_id: local-support-eaee903b28c55ace, compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55, retained_area_fraction: 1.0, fit_event_count: 1287, parent_event_count: 2874, immigrant_kde_training_event_count: 4182, include_eligible_unsupported_parent_history: false}
+    - {snapshot_id: fold_3, fit_end_utc: '2014-12-31T16:00:00Z', support_id: local-support-f86126dbec5bb79b, compensator_domain_id: 8e41c306592739c634ca85bf2540dbcfeb2086e64e908a41b4f90db7cd1f94f1, retained_area_fraction: 0.9972058595099415, fit_event_count: 1828, parent_event_count: 3592, immigrant_kde_training_event_count: 4722, include_eligible_unsupported_parent_history: true}
+    - {snapshot_id: fold_4, fit_end_utc: '2019-12-31T16:00:00Z', support_id: local-support-788851371baf0e3b, compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55, retained_area_fraction: 1.0, fit_event_count: 2342, parent_event_count: 4263, immigrant_kde_training_event_count: 5237, include_eligible_unsupported_parent_history: false}
+    - {snapshot_id: final_validation, fit_end_utc: '2023-06-30T16:00:00Z', support_id: local-support-f6816ab6c6581306, compensator_domain_id: 33a9095704a09f8661c48061f9febec0342a9db671d6384fe7dcbeb3cf3aed55, retained_area_fraction: 1.0, fit_event_count: 2734, parent_event_count: 4802, immigrant_kde_training_event_count: 5629, include_eligible_unsupported_parent_history: false}
+  unsupported_parent_sensitivity_required_for: [fold_1, fold_3]
+  unsupported_parent_sensitivity_method: reevaluate_primary_selected_parameters_without_refit
+  unsupported_parent_sensitivity_optimizer_call_count: 0
+  unsupported_parent_sensitivity_is_diagnostic_not_qualification_gate: true
+  unsupported_parent_sensitivity_result_values:
+    [computed, not_computable_primary_parameters_absent]
+  support_reconstruction_must_equal_frozen_manifest: true
+  local_mc_spatial_isolation: raw_mc_above_common_mc_marks_only_that_fixed_cell_unsupported
+  local_mc_spatial_isolation_must_not_propagate_to_other_cells: true
+  no_eligible_temporal_completeness_layer_is_global_hard_failure: true
+  support_thresholds_may_not_be_recomputed_or_relaxed: true
+  unsupported_targets_never_enter_fit_or_future_scoring: true
+  minimum_retained_area_fraction: 0.95
+
+model:
+  variant_id: etas/d25_q1.5_gamma1_cut300_kde_bw75
+  background_kde_bandwidth_km: 75.0
+  maximum_magnitude: 9.5
+  spatial_kernel: {d_km2: 25.0, q: 1.5, gamma: 1.0, cutoff_km: 300.0}
+  temporal_kernel: {history_parent_cutoff_days: 3650.0, form: normalized_infinite_support_omori_utsu}
+  branching_ratio_maximum: 0.95
+  parameter_order: [background_rate_per_day, productivity_k, alpha, c_days, p]
+  transformed_parameter_order: [log_background_rate_per_day, log_productivity_k, log_alpha, log_c_days, log_p_minus_one]
+  parameter_bounds:
+    background_rate_per_day: [0.01, 10.0]
+    productivity_k: [0.0001, 0.5]
+    alpha: [0.05, 2.0]
+    c_days: [0.001, 30.0]
+    p: [1.01, 2.5]
+  quadrature_grid_km: [50.0, 25.0, 12.5]
+
+repair:
+  only_existing_symbol_allowed_to_change: ETASParameterBounds.from_transformed
+  defect: exp_log_physical_endpoint_may_decode_one_ulp_outside_frozen_bound
+  method: exact_transformed_endpoint_to_exact_physical_endpoint
+  require_strict_transformed_bounds_check: true
+  forbidden: [clip, tolerance, widened_bounds, nextafter_expansion, changed_objective, changed_optimizer]
+
+optimizer:
+  method: L-BFGS-B
+  root_seed: 147
+  bit_generator: numpy.random.PCG64
+  starts_per_snapshot: 5
+  start_indices: [0, 1, 2, 3, 4]
+  exact_start_manifest_required: true
+  options: {ftol: 1.0e-12, gtol: 1.0e-6, maxiter: 500, maxfun: 100000, maxls: 20, gradient_relative_step: 1.0e-6}
+  retry_with_new_seed: false
+  replacement_start_allowed: false
+  threshold_relaxation_after_result: false
+
+qualification:
+  exact_snapshot_count: 5
+  exact_completed_start_row_count: 25
+  all_five_snapshots_required: true
+  minimum_converged_starts: 4
+  gradient_infinity_norm_maximum: 1.0e-4
+  best_three_relative_objective_range_maximum: 1.0e-4
+  best_three_transformed_parameter_range_maximum: 0.1
+  hessian_minimum_eigenvalue: 1.0e-8
+  hessian_condition_number_maximum: 1.0e+10
+  hessian_method: central_second_difference_of_objective_on_transformed_scale
+  hessian_relative_step: 1.0e-4
+  hessian_step_formula: relative_step_times_max_1_abs_parameter
+  hessian_symmetrize: true
+  hessian_invalid_stencil_action: fail_etas_stability_without_one_sided_substitution
+  hessian_condition_number_definition: largest_eigenvalue_divided_by_smallest_eigenvalue_of_symmetric_positive_definite_hessian
+  branching_ratio_maximum_exclusive: 0.95
+  grid_25_to_12_5_expected_count_relative_difference_maximum: 0.02
+  grid_25_to_12_5_density_l1_maximum: 0.05
+  independent_recalculation_required: true
+  result_is_evaluable_iff_every_snapshot_passes_every_gate: true
+
+attempt:
+  attempt_id: etas_qualification_q1
+  root: data/interim/stage2/etas_numerical_qualification/attempts/etas_qualification_q1
+  snapshot_result_path_template: snapshots/{snapshot_id}.json
+  exactly_one_scientific_attempt: true
+  automatic_retry: false
+  fit_etas_call_count_per_missing_snapshot: 1
+  snapshot_result_contains_all_five_start_rows: true
+  snapshot_result_write: same_directory_temporary_file_then_atomic_create_if_absent
+  completed_snapshot_result_is_immutable: true
+  interrupted_attempt_may_fill_missing_snapshot_only: true
+  interrupted_in_memory_fit_without_snapshot_result_is_not_a_completed_scientific_result: true
+  resumed_missing_snapshot_reuses_identical_input_hash_and_five_start_vectors: true
+  completed_start_row_replacement: false
+  final_result_create_once: true
+  positive_or_negative_result_must_be_published: true
+
+resources:
+  max_workers: 1
+  blas_threads: 1
+  reserve_physical_cores_minimum: 2
+  do_not_start_if_system_cpu_percent_gte: 70
+  gpu_required: false
+  gpu_note: current_scipy_lbfgsb_path_is_cpu_bound
+
+outputs:
+  input_manifest: data/manifests/etas_numerical_qualification_input.json
+  result_manifest: data/manifests/etas_numerical_qualification_result.json
+  verification_manifest: data/manifests/etas_numerical_qualification_verification.json
+  report: docs/background_etas_numerical_qualification_report.md
+  static_figure: docs/background_etas_numerical_qualification_diagnostic.svg
+  interactive_report: outputs/interactive/background_etas_numerical_qualification/index.html
+  required_public_fields:
+    [snapshot_id, scientific_fit_input_sha256, start_index, initial_transformed_hex, terminal_transformed_hex, terminal_physical_parameters_hex, numerical_status, objective, gradient_infinity_norm, iterations, function_evaluations, gate_name, gate_status, failure_code]
+  public_forbidden_fields: [physical_event_id, longitude, latitude, absolute_local_path, anomaly_feature, target_label, score]
+  input_manifest_binds:
+    [protocol_config_sha256, code_commit, code_tag, catalog_sha256, study_area_sha256, support_manifest_sha256, start_manifest_sha256, snapshot_membership_sha256, maximum_origin_time, maximum_available_at]
+  result_manifest_binds:
+    [attempt_id, input_manifest_sha256, protocol_config_sha256, code_commit, code_tag, python_version, numpy_version, scipy_version, snapshot_results_sha256, qualification_status]
+  verification_recomputes:
+    [physical_parameters, objective, gradient, best_three, hessian, branching_ratio, three_grid_metrics, unsupported_parent_objective_sensitivity, snapshot_status, qualification_status]
+  verification_must_rebuild_inputs_and_not_trust_derived_result_metrics: true
+  evaluable_only_parameter_snapshots: true
+
+decision:
+  evaluable:
+    - freeze_five_parameter_snapshots
+    - integrate_same_support_uniform_kde_etas_comparison
+    - publish_target_blind_stage4_execution_amendment_before_any_target_read
+  not_evaluable:
+    - publish_credible_numerical_insufficiency
+    - retain_kde_as_reproducible_non_anomaly_background
+    - do_not_read_stage4_targets
+    - stop_etas_candidate_iteration
+    - do_not_enter_deep_model_or_locked_test
