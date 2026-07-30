@@ -5,9 +5,11 @@
 - 预登记日期：2026-07-13
 - 阶段 4A 目标盲修订日期：2026-07-30
 - 阶段 2S 目标盲协议本地冻结日期：2026-07-30
-- 状态：阶段 4A 在首次真实目标读取前因 foundational P0 停止；保留 75 km KDE，阶段 2S
-  协议内容已通过本地验收；远程协议标签核验前，尚未获得实现授权、读取阶段 2S 目标或运行
-  锁定测试
+- 阶段 2S 正式执行日期：2026-07-30
+- 状态：阶段 4A 已停止；阶段 2S 的协议与代码标签已冻结并远端核验，唯一历史开发 attempt
+  已消费且只读取一次目录，但主路径在 fold4 重建后、首个 fold-fit receipt 前发生未留存异常，
+  terminal/finalizer 二次异常又覆盖原异常。没有模型成绩或 result tag，Stage 2S 停止，继续
+  保留 75 km KDE；锁定测试未读取
 - 对应机器配置：`configs/research_protocol.yaml`
 - 首次冻结标签：`v0.1.0-data-contract`；阶段 2 成绩前冻结标签：`v0.2.0-background-protocol`
 
@@ -127,13 +129,37 @@ master seal 写成前不得构造、暴露或评分 assessment memberships；较
 Stage 2S 独立验证。开发通过也只说明 Stage 2S 新增 alpha/候选图在复用开发期有时间因果信号，
 值得新的前瞻封存验证，不等于全局目标盲、锁定测试或 G8。
 
+## 0.4 阶段 2S 唯一正式尝试结果
+
+代码提交 `4188523991926c51a7fbd9314d36395cc9bfad62` 及远端标签
+`v0.2.3-causal-seismicity-screen-code` 核验通过。正式入口随后完成无目标预检、唯一 attempt
+认领和唯一 target read 认领；地震目录只物理打开并解析一次，最后一个成功进度为
+`fold4_support_rebuilt`。
+
+主科学路径随后在首个 fold-fit receipt 和任何预测封印形成前发生异常。正式 CLI 没有保存原始
+traceback；异常处理器写 terminal record 时又重读已落盘的 preflight receipt，把其中已编码的
+浮点 marker 再次送入 canonical JSON 编码器，触发 `$seismoflux_type` 保留键错误。这个第二异常
+覆盖了原始 science 异常并阻止 terminal 写入，因此原始失败类型未知且不可恢复。
+
+没有形成 fold-fit/issue/fold/master seal、whole-run record、六个正式结果工件、模型评分或
+result tag。这次尝试的正式状态为 `invalid`，不是 S1 相对 S0/SP 的负结果。唯一 attempt 和
+target read 均已消费，禁止修改冻结代码后重开目录、恢复或重跑同一历史目标。
+
+- `science_value_category`: `no_material_progress`
+- `evidence`: 没有预测封印、评分或效果指标，无法判断近期 30 天地震活动是否改善预测
+- `decision`: 停止 Stage 2S，继续保留长期 75 km KDE `S0`
+- `next_scientific_test`: 先做目标盲科学路线复审；将选定的新问题、门和停止条件写入唯一蓝图并
+  验收后，才可预登记新的前瞻检验
+- `stop_condition`: 不得重用本次 attempt、2022–2025 目标或锁定测试进行修复后重跑或调参
+
 ## 1. 唯一科学问题
 
 在相同支持域、严格未来隔离和相同报警面积下，合法的地震活动背景、近期地震、动态异常或长期构造
 成分及其简单组合，能否稳定提高未来独立物理地震的区域召回或以更小面积达到相同召回？
 
 任一新增成分只有在相同数据、时间切分和报警面积预算下超过当前最佳合法背景及其预登记对照，才
-可视为提供增量信息。当前 Stage 2S 只检验最近 30 天地震活动，不检验异常或构造。
+可视为提供增量信息。已经停止的 Stage 2S 只检验最近 30 天地震活动，没有检验异常或构造；
+它没有产生预测成绩。
 
 ## 2. 目标、覆盖与非目标
 

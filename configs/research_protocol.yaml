@@ -1,7 +1,7 @@
 schema_version: 1
 protocol_version: 1.3.0
 data_contract_version: 0.1.0
-status: stage_2s_causal_seismicity_protocol_content_accepted_remote_tag_required_for_execution
+status: stage_2s_formal_attempt_invalid_stopped_retain_75km_KDE
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
@@ -115,6 +115,37 @@ stage_2s_preregistration:
   maximum_new_foundational_protocol_corrections_after_freeze: 0
   on_new_foundational_P0_or_gate_failure: stop_stage2s_and_retain_75km_KDE
   large_or_complex_model_entry_forbidden: true
+  formal_outcome:
+    executed_on: '2026-07-30'
+    code_commit: 4188523991926c51a7fbd9314d36395cc9bfad62
+    code_tag_verified_remote: true
+    development_attempt_consumed: true
+    development_target_read_count_final: 1
+    catalog_physical_open_count_final: 1
+    progress_through: fold4_support_rebuilt
+    failure_interval: after_fold4_support_rebuilt_before_fold_fit_receipt
+    status: invalid_original_science_exception_masked_by_terminal_finalizer_P0
+    original_science_exception: unknown_and_not_recoverable_from_preserved_cli_output
+    observed_finalizer_error: reserved_canonical_JSON_key_from_reencoded_float_marker
+    non_target_preflight_receipt_file_sha256: e216194a6ec035a2788d3f55b7e949f5afd21e9584d6d422de6c9a61baa9d71f
+    attempt_ledger_file_sha256: fef0606d68aa6d1da721f634c04fd53df10500b522aa6b38307415194b560f5d
+    target_read_receipt_file_sha256: cd1482d63dc8add9354f005b647781371eec62ee882fe7fac23adc3c0ff71cfe
+    fold_fit_receipt_created: false
+    issue_fold_or_master_prediction_seal_created: false
+    whole_run_record_created: false
+    formal_result_artifacts_created: false
+    result_tag_created: false
+    terminal_record_created: false
+    terminal_record_absence_reason: >-
+      finalizer_reencoded_persisted_preflight_and_masked_the_original_exception
+    retry_or_catalog_reopen_authorized: false
+    scientific_value_category: no_material_progress
+    evidence: no_prediction_seal_score_or_effect_metric_was_created
+    decision: stop_stage2s_and_retain_75km_KDE
+    next_scientific_test: >-
+      target_blind_route_review_then_preregister_selected_prospective_test
+    stop_condition: >-
+      never_reuse_this_attempt_or_2022_2025_targets_for_repair_rerun_or_tuning
 stage_science_value_review:
   required_immediately_after_each_stage_result: true
   categories:

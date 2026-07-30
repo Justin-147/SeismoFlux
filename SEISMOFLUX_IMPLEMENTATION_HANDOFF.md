@@ -752,6 +752,33 @@ Bonferroni 家族，同时区间为 `1.25%–98.75%`。通过必须同时满足�
 R/RP 窗口、available_at 截止、每折权重/共同率、fold/horizon、seal hash 和实际报警面积。
 完整合同见 `docs/causal_seismicity_screen_protocol.md`。
 
+#### 阶段 2S-1 正式执行结果（2026-07-30）
+
+代码提交 `4188523991926c51a7fbd9314d36395cc9bfad62` 和远端标签
+`v0.2.3-causal-seismicity-screen-code` 核验通过。第一次正式入口因隔离工作树未挂载 ignored
+输入而在任何 receipt 或目录读取前停止；只恢复冻结逻辑相对路径后，第二次入口完成无目标
+preflight，并依次原子写入 attempt ledger 和 target-read receipt。真实地震目录随后只读取并
+解析一次，fold4 支持域重建完成。
+
+最后一个成功进度为 `fold4_support_rebuilt`。随后主科学路径在 fold-fit receipt 和任何预测封印
+形成前发生异常；正式 CLI 没有保留该原始异常。异常处理器准备写不可变 terminal record 时，
+重读已落盘的 preflight receipt，并把其中已经规范编码的浮点标记再次送入 canonical JSON
+编码器，触发第二个保留键错误：
+
+`reserved canonical JSON key at $.bindings.aligned_grid_identity.layers.12.5.cell_size_km: $seismoflux_type`
+
+第二个异常覆盖了原始 science 异常，因此原始失败原因现已不可恢复，不能把上述保留键错误误称为
+模型计算的主失败。它同时证明冻结 code tag 的 terminal/finalizer 存在 foundational P0。本次
+attempt 已消费，但没有形成 fold-fit/issue/fold/master prediction seal、whole-run record、
+模型评分或正式静态/交互结果；terminal record 也没有形成。该缺失作为治理异常保留，不得手工
+补写。不得修改冻结 code tag 后重开目录、恢复当前 attempt 或重新评分。
+
+本轮分类为 `no_material_progress`：它没有提供 S1 相对 S0/SP 的正面或负面预测证据。Stage 2S
+按 foundational P0 停止，继续保留 G1-LS 的 75 km KDE。下一步先做不读取目标成绩的科学路线
+复审，并把选定的新问题、门和停止条件写入本蓝图、验收、提交和推送。若复审仍选择近期地震活动，
+只能另立新的前瞻封存协议，使用本次之后尚未发生的目标 cohort；不得再把 2022–2025 称为独立
+验证，也不得修复后重跑本次历史目标。
+
 ### 阶段3：动态异常轨迹特征库
 
 任务：

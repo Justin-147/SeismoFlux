@@ -4,7 +4,10 @@
 
 阶段 4A 目标盲修订：2026-07-30
 
-状态：阶段 4A 0.4.4 在真实目标读取前触发基础性 P0，异常增量路线已硬停止
+阶段 2S 唯一正式尝试停止复审：2026-07-30
+
+状态：阶段 4A 异常路线和阶段 2S 近期地震路线均已硬停止；当前保留长期 75 km KDE，下一步必须
+先做目标盲科学路线复审
 
 ## 1. 最终科学目标
 
@@ -188,10 +191,9 @@ exposure 日期 adapter。
 隔离清单和恢复边界见
 `docs/phase4_kde_0_4_4_synthetic_acceptance_and_foundational_stop.md`。
 
-只读路线复审已推荐另立阶段 2S，而不是重开阶段 4A：用冻结的长期 75 km KDE 作为 `S0`，只增加
+只读路线复审曾推荐另立阶段 2S，而不是重开阶段 4A：用冻结的长期 75 km KDE 作为 `S0`，只增加
 一个严格因果的近期地震 KDE 形成 `S1`，直接检验 600,000 平方公里固定面积召回、信息增益和时间
-错位对照。阶段 4A 停止已提交并推送；当前只推进 Stage 2S 目标盲协议验收，尚未获得真实目录/
-目标读取或开发评分授权。
+错位对照。该路线后来完成协议与代码冻结并进入唯一正式尝试；最终结果见第 10 节。
 
 ## 9. Stage 2S-0 最小科学合同
 
@@ -230,3 +232,24 @@ query grid/精确面积合同不闭合、连续 KDE 与格点评分混用、支�
 
 Stage 2S-0 只有在协议测试、独立验收、提交、推送和协议标签远端核对全部完成后，才可进入最小
 代码阶段。完整合同见 `docs/causal_seismicity_screen_protocol.md`。
+
+## 10. Stage 2S-1 唯一正式尝试停止复审
+
+Stage 2S-1 的代码提交 `4188523991926c51a7fbd9314d36395cc9bfad62` 及远端 code tag 已核验。
+正式入口完成无目标预检、唯一 attempt 与 target read 认领、目录单次解析以及 fold4 支持域重建。
+主科学路径随后在首个 fold-fit receipt 和任何预测封印前发生未留存异常；terminal/finalizer
+重读 preflight receipt 时又触发 canonical JSON reserved-key 二次异常，覆盖原始异常并阻止
+terminal record 写入。因此原始 science 失败类型未知且不可恢复。
+
+没有形成 S0/S1/SP 预测、评分、Bootstrap、跨区或延迟指标，也没有 whole-run record、正式效果图
+或 result tag。这不是“近期地震活动没有用”的科学负结果，而是没有可评分答案的无效实验。冻结
+协议不允许在 foundational P0 后修复代码并用同一历史目标再考一次。
+
+- `science_value_category`: `no_material_progress`
+- `direct_prediction_improvement`: 无法评价
+- `evidence`: 真实目录只读取一次并完成长期支持重建，但没有任何预测 seal、成绩或效果指标
+- `decision`: `stop_stage2s_and_retain_75km_KDE`
+- `next_scientific_test`: `target_blind_route_review_then_preregister_selected_prospective_test`；先选择
+  新问题、评价门和停止条件并写入唯一蓝图，只有验收、提交和推送后才可实施
+- `stop_condition`: 不得重用本次 attempt、2022–2025 目标或锁定测试进行修复后重跑、调参或
+  追逐阳性结果；不得先修代码再寻找可承接的科学问题
