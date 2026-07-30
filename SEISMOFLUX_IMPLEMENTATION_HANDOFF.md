@@ -700,9 +700,9 @@ R^*=\arg\max_R
 - 按地区和窗口报告增量，并执行去最大贡献区的稳健性检查；
 - 不读取独立正式验证目标或锁定测试，不加入新 ETAS 候选、树模型、弱监督、自监督、断层交互或大型神经网络。
 
-阶段 4A 当前唯一执行协议为 `0.4.3`，标签为
-`v0.3.3-kde-anomaly-increment-{protocol,code,result}`。`0.4.2` /
-`v0.3.2-kde-anomaly-increment-*` 因目标读取前发现可执行性矛盾而保留为 `superseded` 历史证据，
+阶段 4A 当前唯一执行协议为 `0.4.4`，标签为
+`v0.3.4-kde-anomaly-increment-{protocol,code,result}`。`0.4.2` / `0.4.3` 及其
+`v0.3.2-*` / `v0.3.3-*` 标签因目标读取前发现可执行性矛盾而保留为 `superseded` 历史证据，
 不得再提供执行授权：公开背景 registry 只作身份与审计摘要，不是 KDE 验证或推理 payload；历史
 模型路径只作不要求存在且运行时禁读的未跟踪声明。唯一注册目录读取会话必须先从同一内存 catalog
 中选择 `origin_time_utc/available_at <= 2019-12-31T16:00:00Z`、研究区内的全部目录震级，重建并
@@ -715,9 +715,19 @@ manifest ID `local-support-bundle-69cecbee9093a21d`），重物化必须按机�
 日率、训练/参数身份、归一化质量、三网格收敛、support/domain ID、Mc、面积和有序 cell-mass
 receipt；2019 截止后变化不得改变背景身份，历史入选行变化必须失败关闭。
 
+`0.4.4` 进一步冻结四个受限空间工件的项目相对路径、byte count、整文件 SHA-256、Arrow/JSON
+schema 与跨工件关系，并冻结 ASCII exposure/issue ID、`Asia/Shanghai` 零时到 UTC 的转换以及
+`(T,T+h]` 窗口。正式 adapter 只能从已认证阶段 3 表构造 issue tables、snapshots、既有 query-grid
+DTO 和 state-to-stratum mapping；connectors 与 zone geometry 只核验不返回，禁止据此重建格网、
+候选或区域。精确合同见
+`docs/phase4_kde_target_blind_executability_amendment.md`。代码标签前必须用纯合成数据证明
+observed、时间置乱和空间置乱走同一条“重建—9/17/22 特征组装—仅 fit 行预处理—ridge 重拟合—
+assessment prediction 冻结—无目标统计量”路径；若这一次验收仍出现新的基础性 P0，停止异常路线
+并保留 KDE，不再追加工程层。
+
 target-read ledger 是 Git-ignored 的单个 canonical `.json` mapping，只允许在已注册且身份相同的
 attempt ledger 核验后，从零态原子 CAS 到 `logical_open_count=1`，并记录 entry hash 与前序零态
-hash；打开态不可改写、回退或再次打开。背景与 Stage 3 置乱代码只准使用 `0.4.3` 精确整文件哈希/
+hash；打开态不可改写、回退或再次打开。背景与 Stage 3 置乱代码只准使用 `0.4.4` 精确整文件哈希/
 symbol allowlist；完整 `local_support_runtime.build_local_support_runtime` 仅可作纯合成测试参照，
 正式运行只能用底层原语构造 `fold_4`。旧 R2 scoring/formal orchestrator、`placebo_source.py`、
 `placebo_runtime.py`、带宽选择、旧 gate 和旧随机语义继续禁止；`placebo.py` 仅为哈希封印的

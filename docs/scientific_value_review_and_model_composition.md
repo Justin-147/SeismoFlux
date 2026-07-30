@@ -111,7 +111,7 @@ Q2 的准确静态和离线交互判读分别见：
 - `docs/background_etas_numerical_qualification_interpretation.svg`；
 - `outputs/interactive/background_etas_numerical_qualification/interpretation.html`。
 
-## 6. Stage 4A 可执行性审计与 0.4.3 调整
+## 6. Stage 4A 可执行性审计与 0.4.3 调整（历史状态）
 
 `0.4.2` 可执行性审计没有产生预测成绩。它发现公开背景 registry/model JSON 只有身份和数值审计
 摘要，不含可推理 KDE 状态，而旧协议又禁止目录重物化；同时旧 `.jsonl` target-read ledger
@@ -131,3 +131,30 @@ Q2 的准确静态和离线交互判读分别见：
 `continue_to_thin_code_freeze`；本轮复审 PASS 前保持 `no_material_progress + adjust`。该有限价值
 只表示执行矛盾已消除、紧邻的一次 Stage 4A 科学检验仍可实施，不能把协议测试或可执行性冒充预测
 提升。详细证据见 `docs/phase4_kde_development_executability_amendment.md`。
+
+## 7. Stage 4A 0.4.4 当前科学价值状态
+
+上一节记录的是 `0.4.3` 冻结前后的历史判断。随后对废弃一次性 runner 的独立审计确认：旧实现
+没有把时间/空间置乱真正接入“重建特征—重新拟合—重新评分”，因此已停止使用；它没有打开真实
+目标，也没有消耗唯一开发 attempt。目标盲 schema 预检又确认阶段 3 状态/特征 schema 与 registry
+一致，两个置乱重建函数本身具备真实重建能力，剩余基础缺口只是受限空间工件定位/schema 与
+exposure 日期 adapter。
+
+当前唯一协议已调整为 `0.4.4` / `v0.3.4-kde-anomaly-increment-protocol`；`0.4.3` 与
+`v0.3.3-*` 已在任何真实输入或目标读取前转为
+`historical_superseded_before_target_read`，不再提供执行授权。
+
+当前科学价值字段是：
+
+- `science_value_category`: `necessary_enabler`
+- `direct_prediction_improvement`: 尚无
+- `evidence`: 已冻结四个受限空间工件的固定身份/schema、exposure/issue 日期解释和最小
+  target-blind adapter 边界；科学问题、候选、面积、置乱、Bootstrap 和通过门均未改变。
+- `decision`: 只继续一次纯合成的 observed/time/space 同路径重建—组装—重拟合验收与薄代码冻结。
+- `next_scientific_test`: 代码标签远端回读通过后，才在唯一开发 attempt 中运行真实
+  observed/time/space 重拟合和 600,000 平方公里固定面积比较。
+- `stop_condition`: 若这一次纯合成验收仍发现新的基础性 P0，停止异常增量路线并保留 75 km KDE；
+  不再追加工程层、复杂模型或锁定测试绕过。
+
+这一定性只说明紧邻的科学检验获得一条受控可执行路径，不是预测效果提升。详细当前合同见
+`docs/phase4_kde_target_blind_executability_amendment.md`。

@@ -1,13 +1,19 @@
 {
   "schema_version": 1,
-  "protocol_version": "0.4.3",
+  "protocol_version": "0.4.4",
   "experiment_id": "stage4-kde-development-v1",
   "status": "target_blind_allowlist_only_no_execution_authority",
   "supersedes": {
-    "protocol_version": "0.4.2",
-    "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
+    "protocol_version": "0.4.3",
+    "protocol_tag": "v0.3.3-kde-anomaly-increment-protocol",
     "status": "historical_superseded_before_target_read",
-    "historical_evidence_is_immutable": true
+    "historical_evidence_is_immutable": true,
+    "earlier_history": {
+      "protocol_version": "0.4.2",
+      "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
+      "status": "historical_superseded_before_target_read",
+      "historical_evidence_is_immutable": true
+    }
   },
   "background_rematerialization_contract": {
     "local_support_manifest": {
@@ -52,6 +58,158 @@
     ],
     "legacy_placebo_module_role": "hash_sealed_import_only_transitive_dependency",
     "legacy_types_or_builders_direct_call": "forbidden"
+  },
+  "target_blind_spatial_artifact_contract": {
+    "source_manifest": {
+      "path": "data/manifests/anomaly_increment_r2_spatial_strata.json",
+      "file_sha256": "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83",
+      "content_sha256": "0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2",
+      "allowed_pointer": "/local_artifacts"
+    },
+    "access_boundary": {
+      "before_code_tag": "path_declarations_only_no_stat_open_or_read",
+      "after_remote_code_tag_verification": "exact_hash_bound_non_target_read_only",
+      "caller_path_override": "forbidden",
+      "directory_enumeration": "forbidden"
+    },
+    "artifacts": {
+      "cell_mapping": {
+        "path": "data/interim/stage4/anomaly_increment_r2/construction_zone_cell_mapping.parquet",
+        "byte_count": 42917,
+        "media_type": "application/vnd.apache.parquet",
+        "sha256": "171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e",
+        "row_count": 15697,
+        "fields_in_order": [
+          {"name": "grid_id", "type": "string", "nullable": true},
+          {"name": "cell_id", "type": "string", "nullable": true},
+          {"name": "cell_row", "type": "int64", "nullable": true},
+          {"name": "cell_column", "type": "int64", "nullable": true},
+          {"name": "query_x_m", "type": "float64", "nullable": true},
+          {"name": "query_y_m", "type": "float64", "nullable": true},
+          {"name": "construction_zone_id", "type": "string", "nullable": true}
+        ],
+        "required_runtime_null_count_each_field": 0,
+        "schema_metadata": {
+          "seismoflux_contract": "0.4.1-local-construction-zone-cell-mapping",
+          "seismoflux_license": "unknown_no_redistribution",
+          "seismoflux_publication": "forbidden_contains_coordinates_and_per_cell_mapping"
+        }
+      },
+      "entity_mapping": {
+        "path": "data/interim/stage4/anomaly_increment_r2/construction_zone_entity_mapping.parquet",
+        "byte_count": 4055922,
+        "media_type": "application/vnd.apache.parquet",
+        "sha256": "49cd56ace13680c3465b0c128f7dd9823636f6f1db7a2f39a12d1235df532170",
+        "row_count": 165841,
+        "fields_in_order": [
+          {"name": "state_id", "type": "string", "nullable": true},
+          {"name": "anomaly_id", "type": "string", "nullable": true},
+          {"name": "issue_time_utc", "type": "timestamp[us, tz=UTC]", "nullable": true},
+          {"name": "construction_stratum_id", "type": "string", "nullable": true},
+          {"name": "coordinate_pair_sha256", "type": "string", "nullable": true},
+          {"name": "outside_study_area", "type": "bool", "nullable": true}
+        ],
+        "required_runtime_null_count_each_field": 0,
+        "schema_metadata": {
+          "seismoflux_contract": "0.4.1-local-construction-zone-entity-mapping",
+          "seismoflux_license": "unknown_no_redistribution",
+          "seismoflux_publication": "forbidden_contains_per-entity-stratification"
+        }
+      },
+      "connectors": {
+        "path": "data/interim/stage4/anomaly_increment_r2/construction_zone_connectors.json",
+        "byte_count": 11768,
+        "media_type": "application/json",
+        "sha256": "1f25120d9b9b15ec428efe97183179cebe1c3c5b0e022294dbf82f4c73e4e167",
+        "exact_top_level_keys": [
+          "connector_count",
+          "connectors",
+          "coordinate_crs",
+          "license_status",
+          "maximum_connector_distance_m",
+          "protocol_version",
+          "publication",
+          "schema_version"
+        ],
+        "exact_connector_keys": [
+          "coordinates_equal_area_m",
+          "endpoint_index",
+          "length_m",
+          "source_line_sha256",
+          "target_kind"
+        ],
+        "fixed_values": {
+          "connector_count": 40,
+          "coordinate_crs": "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs",
+          "license_status": "unknown_no_redistribution",
+          "maximum_connector_distance_m": 100000.0,
+          "protocol_version": "0.4.1",
+          "publication": "forbidden_contains_restricted_coordinates",
+          "schema_version": 1
+        },
+        "target_kind_allowlist": [
+          "study_area_boundary",
+          "other_construction_line"
+        ],
+        "connector_value_constraints": {
+          "coordinates_equal_area_m": "exactly_two_finite_xy_pairs",
+          "endpoint_index": [0, 1],
+          "length_m": "finite_gt_0_lte_100000",
+          "source_line_sha256": "lowercase_hex_sha256"
+        }
+      },
+      "zone_geometry": {
+        "path": "data/interim/stage4/anomaly_increment_r2/construction_zones.parquet",
+        "byte_count": 233171,
+        "media_type": "application/vnd.apache.parquet",
+        "sha256": "c1c54d390bd1553c8f75b10def4898e24deb919345dd9ca0a11a02d0ff80ba70",
+        "row_count": 65,
+        "fields_in_order": [
+          {"name": "construction_zone_id", "type": "string", "nullable": true},
+          {"name": "geometry_wkb_equal_area_m", "type": "binary", "nullable": true}
+        ],
+        "required_runtime_null_count_each_field": 0,
+        "schema_metadata": {
+          "seismoflux_contract": "0.4.1-local-construction-zone-geometry",
+          "seismoflux_license": "unknown_no_redistribution",
+          "seismoflux_publication": "forbidden_contains_restricted_geometry"
+        },
+        "geometry_decode_or_return": "forbidden"
+      }
+    },
+    "loader_exact_return_fields": [
+      "issue_tables",
+      "snapshots_by_issue_id",
+      "query_grid",
+      "construction_stratum_by_state_id"
+    ],
+    "cross_artifact_rules": {
+      "cell_grid_identity": "rowwise_equal_to_authenticated_stage3_grid_identity_and_xy",
+      "entity_identity": "exactly_all_spatially_eligible_snapshot_states_with_matching_anomaly_and_issue_time",
+      "zone_reference": "every_cell_and_entity_zone_prefix_exists_in_65_zone_geometry_ids",
+      "nonempty_cell_zone_count": 39
+    },
+    "connector_coordinates_or_zone_geometry_return": "forbidden",
+    "earthquake_catalog_target_score_or_model_result_parameter_or_return": "forbidden"
+  },
+  "exposure_parser_contract": {
+    "exposure_id_ascii_fullmatch": "\\Adevelopment-h(?P<horizon>007|030|090)-(?P<local_date>[0-9]{4}-[0-9]{2}-[0-9]{2})\\Z",
+    "issue_id_ascii_fullmatch": "\\Aanomaly-issue-(?P<local_date>[0-9]{4}-[0-9]{2}-[0-9]{2})\\Z",
+    "date_parser": "date.fromisoformat_then_isoformat_exact_roundtrip",
+    "issue_timezone": "Asia/Shanghai",
+    "local_issue_time": "00:00:00",
+    "required_utc_offset": "+08:00",
+    "utc_conversion": "timezone_aware_astimezone_UTC",
+    "exposure_to_issue": "same_local_date_only",
+    "target_window": "(T,T+h]",
+    "fit_horizon": "007_only",
+    "assessment_horizons": ["007", "030", "090"],
+    "rolling_fold_indices": [1, 2, 3],
+    "fold_manifest_pointer": "/joint_macro_rolling_folds",
+    "fold_manifest_horizons_pointer": "forbidden",
+    "fit_and_assessment_time_pools": "unique_strictly_increasing_disjoint_fit_strictly_before_assessment",
+    "validation_or_formal_id": "forbidden",
+    "failure_action": "fail_closed"
   },
   "source_contracts": {
     "fold": {

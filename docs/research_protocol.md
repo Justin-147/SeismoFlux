@@ -1,6 +1,6 @@
 # SeismoFlux 研究预登记协议
 
-- 协议版本：1.2.1
+- 协议版本：1.2.2
 - 数据契约版本：0.1.0
 - 预登记日期：2026-07-13
 - 阶段 4A 目标盲修订日期：2026-07-30
@@ -56,13 +56,13 @@ H1 原本就允许“ETAS 或预先选定的最佳背景模型”，G1 也允许
 阶段 4A 通过只表示出现“值得一次独立验证的异常增量线索”，不等于 G2/G3 正式通过。只有阶段 4A 结果完成科学价值复审、提交、推送和结果标签后，才可另立阶段 4B，并在读取独立验证目标前冻结新的协议、代码、输入和唯一正式验证 attempt。阶段 4A 两个候选都失败或证据不足时，保留 KDE 并停止异常模型扩张；不得用复杂模型或锁定测试继续寻找阳性结果。
 
 阶段 4A 的唯一机器协议为 `configs/anomaly_increment_kde_dev.yaml`，解释文档为
-`docs/anomaly_increment_kde_dev_protocol.md`，执行协议版本为 `0.4.3`，协议冻结标签为
-`v0.3.3-kde-anomaly-increment-protocol`。在该标签的远端对象和 peeled commit 完成回读核验前，
+`docs/anomaly_increment_kde_dev_protocol.md`，执行协议版本为 `0.4.4`，协议冻结标签为
+`v0.3.4-kde-anomaly-increment-protocol`。在该标签的远端对象和 peeled commit 完成回读核验前，
 阶段 4A 代码冻结、真实输入打开和开发目标读取均不得开始。
 
-`0.4.2` / `v0.3.2-kde-anomaly-increment-*` 是目标读取前被替代的历史版本：公开背景 registry
-只含身份与审计摘要，不含可推理 KDE 状态；历史模型路径只作不要求存在且运行时禁读的未跟踪声明。
-`0.4.3` 只允许在唯一注册目录会话中，先用同一内存 catalog 中
+`0.4.2` / `v0.3.2-*` 与 `0.4.3` / `v0.3.3-*` 都是目标读取前被替代的历史版本：
+公开背景 registry 只含身份与审计摘要，不含可推理 KDE 状态；历史模型路径只作不要求存在且运行时
+禁读的未跟踪声明。`0.4.4` 只允许在唯一注册目录会话中，先用同一内存 catalog 中
 `origin_time_utc/available_at <= 2019-12-31T16:00:00Z`、研究区内的全部目录震级重建并核验
 `fold_4` 支持与 Mc；支持重建前不得按 `M>=4` 过滤。然后 KDE 训练才在重建的保留支持域内取
 `M>=4` 事件，以已选 75 km 带宽重物化并逐项核对冻结身份；禁止重选带宽、改变 Mc/支持域、使用
@@ -71,9 +71,13 @@ H1 原本就允许“ETAS 或预先选定的最佳背景模型”，G1 也允许
 `632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d`，
 manifest ID `local-support-bundle-69cecbee9093a21d`）。target-read ledger 同步收敛为本地单个
 canonical `.json` 的 `0→1` CAS；打开前必须验证相同身份 attempt 已注册，打开后不可改写或回退。
+本修订另冻结四个受限空间工件的固定路径/schema 以及 exposure/issue 日期解释；connectors 和
+zone geometry 只核验不返回。代码标签前必须先用纯合成数据证明 observed、时间置乱和空间置乱都
+走同一条真实重建、9/17/22 特征组装、fit-only 预处理与 ridge 重拟合路径。
 科学问题、四模型、三折×三窗、面积、Bootstrap、置乱、`maxT`、同时区间、attempt 和测试访问限制
 均不变。完整修订与科学价值复审见
-`docs/phase4_kde_development_executability_amendment.md`。
+`docs/phase4_kde_target_blind_executability_amendment.md`。若这一次纯合成验收仍发现新的基础性
+P0，停止异常路线并保留 KDE，不再追加工程修订或复杂模型。
 
 ## 1. 唯一科学问题
 

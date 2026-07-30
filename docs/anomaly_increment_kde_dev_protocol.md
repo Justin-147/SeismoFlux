@@ -1,17 +1,18 @@
 # 阶段 4A：75 km KDE + 异常开发科学筛查协议
 
 - 协议 ID：`stage4-kde-development-v1`
-- 协议版本：`0.4.3`
+- 协议版本：`0.4.4`
 - 门控：`S4-KDE-DEV`
 - 机器协议：`configs/anomaly_increment_kde_dev.yaml`
 - 本地草案日期：2026-07-30
-- 计划协议/代码/结果标签：`v0.3.3-kde-anomaly-increment-{protocol,code,result}`
+- 计划协议/代码/结果标签：`v0.3.4-kde-anomaly-increment-{protocol,code,result}`
 - 状态：目标盲、无成绩、尚未打开开发目标
 
-`0.4.2` / `v0.3.2-kde-anomaly-increment-*` 是目标读取前形成的历史版本，因把公开审计摘要误作
-可推理 KDE payload、并把单映射 CAS ledger 错写为 append-only `.jsonl` 而被本版本
-`superseded`。旧验收证据保持不可变，但不构成当前执行授权。修订原因、科学价值复审和精确差异见
-`docs/phase4_kde_development_executability_amendment.md`。
+`0.4.2` / `v0.3.2-*` 与 `0.4.3` / `v0.3.3-*` 都是目标读取前形成的历史版本。
+`0.4.3` 已解决 KDE 重物化和 ledger 矛盾，但独立审计随后发现废弃 runner 没有执行真实的置乱后
+重建—重拟合，而且当前协议还缺四个受限空间工件的直接 schema 与 exposure 日期 adapter 合同。
+旧验收证据保持不可变，但不构成当前执行授权。最终目标盲修订见
+`docs/phase4_kde_target_blind_executability_amendment.md`。
 
 ## 1. 这一步用外行能听懂的话在做什么
 
@@ -57,7 +58,9 @@ ETAS 执行路径不可评价，不能说明 ETAS 或历史地震聚集没有科
    不得回填较早起报日。
 3. **报告覆盖与缺报信息**：作为混杂控制，防止把“后来报得更多、台站更多”误当成物理异常增强。
 4. **固定研究区、25 km 格网与目标无关构造分区**：用于同面积报警、空间置乱和区域稳健性，不公开
-   受限边界、坐标或事件—区域绑定。
+   受限边界、坐标或事件—区域绑定。四个受限工件的固定路径、byte count、整文件哈希和精确 schema
+   已在 `0.4.4` 直接声明；只能在代码标签后核验。connector 和 zone geometry 只作身份/关系核验，
+   不返回模型，也不得用来重建格网、候选或区域。
 
 人工填写的预测地点、震级、时间、分析意见和自由文本全部禁止。主震级档
 `M5_6=[5.0,6.0)`；180/365 天和 M6+ 只作描述或稀疏探索，不能挽救主门。
@@ -78,6 +81,11 @@ support/domain ID、公共 Mc=4 和面积比例=1。随后生成并绑定有序 
 205 个快照和 3,217,885 行是 Stage 3 冻结源库总量，不是本次 attempt 的样本量。Stage 4A 只按
 三个滚动折的训练/评估 issue 范围读取对应子集；留给正式验证或位于未来期的行不得进入本轮。
 结果必须逐折报告实际读取的异常快照数、特征行数和未使用原因，不能用源库总量暗示模型看过全部时期。
+
+开发 exposure 只能是 `development-h007|030|090-YYYY-MM-DD`，并只映射到同日
+`anomaly-issue-YYYY-MM-DD`。日期按 `Asia/Shanghai` 当天 00:00 转为 UTC，目标窗口严格为
+`(T,T+h]`。训练 ID 只允许 h007；assessment ID 的 horizon 必须与 7/30/90 分组一致。日期、时区、
+重复、fold、pool 或窗口任一不一致都失败关闭。
 
 ## 4. 四个模型和贡献拆分
 
@@ -206,6 +214,17 @@ attempt。唯一 adapter 打开前必须核验 attempt ledger 已注册且身份
 运行不得导入或调用。置乱只直接开放
 整文件封印的 `placebo_features.rebuild_time_placebo_features/rebuild_space_placebo_features`；
 其传递依赖只获 import-only 身份，不获直接 API 授权。
+
+`0.4.4` 只额外直接开放已哈希封印的
+`states_from_records`、`build_issue_snapshots` 和 `Stage3QueryGrid`。
+现有 `feature_adapter.py` / `grid_features.py` 因 import closure 会带入旧 qualification、runner
+和目标相关模块，不获得直接执行授权；新薄 fit 模块只能按已认证 feature manifest 的冻结列名原序
+拼接 9/17/22 组 value/mask design，再调用已开放的 preprocessing/model 原语。
+`Stage3QueryGrid` 只能由已认证阶段 3 表实例化并核验，禁止调用
+`build_stage3_query_grid` 从研究区重新生成格网。代码标签前必须先用纯合成数据证明 observed、
+time placebo 和 space placebo 走同一条真实特征重建、9/17/22 列组装、fit-only 预处理、ridge
+重拟合与 assessment prediction 冻结路径；该测试不得读取真实目标，也不得把 target-free 链路
+统计量称为预测成绩。
 
 旧 R2 的 `scoring_pipeline`、formal orchestrator、`evaluate_g2/evaluate_g3`、五窗口
 Bootstrap、同召回面积二选一门、`placebo_source.py`、`placebo_runtime.py`、

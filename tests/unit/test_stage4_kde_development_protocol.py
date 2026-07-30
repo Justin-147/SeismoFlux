@@ -4,16 +4,22 @@ import ast
 import hashlib
 import json
 import math
+import re
 import statistics
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "anomaly_increment_kde_dev.yaml"
 PROTOCOL_DOCUMENT_PATH = ROOT / "docs" / "anomaly_increment_kde_dev_protocol.md"
-EXECUTABILITY_AMENDMENT_PATH = ROOT / "docs" / "phase4_kde_development_executability_amendment.md"
+HISTORICAL_EXECUTABILITY_AMENDMENT_PATH = (
+    ROOT / "docs" / "phase4_kde_development_executability_amendment.md"
+)
+EXECUTABILITY_AMENDMENT_PATH = ROOT / "docs" / "phase4_kde_target_blind_executability_amendment.md"
 
 EXPECTED_TOP_LEVEL = {
     "schema_version",
@@ -125,6 +131,12 @@ def _content_sha256(payload: dict[str, Any]) -> str:
     return hashlib.sha256(serialized).hexdigest()
 
 
+def _required_fullmatch(pattern: re.Pattern[str], value: str) -> re.Match[str]:
+    match = pattern.fullmatch(value)
+    assert match is not None
+    return match
+
+
 def _all_mapping_keys(value: object) -> set[str]:
     keys: set[str] = set()
     if isinstance(value, dict):
@@ -213,7 +225,7 @@ def test_protocol_is_unique_target_blind_and_has_exact_stage_identity() -> None:
 
     assert set(config) == EXPECTED_TOP_LEVEL
     assert config["schema_version"] == 1
-    assert config["protocol_version"] == "0.4.3"
+    assert config["protocol_version"] == "0.4.4"
     assert config["stage"] == "4A"
     assert config["experiment_id"] == "stage4-kde-development-v1"
     assert config["gate_id"] == "S4-KDE-DEV"
@@ -231,17 +243,25 @@ def test_protocol_is_unique_target_blind_and_has_exact_stage_identity() -> None:
         freeze["expected_code_tag"],
         freeze["expected_result_tag"],
     } == {
-        "v0.3.3-kde-anomaly-increment-protocol",
-        "v0.3.3-kde-anomaly-increment-code",
-        "v0.3.3-kde-anomaly-increment-result",
+        "v0.3.4-kde-anomaly-increment-protocol",
+        "v0.3.4-kde-anomaly-increment-code",
+        "v0.3.4-kde-anomaly-increment-result",
     }
     assert freeze["supersedes"] == {
-        "protocol_version": "0.4.2",
-        "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
-        "expected_code_tag": "v0.3.2-kde-anomaly-increment-code",
-        "expected_result_tag": "v0.3.2-kde-anomaly-increment-result",
+        "protocol_version": "0.4.3",
+        "protocol_tag": "v0.3.3-kde-anomaly-increment-protocol",
+        "expected_code_tag": "v0.3.3-kde-anomaly-increment-code",
+        "expected_result_tag": "v0.3.3-kde-anomaly-increment-result",
         "status": "historical_superseded_before_target_read",
         "historical_evidence_is_immutable": True,
+        "earlier_history": {
+            "protocol_version": "0.4.2",
+            "protocol_tag": "v0.3.2-kde-anomaly-increment-protocol",
+            "expected_code_tag": "v0.3.2-kde-anomaly-increment-code",
+            "expected_result_tag": "v0.3.2-kde-anomaly-increment-result",
+            "status": "historical_superseded_before_target_read",
+            "historical_evidence_is_immutable": True,
+        },
     }
     assert freeze["protocol_tests_and_documents_allowed_before_protocol_tag"] is True
     assert (
@@ -354,7 +374,7 @@ def test_public_input_identities_and_inherited_contracts_are_byte_exact() -> Non
     )
 
     inherited = _load_json(inputs["inherited_contract_allowlist"]["path"])
-    assert inherited["protocol_version"] == "0.4.3"
+    assert inherited["protocol_version"] == "0.4.4"
     assert inherited["supersedes"]["status"] == "historical_superseded_before_target_read"
     support_contract = inherited["background_rematerialization_contract"]
     assert support_contract["local_support_manifest"] == {
@@ -388,6 +408,275 @@ def test_public_input_identities_and_inherited_contracts_are_byte_exact() -> Non
     } <= forbidden
 
 
+def test_target_blind_spatial_artifact_contract_is_exact_without_opening_artifacts() -> None:
+    config = _load_yaml()
+    inputs = config["inputs"]
+    inherited = _load_json(inputs["inherited_contract_allowlist"]["path"])
+    spatial_manifest = _load_json(inputs["inherited_spatial_strata_contract"]["path"])
+    contract = inherited["target_blind_spatial_artifact_contract"]
+
+    assert contract["source_manifest"] == {
+        "path": "data/manifests/anomaly_increment_r2_spatial_strata.json",
+        "file_sha256": "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83",
+        "content_sha256": "0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2",
+        "allowed_pointer": "/local_artifacts",
+    }
+    assert contract["access_boundary"] == {
+        "before_code_tag": "path_declarations_only_no_stat_open_or_read",
+        "after_remote_code_tag_verification": "exact_hash_bound_non_target_read_only",
+        "caller_path_override": "forbidden",
+        "directory_enumeration": "forbidden",
+    }
+
+    artifacts = contract["artifacts"]
+    expected_identities = {
+        "cell_mapping": {
+            "path": (
+                "data/interim/stage4/anomaly_increment_r2/construction_zone_cell_mapping.parquet"
+            ),
+            "byte_count": 42_917,
+            "sha256": "171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e",
+        },
+        "entity_mapping": {
+            "path": (
+                "data/interim/stage4/anomaly_increment_r2/construction_zone_entity_mapping.parquet"
+            ),
+            "byte_count": 4_055_922,
+            "sha256": "49cd56ace13680c3465b0c128f7dd9823636f6f1db7a2f39a12d1235df532170",
+        },
+        "connectors": {
+            "path": ("data/interim/stage4/anomaly_increment_r2/construction_zone_connectors.json"),
+            "byte_count": 11_768,
+            "sha256": "1f25120d9b9b15ec428efe97183179cebe1c3c5b0e022294dbf82f4c73e4e167",
+        },
+        "zone_geometry": {
+            "path": ("data/interim/stage4/anomaly_increment_r2/construction_zones.parquet"),
+            "byte_count": 233_171,
+            "sha256": "c1c54d390bd1553c8f75b10def4898e24deb919345dd9ca0a11a02d0ff80ba70",
+        },
+    }
+    for artifact_id, identity in expected_identities.items():
+        artifact = artifacts[artifact_id]
+        assert artifact["path"] == identity["path"]
+        assert artifact["byte_count"] == identity["byte_count"]
+        assert artifact["sha256"] == identity["sha256"]
+        assert {
+            "byte_count": artifact["byte_count"],
+            "media_type": artifact["media_type"],
+            "sha256": artifact["sha256"],
+        } == spatial_manifest["local_artifacts"][artifact_id]
+        assert not Path(artifact["path"]).is_absolute()
+        assert Path(artifact["path"]).parts[:2] == ("data", "interim")
+
+    assert [field["name"] for field in artifacts["cell_mapping"]["fields_in_order"]] == [
+        "grid_id",
+        "cell_id",
+        "cell_row",
+        "cell_column",
+        "query_x_m",
+        "query_y_m",
+        "construction_zone_id",
+    ]
+    assert [field["type"] for field in artifacts["cell_mapping"]["fields_in_order"]] == [
+        "string",
+        "string",
+        "int64",
+        "int64",
+        "float64",
+        "float64",
+        "string",
+    ]
+    assert [field["name"] for field in artifacts["entity_mapping"]["fields_in_order"]] == [
+        "state_id",
+        "anomaly_id",
+        "issue_time_utc",
+        "construction_stratum_id",
+        "coordinate_pair_sha256",
+        "outside_study_area",
+    ]
+    assert [field["type"] for field in artifacts["entity_mapping"]["fields_in_order"]] == [
+        "string",
+        "string",
+        "timestamp[us, tz=UTC]",
+        "string",
+        "string",
+        "bool",
+    ]
+    assert [field["name"] for field in artifacts["zone_geometry"]["fields_in_order"]] == [
+        "construction_zone_id",
+        "geometry_wkb_equal_area_m",
+    ]
+    assert [field["type"] for field in artifacts["zone_geometry"]["fields_in_order"]] == [
+        "string",
+        "binary",
+    ]
+    assert artifacts["connectors"]["exact_top_level_keys"] == [
+        "connector_count",
+        "connectors",
+        "coordinate_crs",
+        "license_status",
+        "maximum_connector_distance_m",
+        "protocol_version",
+        "publication",
+        "schema_version",
+    ]
+    assert artifacts["connectors"]["exact_connector_keys"] == [
+        "coordinates_equal_area_m",
+        "endpoint_index",
+        "length_m",
+        "source_line_sha256",
+        "target_kind",
+    ]
+    assert artifacts["connectors"]["fixed_values"]["coordinate_crs"] == (
+        "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs"
+    )
+    assert artifacts["connectors"]["connector_value_constraints"] == {
+        "coordinates_equal_area_m": "exactly_two_finite_xy_pairs",
+        "endpoint_index": [0, 1],
+        "length_m": "finite_gt_0_lte_100000",
+        "source_line_sha256": "lowercase_hex_sha256",
+    }
+    assert contract["cross_artifact_rules"] == {
+        "cell_grid_identity": "rowwise_equal_to_authenticated_stage3_grid_identity_and_xy",
+        "entity_identity": (
+            "exactly_all_spatially_eligible_snapshot_states_with_matching_anomaly_and_issue_time"
+        ),
+        "zone_reference": ("every_cell_and_entity_zone_prefix_exists_in_65_zone_geometry_ids"),
+        "nonempty_cell_zone_count": 39,
+    }
+    assert contract["loader_exact_return_fields"] == [
+        "issue_tables",
+        "snapshots_by_issue_id",
+        "query_grid",
+        "construction_stratum_by_state_id",
+    ]
+    assert contract["connector_coordinates_or_zone_geometry_return"] == "forbidden"
+    declared = inputs["target_blind_spatial_artifacts"]
+    assert declared["contract_json_pointer"] == "/target_blind_spatial_artifact_contract"
+    assert declared["before_remote_code_tag_verification"] == (
+        "declarations_only_no_stat_open_or_read"
+    )
+    assert declared["after_remote_code_tag_verification"] == (
+        "exact_hash_bound_non_target_verification"
+    )
+
+
+def test_target_blind_exposure_parser_fold_membership_and_code_stage_are_exact() -> None:
+    config = _load_yaml()
+    parser = config["calendar"]["target_blind_exposure_parser"]
+    inherited = _load_json(config["inputs"]["inherited_contract_allowlist"]["path"])
+    assert parser["contract_json_pointer"] == "/exposure_parser_contract"
+    assert (
+        inherited["exposure_parser_contract"]["exposure_id_ascii_fullmatch"]
+        == (parser["exposure_id_ascii_fullmatch"])
+    )
+    assert (
+        inherited["exposure_parser_contract"]["issue_id_ascii_fullmatch"]
+        == (parser["issue_id_ascii_fullmatch"])
+    )
+
+    exposure_pattern = re.compile(parser["exposure_id_ascii_fullmatch"], re.ASCII)
+    issue_pattern = re.compile(parser["issue_id_ascii_fullmatch"], re.ASCII)
+    valid = _required_fullmatch(exposure_pattern, "development-h007-2020-01-01")
+    assert valid.groupdict() == {"horizon": "007", "local_date": "2020-01-01"}
+    assert issue_pattern.fullmatch("anomaly-issue-2020-01-01") is not None
+    for invalid in (
+        " development-h007-2020-01-01",
+        "development-h007-2020-01-01 ",
+        "development-h7-2020-01-01",
+        "development-h180-2020-01-01",
+        f"development-h007-{chr(0xFF12)}{chr(0xFF10)}{chr(0xFF12)}{chr(0xFF10)}-01-01",
+        "validation-h007-2020-01-01",
+        "formal-h007-2020-01-01",
+        "Development-h007-2020-01-01",
+    ):
+        assert exposure_pattern.fullmatch(invalid) is None
+
+    local_date = date.fromisoformat(valid.group("local_date"))
+    assert local_date.isoformat() == valid.group("local_date")
+    local_issue = datetime.combine(
+        local_date,
+        time.min,
+        tzinfo=ZoneInfo(config["calendar"]["issue_timezone"]),
+    )
+    assert local_issue.fold == 0
+    assert local_issue.utcoffset() == timedelta(hours=8)
+    issue_utc = local_issue.astimezone(UTC)
+    assert issue_utc.isoformat().replace("+00:00", "Z") == "2019-12-31T16:00:00Z"
+    assert (issue_utc + timedelta(days=7)).isoformat().replace("+00:00", "Z") == (
+        "2020-01-07T16:00:00Z"
+    )
+    assert parser["reference_mapping"] == {
+        "exposure_id": "development-h007-2020-01-01",
+        "issue_id": "anomaly-issue-2020-01-01",
+        "issue_time_utc": "2019-12-31T16:00:00Z",
+        "target_start_exclusive_utc": "2019-12-31T16:00:00Z",
+        "target_end_inclusive_utc": "2020-01-07T16:00:00Z",
+    }
+
+    fold_manifest = _load_json(config["inputs"]["inherited_fold_contract"]["path"])
+    folds = fold_manifest["joint_macro_rolling_folds"]
+    assert [fold["fold_index"] for fold in folds] == [1, 2, 3]
+    all_assessment_ids: list[str] = []
+    for fold in folds:
+        fit_ids = fold["fit_exposure_ids_7d"]
+        assert len(fit_ids) == len(set(fit_ids))
+        assert all(
+            _required_fullmatch(exposure_pattern, item).group("horizon") == "007"
+            for item in fit_ids
+        )
+        assessment = fold["assessment_exposure_ids_by_horizon"]
+        assert set(assessment) == {"7", "30", "90"}
+        for horizon, ids in assessment.items():
+            expected_horizon = parser["assessment_horizons_by_manifest_key"][horizon]
+            assert all(
+                _required_fullmatch(exposure_pattern, item).group("horizon") == expected_horizon
+                for item in ids
+            )
+            all_assessment_ids.extend(ids)
+        pools = fold["time_permutation_feature_pools"]
+        fit_pool = pools["fit"]
+        assessment_pool = pools["assessment"]
+        assert len(fit_pool) == len(set(fit_pool))
+        assert len(assessment_pool) == len(set(assessment_pool))
+        assert set(fit_pool).isdisjoint(assessment_pool)
+        assert all(issue_pattern.fullmatch(item) for item in (*fit_pool, *assessment_pool))
+        assert max(fit_pool) < min(assessment_pool)
+    assert len(all_assessment_ids) == len(set(all_assessment_ids))
+
+    code_stage = config["execution_control"]["target_blind_code_stage"]
+    assert code_stage["required_new_modules"] == {
+        "calendar_adapter": {
+            "path": "src/seismoflux/anomaly_increment/kde_dev_calendar.py",
+            "symbols": [
+                "parse_development_exposure_id",
+                "parse_anomaly_issue_id",
+                "validate_development_fold_calendar",
+            ],
+        },
+        "input_adapter": {
+            "path": "src/seismoflux/anomaly_increment/kde_dev_inputs.py",
+            "symbols": ["load_verified_target_blind_anomaly_inputs"],
+        },
+        "fit_path": {
+            "path": "src/seismoflux/anomaly_increment/kde_dev_fit.py",
+            "symbols": [
+                "load_frozen_feature_set_contract",
+                "concatenate_frozen_source_columns",
+                "assemble_refit_and_freeze_assessment_prediction",
+            ],
+        },
+    }
+    assert code_stage["synthetic_path"]["observed_time_and_space_use_same_function_path"]
+    assert code_stage["synthetic_path"]["real_input_path_or_target_score_column"] == "forbidden"
+    assert code_stage["synthetic_path"]["target_free_statistic_is_prediction_result"] is False
+    assert code_stage["hard_stop"] == {
+        "maximum_additional_foundational_protocol_corrections": 0,
+        "on_new_foundational_P0": "stop_anomaly_increment_and_retain_75km_KDE",
+        "engineering_layer_or_complex_model_bypass": "forbidden",
+    }
+
+
 def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
     primitives = _load_yaml()["inputs"]["reusable_scientific_primitives"]
     allowlist = primitives["exact_symbol_allowlist"]
@@ -405,6 +694,9 @@ def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
         "background_grid",
         "background_artifacts",
         "stage3_placebo_features",
+        "stage3_state_adapter",
+        "stage3_snapshot_adapter",
+        "stage3_grid_dto",
     }
     assert primitives["any_unlisted_module_or_symbol"] == "forbidden"
     assert set(allowlist["evaluation"]["symbols"]) == {
@@ -446,6 +738,9 @@ def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
         "rebuild_time_placebo_features",
         "rebuild_space_placebo_features",
     ]
+    assert allowlist["stage3_state_adapter"]["symbols"] == ["states_from_records"]
+    assert allowlist["stage3_snapshot_adapter"]["symbols"] == ["build_issue_snapshots"]
+    assert allowlist["stage3_grid_dto"]["symbols"] == ["Stage3QueryGrid"]
     dependencies = primitives["transitive_dependency_file_hashes"]
     assert primitives["transitive_dependencies_are_import_only_not_direct_api_authority"] is True
     for identity in dependencies.values():
@@ -477,6 +772,8 @@ def test_only_exact_low_level_scientific_symbols_may_be_reused() -> None:
         "evaluation.stratified_five_horizon_bootstrap_indices",
         "poisson.select_kde_bandwidth",
         "preregistration.Stage4SeedContext",
+        "preregistration.build_construction_strata",
+        "features.anomaly.grid.build_stage3_query_grid",
     } <= explicitly_forbidden
 
 
@@ -791,7 +1088,7 @@ def test_same_condition_model_calendar_alarm_and_randomness_are_frozen() -> None
         "evidence_insufficient_no_drop_or_replacement"
     )
     mappings = randomness["stage4a_mapping_dtos"]
-    assert mappings["context_protocol_version"] == "0.4.3"
+    assert mappings["context_protocol_version"] == "0.4.4"
     assert mappings["construction_uses_only_stage4a_pcg64_context"] is True
     assert mappings["placebo_features_contract"] == ("structural_duck_typing_no_isinstance_checks")
     assert mappings["TimeMappingDTO"]["consumed_structural_fields"] == [
@@ -1147,7 +1444,7 @@ def test_minimal_execution_seal_ledgers_and_resume_identity_are_mandatory() -> N
     assert graph["seal_commit"]["any_other_changed_path"] == "forbidden"
     assert graph["seal_commit"]["self_commit_hash_embedded_in_tracked_tree"] == "forbidden"
     assert graph["code_tag"] == {
-        "name": "v0.3.3-kde-anomaly-increment-code",
+        "name": "v0.3.4-kde-anomaly-increment-code",
         "points_to": "C",
     }
     assert graph["preflight_remote_verification"] == [
@@ -1325,7 +1622,7 @@ def test_science_value_gate_is_mandatory_and_no_scores_are_embedded() -> None:
     assert "科学价值复审" in agents_text
     assert "没有实质推动时停止继续堆叠工程" in agents_text
 
-    amendment_text = EXECUTABILITY_AMENDMENT_PATH.read_text(encoding="utf-8")
+    historical_amendment_text = HISTORICAL_EXECUTABILITY_AMENDMENT_PATH.read_text(encoding="utf-8")
     for token in (
         "0.4.3",
         "v0.3.3-kde-anomaly-increment-protocol",
@@ -1336,5 +1633,19 @@ def test_science_value_gate_is_mandatory_and_no_scores_are_embedded() -> None:
         "decision`: `continue_to_thin_code_freeze",
         "P0/P1/P2 = 0/0/0",
         "ordered_25km_cell_id_mass_sha256",
+    ):
+        assert token in historical_amendment_text
+
+    amendment_text = EXECUTABILITY_AMENDMENT_PATH.read_text(encoding="utf-8")
+    for token in (
+        "0.4.4",
+        "v0.3.4-kde-anomaly-increment-protocol",
+        "historical_superseded_before_target_read",
+        "四个受限空间工件",
+        "development-h(?P<horizon>007|030|090)",
+        "observed、time placebo、space placebo",
+        "necessary_enabler",
+        "停止异常增量实现",
+        "保留 75 km KDE",
     ):
         assert token in amendment_text
