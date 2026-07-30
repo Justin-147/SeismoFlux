@@ -1,0 +1,923 @@
+schema_version: 1
+protocol_version: 0.2.3
+experiment_id: stage2s-causal-seismicity-development-v1
+gate_id: G1-T
+status: target_blind_protocol_content_accepted_remote_tag_required_for_execution
+drafted_on: '2026-07-30'
+frozen_on: '2026-07-30'
+
+scientific_question: >-
+  Does adding one strictly causal spatial KDE of M4+ earthquakes from the most recent
+  30 days to the frozen long-term 75 km KDE improve future M5_6 information gain and
+  strict recall at 600000 km2 across three purged rolling folds, while also exceeding
+  an otherwise identical model using the immediately preceding 30-day history?
+
+governance:
+  stage:
+    protocol: Stage2S-0
+    development_attempt: Stage2S-1
+    branch_role: background_dynamics_not_stage4_anomaly_revival
+  protocol_tag: v0.2.3-causal-seismicity-screen-protocol
+  expected_code_tag: v0.2.3-causal-seismicity-screen-code
+  expected_result_tag: v0.2.3-causal-seismicity-screen-result
+  protocol_code_and_result_tags_must_be_distinct: true
+  protocol_commit_and_tag_push_required_before_code: true
+  code_commit_and_tag_push_required_before_real_input_or_target_read: true
+  execution_authority_requires_remote_protocol_tag: true
+  development_scientific_attempts_allowed: 1
+  attempt_id: stage2s-causal-seismicity-development-v1-attempt-1
+  development_target_read_count_at_preregistration: 0
+  independent_validation_target_read_count_at_preregistration: 0
+  locked_test_read_count_at_preregistration: 0
+  stage4a_attempt_consumed: false
+  stage4a_route_status: stopped_before_code_freeze
+  stage4a_code_or_result_reuse: forbidden
+  maximum_new_foundational_protocol_corrections_after_this_freeze: 0
+  on_new_foundational_P0: stop_stage2s_and_retain_75km_KDE
+  tuning_or_retry_after_development_result: forbidden
+  parameter_window_bandwidth_area_or_region_change_after_result: forbidden
+  independent_validation_authorized: false
+  target_blind_scope: >-
+    no_stage2s_candidate_metric_target_row_or_result_was_opened_while_writing_this_contract
+    _but_the_2022_2023_period_is_reused_stage2r_development_data
+  existing_2022_2023_development_role: >-
+    reused_stage2r_background_selection_period_only_stage2s_alpha_and_candidate_maps_are
+    _time_causal_not_independent_not_globally_target_blind
+  existing_2024_2025_validation_role: >-
+    previously_scored_by_stage2r_not_an_independent_stage2s_target
+  future_independent_evidence_rule: >-
+    only_a_new_prospectively_sealed_cohort_or_the_existing_stage9_locked_test_after_all_prior_gates
+  locked_test_run: false
+
+allowed_models:
+  exact_order: [S0, S1, SP]
+  confirmatory_candidate: S1
+  comparators: [S0, SP]
+  additional_candidate_model: forbidden
+  S0:
+    label: frozen_long_term_75km_KDE
+  S1:
+    label: long_term_plus_most_recent_30d_seismicity
+  SP:
+    label: long_term_plus_immediately_preceding_30d_seismicity_control
+    role: deterministic_past_only_matched_control_not_random_permutation
+  full_etas_hawkes: forbidden
+  anomaly_feature_or_table_use: forbidden
+  fault_or_hazard_feature_use: forbidden
+  artificial_forecast_feature_or_label_use: forbidden
+  tree_neural_weak_or_self_supervised_model: forbidden
+
+source_contracts:
+  data_catalog:
+    path: data/manifests/data_catalog.json
+    sha256: 0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50
+    allowed_pointer: /datasets/earthquake_event
+  study_area:
+    path: data/processed/china_mainland.geojson
+    file_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    byte_open_or_stat_before_remote_code_tag: forbidden
+    post_remote_code_tag_pre_target_role: >-
+      one_non_target_byte_open_hash_parse_project_and_grid_identity_preflight
+    projected_geometry_sha256: c5074034de71fd24ff2d9e0277c49389436e41b720a82fdb45f620b67b2c7231
+    projected_geometry_identity_algorithm:
+      source_path: src/seismoflux/background/local_support.py
+      source_sha256_at_protocol: a66f6b113c9dd8da4b013a7869f0396dc3d643ac4fce63ebccefd374ce7e8aaa
+      normalize: shapely.normalize_on_projected_geometry
+      serialize: shapely.to_wkb_hex_false_output_dimension_2_byte_order_1_include_srid_false
+      digest: SHA256_of_serialized_WKB_bytes
+    projected_total_area_m2: 9415305754432.771
+    projected_area_absolute_tolerance_m2: 9.41530575443277
+    equal_area_crs: >-
+      +proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m
+      +no_defs +type=crs
+    exact_loader_symbol: seismoflux.background.catalog.load_study_area_bytes
+    loader_source_path: src/seismoflux/background/catalog.py
+    loader_source_sha256_at_protocol: 2a422f7eaefc23c3aaf647b7bc0b7929ea52408e95ad23a7ca47fd7eed034686
+    builder_symbol: seismoflux.features.anomaly.grid.build_stage3_query_grid
+    builder_source_path: src/seismoflux/features/anomaly/grid.py
+    builder_source_sha256_at_protocol: bd349dfff894d039d67ab2b9f025e7682ffc571a42a5d6fc1c6ff44c842ad493
+    grid_primitives_source_path: src/seismoflux/background/grid.py
+    grid_primitives_source_sha256_at_protocol: ab78e3176f14bd91c92dccb661af8af1d32345582c989212c2be8922085bc135
+    operational_grid_family_builder_symbol: seismoflux.background.grid.build_equal_area_grid_family
+    operational_quadrature_representative_point: shapely.point_on_surface_of_exact_support_clipped_geometry
+    builder_sources_must_be_byte_identical_in_remote_code_tag: true
+  earthquake_catalog:
+    path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+    byte_open_or_stat_before_remote_code_tag: forbidden
+    byte_open_before_registered_attempt_and_target_read_CAS: forbidden
+    file_sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+    content_sha256: 2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404
+    schema_sha256: c88d20b32a2cb599f22d1921764757b617fe19b030a0f58585652e9f7c74f3c5
+    row_count: 40898
+    required_fields:
+      - event_id
+      - origin_time_utc
+      - available_at
+      - longitude
+      - latitude
+      - magnitude
+      - inside_study_area
+    event_id_role: deduplicated_physical_event_id
+    one_open_session_for_background_recent_history_training_and_scoring: true
+    second_open_in_same_attempt: forbidden
+    exact_hash_and_schema_verification_occurs_after_CAS_and_consumes_attempt_if_invalid: true
+  background_local_support_manifest:
+    path: data/manifests/background_local_support_manifest.json
+    sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    manifest_id: local-support-bundle-69cecbee9093a21d
+  background_registry:
+    path: data/manifests/background_local_support_model_registry.json
+    sha256: 774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b
+    role: identity_and_historical_evidence_crosscheck_not_inference_payload
+  rolling_fold_manifest:
+    path: data/manifests/causal_seismicity_screen_fold_manifest.json
+    sha256: c3e2444e8892addd03d4c57526c007e2a861137dac50d5abe2e53bac004456e6
+    status: target_blind_calendar_only_no_execution_or_scoring_authority
+    source_design:
+      path: data/manifests/anomaly_increment_r2_fold_manifest.json
+      sha256: 74bb8c73751cab71c85e20609eb70d94902634fe946a3cb4316a83d7e9b051a1
+      content_sha256: d3fd999d51ad66e3ea153d1b40d24d8f861993f0337d2de297ac297711f8eaf2
+      allowed_pointers:
+        - /joint_macro_rolling_folds
+        - /target_window_rule
+        - /training_target_end_must_be_strictly_before_assessment_target_start
+    anomaly_issue_ids_and_time_permutation_pools: forbidden
+    inherited_execution_authority_attempt_randomness_or_result: forbidden
+  target_blind_input_contract:
+    path: data/manifests/causal_seismicity_screen_target_blind_input_contract.json
+    sha256: 50117a0c0cda0d14bd467b8f0d1032855cb5afab0aa2d968370313a933a95ff6
+  spatial_strata_manifest:
+    path: data/manifests/anomaly_increment_r2_spatial_strata.json
+    sha256: 283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83
+    content_sha256: 0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2
+    allowed_pointers:
+      - /aggregate/assigned_nonempty_zone_count
+      - /aggregate/zone_set_sha256
+      - /local_artifacts/cell_mapping
+      - /topology_gate/fixed_query_grid_assignment
+    inherited_entity_mapping_connectors_zone_geometry_or_placebo_semantics: forbidden
+  cell_zone_mapping:
+    path: data/interim/stage4/anomaly_increment_r2/construction_zone_cell_mapping.parquet
+    pre_code_tag_role: declaration_only_no_stat_or_open
+    post_remote_code_tag_pre_target_role: non_target_exact_hash_schema_and_relation_verification
+    sha256: 171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e
+    byte_count: 42917
+    row_count: 15697
+    exact_fields_in_order:
+      - {name: grid_id, type: string}
+      - {name: cell_id, type: string}
+      - {name: cell_row, type: int64}
+      - {name: cell_column, type: int64}
+      - {name: query_x_m, type: float64}
+      - {name: query_y_m, type: float64}
+      - {name: construction_zone_id, type: string}
+    required_null_count_each_field: 0
+    required_nonempty_zone_count: 39
+    required_unique_grid_id_count: 1
+    required_unique_cell_id_count: 15697
+    grid_id_must_equal_runtime_query_grid_id: true
+    rows_columns_and_query_xy_must_match_runtime_query_grid_bitwise: true
+    exact_adapter_return_fields:
+      - query_grid
+      - construction_zone_id_by_cell_id
+    query_grid_exact_runtime_fields:
+      - grid_id
+      - equal_area_crs
+      - cell_size_km
+      - cell_ids
+      - rows
+      - columns
+      - query_xy_m
+      - clipped_area_km2
+    query_grid_coordinate_and_area_role: >-
+      trusted_local_target_independent_grid_construction_mass_aggregation_alarm_area_and
+      _event_cell_assignment_only
+    query_grid_coordinates_for_candidate_refinement_or_parameter_selection: forbidden
+    raw_query_grid_coordinate_or_clipped_geometry_table_publication: forbidden
+    derived_historical_result_map_rendering_after_result: allowed_without_embedded_raw_coordinate_table_or_geometry
+    construction_zone_mapping_coordinates_or_geometry_return: forbidden
+    construction_zone_id_by_cell_id_drop_or_hidden_cache: forbidden
+    code_stage_stop_if_mapping_cannot_be_returned: true
+
+long_term_background:
+  model_id: S0
+  variant_id: spatial_poisson/gaussian_kde_bw75km
+  source_snapshot: fold_4
+  fit_end_utc: '2019-12-31T16:00:00Z'
+  selected_mc: 4.0
+  bandwidth_km: 75.0
+  support_domain: exact_frozen_fold4_supported_domain
+  density_integral_over_domain: 1.0
+  support_id: local-support-788851371baf0e3b
+  support_protocol_version: seismoflux_local_support_v1
+  support_fit_end_utc_exact_manifest: '2019-12-31T16:00:00.000000Z'
+  support_common_mc: 4.0
+  support_retained_area_fraction: 1.0
+  support_retained_area_m2: 9415305754432.771
+  support_total_area_m2: 9415305754432.771
+  support_historical_event_count: 24173
+  support_historical_event_sha256: 7243a6e52ab78379f96d1c4f20f9ef630f7cbb583b4d90b41e9f7ed88574b3ed
+  support_retained_selected_event_count: 5237
+  support_base_cell_size_km: 500.0
+  support_parent_cell_size_km: 1000.0
+  support_projected_geometry_sha256: c5074034de71fd24ff2d9e0277c49389436e41b720a82fdb45f620b67b2c7231
+  runtime_crosscheck_all_fields_required: true
+  training_event_filter:
+    origin_time_utc_lte: '2019-12-31T16:00:00Z'
+    available_at_lte: '2019-12-31T16:00:00Z'
+    inside_study_area: true
+    magnitude_gte_after_support_reconstruction: 4.0
+  support_reconstruction_uses_all_magnitudes_before_mc: true
+  bandwidth_mc_support_or_domain_reselection: forbidden
+  final_validation_background_use: forbidden
+  rematerialize_from_same_in_memory_catalog_as_recent_and_target_views: true
+  public_registry_as_inference_payload: forbidden
+
+recent_seismicity:
+  source_magnitude_minimum: 4.0
+  source_magnitude_weight: 1.0
+  spatial_kernel: equal_area_isotropic_gaussian
+  spatial_bandwidth_km: 75.0
+  temporal_decay: none
+  magnitude_productivity: none
+  most_recent_window:
+    model_component_id: R
+    origin_interval: '(T-30d,T]'
+    origin_time_utc_lte_issue_time: true
+    available_at_lte_issue_time: true
+    inside_study_area_and_supported_domain: true
+  preceding_window_control:
+    model_component_id: RP
+    origin_interval: '(T-60d,T-30d]'
+    origin_time_utc_lte: T_minus_30d
+    available_at_lte: T_minus_30d
+    same_length_kernel_magnitude_and_domain_as_R: true
+  density_freeze_time: issue_time_T
+  density_changes_inside_forecast_horizon: forbidden
+  normalize_each_component_once_over_same_fold4_domain: true
+  empty_window_fallback_component: S0
+  nonfinite_or_nonpositive_normalization_action: invalid
+  second_window_length_decay_bandwidth_or_magnitude_weight: forbidden
+
+continuous_spatial_density:
+  coordinate_system: frozen_equal_area_crs_in_source_contracts_study_area
+  projected_xy_m: pyproj_Transformer_from_EPSG4326_always_xy_true_output_meters
+  density_xy_km: projected_xy_m_divided_by_exact_1000
+  density_coordinate_and_area_units: density_x_y_bandwidth_in_km_and_quadrature_area_in_km2
+  grid_coordinate_and_area_units: grid_x_y_origin_in_m_and_alarm_area_in_km2
+  raw_equal_weight_gaussian_formula: >-
+    k_X_T_x_equals_mean_j_exp_minus_squared_distance_x_xj_div_2b2_div_2pi_b2
+  raw_source_count_convention: arithmetic_mean_includes_exact_inverse_source_event_count
+  bandwidth_b_km: 75.0
+  bandwidth_semantics: two_dimensional_gaussian_standard_deviation_sigma
+  sigma_km: 75.0
+  kernel_centres: projected_coordinates_of_causal_M4plus_source_events
+  operational_normalization_grid_km: 12.5
+  normalization_domain: exact_fold4_supported_geometry_equal_to_frozen_study_area
+  normalization_quadrature: >-
+    raw_density_at_support_clipped_cell_representative_point_times_exact_support
+    _clipped_area_km2
+  normalization_constant_formula: math_fsum_of_all_12_5km_raw_quadrature_masses
+  normalized_density_formula: q_X_T_x_equals_k_X_T_x_div_normalization_constant
+  event_density_operator: >-
+    continuous_normalized_gaussian_KDE_at_projected_event_coordinate_not_cell
+    _interpolation_or_cell_average
+  stable_event_log_density_formula: >-
+    log_q_equals_logsumexp_negative_squared_distance_div_2b2_minus_log_source_event_count
+    _minus_log_2pi_b2_minus_log_mean_KDE_normalization_constant
+  density_floor_or_clipping: forbidden
+  nonfinite_nonpositive_normalization_or_event_density_action: invalid
+  empty_window_density: exact_S0_density_and_log_density
+  same_operator_for_alpha_fit_and_assessment_IG: true
+  coordinate_access_classes:
+    causal_history_source_coordinates:
+      availability: origin_time_and_available_at_lte_that_issue_T
+      role: predictor_KDE_kernel_centres_before_that_issue_prediction_seal
+    fit_target_coordinates:
+      availability: >-
+        after_that_fold_frozen_fit_cutoff_and_after_prior_fold_prediction_seal_if_any
+      role: alpha_fit_continuous_density_evaluation_only
+      assessment_membership_exposure: forbidden
+    assessment_target_coordinates_and_memberships:
+      availability: only_after_O_EXCL_master_prediction_seal
+      role: continuous_scoring_frozen_cell_zone_assignment_and_diagnostics_only
+  any_target_coordinate_for_grid_candidate_region_boundary_bandwidth_window_or_parameter_change: forbidden
+  quadrature_grid_family_km: [50.0, 25.0, 12.5]
+  grid_origin_m: [0.0, 0.0]
+  cell_bounds: left_bottom_closed_right_top_open
+  event_cell_index: >-
+    column_floor_projected_x_m_minus_origin_x_m_div_25000_and_row_floor_projected
+    _y_m_minus_origin_y_m_div_25000
+  event_exactly_on_grid_line_action: floor_rule_no_epsilon_or_target_based_tie
+  direct_grid_masses_for_convergence: >-
+    normalized_12_5km_density_evaluated_at_each_grid_representative_point_times
+    _that_grid_exact_support_clipped_area
+  operational_25km_mass: aggregate_operational_12_5km_normalized_masses_to_aligned_parent
+  fine_to_parent_rule: parent_row_floor_child_row_div_2_and_parent_column_floor_child_column_div_2
+  operational_25km_mass_sum_expected: 1.0
+  operational_25km_mass_sum_absolute_tolerance: 1.0e-12
+  alarm_area_denominator: exact_study_area_clipped_25km_parent_area
+  regional_compensator_mass: same_operational_12_5km_to_25km_aggregated_mass
+  primary_convergence_pair_km: [25.0, 12.5]
+  diagnostic_convergence_pair_km: [50.0, 25.0]
+  convergence_relative_expected_count_max: 0.02
+  convergence_density_l1_max: 0.05
+  convergence_l1_definition: >-
+    sum_abs_direct_coarse_mass_div_coarse_total_minus_aggregated_fine_mass_div_fine_total
+  convergence_relative_count_definition: >-
+    abs_direct_coarse_total_minus_fine_total_div_max_abs_fine_total_and_1e_12
+  convergence_required_for: every_nonempty_S0_R_RP_S1_SP_fit_assessment_and_delayed_map
+  convergence_failure_status: invalid
+
+mixtures:
+  S1:
+    formula: (1-alpha_R_fold)*S0 + alpha_R_fold*R
+    alpha_id: alpha_R_fold
+  SP:
+    formula: (1-alpha_P_fold)*S0 + alpha_P_fold*RP
+    alpha_id: alpha_P_fold
+  weight_bounds_inclusive: [0.0, 1.0]
+  one_weight_per_model_per_fold: true
+  weight_shared_across_7_30_90_day_assessments: true
+  weight_fit_rows: expanding_nonoverlapping_h007_fit_exposures_only
+  fit_issue_map_rule: >-
+    every_fit_event_is_assigned_to_the_unique_issue_T_with_T_less_than_origin_time
+    _lte_T_plus_7d
+  fit_predictor_history_rule: source_origin_time_and_available_at_lte_issue_T
+  fit_target_availability_rule: available_at_lte_that_fold_fit_target_end_inclusive_utc
+  fit_target_population: unique_supported_M5_6_events_only
+  assessment_target_or_metric_use_for_weight: forbidden
+  objective: sum_fit_event_log_mixture_spatial_density
+  objective_formula: >-
+    L_alpha_equals_sum_i_log_of_1_minus_alpha_times_q0_i_plus_alpha_times_qX_i
+  objective_compensator_role: equal_constant_across_weights
+  exact_solver:
+    concavity_required: true
+    first_derivative_formula: >-
+      sum_i_qX_i_minus_q0_i_div_1_minus_alpha_times_q0_i_plus_alpha_times_qX_i
+    second_derivative_formula: >-
+      negative_sum_i_square_of_qX_i_minus_q0_i_div_square_of_mixture_density_i
+    derivative_aggregation: >-
+      math_fsum_in_origin_time_then_unsigned_UTF8_event_id_bytes_order_divided_by_event_count
+    derivative_sign_tolerance: 1.0e-12
+    concavity_positive_tolerance: 1.0e-12
+    solver_precedence:
+      - no_fit_events_evidence_insufficient
+      - nonfinite_or_nonpositive_invalid
+      - flat_alpha_0
+      - derivative_at_zero_alpha_0
+      - derivative_at_one_alpha_1
+      - bisection
+    derivative_endpoint_overlap_action: alpha_0_by_derivative_at_zero_precedence
+    flat_rule: max_abs_qX_div_q0_minus_1_lte_1e_12
+    if_derivative_at_zero_lte_positive_tolerance: 0.0
+    if_derivative_at_one_gte_negative_tolerance: 1.0
+    otherwise_bisection_iterations: 64
+    bisection_update_if_midpoint_derivative_gt_zero: replace_left_endpoint
+    bisection_update_otherwise: replace_right_endpoint
+    bisection_return: arithmetic_mean_of_final_left_and_right_endpoints
+    completely_flat_tie: 0.0
+    stable_mixture_log_density:
+      alpha_0: log_q0
+      alpha_1: log_qX
+      interior: numpy_logaddexp_log1p_minus_alpha_plus_log_q0_and_log_alpha_plus_log_qX
+    density_floor_or_ratio_clipping: forbidden
+    nonfinite_nonpositive_density_or_nonconcave_action: invalid
+  grid_search_or_result_based_weight_choice: forbidden
+
+shared_rate_and_compensator:
+  rate_id: r_M5_6_fold
+  estimate: supported_M5_6_fit_event_count_divided_by_total_h007_fit_exposure_days
+  fit_scope: same_expanding_h007_fit_exposures_as_mixture_weights
+  fit_event_assignment: same_unique_h007_issue_membership_as_alpha_fit
+  fit_event_availability_rule: available_at_lte_that_fold_fit_target_end_inclusive_utc
+  fit_event_deduplication: event_id_exactly_once
+  shared_exactly_by: [S0, S1, SP]
+  source_M4_rate_use: forbidden
+  candidate_specific_rate: forbidden
+  per_issue_expected_count_formula: r_M5_6_fold_times_horizon_days
+  fold_horizon_expected_count_formula: >-
+    number_of_assessment_issue_dates_for_that_fold_horizon_times_r_M5_6_fold_times
+    _horizon_days
+  zero_or_nonfinite_rate_action: evidence_insufficient
+  cell_mass_sum_each_model_expected: 1.0
+  cell_mass_sum_each_model_absolute_tolerance: 1.0e-12
+  compensator_mass_source: operational_12_5km_masses_aggregated_to_25km
+  paired_global_compensator_difference_expected: 0.0
+  paired_global_compensator_difference_absolute_tolerance: 1.0e-10
+  write_zero_without_independent_numerical_recomputation: forbidden
+  midpoint_or_issue_after_time_integration: not_applicable_density_frozen_at_T
+
+calendar_and_targets:
+  fold_indices: [1, 2, 3]
+  fold_source_pointer: /joint_macro_rolling_folds
+  fit_exposures: h007_only_as_frozen_in_manifest
+  assessment_horizons_days: [7, 30, 90]
+  assessment_bands_mutually_disjoint: true
+  training_target_end_strictly_before_assessment_target_start: true
+  issue_timezone: Asia/Shanghai
+  issue_time_local: '00:00:00'
+  target_window: '(T,T+h]'
+  base_target:
+    magnitude_bin_id: M5_6
+    magnitude_interval: '[5.0,6.0)'
+    deduplication_unit: event_id
+    inside_study_area: true
+    one_issue_membership_maximum_within_each_fold_horizon: true
+    duplicate_issue_membership_action: invalid
+  information_gain_target:
+    population: base_target_and_inside_exact_fold4_supported_domain
+    unsupported_target_event_log_action: excluded
+    denominator: supported_unique_physical_event_count
+  strict_recall_target:
+    population: all_base_targets_in_full_study_area
+    unsupported_target_action: included_in_denominator_and_forced_miss_for_all_models
+    denominator: full_study_area_unique_physical_event_count
+  M6_plus_role: descriptive_only_not_G1_T
+  minimum_supported_IG_unique_physical_events_union: 20
+  minimum_supported_IG_unique_events_each_fold_horizon: 1
+  minimum_full_area_recall_unique_physical_events_union: 20
+  minimum_full_area_recall_unique_events_each_fold_horizon: 1
+  any_minimum_or_zero_event_failure_action: evidence_insufficient_no_partial_macro
+  full_study_area_target_denominator: true
+  outside_supported_domain_target_action: count_as_not_covered_in_strict_recall
+  target_epicenter_use_for_grid_region_candidate_or_boundary_generation: forbidden
+
+alarm_area:
+  query_grid_cell_size_km: 25.0
+  grid_origin_m: [0.0, 0.0]
+  target_independent_grid_only: true
+  primary_budget_km2: 600000.0
+  mass_source: operational_12_5km_normalized_masses_aggregated_to_aligned_25km_parent
+  area_source: exact_study_area_clipped_runtime_query_grid_cell_area
+  rank_value: aggregated_integrated_cell_mass_divided_by_exact_study_area_clipped_cell_area
+  descending_rank: true
+  tie_break: [cell_row_ascending, cell_column_ascending, cell_id_ascending]
+  selection: complete_prefix_with_cumulative_exact_area_lte_budget
+  partial_cell_skip_oversized_cell_or_budget_expansion: forbidden
+  same_grid_area_and_tie_rule_all_models: true
+
+evaluation:
+  cell_dimensions: fold_x_horizon
+  cell_order:
+    folds: [1, 2, 3]
+    horizons_days: [7, 30, 90]
+  information_gain:
+    formula: >-
+      paired_continuous_event_log_intensity_ratio_minus_independently_recomputed_paired
+      _integrated_compensator_difference_per_supported_unique_physical_event
+    event_density_operator: >-
+      continuous_normalized_KDE_at_projected_event_coordinate_exactly_as_alpha_fit
+    event_density_grid_lookup_interpolation_or_cell_average: forbidden
+    shared_rate_log_term: cancels_but_positive_shared_rate_must_have_passed
+    fold_horizon_compensator: sum_independently_recomputed_compensator_over_all_issue_dates
+  strict_recall:
+    formula: >-
+      full_study_area_unique_target_hits_in_complete_600000km2_alarm_prefix_divided_by
+      _full_study_area_unique_target_count
+    unsupported_target_hit: forced_zero_all_models
+  aggregation:
+    fold_macro: arithmetic_mean_of_7_30_90_cells
+    horizon_macro: arithmetic_mean_of_three_fold_cells_for_same_horizon
+    overall_macro: arithmetic_mean_of_three_fold_macros
+    each_fold_horizon_weight: 0.1111111111111111
+    recall_uses_same_fold_then_overall_equal_weight_order: true
+  confirmatory_contrasts:
+    exact_order: [S1_minus_S0, S1_minus_SP]
+    S1_minus_S0:
+      practical_recall_gain_minimum_percentage_points: 5.0
+    S1_minus_SP:
+      practical_recall_gain_minimum_percentage_points: 0.0
+  descriptive_contrasts:
+    SP_minus_S0:
+      role: interpretation_only_not_interval_family_or_pass_gate
+  deterministic_control_permutation_p_value: forbidden
+
+bootstrap:
+  replications: 2000
+  replicate_indices: 0_through_1999
+  root_seed: 147
+  generator: numpy.random.PCG64
+  seed_namespace_utf8_exact: 'seismoflux|stage2s-causal-seismicity-development-v1|G1-T|paired-event-block-bootstrap|PCG64|root-seed=147|v1'
+  entropy_uint128: unsigned_big_endian_integer_of_first_16_bytes_of_SHA256_seed_namespace
+  generator_constructor: numpy.random.Generator_numpy.random.PCG64_entropy_uint128
+  unit: deduplicated_physical_event_block_with_all_fold_horizon_memberships
+  strata: fold_id_x_three_bit_7_30_90_horizon_membership_signature_x_supported_IG_bit
+  horizon_membership_signature:
+    text_order: b7_b30_b90
+    binary_integer: int_of_concatenated_b7b30b90_base_2
+    example_001: 90_day_only
+  stratum_order: >-
+    fold_index_ascending_then_membership_binary_integer_001_to_111_ascending_then
+    _supported_bit_0_then_1
+  event_order_within_stratum: origin_time_utc_ascending_then_unsigned_UTF8_event_id_bytes_ascending
+  draw_order: each_replicate_then_each_nonempty_stratum_in_frozen_stratum_order
+  empty_stratum_RNG_call: none
+  one_draw: >-
+    rng.integers_low_0_high_stratum_size_size_stratum_size_dtype_int64_endpoint_false
+  sampling: with_replacement_within_stratum_preserving_each_stratum_size
+  same_multiplicity_for_all_models_contrasts_IG_and_recall: true
+  predictions_alarms_rates_and_weights_refit_inside_bootstrap: false
+  sequence_component_count_and_event_resampling_unit_count_reported: true
+  failed_replication_replacement_or_seed_change: forbidden
+  failed_replication_action: invalid
+  point_estimate_included_as_replication: false
+  quantile:
+    method: numpy_linear_frozen_explicitly
+    sorted_values_zero_based: x_0_through_x_B_minus_1
+    h: B_minus_1_times_p
+    j: floor_h
+    gamma: h_minus_j
+    formula: one_minus_gamma_times_x_j_plus_gamma_times_x_j_plus_1
+  interval_families:
+    information_gain:
+      members: [S1_minus_S0, S1_minus_SP]
+      method: bonferroni_two_sided_percentile_familywise_95pct
+      member_interval_coverage: 0.975
+      lower_percentile: 1.25
+      upper_percentile: 98.75
+    fixed_area_recall:
+      members: [S1_minus_S0, S1_minus_SP]
+      method: bonferroni_two_sided_percentile_familywise_95pct
+      member_interval_coverage: 0.975
+      lower_percentile: 1.25
+      upper_percentile: 98.75
+  ordinary_marginal_95pct_interval_role: diagnostic_only
+  interval_scope: >-
+    conditional_on_fixed_calendar_observed_stratum_sizes_fitted_fold_models_and_weights
+    _with_event_block_resampling_not_sequence_independence
+
+regional_robustness:
+  region_id_source: construction_zone_id_by_cell_id
+  event_region_assignment: >-
+    projected_event_coordinate_to_left_bottom_closed_right_top_open_frozen_25km_cell
+    _then_frozen_zone_id
+  contrasts_required: [S1_minus_S0, S1_minus_SP]
+  sign_tolerance: 1.0e-12
+  region_contribution_denominator: original_frozen_fold_horizon_denominator_no_renormalization
+  information_gain_additive_region_cell_formula: >-
+    G_z_fh_A_minus_B_equals_open_bracket_sum_e_in_E_z_fh_log_q_A_Te_div_q_B_Te
+    _minus_sum_T_in_J_fh_open_paren_r_f_times_h_times_open_paren_M_A_T_z_minus_M_B_T_z
+    _close_paren_close_paren_close_bracket_div_n_supported_fh
+  recall_additive_region_cell_formula: >-
+    full_area_hit_difference_sum_in_zone_divided_by_original_full_area_event_count
+  macro_region_contribution: arithmetic_mean_of_nine_fold_horizon_additive_cell_contributions
+  report_all_39_zones_including_zero_event_zones: true
+  additive_closure_absolute_tolerance: 1.0e-10
+  additive_closure_failure_status: invalid
+  IG_event_bearing_zone: at_least_one_supported_IG_target_membership
+  recall_event_bearing_zone: at_least_one_full_area_recall_target_membership
+  minimum_IG_event_bearing_zones: 2
+  minimum_recall_event_bearing_zones: 2
+  minimum_positive_additive_IG_event_bearing_zones_each_contrast: 2
+  minimum_positive_additive_recall_event_bearing_zones_each_contrast: 2
+  positive_definition: event_bearing_AND_additive_contribution_gt_sign_tolerance
+  strongest_positive_zone_each_contrast_each_metric:
+    IG: maximum_additive_macro_IG_among_positive_IG_event_bearing_zones
+    recall: maximum_additive_macro_recall_gain_among_positive_recall_event_bearing_zones
+    tie_break: unsigned_UTF8_construction_zone_id_bytes_ascending
+  leave_one_region_out:
+    type: fixed_denominator_additive_residual
+    model_weight_rate_density_alarm_mask_ranking_or_denominator_refit: forbidden
+    residual_macro_IG: >-
+      primary_macro_IG_contrast_minus_that_contrasts_strongest_IG_zone_additive_contribution
+    residual_macro_recall_gain: >-
+      primary_macro_recall_gain_contrast_minus_that_contrasts_strongest_recall_zone
+      _additive_contribution
+    residual_macro_IG_each_contrast_gt_sign_tolerance: true
+    residual_macro_recall_gain_each_contrast_gt_sign_tolerance: true
+  raw_target_event_to_region_binding_publication: forbidden
+
+sequence_dominance_diagnostic:
+  role: required_claim_scope_diagnostic_not_primary_pass_gate
+  sequence_algorithm:
+    population: unique_full_study_area_primary_M5_6_assessment_event_union
+    graph_edge_if:
+      absolute_origin_time_difference_seconds_lte: 2592000
+      WGS84_geodesic_distance_m_lte: 75000.0
+      conjunction: AND
+    geodesic_implementation: pyproj.Geod_ellps_WGS84
+    components: undirected_connected_components
+    component_id: unsigned_UTF8_bytes_smallest_event_id
+    event_order: [origin_time_utc_ascending, unsigned_UTF8_event_id_bytes_ascending]
+    largest_count_tie_break: unsigned_UTF8_component_id_bytes_ascending
+    largest_gain_tie_break: unsigned_UTF8_component_id_bytes_ascending
+  retain_all_sequences_in_primary_analysis: true
+  additive_statistics:
+    contrasts: [S1_minus_S0, S1_minus_SP]
+    IG_component: >-
+      original_denominator_one_ninth_sum_of_supported_event_log_ratio_memberships
+    recall_component: >-
+      original_denominator_one_ninth_sum_of_full_area_event_hit_difference_memberships
+    global_compensator_assignment: separate_unassigned_residual_not_attributed_to_any_sequence
+    additive_closure: >-
+      sum_sequence_event_components_plus_global_compensator_residual_equals_primary_macro
+    sum_components_to_primary_macro_absolute_tolerance: 1.0e-10
+    global_compensator_above_primary_1e_10_tolerance_or_closure_failure_status: invalid
+  largest_gain_component_each_contrast_each_metric:
+    IG: maximum_additive_IG_event_component
+    recall: maximum_additive_recall_gain_component
+    tie_break: unsigned_UTF8_component_id_bytes_ascending
+  fraction_rules:
+    event_fraction: component_unique_events_div_unique_union_events
+    hit_fraction_by_model: >-
+      component_additive_macro_hit_div_model_macro_recall_if_denominator_gt_1e_12_else_null
+    IG_gain_fraction_each_contrast: >-
+      component_additive_IG_div_macro_IG_if_macro_IG_gt_1e_12_else_null
+    raw_values_always_reported: true
+  leave_out:
+    components:
+      - largest_count_component
+      - largest_IG_gain_component_each_contrast
+      - largest_recall_gain_component_each_contrast
+    method: >-
+      primary_macro_including_independently_recomputed_global_compensator_residual_minus
+      _selected_sequence_event_component_with_original_denominators
+    refit_reweight_rerank_alarm_or_denominator_change: forbidden
+  report:
+    - sequence_component_count
+    - event_resampling_unit_count
+    - largest_sequence_event_fraction
+    - largest_sequence_hit_fraction
+    - largest_sequence_information_gain_fraction
+    - leave_largest_count_sequence_out
+    - leave_largest_gain_sequence_out
+    - component_origin_time_span_days
+    - component_max_pairwise_geodesic_distance_km
+    - component_event_count
+  if_any_required_contrast_residual_IG_or_recall_gain_lte_1e_12: >-
+    claim_limited_to_sequence_associated_continuation_not_broad_regional_gain
+  aftershock_or_cluster_deletion_from_primary_result: forbidden
+
+catalog_latency_sensitivity:
+  interpretation: predictor_feed_availability_delay_only
+  simulated_additional_delay_days: [1, 7]
+  run_each_delay_separately_and_require_both: true
+  recent_window_as_of_rule: available_at_plus_delay_lte_T
+  preceding_window_as_of_rule: available_at_plus_delay_lte_T_minus_30d
+  origin_interval_boundaries_unchanged: true
+  eligibility: intersection_of_fixed_origin_interval_and_delayed_availability_rule
+  same_window_kernel_domain_solver_and_assessment_as_primary: true
+  mixture_weights_refit_on_corresponding_delayed_fit_maps: true
+  unchanged:
+    - S0
+    - assessment_targets_and_memberships
+    - fold_calendar
+    - support_domain
+    - kernel_and_normalization
+    - alarm_area_rule
+    - primary_shared_r_M5_6_fold
+  delayed_fit_targets: same_primary_fit_target_rows
+  report_contrasts_each_delay: [S1_delay_minus_S0, S1_delay_minus_SP_delay]
+  selecting_best_delay_or_combining_delays: forbidden
+  interval_role: diagnostic
+  threshold: 1.0e-12
+  required_for_operational_robustness_each_delay_each_contrast:
+    overall_macro_IG_point_gt_threshold: true
+    fixed_600000km2_recall_gain_point_gt_threshold: true
+  any_required_metric_lte_threshold_action: evidence_insufficient_fragile_signal_stop_route
+  nonfinite_or_identity_failure_action: invalid
+
+decision_gate:
+  exact_status_order: [invalid, evidence_insufficient, failed, passed_development_signal]
+  invalid_if:
+    - future_or_assessment_leakage
+    - source_hash_schema_support_grid_or_region_identity_failure
+    - nonfinite_or_nonconvergent_density_or_weight
+    - nonzero_global_compensator_difference_above_tolerance
+    - different_target_rate_domain_grid_area_or_alarm_rule_across_models
+    - target_derived_grid_region_boundary_parameter_or_candidate
+    - cell_zone_mapping_unavailable_to_evaluator
+    - continuous_density_operator_or_additive_identity_failure
+    - grid_convergence_or_mass_closure_failure
+  evidence_insufficient_if:
+    - supported_IG_unique_physical_event_union_below_20
+    - full_area_recall_unique_physical_event_union_below_20
+    - any_fold_horizon_has_zero_supported_IG_or_full_area_recall_events
+    - fewer_than_two_IG_or_recall_event_bearing_regions
+    - zero_or_nonfinite_supported_fit_M5_6_rate
+    - required_interval_undefined
+    - latency_sensitivity_any_required_metric_lte_1e_12
+  passed_development_signal_requires_all:
+    - all_three_horizon_S1_minus_S0_IG_point_estimates_positive
+    - all_three_horizon_S1_minus_SP_IG_point_estimates_positive
+    - at_least_two_of_three_S1_minus_S0_fold_macros_positive
+    - at_least_two_of_three_S1_minus_SP_fold_macros_positive
+    - S1_minus_S0_fold_macro_median_positive
+    - S1_minus_SP_fold_macro_median_positive
+    - S1_minus_S0_overall_macro_IG_familywise_lower_gt_zero
+    - S1_minus_SP_overall_macro_IG_familywise_lower_gt_zero
+    - at_least_two_of_three_S1_minus_S0_fold_macro_recall_gains_positive
+    - at_least_two_of_three_S1_minus_SP_fold_macro_recall_gains_positive
+    - S1_minus_S0_fold_macro_recall_gain_median_positive
+    - S1_minus_SP_fold_macro_recall_gain_median_positive
+    - S1_minus_S0_fixed_600000km2_recall_gain_gte_5pp
+    - S1_minus_S0_fixed_600000km2_recall_familywise_lower_gt_zero
+    - S1_minus_SP_fixed_600000km2_recall_gain_gt_zero
+    - S1_minus_SP_fixed_600000km2_recall_familywise_lower_gt_zero
+    - both_contrasts_regional_additive_and_metric_specific_LORO_passed
+    - both_delays_both_contrasts_IG_and_recall_gt_1e_12
+  passed_claim: >-
+    stage2s_alpha_time_causal_screen_on_reused_stage2r_development_period_for_one_30d
+    _seismicity_increment_not_independent_not_globally_target_blind_not_locked_test
+    _not_absolute_probability
+  any_valid_evaluable_requirement_failure_status: failed
+  S1_beats_S0_but_not_SP_interpretation: >-
+    spatial_clustering_signal_without_proven_30d_freshness_then_stop_without_window_change
+  SP_beats_S0_descriptive_interpretation: >-
+    older_window_spatial_clustering_may_deserve_a_future_new_protocol_but_authorizes_no_retry
+  neither_increment_beats_S0_interpretation: current_fixed_30d_increment_not_supported
+  failure_scope: does_not_disprove_longer_timescale_or_full_Hawkes_but_route_still_stops
+  result_based_30_60_90_365_day_exponential_or_random_lag_retry: forbidden
+
+execution_control:
+  non_target_preflight_receipt:
+    path: data/interim/stage2s/causal_seismicity_screen/non_target_preflight_receipt.json
+    creation: O_EXCL_canonical_JSON_UTF8_LF_flush_fsync_close
+    required_bindings:
+      - protocol_commit_tag_and_config_fold_input_hashes
+      - code_commit_and_tag
+      - study_area_file_projected_geometry_area_and_identity_algorithm
+      - loader_query_and_operational_grid_builder_source_hashes
+      - fold4_support_identity_and_manifest_hash
+      - cell_mapping_file_hash_schema_grid_id_15697_cells_and_39_zones
+      - aligned_12_5_25_50km_grid_ids_areas_parent_relations_and_representative_points
+      - query_grid_and_cell_zone_mapping_returned_together
+    security_assertions:
+      earthquake_catalog_bytes_read: false
+      assessment_target_view_read: false
+      score_or_candidate_metric_read: false
+    append_rewrite_delete_or_rollback: forbidden
+  attempt_ledger:
+    path: data/manifests/causal_seismicity_screen_attempt_ledger.json
+    initial_state: file_absent_means_zero_registered_attempts
+    only_transition: absent_to_registered_once_by_O_EXCL
+    append_rewrite_delete_or_rollback: forbidden
+    required_identity_fields:
+      - attempt_id
+      - experiment_id
+      - protocol_commit
+      - protocol_tag
+      - protocol_config_sha256
+      - fold_manifest_sha256
+      - target_blind_input_contract_sha256
+      - code_commit
+      - code_tag
+      - expected_catalog_file_content_and_schema_sha256
+      - non_target_preflight_receipt_sha256
+  target_read_ledger:
+    path: data/interim/stage2s/causal_seismicity_screen/target_read_receipt.json
+    initial_state: file_absent_means_logical_and_physical_open_count_zero
+    only_transition: absent_to_claimed_before_first_catalog_byte_by_O_EXCL
+    transition_requires_registered_same_identity_attempt: true
+    required_bindings:
+      - attempt_ledger_sha256
+      - prior_absent_state
+      - attempt_id
+      - protocol_and_code_commits_tags_and_hashes
+      - expected_catalog_file_content_and_schema_sha256
+    write_flush_fsync_close_before_catalog_open: true
+    second_open_rewrite_delete_or_rollback: forbidden
+    claim_consumes_attempt_even_if_catalog_validation_or_run_fails: true
+  code_stage_non_target_preflight_must_pass_before_attempt_registration:
+    - study_area_one_open_hash_parse_projection_geometry_area_and_grid_identity
+    - fold4_manifest_identity_retained_fraction_1_area_and_50_25_12_5km_grid_reconstruction_without_catalog
+    - cell_mapping_one_open_exact_hash_schema_null_uniqueness_and_relations
+    - query_grid_and_cell_zone_mapping_returned_together
+    - all_15697_query_cells_map_once_to_39_nonempty_zones
+    - query_grid_count_order_grid_id_rows_columns_xy_and_clipped_area_crosschecks
+    - aligned_12_5_to_25_to_50_parent_area_and_identity_crosschecks
+    - pure_synthetic_S0_S1_SP_weight_rate_compensator_alarm_bootstrap_region_chain
+    - synthetic_cross_fold_and_cross_issue_role_overlap_precedence_and_seal_order
+    - AST_transitive_import_closure_has_no_stage4_kde_dev_module_or_test_regardless_tracking_state
+  development_run_order:
+    - verify_remote_protocol_and_code_tags_and_commits
+    - verify_non_target_preflight
+    - atomically_register_unique_attempt_by_O_EXCL
+    - atomically_claim_target_read_by_O_EXCL_before_first_catalog_byte
+    - physically_open_catalog_path_once_and_stream_bytes_once_while_hashing
+    - parse_only_the_same_immutable_bytes_via_pyarrow_BufferReader_and_verify_schema_content
+    - reconstruct_fold4_support_from_all_magnitudes_and_crosscheck_every_frozen_manifest_field
+    - process_folds_strictly_1_then_2_then_3_with_prior_fold_seal_required
+    - for_each_fold_expose_only_that_folds_frozen_fit_view_and_fit_weights_rates
+    - write_O_EXCL_fold_fit_receipt_before_first_assessment_issue
+    - for_each_fold_process_unique_assessment_issue_dates_ascending
+    - for_each_issue_expose_only_origin_and_available_at_lte_T_causal_source_view
+    - generate_all_scheduled_horizons_models_primary_0d_and_latency_1d_7d_variants
+    - write_O_EXCL_issue_prediction_seal_chained_to_prior_issue_or_fold_identity
+    - after_last_issue_write_O_EXCL_fold_prediction_seal_chained_to_prior_fold
+    - after_three_folds_write_O_EXCL_master_prediction_seal
+    - expose_all_assessment_target_memberships_only_after_master_prediction_seal
+    - score_from_same_in_memory_catalog_and_write_results
+    - close_session_without_path_reopen_stat_or_second_byte_source
+  rolling_role_separation:
+    later_fold_fit_view_before_prior_fold_prediction_seal: forbidden
+    earlier_assessment_event_in_later_fit_role: >-
+      allowed_only_after_earlier_fold_prediction_seal_and_only_if_within_later_frozen_fit_cutoff
+    earlier_assessment_event_in_later_causal_source_role: >-
+      allowed_only_after_corresponding_issue_prediction_seal_and_origin_and_available_at_lte_later_T
+    prior_fold_score_hit_or_candidate_metric_to_later_fit_or_predictor: forbidden
+    later_fit_view_fields: exact_raw_catalog_allowlist_only_no_prior_score_or_hit
+  catalog_single_open:
+    path_stat_GetFileHash_or_parquet_path_open: forbidden
+    physical_open_calls_allowed: 1
+    read_mode: binary_once_to_immutable_memory_bytes
+    file_sha256: computed_while_reading_that_same_open_stream
+    parquet_parse: pyarrow_BufferReader_over_same_in_memory_bytes
+    background_recent_fit_and_target_views_share_same_parsed_object: true
+    prediction_seal_chain:
+      fold_fit_receipt_path_pattern: 'data/interim/stage2s/causal_seismicity_screen/fold_{fold}/fit_receipt.json'
+      issue_path_pattern: 'data/interim/stage2s/causal_seismicity_screen/fold_{fold}/issue_{YYYY-MM-DD}/prediction_seal.json'
+      fold_path_pattern: 'data/interim/stage2s/causal_seismicity_screen/fold_{fold}/fold_prediction_seal.json'
+      master_path: data/interim/stage2s/causal_seismicity_screen/prediction_seal.json
+      creation_each: O_EXCL_canonical_JSON_UTF8_LF_flush_fsync_close
+      fold_fit_receipt_creation: >-
+        before_first_assessment_issue_by_O_EXCL_canonical_JSON_UTF8_LF_flush_fsync_close
+      fold_fit_receipt_binds:
+        - previous_fold_prediction_seal_sha256_if_any
+        - fold_index_fit_cutoff_and_calendar_sha256
+        - exact_fit_view_event_ids_and_source_map_receipts
+        - primary_0d_alpha_R_alpha_P_and_shared_rate
+        - latency_1d_7d_alpha_R_alpha_P
+        - solver_config_grid_support_region_and_code_identities
+        - no_assessment_membership_score_hit_or_metric_exposed
+      issue_order: unique_assessment_issue_date_ascending_with_all_scheduled_horizons_together
+      fold_order: [1, 2, 3]
+      all_issue_seals_in_fold_bind_same_fold_fit_receipt_sha256: true
+      each_issue_binds:
+        - same_current_fold_fit_receipt_sha256
+        - previous_issue_prediction_seal_sha256_if_any
+        - issue_T_and_all_scheduled_horizons
+        - primary_0d_and_latency_1d_7d_all_model_density_and_alarm_receipts
+        - causal_source_event_ids_and_maximum_origin_and_available_at
+        - fold_weights_rates_grid_support_and_region_identities
+      each_fold_binds:
+        - current_fold_fit_receipt_sha256
+        - all_ordered_issue_seal_sha256_values
+        - previous_fold_seal_sha256_if_any
+        - fold_fit_view_identity_weights_and_rates
+      master_binds:
+        - ordered_fold_1_2_3_prediction_seal_sha256_values
+        - attempt_ledger_sha256
+        - target_read_receipt_sha256
+        - protocol_commit_tag_config_fold_and_input_hashes
+        - code_commit_and_tag
+        - catalog_file_content_and_schema_hashes_from_same_open_bytes
+        - non_target_preflight_receipt_sha256
+        - no_assessment_target_role_or_score_exposed_before_master_seal
+      append_rewrite_delete_or_rollback: forbidden
+      master_required_before_assessment_target_view_and_scoring: true
+  workers: 1
+  BLAS_threads_each_library: 1
+  reserve_physical_cores_minimum: 2
+  GPU_optional_only_if_bitwise_or_tolerance_equivalent_to_CPU: true
+
+deliverables_after_real_development_attempt:
+  static_before_target_result_required:
+    - stage2s_data_method_causal_timeline.svg
+  machine_results:
+    - model_and_weight_receipts
+    - fold_horizon_event_and_compensator_contributions
+    - bootstrap_simultaneous_intervals
+    - regional_and_sequence_diagnostics
+    - latency_sensitivities
+    - decision_gate
+  static:
+    - S0_S1_SP_same_area_recall_and_information_gain.svg
+    - fold_horizon_region_and_failure_cases.svg
+    - historical_frozen_assessment_relative_intensity_map.svg
+  interactive_offline:
+    - historical_frozen_assessment_backtest_explorer.html
+    - historical_frozen_assessment_map_explorer.html
+  interactive_provenance_panel_required_fields:
+    - S0_training_cutoff
+    - R_and_RP_origin_windows
+    - available_at_cutoff
+    - fold_alpha_R_alpha_P_and_shared_rate
+    - fold_and_horizon
+    - issue_fold_and_master_seal_sha256
+    - actual_alarm_area_km2
+  visualization_rules:
+    baseline_candidate_and_control_visible_together: true
+    area_budget_and_data_cutoff_visible: true
+    synthetic_or_engineering_chart_labeled_as_prediction_result: forbidden
+    relative_intensity_rank_or_expected_count_only: true
+    absolute_earthquake_probability_claim: forbidden
+    stage2s_outputs_must_be_labeled_historical_reused_development_assessment: true
+    current_or_prospective_forecast_visual_in_stage2s: forbidden
+    frozen_query_grid_coordinates_for_derived_historical_rendering_after_result: allowed
+    embedded_raw_query_grid_coordinate_table_or_clipped_geometry: forbidden
+  current_forecast_generation_authority: >-
+    separate_post_result_prospective_protocol_required_with_issue_time_data_cutoff
+    _immutable_archive_no_historical_backfill_and_no_G8_claim
+
+science_value_review:
+  science_value_category: necessary_enabler
+  direct_prediction_improvement: none_before_real_development_attempt
+  evidence: >-
+    One bounded causal seismicity comparison is preregistered without opening target
+    rows; this is not a prediction result.
+  decision: adjust_to_stage2s_causal_seismicity_screen
+  next_scientific_test: run_one_three_fold_S1_minus_S0_and_SP_development_attempt
+  stop_condition: >-
+    any_new_foundational_P0_any_gate_failure_or_evidence_insufficient_stops_this_route

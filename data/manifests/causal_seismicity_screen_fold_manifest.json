@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "protocol_version": "0.2.3",
+  "experiment_id": "stage2s-causal-seismicity-development-v1",
+  "status": "target_blind_calendar_only_no_execution_or_scoring_authority",
+  "source_design": {
+    "path": "data/manifests/anomaly_increment_r2_fold_manifest.json",
+    "file_sha256": "74bb8c73751cab71c85e20609eb70d94902634fe946a3cb4316a83d7e9b051a1",
+    "content_sha256": "d3fd999d51ad66e3ea153d1b40d24d8f861993f0337d2de297ac297711f8eaf2",
+    "allowed_pointers": [
+      "/joint_macro_rolling_folds",
+      "/target_window_rule",
+      "/training_target_end_must_be_strictly_before_assessment_target_start"
+    ],
+    "inherited_anomaly_ids_pools_execution_attempt_randomness_or_results": false
+  },
+  "issue_semantics": {
+    "timezone": "Asia/Shanghai",
+    "local_time": "00:00:00",
+    "utc_offset": "+08:00",
+    "target_window": "(T,T+h]",
+    "fit_horizon_days": 7,
+    "assessment_horizons_days": [7, 30, 90],
+    "training_target_end_strictly_before_assessment_target_start": true,
+    "random_split": false
+  },
+  "target_bands_mutually_disjoint": true,
+  "rolling_rule": "three_disjoint_90d_target_bands_with_expanding_nonoverlapping_h007_fit",
+  "folds": [
+    {
+      "fold_index": 1,
+      "fit_scope_id": "stage2s-development-fold-1",
+      "fit_issue_dates_local_h007": [
+        "2022-07-21",
+        "2022-07-28",
+        "2022-08-04",
+        "2022-08-11",
+        "2022-08-18",
+        "2022-08-25",
+        "2022-09-01",
+        "2022-09-08",
+        "2022-09-15",
+        "2022-09-22",
+        "2022-09-29",
+        "2022-10-06"
+      ],
+      "fit_target_end_inclusive_utc": "2022-10-12T16:00:00Z",
+      "assessment_band": {
+        "start_exclusive_local": "2022-10-20",
+        "start_exclusive_utc": "2022-10-19T16:00:00Z",
+        "end_inclusive_local": "2023-01-18",
+        "end_inclusive_utc": "2023-01-17T16:00:00Z"
+      },
+      "assessment_issue_dates_local_by_horizon": {
+        "7": [
+          "2022-10-20",
+          "2022-10-27",
+          "2022-11-03",
+          "2022-11-10",
+          "2022-11-17",
+          "2022-11-24",
+          "2022-12-01",
+          "2022-12-08",
+          "2022-12-15",
+          "2022-12-22",
+          "2022-12-29",
+          "2023-01-05"
+        ],
+        "30": [
+          "2022-11-03",
+          "2022-12-08"
+        ],
+        "90": [
+          "2022-10-20"
+        ]
+      }
+    },
+    {
+      "fold_index": 2,
+      "fit_scope_id": "stage2s-development-fold-2",
+      "fit_issue_dates_local_h007": [
+        "2022-07-21",
+        "2022-07-28",
+        "2022-08-04",
+        "2022-08-11",
+        "2022-08-18",
+        "2022-08-25",
+        "2022-09-01",
+        "2022-09-08",
+        "2022-09-15",
+        "2022-09-22",
+        "2022-09-29",
+        "2022-10-06",
+        "2022-10-13",
+        "2022-10-20",
+        "2022-10-27",
+        "2022-11-03",
+        "2022-11-10",
+        "2022-11-17",
+        "2022-11-24",
+        "2022-12-01",
+        "2022-12-08",
+        "2022-12-15",
+        "2022-12-22",
+        "2022-12-29",
+        "2023-01-05"
+      ],
+      "fit_target_end_inclusive_utc": "2023-01-11T16:00:00Z",
+      "assessment_band": {
+        "start_exclusive_local": "2023-01-19",
+        "start_exclusive_utc": "2023-01-18T16:00:00Z",
+        "end_inclusive_local": "2023-04-19",
+        "end_inclusive_utc": "2023-04-18T16:00:00Z"
+      },
+      "assessment_issue_dates_local_by_horizon": {
+        "7": [
+          "2023-01-19",
+          "2023-01-26",
+          "2023-02-02",
+          "2023-02-09",
+          "2023-02-16",
+          "2023-02-23",
+          "2023-03-02",
+          "2023-03-09",
+          "2023-03-16",
+          "2023-03-23",
+          "2023-03-30",
+          "2023-04-06"
+        ],
+        "30": [
+          "2023-02-16"
+        ],
+        "90": [
+          "2023-01-19"
+        ]
+      }
+    },
+    {
+      "fold_index": 3,
+      "fit_scope_id": "stage2s-development-fold-3",
+      "fit_issue_dates_local_h007": [
+        "2022-07-21",
+        "2022-07-28",
+        "2022-08-04",
+        "2022-08-11",
+        "2022-08-18",
+        "2022-08-25",
+        "2022-09-01",
+        "2022-09-08",
+        "2022-09-15",
+        "2022-09-22",
+        "2022-09-29",
+        "2022-10-06",
+        "2022-10-13",
+        "2022-10-20",
+        "2022-10-27",
+        "2022-11-03",
+        "2022-11-10",
+        "2022-11-17",
+        "2022-11-24",
+        "2022-12-01",
+        "2022-12-08",
+        "2022-12-15",
+        "2022-12-22",
+        "2022-12-29",
+        "2023-01-05",
+        "2023-01-12",
+        "2023-01-19",
+        "2023-01-26",
+        "2023-02-02",
+        "2023-02-09",
+        "2023-02-16",
+        "2023-02-23",
+        "2023-03-02",
+        "2023-03-09",
+        "2023-03-16",
+        "2023-03-23",
+        "2023-03-30",
+        "2023-04-06"
+      ],
+      "fit_target_end_inclusive_utc": "2023-04-12T16:00:00Z",
+      "assessment_band": {
+        "start_exclusive_local": "2023-04-20",
+        "start_exclusive_utc": "2023-04-19T16:00:00Z",
+        "end_inclusive_local": "2023-07-19",
+        "end_inclusive_utc": "2023-07-18T16:00:00Z"
+      },
+      "assessment_issue_dates_local_by_horizon": {
+        "7": [
+          "2023-04-20",
+          "2023-04-27",
+          "2023-05-04",
+          "2023-05-11",
+          "2023-05-18",
+          "2023-05-25",
+          "2023-06-01",
+          "2023-06-08",
+          "2023-06-15",
+          "2023-06-22",
+          "2023-06-29"
+        ],
+        "30": [
+          "2023-04-27",
+          "2023-06-01"
+        ],
+        "90": [
+          "2023-04-20"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "contains_target_ids_coordinates_scores_hits_or_model_results": false,
+    "contains_anomaly_values_features_or_entity_ids": false,
+    "development_target_read_authorized": false,
+    "independent_validation_or_locked_test_authorized": false
+  }
+}

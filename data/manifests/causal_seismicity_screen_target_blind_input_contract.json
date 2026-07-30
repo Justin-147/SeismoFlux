@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "protocol_version": "0.2.3",
+  "experiment_id": "stage2s-causal-seismicity-development-v1",
+  "status": "target_blind_declarations_only_no_execution_or_target_read_authority",
+  "earthquake_catalog": {
+    "metadata_manifest": {
+      "path": "data/manifests/data_catalog.json",
+      "file_sha256": "0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50",
+      "allowed_pointer": "/datasets/earthquake_event"
+    },
+    "local_path": "data/processed/stage1/debc98054172a4a1/earthquake_event.parquet",
+    "file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+    "content_sha256": "2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404",
+    "schema_sha256": "c88d20b32a2cb599f22d1921764757b617fe19b030a0f58585652e9f7c74f3c5",
+    "row_count": 40898,
+    "pre_remote_code_tag": "path_and_manifest_declaration_only_no_stat_hash_or_open",
+    "first_byte_open": "after_registered_attempt_and_atomic_target_read_zero_to_one_CAS",
+    "one_open_session": true,
+    "second_open": "forbidden"
+  },
+  "study_area": {
+    "path": "data/processed/china_mainland.geojson",
+    "file_sha256": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02",
+    "pre_remote_code_tag": "path_and_manifest_declaration_only_no_stat_hash_or_open",
+    "post_remote_code_tag_pre_target": "one_non_target_byte_open_hash_parse_project_and_grid_identity_preflight",
+    "projected_geometry_sha256": "c5074034de71fd24ff2d9e0277c49389436e41b720a82fdb45f620b67b2c7231",
+    "projected_geometry_identity_algorithm": {
+      "source_path": "src/seismoflux/background/local_support.py",
+      "source_sha256_at_protocol": "a66f6b113c9dd8da4b013a7869f0396dc3d643ac4fce63ebccefd374ce7e8aaa",
+      "normalize": "shapely.normalize_on_projected_geometry",
+      "serialize": "shapely.to_wkb_hex_false_output_dimension_2_byte_order_1_include_srid_false",
+      "digest": "SHA256_of_serialized_WKB_bytes"
+    },
+    "projected_total_area_m2": 9415305754432.771,
+    "projected_area_absolute_tolerance_m2": 9.41530575443277,
+    "equal_area_crs": "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs",
+    "exact_loader_symbol": "seismoflux.background.catalog.load_study_area_bytes",
+    "loader_source_sha256_at_protocol": "2a422f7eaefc23c3aaf647b7bc0b7929ea52408e95ad23a7ca47fd7eed034686",
+    "query_grid_builder_symbol": "seismoflux.features.anomaly.grid.build_stage3_query_grid",
+    "query_grid_builder_source_sha256_at_protocol": "bd349dfff894d039d67ab2b9f025e7682ffc571a42a5d6fc1c6ff44c842ad493",
+    "grid_primitives_source_sha256_at_protocol": "ab78e3176f14bd91c92dccb661af8af1d32345582c989212c2be8922085bc135",
+    "operational_grid_family_builder_symbol": "seismoflux.background.grid.build_equal_area_grid_family",
+    "operational_quadrature_representative_point": "shapely.point_on_surface_of_exact_support_clipped_geometry",
+    "query_grid_builder_dependency_closure": {
+      "direct_function_argument": "load_study_area_bytes_verified_payload_equal_area_crs_dot_geographic",
+      "internal_fixed_equal_area_crs": true,
+      "internal_fixed_cell_size_25km": true,
+      "internal_fixed_origin_0_0m": true
+    },
+    "query_grid_builder_target_or_earthquake_input": false,
+    "builder_sources_must_be_byte_identical_in_remote_code_tag": true
+  },
+  "background": {
+    "local_support_manifest": {
+      "path": "data/manifests/background_local_support_manifest.json",
+      "file_sha256": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d",
+      "manifest_id": "local-support-bundle-69cecbee9093a21d"
+    },
+    "registry": {
+      "path": "data/manifests/background_local_support_model_registry.json",
+      "file_sha256": "774531a806a9591398f1be3474a00fdf89626b515b2cebb41c597f7dc6c1c67b",
+      "role": "identity_and_historical_evidence_crosscheck_only_not_inference_payload"
+    },
+    "snapshot_id": "fold_4",
+    "support_id": "local-support-788851371baf0e3b",
+    "fit_end_utc": "2019-12-31T16:00:00Z",
+    "selected_mc": 4.0,
+    "bandwidth_km": 75.0,
+    "retained_area_fraction": 1.0,
+    "retained_area_m2": 9415305754432.771,
+    "historical_event_count": 24173,
+    "historical_event_sha256": "7243a6e52ab78379f96d1c4f20f9ef630f7cbb583b4d90b41e9f7ed88574b3ed",
+    "base_cell_size_km": 500.0,
+    "parent_cell_size_km": 1000.0,
+    "projected_geometry_sha256": "c5074034de71fd24ff2d9e0277c49389436e41b720a82fdb45f620b67b2c7231",
+    "final_validation_use": "forbidden"
+  },
+  "calendar": {
+    "path": "data/manifests/causal_seismicity_screen_fold_manifest.json",
+    "file_sha256": "c3e2444e8892addd03d4c57526c007e2a861137dac50d5abe2e53bac004456e6",
+    "source_design_path": "data/manifests/anomaly_increment_r2_fold_manifest.json",
+    "source_design_file_sha256": "74bb8c73751cab71c85e20609eb70d94902634fe946a3cb4316a83d7e9b051a1",
+    "source_design_content_sha256": "d3fd999d51ad66e3ea153d1b40d24d8f861993f0337d2de297ac297711f8eaf2"
+  },
+  "spatial_inputs": {
+    "source_manifest": {
+      "path": "data/manifests/anomaly_increment_r2_spatial_strata.json",
+      "file_sha256": "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83",
+      "content_sha256": "0e8e1af89b802522150c9ef3b46a1ffe0d440e51f69ce4a532a6e1540934b5d2"
+    },
+    "cell_mapping": {
+      "path": "data/interim/stage4/anomaly_increment_r2/construction_zone_cell_mapping.parquet",
+      "file_sha256": "171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e",
+      "byte_count": 42917,
+      "row_count": 15697,
+      "required_nonempty_zone_count": 39,
+      "required_unique_grid_id_count": 1,
+      "required_unique_cell_id_count": 15697,
+      "fields_in_order": [
+        {"name": "grid_id", "type": "string"},
+        {"name": "cell_id", "type": "string"},
+        {"name": "cell_row", "type": "int64"},
+        {"name": "cell_column", "type": "int64"},
+        {"name": "query_x_m", "type": "float64"},
+        {"name": "query_y_m", "type": "float64"},
+        {"name": "construction_zone_id", "type": "string"}
+      ],
+      "pre_remote_code_tag": "declaration_only_no_stat_or_open",
+      "post_remote_code_tag_pre_target": "exact_hash_schema_and_grid_relation_verification"
+    },
+    "adapter_exact_return_fields": [
+      "query_grid",
+      "construction_zone_id_by_cell_id"
+    ],
+    "query_grid_exact_runtime_fields": [
+      "grid_id",
+      "equal_area_crs",
+      "cell_size_km",
+      "cell_ids",
+      "rows",
+      "columns",
+      "query_xy_m",
+      "clipped_area_km2"
+    ],
+    "mapping_keys_equal_query_grid_cell_ids": true,
+    "mapping_grid_id_rows_columns_and_query_xy_match_runtime_query_grid": true,
+    "query_grid_coordinates_and_areas_are_local_target_independent_runtime_fields": true,
+    "query_grid_coordinates_for_candidate_refinement_or_parameter_selection": false,
+    "raw_query_grid_coordinate_or_clipped_geometry_table_publication": false,
+    "derived_historical_result_map_rendering_after_result_without_raw_coordinate_table": true,
+    "construction_zone_mapping_contains_coordinates_or_geometry": false,
+    "cell_to_zone_mapping_may_not_be_dropped": true
+  },
+  "forbidden_sources": [
+    "any_src/seismoflux/anomaly_increment/kde_dev_*.py_regardless_of_tracking_state",
+    "any_tests/unit/test_stage4_kde_dev_*.py_regardless_of_tracking_state",
+    "stage4_attempt_execution_randomness_or_result",
+    "anomaly_state_or_feature_values",
+    "fault_hazard_or_human_forecast_features",
+    "final_validation_background_payload",
+    "independent_validation_or_locked_test_targets"
+  ],
+  "code_stage_stop_conditions": [
+    "cell_mapping_missing_or_identity_schema_relation_failure",
+    "query_grid_and_construction_zone_id_by_cell_id_not_returned_together",
+    "background_fold4_cannot_be_rematerialized_from_one_catalog_session",
+    "pure_synthetic_same_path_chain_fails",
+    "any_forbidden_source_import_or_copy"
+  ],
+  "security": {
+    "real_catalog_bytes_read": false,
+    "development_target_read": false,
+    "independent_validation_target_read": false,
+    "locked_test_read": false,
+    "study_area_or_query_grid_bytes_read": false,
+    "execution_authority": false
+  }
+}

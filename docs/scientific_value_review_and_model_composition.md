@@ -190,5 +190,43 @@ exposure 日期 adapter。
 
 只读路线复审已推荐另立阶段 2S，而不是重开阶段 4A：用冻结的长期 75 km KDE 作为 `S0`，只增加
 一个严格因果的近期地震 KDE 形成 `S1`，直接检验 600,000 平方公里固定面积召回、信息增益和时间
-错位对照。该推荐尚未获得执行授权；必须先提交、推送当前失败验收，再另行修订唯一蓝图并完成
-Stage 2S 目标盲协议验收。
+错位对照。阶段 4A 停止已提交并推送；当前只推进 Stage 2S 目标盲协议验收，尚未获得真实目录/
+目标读取或开发评分授权。
+
+## 9. Stage 2S-0 最小科学合同
+
+阶段 4A 停止提交 `414198aff611bbe1df05413e0b7bb7309c644189` 已推送后，Stage 2S-0 才开始。
+路线复审最终选择更小、解释更清楚的 30 天合同，放弃 365 天指数衰减和 1,000 次随机 lag：
+
+- `S0`：冻结长期 75 km KDE；
+- `S1`：`S0` + 最近 30 天严格因果 M4+ 事件的等权 75 km KDE；
+- `SP`：`S0` + 紧邻的再前一个 30 天同结构 KDE。
+
+`SP` 是确定性过去对照，不冒充 permutation。每折两个混合权重只在 h007 fit exposures 上按固定
+一维凹似然拟合；三模型共享 M5–6 日率、支持域、格网、目标和面积。两项比较分别进入信息增益和
+召回的两成员 Bonferroni 同时区间。
+
+三路独立协议审计发现并修订了会改变科学结论的基础问题：源日历 content hash 缺失、研究区/
+query grid/精确面积合同不闭合、连续 KDE 与格点评分混用、支持域信息增益与全区召回分母未分开，
+以及双对比区域/LORO、单次读取、Bootstrap 随机流和滚动折封印顺序不唯一。修订后只允许连续
+事件坐标评分、12.5 km 归一质量聚合到 25 km 报警/区域质量、两项对比分别做固定分母可加 LORO；
+三折严格按顺序执行并使用 fold-fit、issue、fold、master 四层不可改写封印，任何 assessment 成绩
+都不能进入后一折拟合或预测。
+
+2022–2023 已经用于 Stage 2R 背景和 75 km 带宽选择。因此 Stage 2S 即使通过，也只能称为
+“新增 alpha 和候选图在复用开发期内的时间因果筛查”，不能称为全局目标盲或独立验证。
+
+本阶段科学价值字段为：
+
+- `science_value_category`: `necessary_enabler`
+- `direct_prediction_improvement`: 尚无
+- `evidence`: 唯一模型、对照、连续评分、窗口、权重规则、三折、固定面积、Bootstrap、双对比
+  跨折召回稳定性、跨区、延迟门和滚动封印链已通过目标盲本地终审；Stage 2S 真实目录、候选目标
+  指标和成绩仍未读取，远端协议标签核验前无执行授权。
+- `decision`: `adjust_to_stage2s_causal_seismicity_screen`
+- `next_scientific_test`: `run_one_three_fold_S1_minus_S0_and_SP_development_attempt`
+- `stop_condition`: 新 foundational P0、任何门失败或证据不足都停止本路线，不改成其他窗口、
+  衰减、带宽或模型重试。
+
+Stage 2S-0 只有在协议测试、独立验收、提交、推送和协议标签远端核对全部完成后，才可进入最小
+代码阶段。完整合同见 `docs/causal_seismicity_screen_protocol.md`。

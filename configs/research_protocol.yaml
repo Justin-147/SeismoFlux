@@ -1,12 +1,18 @@
 schema_version: 1
-protocol_version: 1.2.2
+protocol_version: 1.3.0
 data_contract_version: 0.1.0
-status: stage_4_kde_anomaly_target_blind_final_executability_amendment_preregistered_before_target_read
+status: stage_2s_causal_seismicity_protocol_content_accepted_remote_tag_required_for_execution
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
 stage_4_amendment:
   amendment_frozen_on: '2026-07-30'
+  final_status: stopped_before_code_freeze_on_foundational_P0
+  stop_commit: 414198aff611bbe1df05413e0b7bb7309c644189
+  code_tag_created: false
+  result_tag_created: false
+  development_attempt_consumed: false
+  development_target_read_count_final: 0
   registered_before_formal_target_read: true
   formal_target_read_count_at_amendment: 0
   formal_scoring_count_at_amendment: 0
@@ -66,6 +72,49 @@ stage_4_amendment:
   old_r2_execution_authority_reused: false
   locked_test_run: false
   large_or_complex_model_entry_forbidden: true
+stage_2s_preregistration:
+  drafted_on: '2026-07-30'
+  frozen_on: '2026-07-30'
+  protocol_version: 0.2.3
+  experiment_id: stage2s-causal-seismicity-development-v1
+  gate_id: G1-T
+  machine_protocol:
+    path: configs/causal_seismicity_screen.yaml
+    sha256: a85df78348c0f033444db4c9e3edc81b70ef436da3b108139feab39cd49d8c42
+  fold_manifest:
+    path: data/manifests/causal_seismicity_screen_fold_manifest.json
+    sha256: c3e2444e8892addd03d4c57526c007e2a861137dac50d5abe2e53bac004456e6
+  target_blind_input_contract:
+    path: data/manifests/causal_seismicity_screen_target_blind_input_contract.json
+    sha256: 50117a0c0cda0d14bd467b8f0d1032855cb5afab0aa2d968370313a933a95ff6
+  protocol_tag: v0.2.3-causal-seismicity-screen-protocol
+  expected_code_tag: v0.2.3-causal-seismicity-screen-code
+  expected_result_tag: v0.2.3-causal-seismicity-screen-result
+  development_target_read_count_at_preregistration: 0
+  independent_validation_target_read_count_at_preregistration: 0
+  locked_test_read_count_at_preregistration: 0
+  models: [S0, S1, SP]
+  S0: frozen_fold4_75km_KDE
+  S1: S0_plus_most_recent_30d_causal_M4plus_75km_KDE
+  SP: S0_plus_immediately_preceding_30d_past_only_control
+  second_window_decay_bandwidth_or_model: forbidden
+  development_rolling_folds: 3
+  horizons_days: [7, 30, 90]
+  primary_magnitude_bin: M5_6
+  primary_alarm_area_km2: 600000
+  bootstrap_replications: 2000
+  confirmatory_contrasts: [S1_minus_S0, S1_minus_SP]
+  independent_validation_authorized: false
+  reused_2022_2023_development_role: >-
+    stage2r_background_and_bandwidth_selection_period_only_stage2s_alpha_is_time_causal
+    _not_independent_not_globally_target_blind
+  existing_2024_2025_validation_role: previously_scored_not_independent_for_stage2s
+  execution_seal_chain: fold_fit_receipt_then_issue_seals_then_fold_seal_then_master_seal
+  assessment_membership_or_score_before_master_seal: forbidden
+  prior_fold_score_hit_or_metric_to_later_fit_or_predictor: forbidden
+  maximum_new_foundational_protocol_corrections_after_freeze: 0
+  on_new_foundational_P0_or_gate_failure: stop_stage2s_and_retain_75km_KDE
+  large_or_complex_model_entry_forbidden: true
 stage_science_value_review:
   required_immediately_after_each_stage_result: true
   categories:
@@ -90,6 +139,7 @@ stage_science_value_review:
     - runtime_stability
   no_material_progress_action: stop_engineering_expansion_and_reassess_route
 frozen_on: '2026-07-13'
+latest_target_blind_amendment_on: '2026-07-30'
 background_protocol_version: 0.2.0
 background_protocol_path: configs/background.yaml
 background_protocol_frozen_on: '2026-07-13'
