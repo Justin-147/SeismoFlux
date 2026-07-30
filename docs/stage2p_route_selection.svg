@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Stage 2P 目标盲科学路线选择</title>
+  <desc id="desc">当前唯一合法冠军是长期75公里KDE。路线复审选择先启动长期背景、最近30天地震和前一个30天对照的真正前瞻封存，异常增量作为第二挑战者，构造先验作为慢窗口后续路线。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+      <path d="M0 0 L11 5.5 L0 11 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { fill: #0f172a; font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 44px; font-weight: 700; }
+      .subtitle { fill: #475569; font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 23px; }
+      .card-title { fill: #0f172a; font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 28px; font-weight: 700; }
+      .body { fill: #334155; font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 21px; }
+      .small { fill: #475569; font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 18px; }
+      .badge { font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: 19px; font-weight: 700; text-anchor: middle; }
+      .champion { fill: #e0f2fe; stroke: #0284c7; stroke-width: 3; }
+      .selected { fill: #dcfce7; stroke: #16a34a; stroke-width: 4; }
+      .second { fill: #fef3c7; stroke: #d97706; stroke-width: 3; }
+      .later { fill: #e2e8f0; stroke: #64748b; stroke-width: 3; }
+      .timeline { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; }
+      .node { fill: #ffffff; stroke: #64748b; stroke-width: 3; }
+      .node-selected { fill: #dcfce7; stroke: #16a34a; stroke-width: 4; }
+      .line { fill: none; stroke: #64748b; stroke-width: 4; marker-end: url(#arrow); }
+      .warning { fill: #fff1f2; stroke: #e11d48; stroke-width: 3; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <text class="title" x="80" y="76">Stage 2P：从“反复修历史代码”转向真正前瞻证据</text>
+  <text class="subtitle" x="80" y="118">本图是目标盲路线决定，不是模型效果图；当前还没有新增成分的预测成绩</text>
+
+  <rect class="champion" x="80" y="160" width="1440" height="100" rx="18"/>
+  <text class="card-title" x="110" y="202">当前唯一合法冠军：长期 75 km KDE</text>
+  <text class="body" x="110" y="236">验证信息增益 +0.40215 nats/event（95% CI +0.23564 至 +0.56286）；固定面积严格召回仍未证明</text>
+
+  <rect class="selected" x="80" y="305" width="460" height="260" rx="22"/>
+  <rect x="102" y="326" width="92" height="38" rx="19" fill="#16a34a"/>
+  <text class="badge" x="148" y="352" fill="#ffffff">已选择</text>
+  <text class="card-title" x="105" y="405">A｜近期地震真正前瞻</text>
+  <text class="body" x="105" y="446">P0：同 T 快照因果长期 KDE</text>
+  <text class="body" x="105" y="480">P1：0.5×P0 + 0.5×R30</text>
+  <text class="body" x="105" y="514">PP：0.5×P0 + 0.5×RP30</text>
+  <text class="small" x="105" y="547">预测首期即可查看；正式判断最早约 15 个月</text>
+
+  <rect class="second" x="570" y="305" width="460" height="260" rx="22"/>
+  <rect x="592" y="326" width="116" height="38" rx="19" fill="#d97706"/>
+  <text class="badge" x="650" y="352" fill="#ffffff">第二挑战者</text>
+  <text class="card-title" x="595" y="405">B｜最小异常增量</text>
+  <text class="body" x="595" y="446">205 期异常已因果重建</text>
+  <text class="body" x="595" y="480">但没有任何真实效果成绩</text>
+  <text class="body" x="595" y="514">另立前瞻有效日与覆盖对照</text>
+  <text class="small" x="595" y="547">在 A 首期开始后推进，不得阻塞 A</text>
+
+  <rect class="later" x="1060" y="305" width="460" height="260" rx="22"/>
+  <rect x="1082" y="326" width="100" height="38" rx="19" fill="#64748b"/>
+  <text class="badge" x="1132" y="352" fill="#ffffff">后续慢线</text>
+  <text class="card-title" x="1085" y="405">C｜构造与长期危险性</text>
+  <text class="body" x="1085" y="446">只能从 2026-07-13 后前瞻</text>
+  <text class="body" x="1085" y="480">主要检验 90/180/365 天</text>
+  <text class="body" x="1085" y="514">历史映射与可用时间仍有限</text>
+  <text class="small" x="1085" y="547">不先于 A/B，不进入复杂模型</text>
+
+  <text class="small" x="800" y="592" text-anchor="middle">复杂路线（ETAS／树模型／神经网络）：当前停止，不用来修补本次候选</text>
+
+  <rect class="timeline" x="80" y="610" width="1440" height="190" rx="22"/>
+  <text class="card-title" x="110" y="654">选定路线的不可回填时间线</text>
+
+  <path class="line" d="M315 716 H525"/>
+  <path class="line" d="M705 716 H915"/>
+  <path class="line" d="M1095 716 H1305"/>
+
+  <g transform="translate(225 716)">
+    <circle class="node" r="54"/>
+    <text class="badge" y="7" fill="#334155">协议</text>
+    <text class="small" x="0" y="75" text-anchor="middle">源快照 + 封印闭合</text>
+  </g>
+  <g transform="translate(615 716)">
+    <circle class="node-selected" r="54"/>
+    <text class="badge" y="7" fill="#166534">首期</text>
+    <text class="small" x="0" y="75" text-anchor="middle">下一合法周四，禁止补发</text>
+  </g>
+  <g transform="translate(1005 716)">
+    <circle class="node" r="54"/>
+    <text class="badge" y="7" fill="#334155">积累</text>
+    <text class="small" x="0" y="75" text-anchor="middle">52 期 + 20 个唯一 M5–6</text>
+  </g>
+  <g transform="translate(1395 716)">
+    <circle class="node" r="54"/>
+    <text class="badge" y="7" fill="#334155">判定</text>
+    <text class="small" x="0" y="75" text-anchor="middle">通过、失败或证据不足</text>
+  </g>
+
+  <rect class="warning" x="250" y="835" width="1100" height="48" rx="16"/>
+  <text class="body" x="800" y="867" text-anchor="middle">任何早期命中都不能改权重；104 期仍不足 20 个唯一 M5–6 就停止 P1，保留 P0</text>
+</svg>

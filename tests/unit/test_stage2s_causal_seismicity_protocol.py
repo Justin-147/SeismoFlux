@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import xml.etree.ElementTree as ET
 from datetime import UTC, date, datetime, time, timedelta
 from itertools import pairwise
 from pathlib import Path
@@ -24,6 +25,10 @@ INPUT_PATH = (
 RESEARCH_CONFIG_PATH = ROOT / "configs" / "research_protocol.yaml"
 SOURCE_FOLD_PATH = ROOT / "data" / "manifests" / "anomaly_increment_r2_fold_manifest.json"
 ACCEPTANCE_PATH = ROOT / "docs" / "phase2s0_causal_seismicity_protocol_acceptance.md"
+STAGE2P_REVIEW_PATH = ROOT / "docs" / "phase2p_target_blind_scientific_route_review.md"
+STAGE2P_HANDOFF_PATH = ROOT / "docs" / "restart_handoff_2026-07-31_stage2p_route_review.md"
+SCIENCE_REVIEW_PATH = ROOT / "docs" / "scientific_value_review_and_model_composition.md"
+STAGE2P_SVG_PATH = ROOT / "docs" / "stage2p_route_selection.svg"
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
@@ -766,13 +771,17 @@ def test_static_interactive_and_forecast_outputs_are_preregistered_without_false
     )
 
 
-def test_blueprint_and_research_protocol_agree_with_machine_contract() -> None:
+def test_blueprint_and_research_protocol_agree_with_stage2s_and_stage2p_contracts() -> None:
     config = _load_yaml(CONFIG_PATH)
     research = _load_yaml(RESEARCH_CONFIG_PATH)
     blueprint = (ROOT / "SEISMOFLUX_IMPLEMENTATION_HANDOFF.md").read_text(encoding="utf-8")
     protocol = (ROOT / "docs" / "causal_seismicity_screen_protocol.md").read_text(encoding="utf-8")
     research_doc = (ROOT / "docs" / "research_protocol.md").read_text(encoding="utf-8")
     acceptance = ACCEPTANCE_PATH.read_text(encoding="utf-8")
+    route_review = STAGE2P_REVIEW_PATH.read_text(encoding="utf-8")
+    stage2p_handoff = STAGE2P_HANDOFF_PATH.read_text(encoding="utf-8")
+    science_review = SCIENCE_REVIEW_PATH.read_text(encoding="utf-8")
+    stage2p_svg = STAGE2P_SVG_PATH.read_text(encoding="utf-8")
 
     assert "### 阶段2S" in blueprint and "因果近期地震活动增量" in blueprint
     assert "`S0`" in blueprint and "`S1`" in blueprint and "`SP`" in blueprint
@@ -781,15 +790,90 @@ def test_blueprint_and_research_protocol_agree_with_machine_contract() -> None:
     assert "不是随机置乱" in protocol
     assert "不能" in protocol and "称为 Stage 2S 独立验证" in protocol
     assert "## 0.3 阶段 2S 因果近期地震活动预登记" in research_doc
+    assert "### 阶段2P" in blueprint and "真正前瞻近期地震活动证据采集" in blueprint
+    assert "## 0.5 阶段 2P 真正前瞻路线复审" in research_doc
     assert "本地结论" in acceptance and "协议内容通过" in acceptance
     assert "对预测效果的直接提升" in acceptance and "尚无" in acceptance
     assert "只允许逐路径暂存以下 10 个文件" in acceptance
-    assert research["protocol_version"] == "1.3.0"
+    assert research["protocol_version"] == "1.4.0"
     stage2s = research["stage_2s_preregistration"]
     assert stage2s["machine_protocol"]["sha256"] == _sha256(CONFIG_PATH)
     assert stage2s["fold_manifest"]["sha256"] == _sha256(FOLD_PATH)
     assert stage2s["target_blind_input_contract"]["sha256"] == _sha256(INPUT_PATH)
     assert stage2s["models"] == config["allowed_models"]["exact_order"]
+    stage2p = research["stage_2p_route_review"]
+    assert stage2p["status"] == "selected_pending_preregistration"
+    assert stage2p["execution_authorized"] is False
+    assert stage2p["real_issue_authorized"] is False
+    assert stage2p["stage2p1_protocol_frozen"] is False
+    assert stage2p["research_only_not_stage10_or_G8"] is True
+    assert stage2p["new_target_read_count"] == 0
+    assert stage2p["locked_test_read_count"] == 0
+    assert stage2p["locked_test_run_count"] == 0
+    assert stage2p["locked_test_bypass_authorized"] is False
+    assert stage2p["models"] == {
+        "P0": "causal_long_term_75km_KDE_rebuilt_each_issue_from_same_T_snapshot",
+        "P1": "0.5_P0_T_plus_0.5_recent_30d_M4plus_75km_KDE",
+        "PP": "0.5_P0_T_plus_0.5_prior_origin_30d_M4plus_75km_KDE_known_at_T",
+    }
+    assert stage2p["P0_freezes_method_not_2023_density"] is True
+    assert stage2p["recent_components"]["empty_R30_action"] == "P1_equals_P0_exactly"
+    assert stage2p["recent_components"]["empty_RP30_action"] == "PP_equals_P0_exactly"
+    assert stage2p["minimum_complete_mature_issues"] == 52
+    assert stage2p["minimum_unique_deduplicated_M5_6_events"] == 20
+    assert stage2p["primary_target"]["magnitude_bin"] == "M5_6"
+    assert stage2p["primary_target"]["M6plus_role"].endswith("never_satisfies_primary_sample_gate")
+    assert stage2p["maximum_on_time_issues"] == 104
+    analysis = stage2p["exposure_and_analysis_contract"]
+    assert analysis["formal_exposures"].endswith("nonoverlap_within_each_horizon")
+    assert analysis["zero_event_exposures_retained"] is True
+    assert analysis["intermediate_confirmatory_effect_display_or_testing_forbidden"] is True
+    pass_gate = stage2p["pass_gate"]
+    assert pass_gate["P1_minus_P0_macro_information_gain_familywise_lower_gt_zero"] is True
+    assert pass_gate["P1_minus_PP_macro_information_gain_familywise_lower_gt_zero"] is True
+    assert pass_gate["P1_minus_P0_recall_gain_familywise_lower_gt_zero"] is True
+    assert pass_gate["P1_minus_PP_recall_gain_familywise_lower_gt_zero"] is True
+    assert pass_gate["P1_minus_P0_recall_gain_pp_minimum"] == 5
+    source_contract = stage2p["stage2p1_mandatory_source_snapshot_contract"]
+    assert source_contract["seal_completed_before_issue_T"] is True
+    assert (
+        source_contract["append_only_previous_issue_hash_and_remote_time_anchor_required"] is True
+    )
+    assert (
+        "source_id_institution_endpoint_or_file_identity_version_and_license"
+        in (source_contract["must_bind"])
+    )
+    assert "seal_completed_at_utc_and_issue_T_utc" in source_contract["must_bind"]
+    truth_contract = stage2p["stage2p1_mandatory_target_truth_contract"]
+    assert truth_contract["required_before_first_issue"] is True
+    assert "magnitude_location_and_identity_revision_policy" in truth_contract["must_bind"]
+    assert (
+        "immutable_target_cohort_hash_and_append_only_evaluation_revision_policy"
+        in truth_contract["must_bind"]
+    )
+    model_contract = stage2p["stage2p1_mandatory_model_identity_contract"]["must_bind"]
+    assert "study_polygon_projection_support_grid_and_region_map_hashes" in model_contract
+    assert "code_protocol_input_model_and_output_density_hashes" in model_contract
+    assert (
+        stage2p["publication_acl"]["raw_normalized_deduplicated_rows_and_exact_coordinates"]
+        == "local_restricted_unless_license_allows"
+    )
+    assert (
+        stage2p["publication_acl"]["public_artifacts"]
+        == "hashes_counts_aggregate_grids_and_license_permitted_overlays_only"
+    )
+    assert stage2p["anomaly_followup"]["freeze_before_any_P_effect_metric_is_unsealed"] is True
+    assert stage2p["construction_followup"]["horizons_days"] == [90, 180, 365]
+    assert stage2p["pass_interpretation"].endswith("not_G7_G8_stage10_or_business_promotion")
+    assert stage2p["science_value_category"] == "necessary_enabler"
+    assert "唯一去重 `M5_6" in route_review
+    assert "确认性累计对比在唯一正式判定前保持密封" in route_review
+    assert "tracked 清单元数据显示" in stage2p_handoff
+    assert "不替代" in science_review and "G7/G8" in science_review
+    assert "0.5\u00d7P0 + 0.5\u00d7R30" in stage2p_svg
+    assert "20 个唯一 M5\u20136" in stage2p_svg
+    assert "20 个独立 M5+" not in route_review + stage2p_handoff + stage2p_svg
+    ET.parse(STAGE2P_SVG_PATH)
 
 
 def test_science_value_review_is_complete_and_not_a_prediction_claim() -> None:

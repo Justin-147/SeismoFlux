@@ -1,7 +1,7 @@
 schema_version: 1
-protocol_version: 1.3.0
+protocol_version: 1.4.0
 data_contract_version: 0.1.0
-status: stage_2s_formal_attempt_invalid_stopped_retain_75km_KDE
+status: stage_2p_route_selected_pending_preregistration_retain_75km_KDE
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
@@ -146,6 +146,118 @@ stage_2s_preregistration:
       target_blind_route_review_then_preregister_selected_prospective_test
     stop_condition: >-
       never_reuse_this_attempt_or_2022_2025_targets_for_repair_rerun_or_tuning
+stage_2p_route_review:
+  reviewed_on: '2026-07-31'
+  stage_id: Stage2P-0
+  status: selected_pending_preregistration
+  selected_route: prospective_recent_30d_seismicity_screen
+  execution_authorized: false
+  real_issue_authorized: false
+  stage2p1_protocol_frozen: false
+  research_only_not_stage10_or_G8: true
+  locked_test_read_count: 0
+  locked_test_run_count: 0
+  locked_test_bypass_authorized: false
+  new_target_read_count: 0
+  models:
+    P0: causal_long_term_75km_KDE_rebuilt_each_issue_from_same_T_snapshot
+    P1: 0.5_P0_T_plus_0.5_recent_30d_M4plus_75km_KDE
+    PP: 0.5_P0_T_plus_0.5_prior_origin_30d_M4plus_75km_KDE_known_at_T
+  P0_freezes_method_not_2023_density: true
+  g1_ls_final_validation_role: method_selection_evidence_and_static_audit_anchor_only
+  P0_issue_rebuild_requires:
+    - same_issue_T_sealed_catalog_snapshot_as_R30_and_RP30
+    - fixed_training_start_projection_support_Mc_eligibility_and_boundary_normalization
+    - fixed_75km_bandwidth_without_reselection
+    - all_eligible_history_origin_lte_T_and_available_in_snapshot_by_T
+    - training_event_set_hash_count_and_density_hash
+  recent_components:
+    R30: origin_in_T_minus_30d_to_T_and_available_in_same_T_snapshot
+    RP30: origin_in_T_minus_60d_to_T_minus_30d_and_available_in_same_T_snapshot
+    PP_interpretation: current_T_known_older_origin_window_control_not_counterfactual_T_minus_30_snapshot
+    empty_R30_action: P1_equals_P0_exactly
+    empty_RP30_action: PP_equals_P0_exactly
+  mixture_weight_selected_from_target_scores: false
+  mixture_weight_interpretation: density_mixture_coefficient_not_component_importance_or_optimum
+  issue_rule: weekly_Thursday_00_00_Asia_Shanghai
+  first_issue_rule: first_rule_issue_strictly_after_protocol_and_code_tags_verified
+  late_or_missed_issue_action: record_missed_issue_and_never_backfill
+  source_snapshot_receipt_required_before_each_issue: true
+  stage2p1_mandatory_source_snapshot_contract:
+    seal_completed_before_issue_T: true
+    failure_or_stale_snapshot_action: missed_issue_never_backfill
+    append_only_previous_issue_hash_and_remote_time_anchor_required: true
+    must_bind:
+      - source_id_institution_endpoint_or_file_identity_version_and_license
+      - fetch_started_at_utc_fetch_completed_at_utc_status_headers_or_file_metadata
+      - raw_byte_count_and_sha256
+      - parser_schema_version_parser_code_config_and_dedup_code_hashes
+      - normalized_and_deduplicated_row_counts_and_sha256
+      - freshness_limit_and_first_seen_availability_rule
+      - seal_completed_at_utc_and_issue_T_utc
+  stage2p1_mandatory_target_truth_contract:
+    required_before_first_issue: true
+    must_bind:
+      - target_source_identity_version_and_license
+      - deterministic_horizon_maturity_and_late_report_wait_rule
+      - truth_fetch_raw_normalized_deduplicated_hashes_and_counts
+      - magnitude_location_and_identity_revision_policy
+      - M5_9_to_M6_0_boundary_and_cross_catalog_dedup_rule
+      - immutable_target_cohort_hash_and_append_only_evaluation_revision_policy
+  stage2p1_mandatory_model_identity_contract:
+    must_bind:
+      - study_polygon_projection_support_grid_and_region_map_hashes
+      - local_Mc_eligibility_training_start_and_outside_support_miss_rule
+      - boundary_normalization_three_grid_convergence_and_tie_break_rule
+      - P0_R30_RP30_training_event_set_hashes_counts_and_empty_window_fallback
+      - code_protocol_input_model_and_output_density_hashes
+  horizons_days: [7, 30, 90]
+  primary_target:
+    magnitude_bin: M5_6
+    interval: '[5.0,6.0)'
+    M6plus_role: exploratory_never_satisfies_primary_sample_gate
+  primary_alarm_area_km2: 600000
+  minimum_complete_mature_issues: 52
+  minimum_unique_deduplicated_M5_6_events: 20
+  maximum_on_time_issues: 104
+  exposure_and_analysis_contract:
+    weekly_issues_role: immutable_archive_and_descriptive_stability_not_independent_trials
+    formal_exposures: deterministic_chronological_nonoverlap_within_each_horizon
+    zero_event_exposures_retained: true
+    same_event_all_issue_and_horizon_contributions_share_one_cluster_block: true
+    macro_weighting_and_target_cluster_definition_must_freeze_in_stage2p1: true
+    first_formal_look: after_issue_52_all_90d_windows_mature_only_if_primary_event_gate_met
+    insufficient_at_first_look: do_not_open_contrast_rows_continue_blind_to_issue_104
+    final_formal_look: after_issue_104_all_90d_windows_mature_or_evidence_insufficient
+    intermediate_confirmatory_effect_display_or_testing_forbidden: true
+  bootstrap_replications: 2000
+  bootstrap_unit: preregistered_target_cluster_component_with_isolated_event_as_singleton
+  pass_gate:
+    simultaneous_familywise_confidence_level: 0.95
+    P1_minus_P0_macro_information_gain_familywise_lower_gt_zero: true
+    P1_minus_PP_macro_information_gain_familywise_lower_gt_zero: true
+    P1_minus_P0_recall_gain_pp_minimum: 5
+    P1_minus_P0_recall_gain_familywise_lower_gt_zero: true
+    P1_minus_PP_recall_gain_familywise_lower_gt_zero: true
+    remove_largest_positive_cluster_and_region_all_contrast_signs_remain_positive: true
+  anomaly_followup:
+    route: separate_prospective_challenger_after_first_P_issue_not_blocking
+    freeze_before_any_P_effect_metric_is_unsealed: true
+    comparison_cohort_starts_at_later_valid_from: true
+  construction_followup:
+    available_from_local: '2026-07-13T00:00:00+08:00'
+    horizons_days: [90, 180, 365]
+    historical_backfill_forbidden: true
+  ETAS_tree_or_neural_entry_authorized: false
+  publication_acl:
+    raw_normalized_deduplicated_rows_and_exact_coordinates: local_restricted_unless_license_allows
+    public_artifacts: hashes_counts_aggregate_grids_and_license_permitted_overlays_only
+  pass_interpretation: direct_improvement_candidate_only_not_G7_G8_stage10_or_business_promotion
+  science_value_category: necessary_enabler
+  evidence: no_new_target_or_improvement_result_was_read_but_the_minimum_route_to_collect_non_backfillable_future_evidence_is_now_selected
+  decision: adjust_to_stage2p_prospective_recent_seismicity_screen
+  next_scientific_test: preregister_source_snapshot_and_archive_contract_then_complete_target_free_same_path_acceptance_before_the_first_issue
+  stop_condition: do_not_issue_if_any_preissue_contract_is_open_stop_P1_on_formal_gate_failure_or_after_104_on_time_issues_with_insufficient_events_and_retain_P0
 stage_science_value_review:
   required_immediately_after_each_stage_result: true
   categories:
