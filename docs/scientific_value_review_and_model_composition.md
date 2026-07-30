@@ -4,7 +4,7 @@
 
 阶段 4A 目标盲修订：2026-07-30
 
-状态：在阶段 4 正式目标读取前冻结的目标盲路线澄清
+状态：阶段 4A 0.4.4 在真实目标读取前触发基础性 P0，异常增量路线已硬停止
 
 ## 1. 最终科学目标
 
@@ -158,3 +158,37 @@ exposure 日期 adapter。
 
 这一定性只说明紧邻的科学检验获得一条受控可执行路径，不是预测效果提升。详细当前合同见
 `docs/phase4_kde_target_blind_executability_amendment.md`。
+
+## 8. Stage 4A 0.4.4 代码级终审与路线停止
+
+纯合成薄组件和 observed/time/space 同路径链完成了 229 个工程测试，但正式 runner 设计终审发现
+新的 foundational P0：受限 `cell_mapping` 中的
+`cell_id → construction_zone_id` 在 adapter 内核验后被丢弃，而 `0.4.4` 又把返回值冻结为不含
+该映射的四项。于是协议强制的 39 区贡献和 leave-one-region-out 没有合法计算路径；重读工件、
+增加返回字段或从 geometry 重建区域都会违反冻结合同。
+
+同一终审还确认，当前拟合草稿把每个 `issue × cell` 的 7 天 composite-midpoint 补偿项压成
+单个 exposure 和 decay，不能表示非线性指数目标中的逐中点积分。纯合成链只证明代码连通，不证明
+正式数学目标正确。seal 终审另有一个严格类型 P2，但由于更高层 P0 已触发停止，不再追加 seal
+补丁。
+
+本轮科学价值字段更新为：
+
+- `science_value_category`: `no_material_progress`
+- `direct_prediction_improvement`: 无
+- `evidence`: 229 个工程测试通过，但区域稳健性门不可计算，时间补偿目标也不符合冻结数学定义；
+  开发目标、独立验证和锁定测试仍均未读取，未产生真实效果指标。
+- `decision`: `stop_anomaly_increment_and_retain_75km_KDE`
+- `next_scientific_test`: `preregister_stage2s_causal_two_timescale_seismicity_screen`；只预登记
+  长期 75 km KDE 与一个近期因果地震 KDE 的最小组合及一次开发检验。
+- `stop_condition`: 不得通过 `0.4.5` 补丁、复杂异常模型、阶段 4B、阶段 5 或锁定测试读取复活或
+  绕过当前异常路线。
+
+未创建 attempt ledger 和 target-read ledger，唯一开发 attempt 消耗仍为 0。详细失败证据、草稿
+隔离清单和恢复边界见
+`docs/phase4_kde_0_4_4_synthetic_acceptance_and_foundational_stop.md`。
+
+只读路线复审已推荐另立阶段 2S，而不是重开阶段 4A：用冻结的长期 75 km KDE 作为 `S0`，只增加
+一个严格因果的近期地震 KDE 形成 `S1`，直接检验 600,000 平方公里固定面积召回、信息增益和时间
+错位对照。该推荐尚未获得执行授权；必须先提交、推送当前失败验收，再另行修订唯一蓝图并完成
+Stage 2S 目标盲协议验收。

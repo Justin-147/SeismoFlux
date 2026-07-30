@@ -725,6 +725,16 @@ observed、时间置乱和空间置乱走同一条“重建—9/17/22 特征组�
 assessment prediction 冻结—无目标统计量”路径；若这一次验收仍出现新的基础性 P0，停止异常路线
 并保留 KDE，不再追加工程层。
 
+2026-07-30 代码级终审已经触发上述硬停止：`cell_mapping` 中的
+`cell_id → construction_zone_id` 在正式 adapter 核验后被丢弃，冻结四字段接口无法支持强制的
+39 区贡献和 leave-one-region-out；同时拟合草稿没有按 7 天 composite-midpoint 展开补偿积分。
+纯合成链虽有 229 个工程测试通过，但阶段总验收为 `FAIL`，不构成预测效果证据。开发目标、
+独立验证和锁定测试读取仍为 0，唯一开发 attempt 未消耗；`v0.3.4-*-code/result` 不得创建，
+异常增量路线停止并保留 75 km KDE。后续只能先做目标盲科学路线复审，再把选定的新问题、评价门
+和停止条件写入本唯一蓝图，完成独立验收、提交和推送后才可实施；不得用 `0.4.5`、阶段 4B、
+阶段 5、复杂模型或锁定测试绕过本停止结论。详细证据见
+`docs/phase4_kde_0_4_4_synthetic_acceptance_and_foundational_stop.md`。
+
 target-read ledger 是 Git-ignored 的单个 canonical `.json` mapping，只允许在已注册且身份相同的
 attempt ledger 核验后，从零态原子 CAS 到 `logical_open_count=1`，并记录 entry hash 与前序零态
 hash；打开态不可改写、回退或再次打开。背景与 Stage 3 置乱代码只准使用 `0.4.4` 精确整文件哈希/
