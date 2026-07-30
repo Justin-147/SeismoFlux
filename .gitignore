@@ -61,6 +61,10 @@ data/manifests/anomaly_increment_r2_target_read_ledger.json
 data/manifests/etas_numerical_repair_source_access_ledger.json
 data/manifests/etas_numerical_repair_adapter_attempt_ledger.json
 
+# Stage-2S one-shot development attempt state. This is created only after
+# the scoring-code tag is verified remotely and must never be published.
+data/manifests/causal_seismicity_screen_attempt_ledger.json
+
 # Local overrides and secrets
 .env
 .env.*

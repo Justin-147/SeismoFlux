@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1120" role="img" aria-labelledby="title description">
+<title id="title">Stage 2S 数据—方法—因果时间线</title>
+<desc id="description">目标读取前冻结的数据、模型、折序与封印边界；不含目标成绩。</desc>
+<defs>
+<marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#486581"/></marker>
+</defs>
+<style>
+text{font-family:'Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif;fill:#102a43}
+.title{font-size:34px;font-weight:700}.subtitle{font-size:17px;fill:#486581}
+.section{font-size:20px;font-weight:700}.cardTitle{font-size:19px;font-weight:700}
+.body{font-size:15px}.small{font-size:13px;fill:#486581}.badgeText{font-size:14px;font-weight:700;fill:#ffffff}
+.panel{fill:#ffffff;stroke:#bcccdc;stroke-width:1.5}.blue{fill:#eaf2ff;stroke:#2f80ed;stroke-width:2}.green{fill:#e8f7f1;stroke:#2d9d78;stroke-width:2}.orange{fill:#fff3e7;stroke:#f2994a;stroke-width:2}.purple{fill:#f1edff;stroke:#7b61ff;stroke-width:2}.barrier{fill:#fff0f0;stroke:#c0392b;stroke-width:2.5}.badgeBlue{fill:#2f80ed}.badgeGreen{fill:#2d9d78}.badgeGray{fill:#627d98}
+.arrow{stroke:#486581;stroke-width:2;fill:none}
+.divider{stroke:#d9e2ec;stroke-width:1}
+</style>
+<rect width="1600" height="1120" fill="#f7f9fc"/>
+<text x="60" y="60" class="title">Stage 2S 数据—方法—因果时间线</text>
+<text x="60" y="92" class="subtitle">代码冻结前的目标无关交付｜复用开发期历史回溯｜不含目标成绩</text>
+<rect x="1125" y="35" width="190" height="38" rx="19" class="badgeBlue"/>
+<text x="1220" y="60" class="badgeText" text-anchor="middle">协议 0.2.3</text>
+<rect x="1330" y="35" width="210" height="38" rx="19" class="badgeGreen"/>
+<text x="1435" y="60" class="badgeText" text-anchor="middle">目标读取 0</text>
+<text x="60" y="140" class="section">治理顺序：只有远端代码标签后才允许非目标预检</text>
+<rect x="60" y="165" width="250" height="92" rx="16" class="panel"/>
+<text x="78" y="196" class="cardTitle">协议标签</text>
+<text x="78" y="221" class="small">v0.2.3-causal-seismicity-</text>
+<text x="78" y="239" class="small">screen-protocol</text>
+<rect x="355" y="165" width="250" height="92" rx="16" class="panel"/>
+<text x="373" y="196" class="cardTitle">代码标签</text>
+<text x="373" y="221" class="small">v0.2.3-causal-seismicity-</text>
+<text x="373" y="239" class="small">screen-code</text>
+<rect x="650" y="165" width="250" height="92" rx="16" class="panel"/>
+<text x="668" y="196" class="cardTitle">非目标预检</text>
+<text x="668" y="221" class="small">study-area / grid</text>
+<text x="668" y="239" class="small">cell-zone mapping</text>
+<rect x="945" y="165" width="250" height="92" rx="16" class="panel"/>
+<text x="963" y="196" class="cardTitle">唯一 attempt</text>
+<text x="963" y="221" class="small">O_EXCL: 不存在</text>
+<text x="963" y="239" class="small">→ 注册一次</text>
+<rect x="1240" y="165" width="300" height="92" rx="16" class="panel"/>
+<text x="1258" y="196" class="cardTitle">唯一 target read</text>
+<text x="1258" y="221" class="small">O_EXCL 后才可读</text>
+<text x="1258" y="239" class="small">同一目录字节流</text>
+<line x1="310" y1="211" x2="345" y2="211" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="605" y1="211" x2="640" y2="211" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="900" y1="211" x2="935" y2="211" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="1195" y1="211" x2="1230" y2="211" class="arrow" marker-end="url(#arrowhead)"/>
+<text x="60" y="310" class="section">冻结模型与因果窗口</text>
+<rect x="60" y="335" width="305" height="150" rx="16" class="blue"/>
+<text x="82" y="370" class="cardTitle">S0｜长期背景</text>
+<text x="82" y="402" class="body">fold_4；训练截止</text>
+<text x="82" y="425" class="body">2019-12-31T16:00:00Z</text>
+<text x="82" y="448" class="body">75 km 等面积 Gaussian KDE</text>
+<text x="82" y="471" class="body">授权后从同一目录 bytes 精确重物化</text>
+<rect x="390" y="335" width="305" height="150" rx="16" class="green"/>
+<text x="412" y="370" class="cardTitle">R｜最近窗口</text>
+<text x="412" y="402" class="body">M4+；(T-30d,T]</text>
+<text x="412" y="427" class="body">available_at ≤ T</text>
+<text x="412" y="452" class="body">75 km；等权；无时间衰减</text>
+<rect x="720" y="335" width="305" height="150" rx="16" class="orange"/>
+<text x="742" y="370" class="cardTitle">RP｜紧邻过去对照</text>
+<text x="742" y="402" class="body">M4+；(T-60d,T-30d]</text>
+<text x="742" y="427" class="body">available_at ≤ T−30d</text>
+<text x="742" y="452" class="body">75 km；与 R 同结构</text>
+<rect x="1050" y="335" width="490" height="150" rx="16" class="purple"/>
+<text x="1072" y="370" class="cardTitle">三模型共享折内 M5–6 日率</text>
+<text x="1072" y="402" class="body">S1 = (1-alpha_R_fold)*S0 + alpha_R_fold*R</text>
+<text x="1072" y="427" class="body">SP = (1-alpha_P_fold)*S0 + alpha_P_fold*RP</text>
+<text x="1072" y="452" class="body">alpha_R_fold / alpha_P_fold / r_M5_6_fold：本图无数值</text>
+<text x="60" y="535" class="section">目标盲日历：fold 1 → 2 → 3；每折权重共享 7/30/90 天；完整前缀 ≤ 600,000 km²</text>
+<rect x="60" y="560" width="470" height="170" rx="16" class="panel"/>
+<text x="82" y="595" class="cardTitle">Fold 1</text>
+<text x="82" y="627" class="body">非重叠 h007 fit 起报：12 个</text>
+<text x="82" y="652" class="body">fit 标签截止：2022-10-12T16:00:00Z</text>
+<text x="82" y="677" class="body">assessment band（目标盲日期）：</text>
+<text x="82" y="702" class="body">(2022-10-20, 2023-01-18]</text>
+<rect x="565" y="560" width="470" height="170" rx="16" class="panel"/>
+<text x="587" y="595" class="cardTitle">Fold 2</text>
+<text x="587" y="627" class="body">非重叠 h007 fit 起报：25 个</text>
+<text x="587" y="652" class="body">fit 标签截止：2023-01-11T16:00:00Z</text>
+<text x="587" y="677" class="body">assessment band（目标盲日期）：</text>
+<text x="587" y="702" class="body">(2023-01-19, 2023-04-19]</text>
+<rect x="1070" y="560" width="470" height="170" rx="16" class="panel"/>
+<text x="1092" y="595" class="cardTitle">Fold 3</text>
+<text x="1092" y="627" class="body">非重叠 h007 fit 起报：38 个</text>
+<text x="1092" y="652" class="body">fit 标签截止：2023-04-12T16:00:00Z</text>
+<text x="1092" y="677" class="body">assessment band（目标盲日期）：</text>
+<text x="1092" y="702" class="body">(2023-04-20, 2023-07-19]</text>
+<text x="60" y="780" class="section">不可改写的因果封印链</text>
+<rect x="60" y="805" width="270" height="86" rx="16" class="blue"/>
+<text x="195" y="839" class="cardTitle" text-anchor="middle">fold fit receipt</text>
+<text x="195" y="866" class="small" text-anchor="middle">先冻结 alpha / rate / fit view</text>
+<rect x="385" y="805" width="270" height="86" rx="16" class="green"/>
+<text x="520" y="839" class="cardTitle" text-anchor="middle">issue prediction seal</text>
+<text x="520" y="866" class="small" text-anchor="middle">按 T 递增；三窗口一起写</text>
+<rect x="710" y="805" width="270" height="86" rx="16" class="orange"/>
+<text x="845" y="839" class="cardTitle" text-anchor="middle">fold prediction seal</text>
+<text x="845" y="866" class="small" text-anchor="middle">前一折完成后才开放后一折</text>
+<rect x="1035" y="805" width="270" height="86" rx="16" class="purple"/>
+<text x="1170" y="839" class="cardTitle" text-anchor="middle">master prediction seal</text>
+<text x="1170" y="866" class="small" text-anchor="middle">绑定 fold 1 / 2 / 3</text>
+<rect x="1360" y="805" width="180" height="86" rx="16" class="barrier"/>
+<text x="1450" y="839" class="cardTitle" text-anchor="middle">才开放</text>
+<text x="1450" y="866" class="small" text-anchor="middle">assessment / scoring</text>
+<line x1="330" y1="848" x2="375" y2="848" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="655" y1="848" x2="700" y2="848" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="980" y1="848" x2="1025" y2="848" class="arrow" marker-end="url(#arrowhead)"/>
+<line x1="1305" y1="848" x2="1350" y2="848" class="arrow" marker-end="url(#arrowhead)"/>
+<rect x="60" y="930" width="1480" height="105" rx="16" class="barrier"/>
+<text x="85" y="965" class="cardTitle">解释边界</text>
+<text x="85" y="994" class="body">这是复用开发期的历史方法图，不是当前预测、独立验证、锁定测试或 G8 前瞻证据。</text>
+<text x="85" y="1019" class="body">只表达相对强度与固定面积排序；不得解释为绝对发震概率，也不判断未来总数或具体日期。</text>
+<line x1="60" y1="1062" x2="1540" y2="1062" class="divider"/>
+<text x="60" y="1087" class="small">config SHA-256  a85df78348c0f033444db4c9e3edc81b70ef436da3b108139feab39cd49d8c42</text>
+<text x="820" y="1087" class="small">fold manifest SHA-256  c3e2444e8892addd03d4c57526c007e2a861137dac50d5abe2e53bac004456e6</text>
+<text x="60" y="1107" class="small">experiment_id  stage2s-causal-seismicity-development-v1</text>
+</svg>
