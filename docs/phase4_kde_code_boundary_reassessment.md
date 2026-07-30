@@ -6,8 +6,10 @@
 - 唯一科学 attempt 消耗：0
 - 结论：保留科学实验，调整代码职责；停止继续扩张独立统计 reducer
 - 后续状态：本文件规定的唯一集成审计已于 2026-07-30 发现 foundational P0 并触发停线；
-  generic builder 不再继续修补，后续唯一许可方案见
-  `docs/phase4_kde_integrated_audit_stop_and_one_shot_contract.md`
+  generic builder 不再继续修补；当时唯一许可方案见
+  `docs/phase4_kde_integrated_audit_stop_and_one_shot_contract.md`。该 one-shot 方案随后也在唯一独立
+  审计中发现新的 foundational P0 并停止；当前唯一许可方向见
+  `docs/phase4_kde_one_shot_audit_failure_and_science_first_simplification.md`
 
 ## 1. 为什么触发复审
 

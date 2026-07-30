@@ -1,13 +1,17 @@
 # Stage 4A 集成审计停线与 one-shot 执行合同
 
 - 日期：2026-07-30
+- 后续状态：本合同规定的唯一 one-shot 独立审计已发现新的 foundational P0 并判定 `FAIL`；
+  one-shot whole-record 路线已停止，不再提供执行授权。证据与科学优先简化方案见
+  `docs/phase4_kde_one_shot_audit_failure_and_science_first_simplification.md`。
 - 协议：`stage4-kde-development-v1` / `0.4.3`
 - 审计性质：score-blind、纯合成、只读独立审计
 - 真实开发输入读取：0
 - 独立验证读取：0
 - 锁定测试读取：0
 - 唯一科学 attempt 消耗：0
-- 当前决定：停止 generic provenance builder 的补丁式扩张，改成单入口、单记录的封闭执行合同
+- 当时决定（现已废止）：停止 generic provenance builder 的补丁式扩张，改成单入口、单记录的
+  封闭执行合同
 - 前置复审：`docs/phase4_kde_code_boundary_reassessment.md`
 
 ## 1. 已完成但不能当作科学结果的工作
@@ -68,9 +72,12 @@ generic builder 仍接受调用方预构造的 Bootstrap payload、`TimeMappingD
 
 这不说明 KDE 或异常模型一定无效，只说明现在还不能信任这条执行路径给出的“通过/失败”结论。
 
-## 4. 调整后的最小 one-shot 合同
+## 4. 历史 one-shot 合同（已废止）
 
-正式路径只保留一个公开入口：
+本节至第 8 节只保留为“当时准备怎样执行”的历史审计证据，不构成当前授权。该合同规定的唯一独立
+审计已经失败，禁止据此 code freeze、打开真实目标或运行真实 attempt。
+
+当时设计的正式路径只保留一个公开入口：
 
 ```python
 def run_stage4a_once(*, repository_root: Path) -> Stage4AWholeRunRecord:
@@ -134,7 +141,7 @@ code seal 负责冻结计算语义和控制流，包括：原始池提取、排�
 whole-run record 负责绑定本次实际输入、实际数值和实际结论。它不再声称仅凭摘要能反向证明计算
 语义；语义由 code-sealed 的封闭调用链承担。
 
-## 7. 新合同的有限验收
+## 7. 历史合同的有限验收（已失败）
 
 新合同只允许一次纯合成端到端验收：
 
@@ -150,6 +157,9 @@ whole-run record 负责绑定本次实际输入、实际数值和实际结论。
 
 若该新合同再次出现 foundational P0，立即停止 Stage 4A 工程，不再增加 provenance 层；保留当前
 KDE 合法基线，回到异常数据、假设和更简单科学实验设计的复审。
+
+该条件已经在唯一独立审计中触发。以下第 8 节是触发前的历史复审；当前决定和下一科学试验以
+`docs/phase4_kde_one_shot_audit_failure_and_science_first_simplification.md` 为准。
 
 ## 8. 本阶段科学价值复审
 
@@ -168,4 +178,5 @@ KDE 合法基线，回到异常数据、假设和更简单科学实验设计的�
 > 在相同背景、支持域和 600,000 平方公里报警面积下，异常信息是否使独立物理区域召回稳定提高
 > 至少 5 个百分点，并同时优于覆盖控制、时间置乱和空间置乱？
 
-新合同通过后，下一步必须是 code seal 和唯一真实 Stage 4A attempt，而不是新的工程层或更复杂模型。
+本合同最终没有通过，所以上述 code seal 和唯一真实 Stage 4A attempt 均未获授权、均未执行。禁止
+沿本合同继续；当前下一步是新文档规定的 manifest/schema-only、target-blind 预检。
