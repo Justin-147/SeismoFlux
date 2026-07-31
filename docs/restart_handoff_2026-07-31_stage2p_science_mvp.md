@@ -3,7 +3,7 @@
 - 日期：2026-07-31
 - 工作树：`D:\AIPred\SeismoFlux\data\interim\worktrees\science_first`
 - 分支：`codex/stage2-etas-science-first`
-- 当前阶段：Stage 2P-1B 合成科学 MVP 已本地验收；等待提交、推送和代码标签回读
+- 当前阶段：Stage 2P-1B 合成科学 MVP 已验收并远端闭合；Stage 2P-1C 尚未授权
 - `stage_id`: `Stage2P-1B`
 - 控制协议阶段：`Stage2P-1A2`
 - 协议版本：0.2.5
@@ -29,7 +29,7 @@ Stage 2P-1B 已完成本地验收：
 - 当前没有读取真实目录、没有联网发行、没有把合成结果称为真实预测证据；
 - 验收提交 `d9d662c2accde861dd4b0bca8796fa870ef4d547` 已推送；
 - 协议标签 `v0.2.5-prospective-science-mvp-protocol` 已推送，远端 peeled commit 与验收提交一致；
-- Stage 2P-1B 代码和结果尚未提交、推送或打代码标签，因此真实阶段仍未授权。
+- Stage 2P-1B 验收提交与代码标签已推送并远端回读一致；真实阶段仍未授权。
 
 ## 3. 模型和数据
 
@@ -49,10 +49,10 @@ Stage 2P-1B 已完成本地验收：
 2. 已完成 Stage 2P-1B 三种合成情景、静态图、交互页和指标；
 3. 已修复科学审计发现的未来事件旁路和三项 P1；
 4. 已完成 282 项回归、2,000 次结果包复算、视觉 QA 和三路独立 GO；
-5. 当前只允许提交明确的 Stage 2P-1B 文件，禁止暂存 Stage 4 草稿；
-6. 推送分支并建立 `v0.2.5-prospective-science-mvp-code` annotated tag；
-7. 回读远端分支和标签，更新本交接的远端闭合证据；
-8. 只有以上闭合后，才能另立并验收 Stage 2P-1C 真实前瞻起报边界。
+5. 已只提交明确的 Stage 2P-1B 文件，Stage 4 草稿未暂存；
+6. 已推送分支并建立 `v0.2.5-prospective-science-mvp-code` annotated tag；
+7. 已回读远端分支、标签对象和 peeled commit，三者一致；
+8. 下一步只能另立并验收 Stage 2P-1C 真实前瞻起报边界，当前不得读取真实新增目录。
 
 ## 4.1 Stage 2P-1A2 远端闭合证据
 
@@ -63,9 +63,14 @@ Stage 2P-1B 已完成本地验收：
 - 最终验收：255 项通过，独立审计 GO，P0/P1 阻断为 0
 - 本阶段科学价值：仍为 `necessary_enabler`，没有真实预测提升证据
 
-## 4.2 Stage 2P-1B 本地闭合证据
+## 4.2 Stage 2P-1B 远端闭合证据
 
 - 实现状态：`accepted/frozen`
+- 验收提交：`d7b4cf4ab03ff6620584974f91a37793fbcb1c94`
+- 验收时远端分支：`d7b4cf4ab03ff6620584974f91a37793fbcb1c94`
+- 代码标签：`v0.2.5-prospective-science-mvp-code`
+- 标签对象：`41455cdc34e07657bb019d33fc072f32514d3df5`
+- 标签 peeled commit：`d7b4cf4ab03ff6620584974f91a37793fbcb1c94`
 - 结果目录：`docs/stage2p_science_mvp/`
 - 结果说明：`docs/phase2p1b_science_mvp_results.md`
 - 精确回归：282 项通过
@@ -74,7 +79,7 @@ Stage 2P-1B 已完成本地验收：
 - 视觉 QA：总对比 SVG 和离线交互 HTML 已用浏览器实际渲染通过
 - 真实数据：未读取
 - 真实预测证据：无
-- 待完成：提交、推送、代码标签和远端回读
+- 远端闭合：已完成
 
 ## 5. Stage 2P-1B MVP 的验收结果
 
