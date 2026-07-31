@@ -8,10 +8,13 @@
 - 阶段 2S 正式执行日期：2026-07-30
 - 阶段 2P 目标盲路线复审日期：2026-07-31
 - 阶段 2P-1A 前瞻预登记冻结日期：2026-07-31
+- 阶段 2P-1A2 科学最小化修订日期：2026-07-31
 - 状态：阶段 4A 与 Stage 2S 均已停止；继续保留 75 km KDE。Stage 2P-0 已选择最小近期地震
-  真正前瞻筛查；Stage 2P-1A 候选审计已 GO 并唯一跃迁为 accepted/frozen，但尚未授予执行权或
-  真实发行权。下一步只允许在精确最终字节复验、提交、推送和远端标签回读闭合后进入 Stage
-  2P-1B 纯合成链。当前 `protocol_frozen=true`、`execution_authorized=false`、
+  真正前瞻筛查；旧 Stage 2P-1A v0.2.4 已作为历史冻结。当前 Stage 2P-1A2 v0.2.5 已完成本地
+  独立验收并唯一转为 `accepted/frozen`，只替代过度工程证明条款，尚未授予执行权或真实发行权。
+  下一步只允许在提交、推送和远端标签回读闭合后进入 Stage 2P-1B 最小合成科学演练。当前
+  `protocol_frozen=true`、
+  `execution_authorized=false`、
   `real_issue_authorized=false`；锁定测试未读取
 - 对应机器配置：`configs/research_protocol.yaml`
 - 首次冻结标签：`v0.1.0-data-contract`；阶段 2 成绩前冻结标签：`v0.2.0-background-protocol`
@@ -399,6 +402,43 @@ Bootstrap 分布、四端点和稳健性工件。授权后若执行失败，仍�
   代码标签远端核验前保持 `execution_authorized=false`、`real_issue_authorized=false`
 
 任何未来结论只适用于冻结的 ComCat 获取/修订链和固定 0.5 候选，不能外推为全部近期地震模型。
+
+## 0.7 阶段 2P-1A2 科学最小化修订
+
+本阶段标识为 `Stage2P-1A2`。
+旧 v0.2.4 协议、提交、标签和原始字节全部保留为历史。v0.2.5 不改变要回答的问题：在同一数据
+快照和不超过 600,000 平方公里的同一报警面积规则下，加入最近 30 天地震的 P1，能否同时超过
+长期背景 P0 和加入再早 30 天地震的公平对照 PP。
+
+本次只取消与模型效果无关的强制工程门：RFC3161/TSA、证书链、逐工件外部注册、完整字节链重建
+和硬件收据。最小追溯改为规范 JSON、SHA-256、只追加链、Git 提交和 GitHub 回读。时间隔离、
+不能用未来震中、不能扩面积换召回、最多一次正式效果查看、失败后不能针对目标调参等科学约束
+全部保留。
+
+下一阶段只能用合成数据，不读取真实新增目录或未来目标。它必须同时展示三种情景：
+
+1. 最近 30 天活动确实有效；
+2. 最近 30 天没有增量；
+3. 最近 30 天具有误导性。
+
+每种情景必须给出 P0/P1/PP 静态三联图、离线交互页、相同面积报警区、未来合成目标、严格召回、
+信息增益、P1-P0/P1-PP 和移除最大地区/震群后的结果，且醒目标注“合成演练，不是真实预测证据”。
+如果这些图和指标不能形成，或不能正确区分三种情景，立即停止增加工程结构并简化方案。
+
+同面积比较按“规范化 25 km 格质量/实际裁剪面积”排序，以行、列、格 ID 处理并列，三模型实际
+面积两两最大差为 625 平方公里。区域稳健性沿用已冻结的 39 区清单及其哈希；最大正贡献区域和
+震群并列时分别按 `region_id` 与 `component_id` 升序唯一选择。
+
+完整合同见 `docs/phase2p1a2_minimal_scientific_preregistration.md`。
+
+- `science_value_category`: `necessary_enabler`
+- `direct_prediction_improvement`: `none`
+- `evidence`: 尚无真实 issue、未来目标、召回或信息增益结果
+- `uncertainty_change`: 尚未降低近期地震是否有效的不确定性；只让下一次直接科学检验可执行
+- `decision`: `continue_to_stage2p1b_mvp_synthetic_after_acceptance`
+- `next_scientific_test`: 三种合成情景的 P0/P1/PP 图、交互页和同面积效果指标
+- `stop_condition`: 不能正确区分三种情景或再次陷入非科学工程细节时停止并简化；正式门失败时
+  停止 P1、保留 P0
 
 ## 1. 唯一科学问题
 

@@ -1,0 +1,827 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Justin-147/SeismoFlux/data/contracts/stage2p_science_records_v1.json",
+  "title": "SeismoFlux Stage 2P science MVP records",
+  "description": "A minimal append-only record contract for the P0/P1/PP prospective scientific experiment.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/CohortRecord"
+    },
+    {
+      "$ref": "#/$defs/ForecastIssueRecord"
+    },
+    {
+      "$ref": "#/$defs/GitHubPublicationReceipt"
+    },
+    {
+      "$ref": "#/$defs/TruthSnapshotRecord"
+    },
+    {
+      "$ref": "#/$defs/EvaluationRecord"
+    }
+  ],
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "GitSha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "UtcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "CohortRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "previous_record_sha256",
+        "content_sha256",
+        "experiment_id",
+        "protocol_version",
+        "protocol_tag",
+        "code_tag",
+        "code_commit",
+        "valid_from_utc",
+        "historical_catalog_cutoff_utc",
+        "model_ids",
+        "horizons_days",
+        "maximum_alarm_area_km2",
+        "target_magnitude_minimum",
+        "target_magnitude_maximum_exclusive"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "CohortRecord"
+        },
+        "recorded_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "previous_record_sha256": {
+          "type": "null"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "experiment_id": {
+          "const": "stage2p-prospective-recent-seismicity-science-mvp-v2"
+        },
+        "protocol_version": {
+          "const": "0.2.5"
+        },
+        "protocol_tag": {
+          "const": "v0.2.5-prospective-science-mvp-protocol"
+        },
+        "code_tag": {
+          "const": "v0.2.5-prospective-science-mvp-code"
+        },
+        "code_commit": {
+          "$ref": "#/$defs/GitSha1"
+        },
+        "valid_from_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "historical_catalog_cutoff_utc": {
+          "const": "2026-07-09T04:25:56Z"
+        },
+        "model_ids": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "P0"
+            },
+            {
+              "const": "P1"
+            },
+            {
+              "const": "PP"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "horizons_days": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": 7
+            },
+            {
+              "const": 30
+            },
+            {
+              "const": 90
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "maximum_alarm_area_km2": {
+          "const": 600000
+        },
+        "target_magnitude_minimum": {
+          "const": 5.0
+        },
+        "target_magnitude_maximum_exclusive": {
+          "const": 6.0
+        }
+      }
+    },
+    "ModelForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "relative_intensity_grid_sha256",
+        "alarm_mask_sha256",
+        "alarm_area_km2"
+      ],
+      "properties": {
+        "model_id": {
+          "enum": [
+            "P0",
+            "P1",
+            "PP"
+          ]
+        },
+        "relative_intensity_grid_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "alarm_mask_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "alarm_area_km2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 600000
+        }
+      }
+    },
+    "ForecastBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "P0",
+        "P1",
+        "PP",
+        "static_svg_sha256",
+        "interactive_html_sha256"
+      ],
+      "properties": {
+        "P0": {
+          "$ref": "#/$defs/ModelForecast"
+        },
+        "P1": {
+          "$ref": "#/$defs/ModelForecast"
+        },
+        "PP": {
+          "$ref": "#/$defs/ModelForecast"
+        },
+        "static_svg_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "interactive_html_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "ForecastIssueRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "previous_record_sha256",
+        "content_sha256",
+        "issue_id",
+        "scheduled_issue_sequence",
+        "status",
+        "issue_time_utc",
+        "query_cutoff_utc",
+        "forecast_created_at_utc",
+        "code_commit",
+        "source_snapshot_sha256",
+        "P0_event_set_sha256",
+        "R30_event_set_sha256",
+        "RP30_event_set_sha256",
+        "forecast_bundle"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "ForecastIssueRecord"
+        },
+        "recorded_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "previous_record_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "issue_id": {
+          "type": "string",
+          "pattern": "^stage2p-[0-9]{8}T[0-9]{6}Z$"
+        },
+        "scheduled_issue_sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "on_time",
+            "missed_issue"
+          ]
+        },
+        "issue_time_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "query_cutoff_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "forecast_created_at_utc": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UtcTimestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code_commit": {
+          "$ref": "#/$defs/GitSha1"
+        },
+        "source_snapshot_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "P0_event_set_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "R30_event_set_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RP30_event_set_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "forecast_bundle": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ForecastBundle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "on_time"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "forecast_created_at_utc": {
+                "$ref": "#/$defs/UtcTimestamp"
+              },
+              "source_snapshot_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "P0_event_set_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "R30_event_set_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "RP30_event_set_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "forecast_bundle": {
+                "$ref": "#/$defs/ForecastBundle"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "forecast_created_at_utc": {
+                "type": "null"
+              },
+              "source_snapshot_sha256": {
+                "type": "null"
+              },
+              "P0_event_set_sha256": {
+                "type": "null"
+              },
+              "R30_event_set_sha256": {
+                "type": "null"
+              },
+              "RP30_event_set_sha256": {
+                "type": "null"
+              },
+              "forecast_bundle": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "GitHubPublicationReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "previous_record_sha256",
+        "content_sha256",
+        "subject_record_type",
+        "subject_path",
+        "subject_content_sha256",
+        "repository_url",
+        "commit_sha",
+        "git_blob_sha1",
+        "remote_ref",
+        "remote_verified_at_utc",
+        "verification_response_sha256",
+        "issue_time_utc"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "GitHubPublicationReceipt"
+        },
+        "recorded_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "previous_record_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "subject_record_type": {
+          "enum": [
+            "CohortRecord",
+            "ForecastIssueRecord",
+            "TruthSnapshotRecord",
+            "EvaluationRecord"
+          ]
+        },
+        "subject_path": {
+          "type": "string",
+          "pattern": "^records/[A-Za-z0-9._/-]+\\.json$"
+        },
+        "subject_content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "repository_url": {
+          "const": "https://github.com/Justin-147/SeismoFlux.git"
+        },
+        "commit_sha": {
+          "$ref": "#/$defs/GitSha1"
+        },
+        "git_blob_sha1": {
+          "$ref": "#/$defs/GitSha1"
+        },
+        "remote_ref": {
+          "type": "string",
+          "pattern": "^refs/(heads|tags)/[A-Za-z0-9._/-]+$"
+        },
+        "remote_verified_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "verification_response_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "issue_time_utc": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UtcTimestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "subject_record_type": {
+                "const": "ForecastIssueRecord"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "issue_time_utc": {
+                "$ref": "#/$defs/UtcTimestamp"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "issue_time_utc": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TruthSnapshotRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "previous_record_sha256",
+        "content_sha256",
+        "issue_id",
+        "horizon_days",
+        "revision_sequence",
+        "status",
+        "mature_after_utc",
+        "fetched_at_utc",
+        "target_snapshot_sha256",
+        "target_count"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "TruthSnapshotRecord"
+        },
+        "recorded_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "previous_record_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "issue_id": {
+          "type": "string",
+          "pattern": "^stage2p-[0-9]{8}T[0-9]{6}Z$"
+        },
+        "horizon_days": {
+          "enum": [
+            7,
+            30,
+            90
+          ]
+        },
+        "revision_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "status": {
+          "enum": [
+            "mature_truth_sealed",
+            "truth_snapshot_unavailable"
+          ]
+        },
+        "mature_after_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "fetched_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "target_snapshot_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_count": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "mature_truth_sealed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target_snapshot_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "target_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "target_snapshot_sha256": {
+                "type": "null"
+              },
+              "target_count": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ComparisonResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recall_gain_percentage_points",
+        "recall_ci_lower",
+        "recall_ci_upper",
+        "information_gain_nats_per_event",
+        "information_gain_ci_lower",
+        "information_gain_ci_upper"
+      ],
+      "properties": {
+        "recall_gain_percentage_points": {
+          "type": "number"
+        },
+        "recall_ci_lower": {
+          "type": "number"
+        },
+        "recall_ci_upper": {
+          "type": "number"
+        },
+        "information_gain_nats_per_event": {
+          "type": "number"
+        },
+        "information_gain_ci_lower": {
+          "type": "number"
+        },
+        "information_gain_ci_upper": {
+          "type": "number"
+        }
+      }
+    },
+    "EvaluationResults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "P1_minus_P0",
+        "P1_minus_PP",
+        "largest_positive_region_removed_still_positive",
+        "largest_positive_cluster_removed_still_positive",
+        "decision"
+      ],
+      "properties": {
+        "P1_minus_P0": {
+          "$ref": "#/$defs/ComparisonResult"
+        },
+        "P1_minus_PP": {
+          "$ref": "#/$defs/ComparisonResult"
+        },
+        "largest_positive_region_removed_still_positive": {
+          "type": "boolean"
+        },
+        "largest_positive_cluster_removed_still_positive": {
+          "type": "boolean"
+        },
+        "decision": {
+          "enum": [
+            "pass_direct_improvement_candidate",
+            "fail_stop_retain_P0",
+            "evidence_insufficient"
+          ]
+        }
+      }
+    },
+    "EvaluationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "previous_record_sha256",
+        "content_sha256",
+        "phase",
+        "checkpoint_on_time_issue_count",
+        "selected_exposure_manifest_sha256",
+        "truth_manifest_sha256",
+        "bootstrap_indices_sha256",
+        "unique_target_event_count",
+        "independent_cluster_count",
+        "input_freeze_content_sha256",
+        "effect_rows_opened_at_utc",
+        "results"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "EvaluationRecord"
+        },
+        "recorded_at_utc": {
+          "$ref": "#/$defs/UtcTimestamp"
+        },
+        "previous_record_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "phase": {
+          "enum": [
+            "input_freeze",
+            "result_seal"
+          ]
+        },
+        "checkpoint_on_time_issue_count": {
+          "enum": [
+            52,
+            104
+          ]
+        },
+        "selected_exposure_manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "truth_manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "bootstrap_indices_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "unique_target_event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "independent_cluster_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_freeze_content_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effect_rows_opened_at_utc": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UtcTimestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/EvaluationResults"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "phase": {
+                "const": "input_freeze"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "input_freeze_content_sha256": {
+                "type": "null"
+              },
+              "effect_rows_opened_at_utc": {
+                "type": "null"
+              },
+              "results": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "input_freeze_content_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "effect_rows_opened_at_utc": {
+                "$ref": "#/$defs/UtcTimestamp"
+              },
+              "results": {
+                "$ref": "#/$defs/EvaluationResults"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

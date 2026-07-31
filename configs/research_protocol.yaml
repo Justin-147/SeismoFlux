@@ -1,7 +1,7 @@
 schema_version: 1
 protocol_version: 1.4.0
 data_contract_version: 0.1.0
-status: stage_2p1a_accepted_frozen_retain_75km_KDE
+status: stage_2p1a2_accepted_frozen_science_mvp_retain_75km_KDE
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
@@ -350,6 +350,69 @@ stage_2p_route_review:
   decision: adjust_to_stage2p_prospective_recent_seismicity_screen
   next_scientific_test: after_Stage2P_1A_acceptance_run_Stage2P_1B_synthetic_exact_byte_lifecycle_including_T_minus_5_candidate_T_minus_4_missed_formal_freeze_unavailable_two_input_freezes_one_effect_look_and_valid_invalid_result_bundle
   stop_condition: do_not_issue_if_any_preissue_contract_is_open_stop_P1_on_formal_gate_failure_or_after_104_on_time_issues_with_insufficient_events_and_retain_P0
+stage_2p_science_mvp_revision:
+  revised_on: '2026-07-31'
+  stage_id: Stage2P-1A2
+  protocol_version: 0.2.5
+  status: accepted
+  protocol_frozen: true
+  protocol_path: configs/prospective_recent_seismicity_science_v2.yaml
+  record_schema_path: data/contracts/stage2p_science_records_v1.json
+  preregistration_path: docs/phase2p1a2_minimal_scientific_preregistration.md
+  protocol_tag: v0.2.5-prospective-science-mvp-protocol
+  expected_code_tag: v0.2.5-prospective-science-mvp-code
+  supersedes_only_engineering_proof_clauses_of: v0.2.4-prospective-seismicity-protocol
+  prior_protocol_bytes_and_tag_preserved_as_history: true
+  execution_authorized: false
+  real_issue_authorized: false
+  real_catalog_network_or_future_target_read_authorized: false
+  locked_test_read_count: 0
+  scientific_question: recent_30d_seismicity_improves_future_independent_region_recall_at_same_alarm_area
+  models: [P0, P1, PP]
+  horizons_days: [7, 30, 90]
+  primary_alarm_area_budget_km2: 600000
+  primary_target: unique_deduplicated_M5_6_physical_events
+  minimum_unique_targets: 20
+  minimum_cluster_blocks: 10
+  bootstrap_replications: 2000
+  bootstrap_seed: 147
+  maximum_confirmatory_effect_looks: 1
+  first_look_on_time_issue: 52
+  final_input_freeze_on_time_issue: 104
+  P1_failure_action: stop_P1_and_retain_P0
+  minimal_integrity_evidence:
+    - canonical_JSON
+    - SHA256
+    - append_only_previous_record_hash
+    - git_blob_and_commit
+    - GitHub_remote_readback
+  no_longer_mandatory_for_science_mvp:
+    - RFC3161_or_TSA
+    - public_key_certificate_chain_validation
+    - per_artifact_external_registry
+    - full_byte_lifecycle_reconstruction
+    - hardware_receipts
+  next_stage_required_outputs:
+    scenarios:
+      - recent_signal_predictive
+      - recent_signal_no_increment
+      - recent_signal_misleading
+    artifacts:
+      - P0_P1_PP_static_three_panel_maps
+      - offline_interactive_page
+      - equal_area_alarm_overlays_and_future_synthetic_targets
+      - strict_recall_and_information_gain_metrics
+      - P1_minus_P0_and_P1_minus_PP_comparisons
+      - leave_largest_region_and_cluster_out_robustness
+    all_outputs_must_state: synthetic_exercise_not_real_prediction_evidence
+  next_stage_failure_action: stop_engineering_expansion_and_simplify_or_adjust_scientific_route
+  science_value_category: necessary_enabler
+  direct_prediction_improvement: none
+  evidence: no_real_issue_future_target_or_effect_metric_has_been_read
+  uncertainty_change: scientific_effect_uncertainty_unchanged_next_direct_test_now_executable
+  decision: continue_to_stage2p1b_mvp_synthetic_after_acceptance
+  next_scientific_test: three_synthetic_scenarios_with_P0_P1_PP_maps_interactive_page_and_equal_area_metrics
+  stop_condition: stop_and_simplify_if_synthetic_scenarios_are_not_distinguished_or_non_scientific_engineering_blocks_progress
 stage_science_value_review:
   required_immediately_after_each_stage_result: true
   categories:

@@ -1,0 +1,291 @@
+schema_version: 1
+
+protocol:
+  protocol_version: '0.2.5'
+  stage_id: Stage2P-1A2
+  experiment_id: stage2p-prospective-recent-seismicity-science-mvp-v2
+  status: accepted
+  protocol_frozen: true
+  protocol_tag: v0.2.5-prospective-science-mvp-protocol
+  planned_code_tag: v0.2.5-prospective-science-mvp-code
+  execution_authorized: false
+  real_issue_authorized: false
+  real_catalog_read_authorized: false
+  real_network_fetch_authorized: false
+  new_target_read_count: 0
+  locked_test_read_count: 0
+  locked_test_run_count: 0
+  next_authorized_action: commit_push_tag_then_stage2p1b_mvp_synthetic
+  supersedes_for_future_execution:
+    protocol_version: '0.2.4'
+    protocol_tag: v0.2.4-prospective-seismicity-protocol
+    scope: engineering_and_record_contract_only
+    historical_bytes_remain_unchanged: true
+    historical_results_remain_none: true
+  preserved_scientific_question: >-
+    Does adding the most recent 30 days of causal M4+ seismicity to the
+    long-term 75 km KDE improve future independent M5-to-M6 earthquake recall
+    at the same alarm-area rule, relative to both P0 and PP?
+
+science_priority:
+  primary_goal: improve_future_independent_region_recall_at_fixed_alarm_area
+  engineering_is_not_scientific_progress: true
+  next_stage_must_produce:
+    - synthetic_P0_P1_PP_forecast_maps
+    - synthetic_hit_miss_and_alarm_area_results
+    - synthetic_P1_minus_P0_and_P1_minus_PP_metrics
+    - static_and_offline_interactive_scientific_figures
+  next_stage_failure_to_produce_these_outputs: stop_and_simplify
+  excluded_as_mandatory_gates:
+    - external_cryptographic_timestamping
+    - public_key_certificate_validation
+    - per_artifact_typed_manifest_registry
+    - full_byte_reconstruction_of_every_intermediate_table
+    - hardware_identity_receipts
+  maximum_protocol_record_types: 5
+
+data:
+  historical_P0_source:
+    source_id: earthquake_catalog_m3_plus
+    normalized_path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+    cutoff_utc: '2026-07-09T04:25:56Z'
+    training_start_utc: '1970-01-01T00:00:00Z'
+    role: long_term_history_only
+    local_restricted: true
+  prospective_increment_and_truth_source:
+    source_id: usgs_anss_comcat_fdsn_event_api_v1
+    query_endpoint: https://earthquake.usgs.gov/fdsnws/event/1/query
+    count_endpoint: https://earthquake.usgs.gov/fdsnws/event/1/count
+    local_model_magnitude_minimum: 4.0
+    target_magnitude_interval: '[5.0,6.0)'
+    raw_response_saved_locally: true
+    raw_response_sha256_required: true
+    source_snapshot_sha256_required: true
+  P0_composite_rule:
+    historical_component: local_catalog_origin_lte_historical_cutoff
+    prospective_component: ComCat_origin_gt_historical_cutoff_and_lte_Q
+    same_local_Mc_filter_applies_to_both_components: true
+    rebuilt_from_the_issue_snapshot: true
+  first_experiment_uses:
+    - historical_earthquake_catalog
+    - prospective_ComCat_seismicity
+    - prospective_ComCat_mature_truth
+  deliberately_not_used_in_first_experiment:
+    - anomaly_reports
+    - fault_data
+    - long_term_hazard_table
+    - manually_entered_prediction_fields
+  reason_not_all_data_are_used: one_clear_scientific_question_before_model_composition
+
+calendar:
+  timezone: Asia/Shanghai
+  issue_rule: weekly_Thursday_00_00_Asia_Shanghai
+  first_issue_not_before_local: '2026-09-10T00:00:00+08:00'
+  query_cutoff_rule: Q_equals_T_minus_15_minutes
+  forecast_must_be_created_before_issue_T: true
+  late_or_failed_issue_action: record_missed_issue_never_backfill
+  horizons_days: [7, 30, 90]
+  truth_maturity_wait_days: 30
+
+causality:
+  one_source_snapshot_per_issue_for_P0_R30_RP30: true
+  include_event_only_if_origin_time_lte_Q: true
+  include_event_only_if_first_seen_before_T: true
+  future_event_or_revision_in_prior_forecast_forbidden: true
+  real_epicenter_may_not_define_candidates_grid_or_boundaries: true
+  later_truth_may_not_change_original_forecast: true
+  local_Mc_only_affects_its_own_spatial_unit: true
+
+models:
+  bandwidth_km: 75
+  mixture_weight: 0.5
+  frozen_spatial_support:
+    support_id: local-support-f6816ab6c6581306
+    support_manifest_path: data/manifests/background_local_support_manifest.json
+    support_manifest_sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    support_mask_sha256: 5e3b2e75a862fcbe462c73cd33d5b7bac4a7b97b2b48467a02bfa50c9e96a488
+    local_Mc: 4.0
+    local_Mc_unit_km: 500
+    event_below_local_Mc_excluded_only_from_that_unit: true
+    study_area_file_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    equal_area_crs: >-
+      +proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84
+      +units=m +no_defs +type=crs
+  P0:
+    definition: causal_long_term_75km_KDE_rebuilt_at_each_issue
+    event_window: training_start_through_Q
+  R30:
+    definition: causal_75km_KDE_of_M4plus_events
+    event_window: '(Q-30d,Q]'
+  RP30:
+    definition: causal_75km_KDE_of_M4plus_events
+    event_window: '(Q-60d,Q-30d]'
+  P1:
+    definition: 0.5_P0_plus_0.5_R30
+  PP:
+    definition: 0.5_P0_plus_0.5_RP30
+  empty_R30_or_RP30_component_falls_back_exactly_to_P0: true
+  same_projection_grid_support_and_normalization_for_all_models: true
+  relative_intensity_not_absolute_probability: true
+
+alarm:
+  operational_grid_km: 25
+  maximum_alarm_area_km2: 600000
+  selection_rule: highest_density_complete_cell_prefix
+  rank_value: normalized_25km_cell_mass_divided_by_exact_clipped_cell_area
+  tie_break:
+    - cell_row_ascending
+    - cell_column_ascending
+    - cell_id_ascending
+  partial_last_cell_forbidden: true
+  skipped_higher_rank_cell_forbidden: true
+  maximum_complete_cell_area_km2: 625
+  maximum_pairwise_actual_alarm_area_difference_km2: 625
+  same_rule_for_P0_P1_PP: true
+  record_actual_area_for_each_model: true
+
+records:
+  schema_path: data/contracts/stage2p_science_records_v1.json
+  record_types:
+    - CohortRecord
+    - ForecastIssueRecord
+    - GitHubPublicationReceipt
+    - TruthSnapshotRecord
+    - EvaluationRecord
+  canonical_json_profile: sorted_keys_compact_utf8_no_nan
+  content_sha256_excludes_only_content_sha256: true
+  append_only_create_new: true
+  overwrite_delete_or_reorder_forbidden: true
+  previous_record_sha256_chain_required: true
+  forecast_artifacts_bound_by_sha256: true
+  source_snapshot_bound_by_sha256: true
+  code_commit_required: true
+  public_git_publication_required_for_real_on_time_issue: true
+  publication_must_complete_before_issue_T: true
+  publication_failure_action: missed_issue
+
+truth:
+  target_window_rule: '(T,T+h]'
+  target_magnitude_interval: '[5.0,6.0)'
+  separate_mature_fetch_from_issue_input: true
+  truth_unavailable_is_not_zero_events: true
+  unavailable_exposure_may_not_be_replaced: true
+  revisions_append_new_TruthSnapshotRecord: true
+  original_forecast_artifacts_remain_unchanged: true
+
+evaluation:
+  primary_metric: fixed_area_strict_region_recall
+  supporting_metric: support_domain_information_gain_nats_per_event
+  comparisons:
+    - P1_minus_P0
+    - P1_minus_PP
+  horizons_macro_weighted_equally: [7, 30, 90]
+  exposure_selection: chronological_nonoverlap_within_each_horizon
+  zero_event_exposures_retained: true
+  every_horizon_must_be_evaluable: true
+  strict_recall:
+    target_scope: full_study_area_all_unique_M5_to_M6_targets
+    support_domain_target_scope_only: false
+    support_domain_outside_event_action: common_not_hit_for_P0_P1_PP
+    independent_region_or_cluster_recall_report_required: true
+  information_gain:
+    target_scope: frozen_support_domain_only
+    estimator: paired_event_log_density_ratio_nats_per_event
+  minimum_unique_M5_to_M6_events: 20
+  minimum_independent_cluster_blocks: 10
+  cluster_rule:
+    maximum_origin_time_difference_days: 30
+    maximum_distance_km: 75
+    connected_components: true
+  regional_robustness:
+    fixed_region_partition_count: 39
+    region_manifest_path: data/manifests/anomaly_increment_r2_spatial_strata.json
+    region_manifest_sha256: 283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83
+    additive_closure_absolute_tolerance: 1.0e-10
+    largest_positive_region_tie_break: unsigned_UTF8_region_id_ascending
+    largest_positive_cluster_tie_break: unsigned_UTF8_component_id_ascending
+    removal_denominators_remain_original: true
+  paired_cluster_bootstrap:
+    replicates: 2000
+    seed: 147
+    generator: numpy_PCG64
+    paired_resample_shared_by_all_models_horizons_and_endpoints: true
+    simultaneous_family:
+      endpoints:
+        - P1_minus_P0_information_gain
+        - P1_minus_PP_information_gain
+        - P1_minus_P0_strict_recall
+        - P1_minus_PP_strict_recall
+      familywise_confidence_level: 0.95
+      correction: Bonferroni
+      per_endpoint_two_sided_confidence_level: 0.9875
+      percentile_lower: 0.00625
+      percentile_upper: 0.99375
+      numpy_quantile_method: linear
+  first_formal_look_after_on_time_issues: 52
+  final_formal_look_after_on_time_issues: 104
+  maximum_effect_looks: 1
+  formal_look_logic:
+    issue_52_first_checks_sample_gate_without_opening_effect_rows: true
+    effect_rows_open_at_52_only_if_all_sample_gates_pass: true
+    otherwise_continue_blindly_to_104: true
+    issue_104_is_final_sample_gate_and_only_remaining_effect_look: true
+    inadequate_sample_at_104: evidence_insufficient_stop_P1_retain_P0
+  pass_requires:
+    P1_minus_P0_recall_gain_percentage_points_minimum: 5.0
+    P1_minus_P0_recall_interval_lower_bound_above_zero: true
+    P1_minus_PP_recall_interval_lower_bound_above_zero: true
+    P1_minus_P0_information_gain_interval_lower_bound_above_zero: true
+    P1_minus_PP_information_gain_interval_lower_bound_above_zero: true
+    removal_of_largest_positive_cluster_and_region_remains_positive_for_each_endpoint: true
+  failure_action: stop_P1_retain_P0_and_report_negative_or_insufficient_evidence
+
+visualization:
+  every_synthetic_scenario:
+    - three_panel_P0_P1_PP_relative_intensity_map
+    - alarm_area_and_hit_miss_overlay
+    - comparison_metric_plot
+  every_real_issue:
+    - static_SVG
+    - offline_interactive_HTML
+  truth_replay_creates_new_files_without_modifying_original_forecast: true
+  display_relative_intensity_only: true
+  exact_event_rows_and_coordinates_remain_local_restricted: true
+
+stage2p1b_mvp_synthetic_acceptance:
+  uses_only_synthetic_events: true
+  reads_real_catalog: false
+  uses_network: false
+  required_scenarios:
+    recent_activity_predictive: P1_outperforms_P0_and_PP
+    no_recent_signal: P1_has_no_material_gain
+    recent_activity_misleading: P1_underperforms_at_least_one_control
+  must_verify:
+    - same_snapshot_and_time_windows
+    - empty_window_fallback
+    - fixed_area_alarm_prefix
+    - hit_miss_and_information_gain_metrics
+    - paired_cluster_bootstrap
+    - append_only_hash_chain
+    - static_and_offline_interactive_figures
+  science_value_category: necessary_enabler
+  synthetic_results_are_real_prediction_evidence: false
+
+resource_limits:
+  reserve_physical_cpu_cores: 2
+  maximum_workers: 8
+  inner_numeric_threads: 1
+  gpu_allowed_only_for_cpu_equivalent_math: true
+
+science_value_review:
+  science_value_category: necessary_enabler
+  direct_prediction_improvement: none
+  evidence: >-
+    The over-engineered evidence layer is replaced by the minimum causal,
+    append-only, hash-bound protocol needed to reach the immediate P0/P1/PP
+    scientific experiment. No real forecast result has been observed.
+  decision: continue_to_stage2p1b_mvp_synthetic_after_protocol_acceptance
+  next_scientific_test: three_synthetic_signal_scenarios_with_maps_and_metrics
+  stop_condition: >-
+    Stop and simplify again if the next stage does not produce complete
+    P0/P1/PP forecasts, metrics, and figures.
