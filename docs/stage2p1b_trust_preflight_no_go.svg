@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675"
+  role="img" aria-labelledby="title desc">
+  <title id="title">Stage 2P-1B 信任预检 NO-GO</title>
+  <desc id="desc">Stage 2P-1A 已完成。1B 要求离线假时间戳服务，但冻结规则只接受 DigiCert 和 Sectigo 的真实证书链，因此没有真实私钥或预签回执时无法验收。推荐先另立隔离的合成信任域协议。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7f9fc"/>
+      <stop offset="1" stop-color="#edf2f8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#14233b" flood-opacity=".10"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+      orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <text x="70" y="72" fill="#14213d" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="34" font-weight="700">Stage 2P-1B 开工前审计：已按硬门停止</text>
+  <text x="70" y="108" fill="#526079" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="18">不是模型跑坏了，而是当前“假服务 + 真实锁”的合同在密码学上不能同时成立</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="150" width="280" height="310" rx="20" fill="#ffffff" stroke="#b8c7dc"/>
+    <rect x="460" y="150" width="280" height="310" rx="20" fill="#fff7f5" stroke="#df746a" stroke-width="2"/>
+    <rect x="850" y="150" width="280" height="310" rx="20" fill="#ffffff" stroke="#b8c7dc"/>
+  </g>
+
+  <circle cx="110" cy="195" r="16" fill="#2d8a61"/>
+  <path d="M101 195l6 6 12-14" fill="none" stroke="#ffffff" stroke-width="4"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="140" y="202" fill="#14213d" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="22" font-weight="700">1A 已完成</text>
+  <text x="100" y="248" fill="#526079" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="17">
+    <tspan x="100" dy="0">规则、schema、时钟、模型</tspan>
+    <tspan x="100" dy="31">与唯一检验已冻结</tspan>
+    <tspan x="100" dy="46">测试 245 / 245</tspan>
+    <tspan x="100" dy="31">提交、推送、远端标签闭环</tspan>
+    <tspan x="100" dy="46">真实数据 / issue / 效果 = 0</tspan>
+  </text>
+
+  <circle cx="500" cy="195" r="16" fill="#c94b43"/>
+  <path d="M492 187l16 16m0-16l-16 16" fill="none" stroke="#ffffff" stroke-width="4"
+    stroke-linecap="round"/>
+  <text x="530" y="202" fill="#8f2e29" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="22" font-weight="700">1B 硬冲突</text>
+  <g transform="translate(560 235)">
+    <rect x="8" y="38" width="100" height="86" rx="15" fill="#fde7e4" stroke="#c94b43" stroke-width="3"/>
+    <path d="M30 39V22c0-42 56-42 56 0v17" fill="none" stroke="#c94b43" stroke-width="9"
+      stroke-linecap="round"/>
+    <circle cx="58" cy="78" r="8" fill="#c94b43"/>
+    <path d="M58 84v20" stroke="#c94b43" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <text x="500" y="390" fill="#526079" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="16">
+    <tspan x="500" dy="0">假 TSA 必须动态签成功 token</tspan>
+    <tspan x="500" dy="28">但锁只认真实 DigiCert / Sectigo</tspan>
+    <tspan x="500" dy="28">无私钥、无预签向量、禁止换测试根</tspan>
+  </text>
+
+  <circle cx="890" cy="195" r="16" fill="#3174b8"/>
+  <path d="M882 195h16m-8-8l8 8-8 8" fill="none" stroke="#ffffff" stroke-width="3"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="920" y="202" fill="#14213d" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="22" font-weight="700">合法下一步</text>
+  <text x="880" y="248" fill="#526079" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="17">
+    <tspan x="880" dy="0">另立目标盲协议版本</tspan>
+    <tspan x="880" dy="36">production 仍只信真实锚</tspan>
+    <tspan x="880" dy="31">synthetic 使用隔离测试 PKI</tspan>
+    <tspan x="880" dy="31">两种模式走同一 CMS 验证器</tspan>
+    <tspan x="880" dy="36">验收 → 提交 → 推送 → 新标签</tspan>
+  </text>
+
+  <line x1="356" y1="305" x2="445" y2="305" stroke="#64748b" stroke-width="3"
+    marker-end="url(#arrow)"/>
+  <line x1="746" y1="305" x2="835" y2="305" stroke="#64748b" stroke-width="3"
+    marker-end="url(#arrow)"/>
+
+  <rect x="70" y="510" width="1060" height="105" rx="18" fill="#14213d"/>
+  <text x="100" y="551" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="20" font-weight="700">当前科学结论</text>
+  <text x="100" y="584" fill="#d9e4f2" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="17">
+    预测效果尚未产生；本轮价值是阻止虚假验收。新协议门通过前，不写 1B 代码、不读真实目录、不联网。
+  </text>
+  <text x="70" y="650" fill="#67758e" font-family="Segoe UI, Microsoft YaHei, sans-serif"
+    font-size="14">SeismoFlux · 2026-07-31 · science-first / fail-closed</text>
+</svg>

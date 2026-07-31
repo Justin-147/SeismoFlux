@@ -4,13 +4,16 @@
 - 工作树：`science_first` 隔离工作树（本地绝对路径不进入公开提交）
 - 分支：`codex/stage2-etas-science-first`
 - 本轮开始 HEAD：`79ab606c68c73fb1e8ed8fa4efa5146c1b181ce6`
-- 当前阶段：`Stage2P-1A complete`；下一阶段 `Stage2P-1B ready_not_started`
-- 文档状态：`complete_remote_closed`
-- 科学价值分类：`necessary_enabler`
+- 当前阶段：`Stage2P-1B preflight_foundational_P0_no_go`
+- 下一阶段：`target_blind_protocol_amendment_requires_decision`
+- 文档状态：`stage2p1a_complete_stage2p1b_preflight_stopped`
+- 当前预检科学价值分类：`no_material_progress`
+- 已关闭 Stage 2P-1A 科学价值分类：`necessary_enabler`
 - 直接预测提升：无
 - `protocol_frozen=true`
 - `execution_authorized=false`
 - `real_issue_authorized=false`
+- `stage2p1b_implementation_started=false`
 - 真实 issue 数：0
 - 新前瞻目标读取数：0
 - 锁定测试读取数：0
@@ -29,14 +32,15 @@
 同一时刻的数据和同一套“不超过 600,000 平方公里”的完整格前缀规则，各自记录实际完整格面积，
 保存后不能回头修改。未来地震成熟后，累计效果最多只正式查看一次。
 
-这一步是必要准备，不是效果成果。当前仍不能运行真实预测。候选审计已 GO，并已唯一把
-`protocol_frozen` 改为 true；`execution_authorized` 和 `real_issue_authorized` 仍保持
-false。精确最终字节复验、提交、推送和远端标签回读闭合后的下一步仅是用纯合成数据演练整条链。
+这一步是必要准备，不是效果成果。当前仍不能运行真实预测。候选审计、最终字节复验、提交、
+推送和远端标签回读均已闭合；`protocol_frozen=true`，`execution_authorized` 和
+`real_issue_authorized` 仍保持 false。随后进行的 1B 开工前预检发现冻结信任边界无法支持
+离线假 TSA 成功链，已按 foundational P0 门控停止，详见第 9 节。
 
 边界必须保持清楚：1A 只冻结 schema、规范字节、工件 profile、信任边界、状态机和统计语义，
 实现状态只能是 `stage2p1b_required`；它不声称 ASN.1/CMS、目录表、预测数组或评价字节已经能够
-重建。1B 才以纯合成数据实现和逐字节演练全链。1A 候选审计已 GO 并完成唯一状态跃迁，但不等于
-阶段完成；最终字节仍须复验、提交、推送、打 annotated 协议标签并完成远端回读。
+重建。1A 已完成远端闭环。1B 原应以纯合成数据实现和逐字节演练全链，但当前冻结协议把
+“离线假服务”和“只信真实固定锚”同时设为硬条件，现已确认不可满足，因此 1B 实现尚未开始。
 
 ## 2. 唯一科学目标
 
@@ -52,8 +56,8 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 
 ## 3. 本轮已形成的冻结内容
 
-以下均为 Stage 2P-1A 已通过候选审计并完成状态跃迁的冻结内容；尚未声明最终字节复验、提交或
-推送完成，必须按此精确清单审计和暂存：
+以下均为 Stage 2P-1A 已通过候选审计、最终字节复验、提交、推送和远端标签回读的冻结内容。
+本清单保留用于身份复核，不得把后续修订伪装成原协议标签内容：
 
 1. `configs/prospective_recent_seismicity.yaml`：唯一机器可执行前瞻协议；
 2. `data/contracts/stage2p_prospective_records.json`：五类记录及
@@ -205,7 +209,9 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 - 逐事件行、精确坐标和原始响应始终本地受限；公开叠加逐项复核许可。
 - 公开限制不阻断本地受控研究。
 
-## 5. 重启后的严格续接顺序
+## 5. 已完成的 1A 历史闭环顺序与当前续接顺序
+
+### 5.1 已完成的 1A 历史闭环
 
 1. 只审计上述 17 个 Stage 2P-1A 仓库文件的差异、内部一致性、官方链接、JSON Schema、SVG 和
    Markdown；明确跳过全部 Stage 4 草稿。
@@ -214,14 +220,24 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
    execution/real 为 false，并针对这组精确最终字节重新跑完整验收与独立审计。
 4. 只在最终字节复验 GO 后提交、推送、创建 annotated 协议标签，并回读远端 tag object 与
    peeled commit；远端闭合后才声明 1A 完成，标签之后不得再改本阶段协议内容。
-5. 另行实现 Stage 2P-1B 纯合成同路径链，不接本地真实目录、不访问 ComCat 真实数据、不发行 issue。
-6. 2P-1B 必须覆盖 `Q=T-15min` 同一快照、T-5 候选/T-4 missed 双证明、P0/R30/RP30、
+
+以上四步均已完成，不再是当前待执行命令。
+
+### 5.2 当前严格续接顺序
+
+1. 保持 Stage 2P-1B 实现停止，不修改原协议标签，不读取真实目录、网络、issue、effect rows 或
+   锁定测试。
+2. 由用户决定是否采用第 9 节和新 trust-preflight 交接推荐的目标盲协议修订。
+3. 若确认修订，另立新协议版本，显式隔离 production 与 synthetic-acceptance 信任域；完成
+   协议/schema 测试、独立 P0/P1 审计、提交、推送、新 annotated tag 和远端回读。
+4. 只有新协议门完整通过后，才可另行实现 Stage 2P-1B 纯合成同路径链。
+5. 恢复后的 2P-1B 必须覆盖 `Q=T-15min` 同一快照、T-5 候选/T-4 missed 双证明、P0/R30/RP30、
    P0/P1/PP、RFC3161 core 与 TSA 主备假服务、scheduled/on_time 双序号、五类记录、时间上独立
    成熟抓取、preferred-origin 跨界修订、真值不可用且禁止 exposure 替补、formal-freeze
    unavailable 分支、最多两次 input-freeze/一次 effect look、支持域 IG/全区召回精确估计量、
    至少 10 个震群块、四端点区间、valid/invalid ResultBundle、`input_freeze→result_seal` 闭环
    和累计密封展示。
-7. 合成链验收后立即做科学价值复审；它仍是必要使能，除非产生真实未来效果证据，否则不能称为
+6. 合成链验收后立即做科学价值复审；它仍是必要使能，除非产生真实未来效果证据，否则不能称为
    预测提升。
 
 ## 6. 停止条件
@@ -246,7 +262,8 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 - [x] 最终复验 GO 后提交、推送并创建 annotated 协议标签；
 - [x] 回读远端提交、tag object 和 peeled commit，闭合后才声明 Stage 2P-1A 完成；
 - [x] 保持 `execution_authorized=false`、`real_issue_authorized=false`；
-- [ ] 再进入 Stage 2P-1B 纯合成链。
+- [x] 完成 Stage 2P-1B 开工前信任可行性预检；发现 foundational P0，按门控停止；
+- [ ] 用户确认目标盲协议修订方向后，另立新协议版本，再决定是否恢复 Stage 2P-1B。
 
 ## 8. 状态跃迁后的验收与远端闭环证据
 
@@ -260,5 +277,33 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 - 科学价值仍是 `necessary_enabler`，没有真实效果指标，不能声称预测已经变准；
 - 精确暂存的 17 个文件已提交并推送；远端分支、annotated tag object 和 peeled commit 已按
   上述身份逐项回读一致。Stage 2P-1A 因而正式关闭；
-- 下一步仅允许进入 Stage 2P-1B 纯合成同路径实现与验收。1B 仍不得读取真实目录、访问 ComCat
+- 远端闭环时原定下一步仅为 Stage 2P-1B 纯合成同路径实现与验收；随后预检已发现 foundational
+  P0 并停止。当前下一步改为第 9 节所述目标盲协议修订决策，仍不得读取真实目录、访问 ComCat
   真实网络、发行真实 issue 或打开任何效果/锁定结果。
+
+## 9. Stage 2P-1B 开工前信任预检更新
+
+Stage 2P-1B 尚未开始写实现。三路独立只读审计在开工前一致确认一个新的 foundational P0：
+
+- 冻结 registry 只接受 DigiCert/Sectigo 的固定 URL、policy OID 和精确 DER 信任锚；
+- 1B 又要求离线假 TSA 动态签发能通过实际 RFC3161 ASN.1/CMS 验证的成功 token；
+- 仓库没有对应私钥、合法预签 `.tsq/.tsr` 向量或独立 synthetic trust profile；
+- 无私钥时不可能为每条动态 core/nonce 生成能链到真实固定锚的新 token；
+- 注入测试根、跳过签名或信任自报布尔值都会绕过冻结合同，不能算合成验收。
+
+因此当前状态从 `Stage2P-1B ready_not_started` 改为
+`Stage2P-1B preflight_foundational_P0_no_go`。已按本交接第 6 节停止条件在读取真实目录、联网、
+发行 issue、打开效果行或锁定测试之前停止，未改动冻结配置/schema，也未编写 1B 实现。
+
+推荐保留并绝不改写现有协议标签，另立目标盲协议修订版本，显式隔离 `production` 和
+`synthetic_acceptance` 两个信任域；两种模式必须共用同一 ASN.1/CMS verifier，且 production
+必须机械拒绝所有测试根和测试 token。新协议完成测试、独立审计、提交、推送、annotated tag
+和远端回读前，不得恢复 1B。
+
+完整证据、科学价值复审、最小修订方案和重启边界见：
+
+- `docs/restart_handoff_2026-07-31_stage2p1b_trust_preflight.md`
+- `docs/stage2p1b_trust_preflight_no_go.svg`
+
+本次 1B 预检的科学价值分类为 `no_material_progress`：它没有产生预测成绩，但阻止了不可满足合同
+被错误包装为工程完成。当前仍没有真实预测结果。

@@ -316,8 +316,9 @@ terminal record 写入。因此原始 science 失败类型未知且不可恢复�
 Stage 2P-1A 只冻结 schema、规范字节、工件 profile、外部信任边界和失败闭合语义，不声称真实
 ASN.1/CMS、目录表、预测数组或评价字节已经实现；其状态只能是 `stage2p1b_required`。Stage
 2P-1B 才用纯合成数据逐字节演练整条链。候选审计 GO 后已在同一候选中唯一改为
-`accepted`、`protocol_frozen=true`；当前仍须对精确最终字节复验，再提交、推送协议标签并完成
-远端 tag object/peeled commit 回读；在此之前不能声称 1A 完成或进入 1B。
+`accepted`、`protocol_frozen=true`，并已完成精确最终字节复验、提交、推送、annotated
+协议标签和远端 tag object/peeled commit 回读，Stage 2P-1A 已正式关闭。随后 1B 开工前预检
+发现的新 foundational P0 见第 13 节。
 
 ### 12.2 这次具体冻结了什么
 
@@ -385,8 +386,8 @@ ComCat 在中国的 M4 覆盖、震级口径和修订节奏可能不同于本地
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none`
 - `evidence`: 来源/原始请求、远端标签、代码身份、时间戳、切源、模型、真值成熟、统计唯一查看、
-  失败闭合、追加回放、许可和资源边界已形成经候选审计 GO 的冻结预登记；真实 issue 数为 0，新前瞻目标读取数
-  为 0，效果指标数为 0
+  失败闭合、追加回放、许可和资源边界已形成冻结预登记，并完成最终验收、提交、推送与远端标签
+  回读；真实 issue 数为 0，新前瞻目标读取数为 0，效果指标数为 0
 - `uncertainty_change`: 降低了未来结果被事后回填、换源混杂、重复查看和单一震群支配所误导的
   风险；没有降低“近期 30 天地震是否真能提升预测”的科学不确定性
 - `decision`: `continue_to_stage2p1b_synthetic_only_after_acceptance`
@@ -397,3 +398,38 @@ ComCat 在中国的 M4 覆盖、震级口径和修订节奏可能不同于本地
   valid/invalid ResultBundle 和 `input_freeze→result_seal` 密封闭环
 - `stop_condition`: 合同审计失败则不进入 2P-1B；合成链出现 foundational P0 则停止并复审；
   真实起报前还必须完成代码、标签、来源身份和许可 preflight，不能把工程完成冒充科学进展
+
+## 13. Stage 2P-1B 信任可行性预检停止复审
+
+### 13.1 外行结论
+
+Stage 2P-1B 原计划用假数据和假时间戳服务器验证整条链。开工前发现，已冻结的锁只接受
+DigiCert/Sectigo 的真实证书链，而假服务器没有这两家机构的私钥，也没有针对本次动态请求预先
+签好的合法回执。当前协议同时禁止换成测试根。因此合成成功链不是“还没写完”，而是在密码学上
+无法按当前合同完成。
+
+三路独立只读审计一致给出 foundational P0 / NO-GO。实现没有开始，真实地震目录、网络、issue、
+effect rows 和锁定测试均未读取。直接删掉 validator 的关门点、跳过签名或相信记录自报的
+“验证成功”都会形成虚假验收，不能推动预测效果。
+
+### 13.2 对最终科学目标的影响
+
+- `scientific_question`: 当前冻结协议能否在完全离线、无真实私钥的条件下完成五记录合成成功链？
+- `new_evidence`: 冻结 registry 只有真实 DigiCert/Sectigo 精确锚；仓库没有相应私钥、预签 token
+  或隔离的 synthetic trust profile。
+- `uncertainty_change`: 将 1B 从 `ready_not_started` 收敛为
+  `impossible_under_current_frozen_contract`。
+- `science_value_category`: `no_material_progress`
+- `direct_prediction_improvement`: `none`
+- `evidence`: 没有模型预测、召回、信息增益、报警面积或置乱对照结果；只有信任边界不可满足的
+  审计证据。
+- `decision`: `stop_before_stage2p1b_implementation_and_reassess_protocol`
+- `next_direct_test`: 新建目标盲协议版本，明确隔离 production 与 synthetic-acceptance 信任域，
+  让测试 PKI 动态签发 core/nonce，但仍使用同一实际 ASN.1/CMS verifier；production 必须拒绝
+  全部测试 token。
+- `stop_condition`: 新协议未经测试、独立审计、提交、推送、annotated tag 和远端回读，不恢复
+  1B，不读取真实数据。
+
+该预检本身没有提高预测能力；其唯一价值是阻止不可满足的工程合同继续消耗时间，避免把测试绕过
+误称为科学进展。推荐的协议修订细节见
+`docs/restart_handoff_2026-07-31_stage2p1b_trust_preflight.md`。
