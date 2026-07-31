@@ -1,0 +1,68 @@
+schema_version: 1
+
+implementation:
+  stage_id: Stage2P-1B
+  status: accepted
+  implementation_frozen: true
+  protocol_version: '0.2.5'
+  protocol_tag: v0.2.5-prospective-science-mvp-protocol
+  planned_code_tag: v0.2.5-prospective-science-mvp-code
+  synthetic_only: true
+  real_catalog_read_authorized: false
+  real_network_fetch_authorized: false
+  science_value_category: necessary_enabler
+
+implementation_isolation:
+  allowed_pure_reuse:
+    - seismoflux.data.common.canonical_json_bytes
+    - seismoflux.stage2s.contracts.AlarmMask
+    - seismoflux.stage2s.contracts.NormalizedSpatialDensity
+    - seismoflux.stage2s.contracts.SpatialGrid
+    - seismoflux.stage2s.contracts.SpatialQuadratureFamily
+    - seismoflux.stage2s.spatial.build_normalized_kde
+    - seismoflux.stage2s.spatial.build_recent_component
+    - seismoflux.stage2s.spatial.event_cell_index_25km
+    - seismoflux.stage2s.spatial.mix_density
+    - seismoflux.stage2s.spatial.select_alarm_prefix
+  forbidden_reuse:
+    - seismoflux.anomaly_increment
+    - seismoflux.stage2s.evaluation
+    - seismoflux.stage2s.production
+    - seismoflux.stage2s.records
+    - seismoflux.stage2s.runner
+    - seismoflux.stage2s.seals
+    - seismoflux.stage2s.synthetic
+    - seismoflux.stage2s.spatial.build_stage2s_models
+    - seismoflux.stage2s.spatial.fit_alpha
+    - seismoflux.stage2s.spatial.fit_alpha_log_density
+
+source_scope:
+  - src/seismoflux/stage2p/catalog.py
+  - src/seismoflux/stage2p/forecast.py
+  - src/seismoflux/stage2p/evaluation.py
+  - src/seismoflux/stage2p/synthetic_experiment.py
+  - src/seismoflux/stage2p/visualization.py
+
+acceptance:
+  status: accepted
+  accepted_date_local: '2026-07-31'
+  exact_regression_test_count: 282
+  independent_audit_P0_count: 0
+  independent_audit_P1_count: 0
+  required_scenarios:
+    - recent_activity_predictive
+    - no_recent_signal
+    - recent_activity_misleading
+  required_outputs:
+    - deterministic_static_SVG
+    - deterministic_offline_interactive_HTML
+    - public_safe_metrics_JSON
+  output_directory: docs/stage2p_science_mvp
+  output_sha256:
+    recent_activity_predictive.svg: a93da34d64e9c0ff3f5df1d22f9b808c4d66dd30e5cc9cf3733fcbc11b53e05b
+    no_recent_signal.svg: 582db851aec53b7bb875cc049229205fde77a97c2719109ac93552b67836eb0e
+    recent_activity_misleading.svg: 8920e8f8e85a14f4b567b813d1f5ee77f257a003d3c8d81fb6d3c4766534b32d
+    scenario_comparison.svg: 36c2e5b8db53c5909e56bb0d845d5f4aed568b5f88cf353b393e948e785079ca
+    stage2p_science_mvp_explorer.html: 26c26baed2fcf880003f5b63f519eade4bde83a23818dc6625e55db5adbdfc0d
+    metrics.json: b54ba547b9e44076ae2d9d5725a097e4a1033cb523310f5720f1df20a2d8d8f7
+  synthetic_results_are_real_prediction_evidence: false

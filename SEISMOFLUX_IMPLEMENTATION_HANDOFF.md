@@ -1135,6 +1135,42 @@ Stage 2P-1B MVP 只用明确标注的合成数据，至少包含“近期活动�
 - `stop_condition`: 不能正确区分三种合成情景或再次被非科学工程细节阻断时停止简化；正式门失败
   时停止 P1、保留 P0
 
+#### 阶段 2P-1B 合成科学 MVP 验收（2026-07-31）
+
+Stage 2P-1B 已在纯合成、已知答案数据上完成本地验收，状态为 `accepted`。三种情景均使用同一
+因果时间规则、75 km KDE、0.5 混合权重、25 km 完整格和实际 600,000 平方公里报警面积：
+
+- 近期活动有效：P1 独立震群召回 100%，P0/PP 为 0%；P1-P0 为 +100.0 pp、IG +1.386，
+  P1-PP 为 +100.0 pp、IG +2.079；
+- 近期活动无增量：P0/P1/PP 均为 100%，两项增益均为 0；
+- 近期活动误导：P1 为 0%，P0/PP 为 100%；两项召回差均为 -100.0 pp、IG -0.693。
+
+每种情景有 36 个未来合成目标、12 个震群和 4 个预先固定区域；7/30/90 天累计含 12/24/36 个
+目标。2,000 次 PCG64 种子 147 的震群配对 Bootstrap、四端点 Bonferroni 区间和最大区域/震群
+移除均已执行。区域每区包含 3 个震群，不再与震群一一对应。
+
+审计曾发现直接构造 `CausalCatalogWindows` 可绕过时间筛选的科学 P0。修复后，P0 必须满足
+训练边界、`origin<=Q`、`first_seen<T`、唯一固定排序；R30/RP30 必须从 P0 完整重算；预测入口
+再次防御性复验。异质 horizon 的固定 Bootstrap 复本若出现零分母，返回结构化
+`evidence_insufficient` 且不重抽。公开产物只使用“合成已知答案检查”，禁止把合成结果称为
+正式门通过。
+
+交付位于 `docs/stage2p_science_mvp/`：三张情景 SVG、总对比 SVG、离线交互 HTML 和公开安全
+metrics JSON。精确回归 282 项通过，三路只读复验最终 GO，P0/P1 为 0。完整结果见
+`docs/phase2p1b_science_mvp_results.md`。
+
+本验收只证明计算、评价和展示逻辑能区分已知正、零、负情景，不证明真实地震预测效果提高。
+真实目录、局部 Mc、真实支持域/39 区、按时发行和成熟真值仍未接入，真实执行继续未授权。代码
+提交、推送和 `v0.2.5-prospective-science-mvp-code` 标签回读闭合前不得进入下一阶段。
+
+- `science_value_category`: `necessary_enabler`
+- `direct_prediction_improvement`: `none`
+- `evidence`: 合成正/零/负情景全部被正确区分，未来事件旁路已封死，图件可直观看到命中和漏报
+- `uncertainty_change`: 实现和评价逻辑不确定性下降；真实近期活动的预测增益不确定性未下降
+- `decision`: `accept_stage2p1b_then_remote_close_before_stage2p1c`
+- `next_scientific_test`: Stage 2P-1C 第一张按时冻结的真实 P0/P1/PP 前瞻图及其后成熟真值
+- `stop_condition`: 真实公平性或按时发行不能闭合则不发行；正式门失败时停止 P1、保留 P0
+
 ### 阶段3：动态异常轨迹特征库
 
 任务：

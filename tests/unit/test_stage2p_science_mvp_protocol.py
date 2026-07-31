@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import ast
 import copy
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, cast
 
@@ -14,6 +15,7 @@ from jsonschema.exceptions import ValidationError  # type: ignore[import-untyped
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "prospective_recent_seismicity_science_v2.yaml"
+IMPLEMENTATION_CONFIG_PATH = ROOT / "configs" / "stage2p_science_mvp_implementation.yaml"
 SCHEMA_PATH = ROOT / "data" / "contracts" / "stage2p_science_records_v1.json"
 OLD_CONFIG_PATH = ROOT / "configs" / "prospective_recent_seismicity.yaml"
 OLD_SCHEMA_PATH = ROOT / "data" / "contracts" / "stage2p_prospective_records.json"
@@ -423,6 +425,103 @@ def test_resources_leave_cpu_headroom() -> None:
     assert limits["reserve_physical_cpu_cores"] >= 2
     assert limits["maximum_workers"] <= 8
     assert limits["inner_numeric_threads"] == 1
+
+
+def test_science_mvp_imports_use_only_the_stage2p1b_symbol_allowlist() -> None:
+    manifest = _load_yaml(IMPLEMENTATION_CONFIG_PATH)
+    implementation = manifest["implementation"]
+    isolation = manifest["implementation_isolation"]
+    allowed = set(cast(Sequence[str], isolation["allowed_pure_reuse"]))
+    forbidden = set(cast(Sequence[str], isolation["forbidden_reuse"]))
+    expected_allowed = {
+        "seismoflux.data.common.canonical_json_bytes",
+        "seismoflux.stage2s.contracts.AlarmMask",
+        "seismoflux.stage2s.contracts.NormalizedSpatialDensity",
+        "seismoflux.stage2s.contracts.SpatialGrid",
+        "seismoflux.stage2s.contracts.SpatialQuadratureFamily",
+        "seismoflux.stage2s.spatial.build_normalized_kde",
+        "seismoflux.stage2s.spatial.build_recent_component",
+        "seismoflux.stage2s.spatial.event_cell_index_25km",
+        "seismoflux.stage2s.spatial.mix_density",
+        "seismoflux.stage2s.spatial.select_alarm_prefix",
+    }
+
+    assert implementation == {
+        "stage_id": "Stage2P-1B",
+        "status": "accepted",
+        "implementation_frozen": True,
+        "protocol_version": "0.2.5",
+        "protocol_tag": "v0.2.5-prospective-science-mvp-protocol",
+        "planned_code_tag": "v0.2.5-prospective-science-mvp-code",
+        "synthetic_only": True,
+        "real_catalog_read_authorized": False,
+        "real_network_fetch_authorized": False,
+        "science_value_category": "necessary_enabler",
+    }
+    assert allowed == expected_allowed
+    assert allowed.isdisjoint(forbidden)
+
+    acceptance = manifest["acceptance"]
+    assert acceptance["status"] == "accepted"
+    assert acceptance["exact_regression_test_count"] == 282
+    assert acceptance["independent_audit_P0_count"] == 0
+    assert acceptance["independent_audit_P1_count"] == 0
+    output_directory = ROOT / cast(str, acceptance["output_directory"])
+    output_hashes = cast(Mapping[str, str], acceptance["output_sha256"])
+    assert set(output_hashes) == {
+        "recent_activity_predictive.svg",
+        "no_recent_signal.svg",
+        "recent_activity_misleading.svg",
+        "scenario_comparison.svg",
+        "stage2p_science_mvp_explorer.html",
+        "metrics.json",
+    }
+    for name, expected_sha256 in output_hashes.items():
+        assert hashlib.sha256((output_directory / name).read_bytes()).hexdigest() == (
+            expected_sha256
+        )
+
+    controlled_prefixes = (
+        "seismoflux.background",
+        "seismoflux.stage2s",
+        "seismoflux.anomaly_increment",
+        "seismoflux.data",
+    )
+    expected_sources = {
+        ROOT / relative_path
+        for relative_path in cast(Sequence[str], manifest["source_scope"])
+    }
+    assert expected_sources
+    for source_path in sorted(expected_sources):
+        assert source_path.is_file()
+        tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.startswith(controlled_prefixes):
+                        pytest.fail(
+                            f"{source_path}: module import {alias.name!r} bypasses "
+                            "the exact symbol allowlist"
+                        )
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                if module.startswith("seismoflux.stage2p"):
+                    continue
+                if not module.startswith(controlled_prefixes):
+                    continue
+                for alias in node.names:
+                    assert alias.name != "*", (
+                        f"{source_path}: wildcard import from {module!r} is forbidden"
+                    )
+                    symbol = f"{module}.{alias.name}"
+                    assert symbol in allowed, (
+                        f"{source_path}: controlled reuse {symbol!r} is not in the "
+                        "Stage2P-1B exact allowlist"
+                    )
+                    assert not any(
+                        symbol == denied or symbol.startswith(f"{denied}.")
+                        for denied in forbidden
+                    ), f"{source_path}: forbidden reuse {symbol!r}"
 
 
 def test_all_five_record_examples_have_valid_canonical_hash_and_schema() -> None:

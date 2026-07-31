@@ -2315,7 +2315,12 @@ def test_stage2p_imports_use_only_the_exact_frozen_symbol_allowlist() -> None:
         "seismoflux.data",
     )
     stage2p_root = ROOT / "src" / "seismoflux" / "stage2p"
-    for source_path in sorted(stage2p_root.rglob("*.py")):
+    historical_source_paths = (
+        stage2p_root / "__init__.py",
+        stage2p_root / "validation.py",
+    )
+    for source_path in historical_source_paths:
+        assert source_path.is_file()
         tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
