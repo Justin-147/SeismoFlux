@@ -4,8 +4,8 @@
 - 工作树：`science_first` 隔离工作树（本地绝对路径不进入公开提交）
 - 分支：`codex/stage2-etas-science-first`
 - 本轮开始 HEAD：`79ab606c68c73fb1e8ed8fa4efa5146c1b181ce6`
-- 当前阶段：`Stage2P-1A`
-- 文档状态：`accepted`
+- 当前阶段：`Stage2P-1A complete`；下一阶段 `Stage2P-1B ready_not_started`
+- 文档状态：`complete_remote_closed`
 - 科学价值分类：`necessary_enabler`
 - 直接预测提升：无
 - `protocol_frozen=true`
@@ -14,6 +14,13 @@
 - 真实 issue 数：0
 - 新前瞻目标读取数：0
 - 锁定测试读取数：0
+- 协议冻结提交：`5417838e3fef3c3ed74a1eb6f6c7d719326561c5`
+- annotated 协议标签：`v0.2.4-prospective-seismicity-protocol`
+- 远端 tag object：`df1ca98785d3e5fcbf48ed955f0a86c247f85b2d`
+- 远端 peeled commit：`5417838e3fef3c3ed74a1eb6f6c7d719326561c5`
+- 远端回读时间：`2026-07-31T08:11:46+08:00`
+- 远端回读规范 LF 响应 SHA256：
+  `8d409c5c6bfada0d894b1d69c83c2dd8e7c53736043e083e43a78dd32c9dc1f8`
 
 ## 1. 外行版
 
@@ -236,12 +243,12 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 - [x] 候选审计 GO；此时不得声称阶段完成；
 - [x] 同一候选唯一设置 `status=accepted`、`protocol_frozen=true`，保持两个授权为 false；
 - [x] 对状态跃迁后的精确最终字节重新完整验收和独立审计；
-- [ ] 最终复验 GO 后提交、推送并创建 annotated 协议标签；
-- [ ] 回读远端提交、tag object 和 peeled commit，闭合后才声明 Stage 2P-1A 完成；
+- [x] 最终复验 GO 后提交、推送并创建 annotated 协议标签；
+- [x] 回读远端提交、tag object 和 peeled commit，闭合后才声明 Stage 2P-1A 完成；
 - [x] 保持 `execution_authorized=false`、`real_issue_authorized=false`；
 - [ ] 再进入 Stage 2P-1B 纯合成链。
 
-## 8. 状态跃迁后、提交前的验收证据
+## 8. 状态跃迁后的验收与远端闭环证据
 
 - 三路独立复审最终结论均为 GO/STABLE，残余 P0=0、P1=0；
 - 单进程、内层线程为 1 的最终测试：机器协议 19/19、语义状态机 183/183、既有背景与 Stage 2S
@@ -251,5 +258,7 @@ false。精确最终字节复验、提交、推送和远端标签回读闭合后
 - 17 个 Stage 2P-1A 文件范围闭合；15 个既有 Stage 4 草稿继续明确排除；
 - 真实 issue=0、新前瞻目标读取=0、锁定测试读取/运行=0，真实目录和网络授权仍为 false；
 - 科学价值仍是 `necessary_enabler`，没有真实效果指标，不能声称预测已经变准；
-- 仅剩：精确暂存 17 个文件、提交、推送、创建 annotated 协议标签并回读远端 tag object 与
-  peeled commit。完成这些动作前仍不得声明 Stage 2P-1A 阶段关闭或进入 1B。
+- 精确暂存的 17 个文件已提交并推送；远端分支、annotated tag object 和 peeled commit 已按
+  上述身份逐项回读一致。Stage 2P-1A 因而正式关闭；
+- 下一步仅允许进入 Stage 2P-1B 纯合成同路径实现与验收。1B 仍不得读取真实目录、访问 ComCat
+  真实网络、发行真实 issue 或打开任何效果/锁定结果。
