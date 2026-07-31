@@ -3,7 +3,7 @@
 - 日期：2026-07-31
 - 工作树：`D:\AIPred\SeismoFlux\data\interim\worktrees\science_first`
 - 分支：`codex/stage2-etas-science-first`
-- 当前阶段：Stage 2P-1A2 最小科学合同已本地 `accepted/frozen`，待提交、推送和远端标签闭合
+- 当前阶段：Stage 2P-1A2 最小科学合同已完成并远端闭合；下一步为 Stage 2P-1B 合成科学演练
 - `stage_id`: `Stage2P-1A2`
 - 协议版本：0.2.5
 - 当前科学价值：`necessary_enabler`
@@ -24,7 +24,9 @@
 - 下一阶段必须产出 P0/P1/PP 静态图、离线交互页和同面积效果指标；
 - 当前没有读取真实新增目录、没有联网发行、没有打开未来目标或效果；
 - 新旧协议及背景回归共 255 项通过，独立复验为 GO，P0/P1 阻断为 0；
-- 当前尚待提交、推送和远端标签闭合；完成前不得进入下一阶段。
+- 验收提交 `d9d662c2accde861dd4b0bca8796fa870ef4d547` 已推送；
+- 协议标签 `v0.2.5-prospective-science-mvp-protocol` 已推送，远端 peeled commit 与验收提交一致；
+- Stage 2P-1B 合成演练现可开始；真实目录、联网发行和未来效果读取仍未授权。
 
 ## 3. 模型和数据
 
@@ -43,11 +45,20 @@
 1. 已完成 v0.2.5 配置、Schema、文档一致性和防泄漏验收；
 2. 已完成独立审计，确认科学门完整、过度工程门已取消；
 3. 已将同一候选唯一改为 accepted/frozen；
-4. 重跑同一套 255 项验收；
-5. 只提交本阶段明确文件，推送并远端核验协议标签；
+4. 已重跑同一套 255 项验收；
+5. 已只提交本阶段 9 个明确文件，并完成推送和远端协议标签核验；
 6. 进入 Stage 2P-1B MVP；
 7. 生成三种合成情景的静态三联图、离线交互页和指标；
 8. 立即复审是否对科学目标有实质推动。若没有直观、可判断的结果，停止工程扩张并调整。
+
+## 4.1 Stage 2P-1A2 远端闭合证据
+
+- 分支：`codex/stage2-etas-science-first`
+- 远端分支提交：`d9d662c2accde861dd4b0bca8796fa870ef4d547`
+- 协议标签对象：`95ef5c7bab5d2192d83055aada70d94ab9681ff6`
+- 协议标签 peeled commit：`d9d662c2accde861dd4b0bca8796fa870ef4d547`
+- 最终验收：255 项通过，独立审计 GO，P0/P1 阻断为 0
+- 本阶段科学价值：仍为 `necessary_enabler`，没有真实预测提升证据
 
 ## 5. Stage 2P-1B MVP 的验收
 
