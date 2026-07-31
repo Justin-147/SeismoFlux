@@ -1,7 +1,7 @@
 schema_version: 1
 protocol_version: 1.4.0
 data_contract_version: 0.1.0
-status: stage_2p_route_selected_pending_preregistration_retain_75km_KDE
+status: stage_2p1a_accepted_frozen_retain_75km_KDE
 registered_without_locked_test_results: true
 initial_freeze_tag: v0.1.0-data-contract
 phase_2_freeze_tag: v0.2.0-background-protocol
@@ -148,17 +148,41 @@ stage_2s_preregistration:
       never_reuse_this_attempt_or_2022_2025_targets_for_repair_rerun_or_tuning
 stage_2p_route_review:
   reviewed_on: '2026-07-31'
-  stage_id: Stage2P-0
-  status: selected_pending_preregistration
+  stage_id: Stage2P-1A
+  status: accepted
   selected_route: prospective_recent_30d_seismicity_screen
   execution_authorized: false
   real_issue_authorized: false
-  stage2p1_protocol_frozen: false
+  stage2p1_protocol_frozen: true
+  stage2p1_protocol_path: configs/prospective_recent_seismicity.yaml
+  stage2p1_record_schema_path: data/contracts/stage2p_prospective_records.json
+  stage2p1_protocol_tag: v0.2.4-prospective-seismicity-protocol
+  stage2p1_code_tag: v0.2.4-prospective-seismicity-code
+  stage2p1_next_authorized_action: final_validation_commit_push_tag_readback_then_stage2p1b_synthetic_only
+  stage2p1_real_catalog_or_network_read_authorized: false
+  stage2p1_first_issue_not_before_local: '2026-09-10T00:00:00+08:00'
   research_only_not_stage10_or_G8: true
   locked_test_read_count: 0
   locked_test_run_count: 0
   locked_test_bypass_authorized: false
   new_target_read_count: 0
+  stage2p1_lifecycle_boundary:
+    Stage2P_1A_scope: freeze_schema_canonical_bytes_artifact_profiles_external_trust_boundaries_state_machine_statistics_and_fail_closed_semantics_only
+    Stage2P_1A_implementation_status: stage2p1b_required
+    Stage2P_1A_claims_actual_ASN1_CMS_table_forecast_or_evaluation_byte_rebuild: false
+    Stage2P_1B_scope: synthetic_exact_byte_full_lifecycle_implementation_and_replay
+    real_catalog_network_issue_or_new_target_read_before_Stage2P_1B_acceptance: forbidden
+  stage2p1_acceptance_sequence:
+    candidate_audit_GO_is_stage_completion: false
+    exact_order:
+      - candidate_audit_GO_with_all_authorizations_false
+      - unique_transition_same_candidate_to_accepted_and_protocol_frozen_true
+      - rerun_full_acceptance_and_independent_audit_on_exact_final_bytes
+      - commit_and_push_only_after_final_byte_revalidation_GO
+      - create_annotated_protocol_tag_and_read_back_tag_object_and_peeled_commit
+      - declare_Stage2P_1A_complete_and_enter_Stage2P_1B_only_after_remote_closure
+    execution_and_real_issue_authorized_remain_false_throughout: true
+    protocol_bytes_after_remote_tag_readback_mutable: false
   models:
     P0: causal_long_term_75km_KDE_rebuilt_each_issue_from_same_T_snapshot
     P1: 0.5_P0_T_plus_0.5_recent_30d_M4plus_75km_KDE
@@ -169,11 +193,12 @@ stage_2p_route_review:
     - same_issue_T_sealed_catalog_snapshot_as_R30_and_RP30
     - fixed_training_start_projection_support_Mc_eligibility_and_boundary_normalization
     - fixed_75km_bandwidth_without_reselection
-    - all_eligible_history_origin_lte_T_and_available_in_snapshot_by_T
+    - all_eligible_history_origin_lte_Q_T_minus_15min_and_available_in_snapshot_by_T
     - training_event_set_hash_count_and_density_hash
   recent_components:
-    R30: origin_in_T_minus_30d_to_T_and_available_in_same_T_snapshot
-    RP30: origin_in_T_minus_60d_to_T_minus_30d_and_available_in_same_T_snapshot
+    Q: T_minus_15_minutes
+    R30: origin_in_Q_minus_30d_to_Q_and_available_in_same_T_snapshot
+    RP30: origin_in_Q_minus_60d_to_Q_minus_30d_and_available_in_same_T_snapshot
     PP_interpretation: current_T_known_older_origin_window_control_not_counterfactual_T_minus_30_snapshot
     empty_R30_action: P1_equals_P0_exactly
     empty_RP30_action: PP_equals_P0_exactly
@@ -182,9 +207,28 @@ stage_2p_route_review:
   issue_rule: weekly_Thursday_00_00_Asia_Shanghai
   first_issue_rule: first_rule_issue_strictly_after_protocol_and_code_tags_verified
   late_or_missed_issue_action: record_missed_issue_and_never_backfill
+  issue_proof_contract:
+    complete_installable_candidate_core_freeze_deadline: T_minus_5_minutes
+    candidate_TSA_genTime_strictly_before: T_minus_5_minutes
+    candidate_TSA_success_action: atomically_install_on_time_issue
+    pre_candidate_failure:
+      prediction_generated: false
+      prediction_installed: false
+      failed_candidate_on_time_core: null
+    candidate_TSA_failure_after_complete_candidate:
+      prediction_generated: true
+      prediction_installed: false
+      failed_candidate_on_time_core_required: true
+      candidate_bytes_local_restricted_content_addressed: true
+      public_density_or_alarm_install_forbidden: true
+    final_missed_audit_core_freeze_deadline: T_minus_4_minutes
+    missed_audit_TSA_request_distinct_from_candidate_attempts: true
+    missed_audit_selected_genTime_strictly_before_issue_T: true
+    missed_audit_TSA_failure_action: do_not_install_record_and_pause_cohort
   source_snapshot_receipt_required_before_each_issue: true
   stage2p1_mandatory_source_snapshot_contract:
     seal_completed_before_issue_T: true
+    complete_candidate_source_prediction_and_alarm_sealed_by_T_minus_5: true
     failure_or_stale_snapshot_action: missed_issue_never_backfill
     append_only_previous_issue_hash_and_remote_time_anchor_required: true
     must_bind:
@@ -216,22 +260,70 @@ stage_2p_route_review:
     magnitude_bin: M5_6
     interval: '[5.0,6.0)'
     M6plus_role: exploratory_never_satisfies_primary_sample_gate
-  primary_alarm_area_km2: 600000
+  primary_alarm_area_budget_km2: 600000
   minimum_complete_mature_issues: 52
   minimum_unique_deduplicated_M5_6_events: 20
   maximum_on_time_issues: 104
+  maximum_scheduled_issues: 130
+  minimum_unique_target_clusters: 10
   exposure_and_analysis_contract:
     weekly_issues_role: immutable_archive_and_descriptive_stability_not_independent_trials
     formal_exposures: deterministic_chronological_nonoverlap_within_each_horizon
     zero_event_exposures_retained: true
     same_event_all_issue_and_horizon_contributions_share_one_cluster_block: true
     macro_weighting_and_target_cluster_definition_must_freeze_in_stage2p1: true
-    first_formal_look: after_issue_52_all_90d_windows_mature_only_if_primary_event_gate_met
+    first_formal_look: after_issue_52_all_90d_windows_mature_only_if_every_horizon_evaluable_and_N_gte_20_and_B_gte_10
     insufficient_at_first_look: do_not_open_contrast_rows_continue_blind_to_issue_104
-    final_formal_look: after_issue_104_all_90d_windows_mature_or_evidence_insufficient
+    second_input_freeze_at_104_allowed_only_if: >-
+      issue_52_basic_gate_not_met_and_no_effect_row_ever_opened
+    final_formal_look: after_issue_104_all_90d_windows_mature_open_effect_only_if_complete_basic_gate_else_evidence_insufficient_without_result_seal
+    maximum_formal_freeze_attempts_across_52_and_104: 2
+    maximum_confirmatory_effect_looks_across_full_route: 1
     intermediate_confirmatory_effect_display_or_testing_forbidden: true
+  formal_freeze_failure_contract:
+    one_attempt_per_actual_input_freeze_checkpoint: true
+    successful_single_full_cohort_response_required_for_scientific_values: true
+    not_run_no_complete_scope_may_encode_mechanically_empty_scope_as_true_zero: true
+    scheduled_cap_or_count_query_parse_or_local_derivation_failure_means: scientific_target_cluster_membership_and_target_dependent_horizon_values_are_null_or_unavailable_not_observed_zero
+    failure_scientific_fields_required_null_or_unavailable:
+      - final_window_membership_sha256
+      - realized_target_union
+      - union_unique_supported_M5_6_event_count
+      - union_unique_full_study_area_M5_6_event_count
+      - unique_target_cluster_count
+      - cluster_membership_sha256
+      - target_dependent_horizon_counts_and_hashes
+    failed_formal_freeze_preserves_exposure_selection_and_truth_availability_evidence: true
+    failed_formal_freeze_opens_target_or_effect_rows: false
+    failed_formal_freeze_bootstrap_status: not_run_formal_freeze_unavailable
+    retry_replace_or_alternate_snapshot_after_failure: forbidden
   bootstrap_replications: 2000
   bootstrap_unit: preregistered_target_cluster_component_with_isolated_event_as_singleton
+  result_bundle_contract:
+    valid_and_invalid_manifest_file_profile: exact_canonical_JSON_without_self_hash_field
+    result_bundle_sha256_equals_SHA256_of_exact_file_bytes: true
+    valid_requires_all:
+      - effect_rows_manifest
+      - alarm_area_comparison_manifest
+      - bootstrap_distribution_artifacts
+      - endpoint_results
+      - robustness_results
+    invalid_execution_requires:
+      - formal_run_and_input_freeze_identity
+      - evaluation_code_identity
+      - failure_stage_and_failure_code
+      - every_actually_available_audit_artifact_sha256
+    invalid_failure_stages:
+      - effect_rows_open
+      - alarm_area_comparison
+      - bootstrap
+      - endpoint_evaluation
+      - robustness_evaluation
+      - result_bundle_install
+      - result_seal
+    artifacts_after_failure_stage: must_be_null_not_empty_or_fabricated
+    invalid_execution_creates_exactly_one_terminal_result_seal: true
+    invalid_execution_rerun_or_test_tuning: forbidden
   pass_gate:
     simultaneous_familywise_confidence_level: 0.95
     P1_minus_P0_macro_information_gain_familywise_lower_gt_zero: true
@@ -256,7 +348,7 @@ stage_2p_route_review:
   science_value_category: necessary_enabler
   evidence: no_new_target_or_improvement_result_was_read_but_the_minimum_route_to_collect_non_backfillable_future_evidence_is_now_selected
   decision: adjust_to_stage2p_prospective_recent_seismicity_screen
-  next_scientific_test: preregister_source_snapshot_and_archive_contract_then_complete_target_free_same_path_acceptance_before_the_first_issue
+  next_scientific_test: after_Stage2P_1A_acceptance_run_Stage2P_1B_synthetic_exact_byte_lifecycle_including_T_minus_5_candidate_T_minus_4_missed_formal_freeze_unavailable_two_input_freezes_one_effect_look_and_valid_invalid_result_bundle
   stop_condition: do_not_issue_if_any_preissue_contract_is_open_stop_P1_on_formal_gate_failure_or_after_104_on_time_issues_with_insufficient_events_and_retain_P0
 stage_science_value_review:
   required_immediately_after_each_stage_result: true

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import subprocess
 import tomllib
 from datetime import date, timedelta
 from pathlib import Path
@@ -47,6 +48,15 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git_blob_sha256(revision: str, path: Path) -> str:
+    completed = subprocess.run(
+        ["git", "show", "--no-textconv", f"{revision}:{path.as_posix()}"],
+        check=True,
+        capture_output=True,
+    )
+    return hashlib.sha256(completed.stdout).hexdigest()
 
 
 def test_background_protocol_is_frozen_before_scores() -> None:
@@ -236,7 +246,9 @@ def test_phase2_numerical_dependencies_are_directly_pinned_and_locked() -> None:
 
     config = _load_yaml(BACKGROUND_CONFIG)
     assert config["inputs"]["environment_lock"] == "uv.lock"
-    assert config["inputs"]["environment_lock_sha256"] == _sha256(ENVIRONMENT_LOCK)
+    assert config["inputs"]["environment_lock_sha256"] == _git_blob_sha256(
+        config["freeze_tag"], ENVIRONMENT_LOCK
+    )
 
 
 def test_fixture_tolerances_match_machine_protocol() -> None:

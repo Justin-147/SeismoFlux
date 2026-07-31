@@ -802,10 +802,19 @@ def test_blueprint_and_research_protocol_agree_with_stage2s_and_stage2p_contract
     assert stage2s["target_blind_input_contract"]["sha256"] == _sha256(INPUT_PATH)
     assert stage2s["models"] == config["allowed_models"]["exact_order"]
     stage2p = research["stage_2p_route_review"]
-    assert stage2p["status"] == "selected_pending_preregistration"
+    assert stage2p["stage_id"] == "Stage2P-1A"
+    assert stage2p["status"] == "accepted"
     assert stage2p["execution_authorized"] is False
     assert stage2p["real_issue_authorized"] is False
-    assert stage2p["stage2p1_protocol_frozen"] is False
+    assert stage2p["stage2p1_protocol_frozen"] is True
+    assert (
+        stage2p["stage2p1_next_authorized_action"]
+        == "final_validation_commit_push_tag_readback_then_stage2p1b_synthetic_only"
+    )
+    assert stage2p["stage2p1_protocol_path"] == "configs/prospective_recent_seismicity.yaml"
+    assert (
+        stage2p["stage2p1_record_schema_path"] == "data/contracts/stage2p_prospective_records.json"
+    )
     assert stage2p["research_only_not_stage10_or_G8"] is True
     assert stage2p["new_target_read_count"] == 0
     assert stage2p["locked_test_read_count"] == 0

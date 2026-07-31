@@ -1,0 +1,2335 @@
+schema_version: 1
+
+protocol:
+  protocol_version: '0.2.4'
+  stage_id: Stage2P-1A
+  experiment_id: stage2p-prospective-recent-seismicity-v1
+  status: accepted
+  protocol_tag: v0.2.4-prospective-seismicity-protocol
+  code_tag: v0.2.4-prospective-seismicity-code
+  execution_authorized: false
+  real_issue_authorized: false
+  stage2p1_protocol_frozen: true
+  next_authorized_action: final_validation_commit_push_tag_readback_then_stage2p1b_synthetic_only
+  real_catalog_read_authorized: false
+  real_network_fetch_authorized: false
+  locked_test_read_count: 0
+  locked_test_run_count: 0
+  locked_test_bypass_authorized: false
+  protocol_and_code_tags_must_be_verified_remotely_before_real_issue: true
+  target_cohort_remote_tag_receipts:
+    remote_url: https://github.com/Justin-147/SeismoFlux.git
+    remote_visibility: public
+    annotated_tags_required: true
+    protocol_tag_object_id_and_peeled_commit_required: true
+    code_tag_object_id_and_peeled_commit_required: true
+    verified_at_utc_and_exact_response_sha256_required: true
+    receipt_sha256_required: true
+    both_verified_before_valid_from_required: true
+    peeled_commits_must_equal_cohort_protocol_and_code_commits: true
+  target_cohort_code_manifest:
+    structured_component_hashes_required: true
+    manifest_sha256_required: true
+    parser_normalization_dedup_revision_model_evaluation_visualization_and_validator_bound: true
+    uv_lock_and_pyproject_sha256_bound: true
+    issue_truth_revision_and_evaluation_records_must_exact_match: true
+
+calendar:
+  timezone: Asia/Shanghai
+  issue_weekday: Thursday
+  issue_local_time: '00:00:00'
+  issue_utc_offset: '+08:00'
+  issue_rule: weekly_Thursday_00_00_Asia_Shanghai
+  first_issue_not_before_local: '2026-09-10T00:00:00+08:00'
+  first_issue_not_before_utc: '2026-09-09T16:00:00Z'
+  first_issue_derivation:
+    valid_from_utc_is_derived_first_legal_issue_T: true
+    formula: >-
+      max_fixed_first_issue_not_before_utc_and_strict_next_rule_Thursday_T
+      _after_max_protocol_and_code_remote_tag_receipt_verified_at_utc
+    strict_next_rule_means_receipt_verified_at_must_be_lt_T: true
+    first_IssueInputSnapshotRecord_issue_time_utc_must_equal_valid_from_utc: true
+    if_pipeline_fails_at_derived_T_action: append_missed_issue_not_change_valid_from
+    arbitrary_operator_delay_or_seasonal_start_selection_forbidden: true
+    valid_from_change_after_TargetCohortDefinition_forbidden: true
+  query_end_lag_minutes: 15
+  query_end_rule: T_minus_15_minutes
+  target_window_rule: '(T,T+h]'
+  scheduled_issue_sequence:
+    counts: every_rule_Thursday_including_missed_issue
+    maximum: 130
+    maximum_reached_before_104_on_time_action: evidence_insufficient_and_stop
+  on_time_issue_sequence:
+    counts: on_time_prediction_records_only
+    maximum: 104
+    missed_issue_value: null
+  missed_issue_policy:
+    any_fetch_freshness_seal_or_timestamp_failure: missed_issue
+    prediction_install_or_publication_forbidden: true
+    pre_candidate_failure_prediction_generated: false
+    timestamp_failure_candidate_may_be_generated_before_T_minus_5: true
+    timestamp_failure_candidate_must_remain_local_restricted_and_uninstalled: true
+    backfill_forbidden: true
+    historical_prediction_overwrite_forbidden: true
+
+historical_baseline:
+  source_id: earthquake_catalog_m3_plus
+  role: frozen_local_history_before_comcat_cutover
+  cutoff_utc: '2026-07-09T04:25:56Z'
+  training_start_utc: '1970-01-01T00:00:00Z'
+  raw_inventory_sha256: c6b817d48317d3228f6709cdcb77b934ccb80be99ae43fef25ef8fc0378f94bf
+  normalized_local_path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+  normalized_file_sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+  normalized_content_sha256: 2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404
+  license_status: unknown_no_redistribution
+  local_restricted: true
+  immutable: true
+  prospective_comcat_origin_rule: origin_time_utc_strictly_greater_than_cutover
+  comcat_rows_at_or_before_cutover_forbidden: true
+
+comcat:
+  source_id: usgs_anss_comcat_fdsn_event_api_v1
+  institution: United_States_Geological_Survey
+  catalog: ANSS_ComCat
+  api_standard: FDSN_event_web_service
+  api_version: '1'
+  endpoint: https://earthquake.usgs.gov/fdsnws/event/1/query
+  count_endpoint: https://earthquake.usgs.gov/fdsnws/event/1/count
+  method: GET
+  response_format: geojson
+  issue_input_role: prospective_increment
+  truth_role: temporally_independent_mature_truth_acquisition_same_source
+  credentials_forbidden: true
+  transport:
+    connect_timeout_seconds: 15
+    total_timeout_seconds: 120
+    redirects: forbidden
+    maximum_response_bytes: 268435456
+    user_agent_identity_sha256_required: true
+    TLS_peer_certificate_chain_sha256_required: true
+  license:
+    status: USGS_authored_data_public_domain_with_non_USGS_partner_exceptions
+    anss_data_and_products_policy_url: >-
+      https://www.usgs.gov/media/files/anss-data-and-products-policy
+    usgs_data_licensing_url: https://www.usgs.gov/data-management/data-licensing
+    source_policy_identity_version_and_retrieved_at_required: true
+    source_policy_exact_response_bytes_sha256_required: true
+    cohort_license_policy_identity_sha256_required: true
+    acquisition_license_identity_must_equal_cohort_license_policy_identity: true
+    non_USGS_partner_content_requires_item_level_review: true
+    raw_and_row_level_artifacts_remain_local_restricted: true
+    uncertain_publication_rights_action: suppress_publication_but_allow_local_research
+  exact_query:
+    minlongitude: 73.446961
+    minlatitude: 20.22909
+    maxlongitude: 135.08583
+    maxlatitude: 53.557926
+    minmagnitude: 3.9
+    eventtype: earthquake
+    format: geojson
+    orderby: time-asc
+    limit: 20000
+    includeallorigins: false
+    includeallmagnitudes: false
+    includedeleted: false
+    includesuperseded: omit_not_applicable_without_eventid
+    reviewstatus: omit_use_default_all
+    offset: 1
+    jsonerror: true
+    nodata: 204
+    catalog: omit
+    contributor: omit
+  request_identity:
+    query_profile: stage2p_fdsn_query_url_v1
+    count_profile: stage2p_fdsn_count_url_v1
+    canonical_url_encoding: >-
+      UTF8_RFC3986_percent_encoding_uppercase_hex_frozen_parameter_order_no_fragment
+    exact_parameter_object_and_canonical_url_sha256_required: true
+    semantic_recomputation_required: true
+  count_preflight:
+    format: geojson
+    same_selection_parameters_as_query_required: true
+    excluded_query_only_parameters:
+      [orderby, limit, offset, includeallorigins, includeallmagnitudes]
+    exact_request_and_response_bytes_sha256_required: true
+    response_headers_sha256_required_on_response: true
+    successful_200_content_type: application_json_or_parameterized_equivalent
+    parsed_count_must_equal_response_count: true
+    parsed_count_must_equal_attempt_and_acquisition_query_count: true
+    count_gte_20000_action: do_not_issue_query_and_fail_closed
+  bbox_order: [minlongitude, minlatitude, maxlongitude, maxlatitude]
+  local_exact_polygon_filter_required: true
+  bbox_only_membership_forbidden: true
+  starttime_rule: API_inclusive_cutover_then_local_origin_strictly_greater_than_cutover
+  endtime_rule_for_issue_input: API_inclusive_query_end_then_local_origin_lte_query_end
+  query_profiles:
+    issue_input:
+      query_start_utc: frozen_cutover_utc
+      query_end_utc: Q_equals_T_minus_15_minutes
+      local_origin_window: '(cutover,Q]'
+      source_role: prospective_increment
+    mature_truth:
+      query_start_utc: issue_T
+      query_end_utc: T_plus_h
+      local_origin_window: '(T,T+h]'
+      source_role: temporally_independent_mature_truth
+      issue_cutover_or_Q_window_reuse_forbidden: true
+    formal_freeze_full_cohort:
+      query_start_utc: minimum_selected_exposure_issue_T
+      query_end_utc: maximum_selected_exposure_T_plus_h
+      local_origin_window: '(global_target_start,global_target_end]'
+      source_role: formal_freeze_full_cohort
+      exactly_one_query_response: true
+      all_exposure_windows_derived_locally_from_this_response: true
+    truth_revision:
+      remote_query_forbidden: true
+      derivation_source: formal_freeze_full_cohort_single_response
+  query_count_preflight_required: true
+  query_count_gte_limit_action: fail_closed_without_dynamic_partition
+  returned_feature_count_gte_limit_action: fail_closed_without_dynamic_partition
+  dynamic_query_partitioning_forbidden: true
+  allowed_success_http_statuses: [200, 204]
+  http_204_semantics: legitimate_zero_event_success_with_empty_body_and_zero_rows
+  captured_response_headers:
+    - date
+    - etag
+    - last-modified
+    - content-type
+    - content-length
+  successful_200_content_type: application_json_or_parameterized_equivalent
+  successful_200_body: parseable_GeoJSON_FeatureCollection
+  successful_200_geojson_parse_verified: true
+  successful_204_body_byte_count: 0
+  successful_204_query_count_feature_count_and_row_counts: 0
+  successful_204_geojson_parse_verified: false
+  missing_optional_header_action: record_null
+  raw_response_bytes_sha256_and_count_required: true
+  local_model_magnitude_eligibility: magnitude_gte_4.0
+  local_truth_magnitude_filter: 5.0_lte_preferred_mag_lt_6.0
+  normalization_schema_and_code_sha256_required: true
+  deduplication_config_and_code_sha256_required: true
+  normalized_and_deduplicated_rows_sha256_and_count_required: true
+  first_seen:
+    field: first_seen_at_utc
+    rule: first_sealed_snapshot_fetch_completed_at_utc
+    origin_time_as_first_seen_forbidden: true
+    provider_updated_as_first_seen_forbidden: true
+    backdating_forbidden: true
+  deduplication:
+    graph_nodes: preferred_feature_id_and_associated_ids
+    graph_edge_rule: identifiers_cooccur_in_one_feature
+    component_rule: connected_components
+    same_identifier_revision_selection:
+      primary: maximum_provider_updated
+      tie_break: minimum_UTF8_raw_feature_bytes_sha256
+    cutover_cross_source_rule:
+      maximum_time_delta_seconds: 300
+      maximum_distance_km: 50
+      maximum_magnitude_delta: 0.5
+      matched_anchor: frozen_local_baseline
+      matched_comcat_event_counted_again: false
+      candidate_pairs_require_all_three_thresholds: true
+      missing_or_nonfinite_magnitude_action: not_a_candidate_pair
+      distance_implementation: pyproj.Geod_ellps_WGS84
+      distance_comparison_absolute_tolerance_m: 1.0e-6
+      assignment_algorithm: deterministic_greedy_one_to_one
+      candidate_order:
+        - absolute_origin_time_delta_ascending
+        - WGS84_geodesic_distance_ascending
+        - absolute_magnitude_delta_ascending
+        - unsigned_UTF8_comcat_event_id_ascending
+        - unsigned_UTF8_local_event_id_ascending
+      used_local_or_comcat_event_cannot_match_again: true
+    policy_frozen_before_real_issue: true
+  revision:
+    issue_model_uses_only_version_available_in_that_issue_snapshot: true
+    later_revision_backfill_into_prior_issue_forbidden: true
+    prior_prediction_rewrite_forbidden: true
+  coverage_diagnostics:
+    recorded_for_interpretation: true
+    arbitrary_China_M4_coverage_threshold_forbidden: true
+    target_conditioned_source_switch_forbidden: true
+    effect_conditioned_source_switch_or_threshold_change_forbidden: true
+    http_200_or_schema_identity_alone_does_not_prove_scientific_continuity: true
+    official_status_or_target_blind_evidence_confirmed_outage_product_change_or_partial_response:
+      action: missed_issue_or_pause_before_effect_open
+      evidence_identity_and_time_must_be_recorded: true
+      backfill_forbidden: true
+
+remote_timestamp:
+  mechanism: RFC3161
+  digest_algorithm: SHA256
+  authority_order:
+    - http://timestamp.digicert.com
+    - http://timestamp.sectigo.com
+  method: POST
+  request_content_type: application/timestamp-query
+  response_content_type: application/timestamp-reply
+  request:
+    message_imprint_digest: SHA256
+    nonce_required: true
+    certReq: true
+  trusted_registry:
+    profile: stage2p_timestamp_trust_registry_v1
+    bootstrap:
+      frozen_by_verified_protocol_tag_before_TargetCohortDefinition: true
+      record_supplied_roots_policies_or_authority_mapping_forbidden: true
+      cohort_fields_must_repeat_external_registry_constants: true
+      future_rotation_requires_target_blind_new_protocol_tag_and_future_valid_from: true
+    verification_level: offline_signature_path_to_protocol_pinned_anchor_without_revocation
+    revocation:
+      evaluated: false
+      full_trust_chain_or_current_non_revocation_claim_forbidden: true
+      residual_risk: signer_or_CA_revocation_after_pinned_protocol_release_is_not_detected
+    token_contract:
+      message_imprint_digest_oid: 2.16.840.1.101.3.4.2.1
+      request_nonce_must_equal_TSTInfo_nonce: true
+      certReq_must_be_true: true
+      allowed_signed_data_digest_algorithm_oids:
+        - 2.16.840.1.101.3.4.2.1
+        - 2.16.840.1.101.3.4.2.2
+      allowed_signer_signature_algorithm_oids:
+        - 1.2.840.113549.1.1.1
+      RSA_PSS_allowed: false
+      signed_attributes_message_digest_and_content_type_required: true
+      TSTInfo_content_type_oid: 1.2.840.113549.1.9.16.1.4
+    certificate_path:
+      token_must_embed_signer_and_intermediate_path_to_exact_pinned_anchor: true
+      leaf_or_intermediate_certificate_pinning: false
+      deterministic_path_selection: >-
+        exact_issuer_subject_match_then_signature_verification_then_shortest
+        _path_then_unsigned_DER_sha256_ascending
+      every_certificate_valid_at_genTime: true
+      signer_basicConstraints_CA_false_required: true
+      signer_extendedKeyUsage_exactly_timeStamping_required: true
+      signer_keyUsage_digitalSignature_required: true
+      intermediate_basicConstraints_CA_true_required: true
+      intermediate_keyUsage_keyCertSign_required: true
+      anchor_exact_DER_sha256_required: true
+    authorities:
+      - attempt_index: 0
+        authority_url: http://timestamp.digicert.com
+        allowed_TSTInfo_policy_oids:
+          - 2.16.840.1.114412.7.1
+        pinned_anchor:
+          subject: DigiCert_Trusted_Root_G4_cross_certificate
+          DER_sha256: 33846b545a49c9be4903c60e01713c1bd4e4ef31ea65cd95d69e62794f30b941
+          DER_base64: MIIFjTCCBHWgAwIBAgIQDpsYjvnQLefv21DiCEAYWjANBgkqhkiG9w0BAQwFADBlMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSQwIgYDVQQDExtEaWdpQ2VydCBBc3N1cmVkIElEIFJvb3QgQ0EwHhcNMjIwODAxMDAwMDAwWhcNMzExMTA5MjM1OTU5WjBiMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSEwHwYDVQQDExhEaWdpQ2VydCBUcnVzdGVkIFJvb3QgRzQwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC/5pBzaN675F1KPDAiMGkz7MKnJS7JIT3yithZwuEppz1Yq3aaza57G4QNxDAf8xukOBbrVsaXbR2rsnnyyhHS5F/WBTxSD1Ifxp4VpX6+n6lXFllVcq9ok3DCsrp1mWpzMpTREEQQLt+C8weE5nQ7bXHiLQwb7iDVySAdYyktzuxeTsiT+CFhmzTrBcZe7FsavOvJz82sNEBfsXpm7nfISKhmV1efVFiODCu3T6cw2Vbuyntd463JT17lNecxy9qTXtyOj4DatpGYQJB5w3jHtrHEtWoYOAMQjdjUN6QuBX2I9YI+EJFwq1WCQTLX2wRzKm6RAXwhTNS8rhsDdV14Ztk6MUSaM0C/CNdaSaTC5qmgZ92kJ7yhTzm1EVgX9yRcRo9k98FpiHaYdj1ZXUJ2h4mXaXpI8OCiEhtmmnTK3kse5w5jrubU75KSOp493ADkRSWJtppEGSt+wJS00mFt6zPZxd9LBADMfRyVw4/3IbKyEbe7f/LVjHAsQWCqsWMYRJUadmJ+9oCw++hkpjPRiQfhvbfmQ6QYuKZ3AeEPlAwhHbJUKSWJbOUOUlFHdL4mrLZBdd56rF+NP8m800ERElvlEFDrMcXKchYiCd98THU/Y+whX8QgUWtvsauGi0/C1kVfnSD8oR7FwI+isX4KJpn15GkvmB0t9dmpsh3lGwIDAQABo4IBOjCCATYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQU7NfjgtJxXWRM3y5nP+e6mK4cD08wHwYDVR0jBBgwFoAUReuir/SSy4IxLVGLp6chnfNtyA8wDgYDVR0PAQH/BAQDAgGGMHkGCCsGAQUFBwEBBG0wazAkBggrBgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMEMGCCsGAQUFBzAChjdodHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vRGlnaUNlcnRBc3N1cmVkSURSb290Q0EuY3J0MEUGA1UdHwQ+MDwwOqA4oDaGNGh0dHA6Ly9jcmwzLmRpZ2ljZXJ0LmNvbS9EaWdpQ2VydEFzc3VyZWRJRFJvb3RDQS5jcmwwEQYDVR0gBAowCDAGBgRVHSAAMA0GCSqGSIb3DQEBDAUAA4IBAQBwoL9DXFXnOF+go3QbPbYW1/e/Vwe9mqyhhyzshV6pGrsi+IcaaVQi7aSId229GhT0E0p6Ly23OO/0/4C5+KH38nLeJLxSA8hO0Cre+i1Wz/n096wwepqLsl7Uz9FDRJtDIeuWcqFItJnLnU+nBgMTdydE1Od/6Fmo8L8vC6bp8jQ87PcDx4eo0kxAGTVGamlUsLihVo7spNU96LHc/RzY9HdaXFSMb++hUD38dglohJ9vytsgjTVgHAIDyyCwrFigDkBjxZgiwbJZ9VVrzyerbHbObyMt9H5xaiNrIv8SuFQtJ37YOtnwtoeW/VvRXKwYw02fc7cBqZ9Xql4o4rmU
+      - attempt_index: 1
+        authority_url: http://timestamp.sectigo.com
+        allowed_TSTInfo_policy_oids:
+          - 1.3.6.1.4.1.6449.2.1.1
+        pinned_anchor:
+          subject: Sectigo_Public_Time_Stamping_Root_R46_cross_certificate
+          DER_sha256: b53ac15cc1afb6e2ac06828f555bb3bf5bad8b2bac1733ce4cb7aafe729356de
+          DER_base64: MIIGgjCCBGqgAwIBAgIQNsKwvXwbOuejs902y8l1aDANBgkqhkiG9w0BAQwFADCBiDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCk5ldyBKZXJzZXkxFDASBgNVBAcTC0plcnNleSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxLjAsBgNVBAMTJVVTRVJUcnVzdCBSU0EgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwHhcNMjEwMzIyMDAwMDAwWhcNMzgwMTE4MjM1OTU5WjBXMQswCQYDVQQGEwJHQjEYMBYGA1UEChMPU2VjdGlnbyBMaW1pdGVkMS4wLAYDVQQDEyVTZWN0aWdvIFB1YmxpYyBUaW1lIFN0YW1waW5nIFJvb3QgUjQ2MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAiJ3YuUVnnR3d6LkmgZpUVMB8SQWbzFoVD9mUEES0QUCBdxSZqdTkdizICFNeINCSJS+lV1ipnW5ihkQyC0cRLWXUJzodqpnMRs46npiJPHrfLBOifjfhpdXJ2aHHsPHggGsCi7uE0awqKggE/LkYw3sqaBia67h/3awoqNvGqiFRJ+OTWYmUCO2GAXsePHi+/JUNAax3kpqstbl3vcTdOGhtKShvZIvjwulRH87rbukNyHGWX5tNK/WABKf+Gnoi4cmisS7oSimgHUI0Wn/4elNd40BFdSZ1EwpuddZ+Wr7+Dfo0lcHflm/FDDrOJ3rWqauUP8hsokDoI7D/yUVI9DAE/WK3Jl3C4LKwIpn1mNzMyptRwsXKrop06m7NUNHdlTDEMovXAIDGAvYynPt5lutv8lZeI5w3MOlCybAZDpK3Dy1MKo+6aEtE9vtiTMzz/o2dYfdP0KWZwZIXbYsTIlg1YIetCpi5s14qiXOpRsKqFKqav9R1R5vj3NgevsAsvxsAnI8Oa5s2oy25qhsoBIGo/zi6GpxFj+mOdh35Xn91y72J4RGOJEoqzEIbW3q0b2iPuWLA911cRxgY5SJYubvjay3nSMbBPPFsyl6mY4/WYucmyS9lo3l7jk27MAe145GWxK4O3m3gEFEIkv7kRmefDR7Oe2T1HxAnICQvr9sCAwEAAaOCARYwggESMB8GA1UdIwQYMBaAFFN5v1qqK0rPVIDh2JvAnfKyA2bLMB0GA1UdDgQWBBT2d2rdP/0BE/8WoWyCAi/QCj0UJTAOBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zATBgNVHSUEDDAKBggrBgEFBQcDCDARBgNVHSAECjAIMAYGBFUdIAAwUAYDVR0fBEkwRzBFoEOgQYY/aHR0cDovL2NybC51c2VydHJ1c3QuY29tL1VTRVJUcnVzdFJTQUNlcnRpZmljYXRpb25BdXRob3JpdHkuY3JsMDUGCCsGAQUFBwEBBCkwJzAlBggrBgEFBQcwAYYZaHR0cDovL29jc3AudXNlcnRydXN0LmNvbTANBgkqhkiG9w0BAQwFAAOCAgEADr5lQe1oRLjlocXUEYfktzsljOt+2sgXke3Y8UPEooU5y39rAARaAdAxUeiX1ktLJ3+lgxtoLQhn5cFb3GF2SSZRX8ptQ6IvuD3wz/LNHKpQ5nX8hjsDLRhsyeIiJsms9yAWnvdYOdEMq1W61KE9JlBkB20XBee6JaXx4UBErc+YuoSb1SxVf7nkNtUjPfcxuFtrQdRMRi/fInV/AobE8Gw/8yBMQKKaHt5eia8ybT8Y/Ffa6HAJyz9gvEOcF1VWXG8OMeM7Vy7Bs6mSIkYeYtddU1ux1dQLbEGur18ut97wgGwDiGinCwKPyFO7ApcmVJOtlw9FVJxw/mL1TbyBns4zOgkaXFnnfzg4qbSvnrwyj1NiurMp4pmAWjR+Pb/SIduPnmFzbSN/G8reZCL4fvGlvPFk4Uab/JVCSmj59+/mB2Gn6G/UYOy8k60mKcmaAZsEVkhOFuoj4we8CYyaR9vd9PGZKSinaZIkvVjbH/3nlLb0a7SBIkiRzfPfS9T+JesylbHa1LtRV9U/7m0q7Ma2CQ/t392ioOssXW7oKLdOmMBl14suVFBmbzrt5V5cQPnwtd3UOTpS9oCG+ZZheiIvPgkDmA8FzPsnfXW5qHELB43ET7HHFHeRPRYrMBKjkb8/IN7Po0d0hQoF4TeMM+zYAJzoKQnVKOLg8pZVPT8=
+    registry_sha256: 28f1cb96182b7f2c731433157da80c86b99230d5e617bc2e8ce2fd5e99afbf56
+  trusted_registry_identity:
+    registry_sha256_rule: >-
+      SHA256_of_seismoflux_canonical_json_v1_trusted_registry_excluding
+      _exactly_registry_sha256
+    trust_anchor_bundle_sha256_rule: >-
+      SHA256_of_seismoflux_canonical_json_v1_authority_ordered_array_of
+      _authority_url_plus_exact_pinned_anchor_object
+    allowed_policy_oid_set_sha256_rule: >-
+      SHA256_of_seismoflux_canonical_json_v1_authority_ordered_array_of
+      _authority_url_plus_allowed_TSTInfo_policy_oids
+    tsa_authority_identity_manifest_sha256_rule: >-
+      SHA256_of_seismoflux_canonical_json_v1_exact_authorities_array
+    expected:
+      registry_sha256: 28f1cb96182b7f2c731433157da80c86b99230d5e617bc2e8ce2fd5e99afbf56
+      trust_anchor_bundle_sha256: 3f56fba3d8e583cffc5d9e9f5201672ef8d86c1ea2f72c443fca8d0ce357abf9
+      allowed_policy_oid_set_sha256: aeed57ffa0ec23462ba6c6687eac2c9e61f200d8c409d3fc681bcd82533bf68d
+      tsa_authority_identity_manifest_sha256: 35f2ab134ecc6a9a258db79bfc9f941d3bc5c9fed2cc036a6d1a6056ca300022
+  attempt_policy:
+    every_attempt_recorded: true
+    every_attempt_has_nonnull_attempt_completed_at_utc: true
+    every_attempt_binds_attempt_preimage_sha256: true
+    selection: first_offline_trust_path_valid_response_with_genTime_before_record_specific_deadline
+    stop_after_first_valid: true
+    all_authorities_failed_action: fail_closed_record_not_installed
+  preimage_profile: stage2p_rfc3161_core_v1
+  preimage: SHA256_of_seismoflux_canonical_json_v1_record_omitting_exactly_the_three_top_level_fields_timestamp_attempt_evidence_remote_timestamp_content_sha256
+  nested_RFC3161_proof_or_token_fields_forbidden: true
+  proof_preimage_sha256_must_equal_recomputed_record_core_sha256: true
+  every_successful_record_attempt_preimage_must_equal_proof_preimage: true
+  selected_response_sha256_must_equal_selected_attempt_response_sha256: true
+  authority_and_trust_chain_identity_required: true
+  verifier_implementation: >-
+    python_cryptography_49_0_0_plus_asn1crypto_1_5_1_no_system_openssl_cli
+  verification_code_sha256_bound_in_cohort: true
+  trust_anchor_bundle_sha256_bound_in_cohort: true
+  allowed_policy_oid_set_sha256_bound_in_cohort: true
+  TSA_authority_identity_manifest_sha256_bound_in_cohort: true
+  attachment_install_contract_sha256_bound_in_cohort: true
+  attachment_paths:
+    request: data/interim/stage2p/timestamp_attachments/{record_type}/{preimage_sha256}/{attempt_index:01d}.tsq
+    response: data/interim/stage2p/timestamp_attachments/{record_type}/{preimage_sha256}/{attempt_index:01d}.tsr
+    create_only_and_reopen_verify: true
+  timestamp_token_bytes_sha256_required: true
+  TSA_policy_OID_required: true
+  timestamping_EKU_required: true
+  message_imprint_must_equal_recomputed_preimage_sha256: true
+  nonce_must_equal_request_nonce: true
+  selected_attempt_position_and_response_sha256_must_match_proof: true
+  second_authority_allowed_only_after_first_verifiable_failure: true
+  all_attempt_time_order: >-
+    record_core_frozen_at_utc_lte_request_started_at_utc_lte
+    _attempt_completed_at_utc_lte_timestamp_deadline_utc
+  response_attempt_completion_rule: >-
+    response_received_at_utc_equals_attempt_completed_at_utc_for_every_response_outcome;
+    network_failure_has_null_response_received_at_utc_and_nonnull_attempt_completed_at_utc
+  authority_sequence_time_order: >-
+    attempt_1_request_started_at_utc_gte_attempt_0_attempt_completed_at_utc
+  deadline_and_attempt_checks_apply_when_remote_timestamp_is_null: true
+  signed_time_must_be_before_record_specific_deadline: true
+  record_specific_deadline_rule:
+    TargetCohortDefinition: timestamp_deadline_utc_equals_valid_from_utc
+    IssueInputSnapshotRecord: >-
+      candidate_timestamp_deadline_utc_equals_issue_time_T_minus_5_minutes
+    MatureTruthSnapshotRecord: >-
+      timestamp_deadline_utc_equals_record_core_frozen_at_utc_plus_5_minutes
+    TruthRevisionRecord: >-
+      timestamp_deadline_utc_equals_record_core_frozen_at_utc_plus_5_minutes
+    EvaluationFreezeRecord: >-
+      timestamp_deadline_utc_equals_record_core_frozen_at_utc_plus_5_minutes
+  selected_attempt_time_order: >-
+    record_core_frozen_at_utc_lte_request_started_at_utc_lte_genTime_utc_lte
+    _response_received_at_utc_equals_attempt_completed_at_utc_lte_timestamp_deadline_utc
+  local_clock_alone_forbidden: true
+  http_date_alone_forbidden: true
+  git_author_or_committer_time_alone_forbidden: true
+  invalid_or_unverifiable_issue_action: missed_issue_no_backfill
+  missed_issue_audit:
+    preimage_profile: stage2p_missed_audit_rfc3161_core_v1
+    preimage: >-
+      SHA256_of_seismoflux_canonical_json_v1_record_omitting_exactly_the_three
+      _top_level_fields_missed_audit_timestamp_attempt_evidence
+      _missed_audit_remote_timestamp_content_sha256
+    candidate_deadline_rule: T_minus_5_minutes
+    final_missed_record_core_freeze_deadline_rule: T_minus_4_minutes
+    audit_timestamp_deadline_rule: issue_T
+    selected_genTime_must_be_strictly_before_T: true
+    audit_attempts_are_distinct_from_candidate_attempts: true
+    audit_failure_action: scientific_continuity_pause_record_not_installed
+    no_formal_issue_or_later_cohort_use_after_audit_failure: true
+
+issue_input_snapshot:
+  fetch_started_at_or_after_query_end_required: true
+  fetch_completed_before_issue_T_required: true
+  seal_completed_before_issue_T_required: true
+  remote_timestamp_before_issue_T_required: true
+  candidate_ready_or_failure_decision_deadline_rule: T_minus_5_minutes
+  query_end_must_equal_T_minus_15_minutes: true
+  stale_if_any_required_time_or_identity_check_fails: true
+  previous_issue_record_sha256_required: true
+  source_snapshot_and_prediction_seal_required_for_on_time: true
+  missed_issue_installs_source_snapshot_or_prediction: false
+  prediction_installed_true_only_for_on_time: true
+  timestamp_failure_candidate_contract:
+    failed_candidate_on_time_core_required: true
+    candidate_profile: stage2p_failed_candidate_on_time_core_v1
+    candidate_core_and_artifact_sha256_must_equal: true
+    candidate_binds_issue_source_snapshot_prediction_seal_core_time_and_deadline_T_minus_5: true
+    all_TSA_attempt_preimage_sha256_equal_candidate_core_sha256: true
+    prediction_generated: true
+    prediction_installed: false
+    final_missed_record_core_is_audit_record_not_TSA_preimage: true
+    candidate_core_bytes_create_only_local_restricted: true
+  pre_candidate_failure_contract:
+    failed_candidate_on_time_core: null
+    timestamp_attempt_evidence: []
+    prediction_generated: false
+    prediction_installed: false
+  missed_issue_records_all_fetch_and_RFC3161_attempt_evidence: true
+  composite_snapshot:
+    P0:
+      historical_component: frozen_local_baseline_origin_lte_cutover
+      prospective_component: comcat_origin_gt_cutover_and_lte_query_end
+      available_and_first_seen_rule: strictly_before_issue_T
+      rebuilt_each_issue: true
+    R30:
+      origin_window: '(query_end-30d,query_end]'
+      exact_duration_days: 30
+      origin_lte_T_required: true
+      available_and_first_seen_rule: strictly_before_issue_T
+      source: usgs_anss_comcat_fdsn_event_api_v1
+    RP30:
+      origin_window: '(query_end-60d,query_end-30d]'
+      exact_duration_days: 30
+      available_and_first_seen_rule: strictly_before_issue_T
+      source: usgs_anss_comcat_fdsn_event_api_v1
+  washout:
+    R30_and_RP30_must_be_strictly_after_cutover: true
+    minimum_days_after_cutover: 60
+    enforced_by_first_issue_not_before: '2026-09-10T00:00:00+08:00'
+
+models:
+  support_id: local-support-f6816ab6c6581306
+  support_manifest_path: data/manifests/background_local_support_manifest.json
+  support_manifest_sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+  support_snapshot_id: final_validation
+  support_mask_derivation: >-
+    ordered_fixed_500km_cells_status_not_equal_unsupported_from_final_validation
+  support_mask_sha256: 5e3b2e75a862fcbe462c73cd33d5b7bac4a7b97b2b48467a02bfa50c9e96a488
+  unsupported_cell_set_sha256: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
+  supported_area_km2: 9415305.754432771
+  supported_cell_count: 61
+  unsupported_cell_count: 0
+  training_start_utc: '1970-01-01T00:00:00Z'
+  local_Mc: 4.0
+  gaussian_kde_bandwidth_km: 75.0
+  support_and_boundary_normalization_frozen: true
+  training_events_scope: supported_cells_only
+  density_normalization_scope: frozen_G1_LS_support_only
+  all_three_models_share_exact_support_mask: true
+  local_high_Mc_changes_only_that_fixed_cell: true
+  spatial_contract:
+    study_area_file_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+    projected_geometry_sha256: c5074034de71fd24ff2d9e0277c49389436e41b720a82fdb45f620b67b2c7231
+    equal_area_crs: >-
+      +proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m
+      +no_defs +type=crs
+    quadrature_grid_family_km: [50.0, 25.0, 12.5]
+    grid_origin_m: [0.0, 0.0]
+    cell_bounds: left_bottom_closed_right_top_open
+    cell_id_rule: frozen_row_column_identity
+    representative_point: shapely_point_on_surface_of_exact_support_clipped_geometry
+    area_source: exact_support_clipped_cell_area
+    operational_mass: normalized_12_5km_mass_aggregated_to_aligned_25km_parent
+    fine_to_parent_rule: floor_child_row_and_column_div_2
+    normalized_mass_absolute_tolerance: 1.0e-12
+    primary_convergence_pair_km: [25.0, 12.5]
+    diagnostic_convergence_pair_km: [50.0, 25.0]
+    convergence_relative_expected_count_max: 0.02
+    convergence_density_l1_max: 0.05
+  P0: causal_long_term_75km_KDE_rebuilt_each_issue_from_composite_T_snapshot
+  P1:
+    formula: 0.5_P0_plus_0.5_R30
+    P0_weight: 0.5
+    R30_weight: 0.5
+    empty_R30_action: byte_identical_to_P0
+  PP:
+    formula: 0.5_P0_plus_0.5_RP30
+    P0_weight: 0.5
+    RP30_weight: 0.5
+    empty_RP30_action: byte_identical_to_P0
+  weights_selected_from_target_scores: false
+  weights_are_component_importance: false
+  interpretation: conditional_relative_spatial_intensity_and_rank_not_absolute_probability
+
+target_cohort:
+  definition_frozen_before_first_issue: true
+  definition_contains_future_event_ids_coordinates_or_counts: false
+  realized_target_set_bound_only_by_evaluation_freeze: true
+  source: usgs_anss_comcat_fdsn_event_api_v1
+  source_fetch_independent_from_issue_input_fetch: true
+  horizons_days: [7, 30, 90]
+  window_rule: '(T,T+h]'
+  primary_magnitude:
+    lower_inclusive: 5.0
+    upper_exclusive: 6.0
+    label: M5_6
+  M6plus_role: exploratory_never_satisfies_primary_sample_gate
+  maturity:
+    late_report_wait_days: 30
+    due_rule: T_plus_h_plus_30_days
+    retry_offsets_hours: [0, 6, 24, 72, 168]
+    retry_in_order: true
+    each_retry_time_order: >-
+      scheduled_lte_count_start_lte_count_complete_lte_query_start_lte_query_complete
+    next_retry_count_start_gte_previous_retry_query_complete: true
+    first_complete_success_selected_and_later_retries_forbidden: true
+    all_five_attempts_required_only_when_every_attempt_fails: true
+    all_retries_failed_action: truth_snapshot_unavailable
+  truth_artifacts_append_only:
+    raw: true
+    normalized: true
+    deduplicated: true
+    revision: true
+  truth_snapshot_must_not_contain_model_scores_hits_or_effects: true
+  formal_freeze_revision_policy:
+    preferred_magnitude_field: preferred_mag_numeric
+    magnitude_must_be_finite: true
+    missing_or_nonfinite_magnitude_action: exclude
+    M5_6_membership_rule: 5.0_lte_preferred_mag_lt_6.0
+    location_basis: preferred_location_in_same_single_formal_freeze_response
+    identity_basis: preferred_and_associated_ids_in_same_single_formal_freeze_response
+    origin_time_field: preferred_origin_time_utc
+    origin_time_basis: preferred_origin_in_same_single_formal_freeze_response
+    origin_time_window_membership_rule: strict_T_lt_origin_time_lte_T_plus_h
+    origin_time_cross_boundary_change_action: append_TruthRevisionRecord_and_reassign_membership
+    revision_cutoff: evaluation_freeze_source_snapshot
+  formal_freeze_source_manifest:
+    single_manifest_per_confirmatory_input_freeze: true
+    exactly_one_single_response_freeze_attempt_per_actual_input_freeze_checkpoint: true
+    checkpoint_retry_replacement_or_alternate_snapshot_forbidden: true
+    maximum_actual_formal_freeze_checkpoints_across_52_and_104_looks: 2
+    104_checkpoint_allowed_only_after_52_basic_gate_not_met_without_effect_rows_opened: true
+    52_manifest_and_revisions_remain_append_only_when_104_manifest_is_created: true
+    evaluation_scope_sha256_binds: >-
+      ordered_issue_prediction_seals_selected_exposure_manifest_and
+      _truth_availability_manifest
+    global_query_interval_rule: >-
+      start_equals_minimum_selected_T_and_end_equals_maximum_selected_T_plus_h
+    query_batch_count: 1
+    provider_native_catalog_version_claimed: false
+    source_snapshot_identity_exact_preimage_fields:
+      profile: stage2p_formal_freeze_source_snapshot_v1
+      ordered_fields:
+        - profile
+        - source_id
+        - canonical_query_request_sha256
+        - response_headers_sha256
+        - raw_response_sha256
+        - response_content_type
+        - response_body_byte_count
+        - http_status
+        - fetch_started_at_utc
+        - fetch_completed_at_utc
+      canonical_query_request_sha256_source: source_acquisition.request_identity_sha256
+      raw_response_sha256_source: source_acquisition.raw_response.file_sha256
+      excluded_fields: [source_snapshot_sha256]
+    count_preflight_must_complete_before_query_starts: true
+    count_query_and_parsed_feature_counts_must_be_equal: true
+    count_gte_20000_action: evidence_insufficient_before_effect_rows_open
+    dynamic_partition_or_multiple_query_response_stitching_forbidden: true
+    ordered_request_response_header_and_raw_response_lengths: 1
+    all_windows_derived_locally_after_single_response_is_frozen: true
+    global_deduplication_before_window_assignment: true
+    binds_normalized_deduplicated_preferred_window_and_binding_rows: true
+    derived_table_registry:
+      profile: stage2p_formal_freeze_table_registry_v1
+      serialization:
+        profile: seismoflux_canonical_jsonl_v1
+        encoding: UTF-8
+        byte_order_mark: forbidden
+        row_encoding: seismoflux_canonical_json_v1
+        row_separator_hex: 0a
+        nonempty_file_final_separator_required: true
+        empty_table_file_bytes: empty
+        JSON_object_per_row_required: true
+        duplicate_object_keys_forbidden: true
+        NaN_positive_or_negative_infinity_forbidden: true
+        timestamp_encoding: exact_pattern_declared_by_each_referenced_row_schema
+        unicode_normalization: none_preserve_decoded_code_points
+      identity:
+        byte_count: exact_serialized_file_byte_length
+        file_sha256: SHA256_of_exact_serialized_file_bytes
+        artifact_id: equals_file_sha256
+        row_count: exact_number_of_JSONL_rows
+        content_sha256: >-
+          SHA256_of_seismoflux_canonical_json_v1_ordered_array_of_strictly
+          _parsed_and_schema_validated_semantic_rows
+        schema_sha256: >-
+          SHA256_of_seismoflux_canonical_json_v1_raw_JSON_object_obtained_by
+          _JSON_Pointer_from_the_strictly_parsed_full_record_schema_with_internal
+          _$ref_strings_preserved_and_not_dereferenced
+        sort_order_sha256: >-
+          SHA256_of_seismoflux_canonical_json_v1_exact_sort_spec_object
+        every_row_sha256: >-
+          SHA256_of_seismoflux_canonical_json_v1_row_omitting_exactly_the
+          _table_specific_self_hash_field
+      tables:
+        normalized_rows:
+          table_role: formal_normalized_rows
+          row_schema_ref: '#/$defs/FormalNormalizedRow'
+          expected_row_schema_sha256: edbc68907cfc2b4c321b78c11a254b32b7720c19e34211796df2c29f8ba96dd2
+          row_self_hash_field: normalized_row_sha256
+          ordered_fields:
+            - normalized_row_sha256
+            - raw_feature_index
+            - raw_feature_sha256
+            - source_feature_id
+            - associated_event_ids
+            - provider_updated_at_utc
+            - preferred_origin_time_utc
+            - preferred_longitude_deg
+            - preferred_latitude_deg
+            - preferred_mag_numeric
+          row_inclusion: exactly_one_row_for_every_GeoJSON_feature_in_source_array
+          primary_key: [raw_feature_index]
+          unique_keys:
+            - [normalized_row_sha256]
+            - [source_feature_id, provider_updated_at_utc, raw_feature_sha256]
+          critical_field_invalid_action: failed_local_derivation_or_freeze
+          critical_fields:
+            - source_feature_id
+            - associated_event_ids
+            - provider_updated_at_utc
+            - preferred_origin_time_utc
+            - preferred_longitude_deg
+            - preferred_latitude_deg
+          only_nullable_scientific_field: preferred_mag_numeric
+          missing_or_nonfinite_preferred_magnitude_action: normalize_to_null_then_exclude_from_preferred_field_rows
+          array_order:
+            associated_event_ids: unsigned_UTF8_ascending
+          associated_event_ids_must_include_source_feature_id: true
+          raw_feature_sha256: >-
+            SHA256_of_seismoflux_canonical_json_v1_decoded_GeoJSON_feature
+          sort_profile: stage2p_formal_normalized_rows_sort_v1
+          expected_sort_order_sha256: 4e81c8edb6cd405b242e4ba40ee578b8985160ef92f584847587d448cebe3f6d
+          sort_spec:
+            keys:
+              - field: source_feature_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: provider_updated_at_utc
+                direction: chronological_ascending
+                nulls: forbidden
+              - field: raw_feature_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: raw_feature_index
+                direction: ascending
+                nulls: forbidden
+            tie_breaker: normalized_row_sha256_unsigned_UTF8_ascending
+            duplicate_primary_key_action: fail_closed
+        deduplicated_rows:
+          table_role: formal_deduplicated_rows
+          row_schema_ref: '#/$defs/FormalDeduplicatedRow'
+          expected_row_schema_sha256: 201be88ebfd8cf21501bf2a195dde9e79d4832a30e8ac33367cbc2700b169342
+          row_self_hash_field: deduplicated_row_sha256
+          ordered_fields:
+            - deduplicated_row_sha256
+            - canonical_event_id
+            - identity_component_sha256
+            - associated_event_ids
+            - member_normalized_row_sha256s
+            - selected_normalized_row_sha256
+            - provider_updated_at_utc
+            - preferred_origin_time_utc
+            - preferred_longitude_deg
+            - preferred_latitude_deg
+            - preferred_mag_numeric
+          row_inclusion: >-
+            exactly_one_row_per_global_connected_component_with_every_normalized
+            _row_assigned_exactly_once
+          primary_key: [identity_component_sha256]
+          unique_keys:
+            - [deduplicated_row_sha256]
+            - [canonical_event_id]
+            - [selected_normalized_row_sha256]
+          canonical_event_id_rule: minimum_unsigned_UTF8_associated_event_id_in_component
+          identity_component_sha256_rule: >-
+            SHA256_of_UTF8_stage2p_comcat_identity_component_v1_NUL_then
+            _seismoflux_canonical_json_v1_sorted_unique_component_associated_event_ids
+          array_order:
+            member_normalized_row_sha256s: unsigned_UTF8_ascending
+            associated_event_ids: unsigned_UTF8_ascending
+          selected_row_rule:
+            primary: maximum_provider_updated_at_utc
+            tie_break: minimum_raw_feature_sha256_unsigned_UTF8
+          selected_preferred_fields_must_be_copied_exactly: true
+          every_normalized_row_assigned_to_exactly_one_component: true
+          sort_profile: stage2p_formal_deduplicated_rows_sort_v1
+          expected_sort_order_sha256: 671f4ad18357c0714668ad5f50df093e993c4110f2b0867d3fc0dac9fd0b8432
+          sort_spec:
+            keys:
+              - field: canonical_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: identity_component_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+            tie_breaker: deduplicated_row_sha256_unsigned_UTF8_ascending
+            duplicate_primary_key_action: fail_closed
+        preferred_field_rows:
+          table_role: formal_preferred_field_rows
+          row_schema_ref: '#/$defs/FormalPreferredFieldRow'
+          expected_row_schema_sha256: 6ce072a6511237c69f86c6134e7499e1726a556b5f74cbfa29ff541a2164bae9
+          row_self_hash_field: preferred_field_row_sha256
+          ordered_fields:
+            - preferred_field_row_sha256
+            - canonical_event_id
+            - identity_component_sha256
+            - associated_event_ids
+            - source_deduplicated_row_sha256
+            - provider_updated_at_utc
+            - preferred_origin_time_utc
+            - preferred_longitude_deg
+            - preferred_latitude_deg
+            - preferred_mag_numeric
+            - magnitude_class
+            - full_study_area_member
+            - study_region_identity_sha256
+            - frozen_support_domain_member
+            - support_cell_identity_sha256
+          row_inclusion: exactly_every_deduplicated_row_with_finite_preferred_magnitude
+          primary_key: [identity_component_sha256]
+          unique_keys:
+            - [preferred_field_row_sha256]
+            - [canonical_event_id]
+            - [source_deduplicated_row_sha256]
+          units:
+            preferred_longitude_deg: WGS84_decimal_degrees
+            preferred_latitude_deg: WGS84_decimal_degrees
+            preferred_mag_numeric: provider_preferred_magnitude_numeric
+          array_order:
+            associated_event_ids: unsigned_UTF8_ascending
+          magnitude_class_rule:
+            below_M5: preferred_mag_numeric_lt_5
+            M5_6: 5_lte_preferred_mag_numeric_lt_6
+            M6plus: preferred_mag_numeric_gte_6
+          region_rule: >-
+            full_study_area_member_true_iff_exact_polygon_contains_point_and_then
+            _study_region_identity_sha256_is_exactly_one_frozen_region_else_null
+          support_rule: >-
+            frozen_support_domain_member_true_implies_full_study_area_member_and
+            _exactly_one_support_cell_identity_sha256_else_null
+          sort_profile: stage2p_formal_preferred_field_rows_sort_v1
+          expected_sort_order_sha256: 15a9062a5493b7fc3d222f0af6159229cf3af3562d51f7f74e3bf93a479b22e4
+          sort_spec:
+            keys:
+              - field: canonical_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+            tie_breaker: preferred_field_row_sha256_unsigned_UTF8_ascending
+            duplicate_primary_key_action: fail_closed
+        window_membership_rows:
+          table_role: formal_window_membership_rows
+          row_schema_ref: '#/$defs/FormalWindowMembershipRow'
+          expected_row_schema_sha256: fe868712e58949e802a0aaff59a88ab6f3f78b6b600a8b551adf4f14ea513b1f
+          row_self_hash_field: membership_row_sha256
+          ordered_fields:
+            - membership_row_sha256
+            - issue_id
+            - horizon_days
+            - issue_prediction_seal_sha256
+            - target_start_exclusive_utc
+            - target_end_inclusive_utc
+            - canonical_event_id
+            - preferred_field_row_sha256
+            - magnitude_class
+            - global_target_cluster_identity_sha256
+          row_inclusion: >-
+            exactly_one_row_for_every_preferred_field_row_and_selected_issue_horizon
+            _satisfying_T_lt_preferred_origin_time_lte_T_plus_h_including_below_M5
+            _M6plus_and_outside_study_area_rows
+          primary_key: [issue_id, horizon_days, canonical_event_id]
+          unique_keys:
+            - [membership_row_sha256]
+          all_selected_windows_and_only_selected_windows_recomputed: true
+          cluster_rule: >-
+            global_target_cluster_identity_sha256_nonnull_exactly_for_M5_6_full_study
+            _area_members_and_recomputed_by_the_frozen_30_day_75km_transitive
+            _component_rule_once_over_the_unique_event_union_of_all_selected
+            _exposures_and_all_three_horizons_then_projected_unchanged_to_every
+            _membership_row
+          sort_profile: stage2p_formal_window_membership_rows_sort_v1
+          expected_sort_order_sha256: 681c3d1219690598a203c06d6a305a4261f87c2aeacab2a2e2455b153ddce1ee
+          sort_spec:
+            keys:
+              - field: issue_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: horizon_days
+                direction: numeric_ascending_7_30_90
+                nulls: forbidden
+              - field: canonical_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+            tie_breaker: membership_row_sha256_unsigned_UTF8_ascending
+            duplicate_primary_key_action: fail_closed
+        formal_window_target_bindings:
+          table_role: formal_window_target_binding_rows
+          row_schema_ref: '#/$defs/FormalWindowTargetBindingRow'
+          expected_row_schema_sha256: 3ce9c6e921d27c6e99644880965b260116d5effe933504a270a7db4ea647d1b0
+          row_self_hash_field: binding_row_sha256
+          ordered_fields:
+            - binding_row_sha256
+            - issue_id
+            - horizon_days
+            - issue_prediction_seal_sha256
+            - previous_truth_record_sha256
+            - truth_available
+            - target_start_exclusive_utc
+            - target_end_inclusive_utc
+            - source_snapshot_sha256
+            - formal_preferred_rows_subset_sha256
+            - formal_preferred_row_count
+            - previous_target_set_sha256
+            - formal_target_set
+            - change_status
+            - revision_reasons
+            - added
+            - removed
+            - modified
+          row_inclusion: exactly_one_row_per_selected_issue_and_horizon
+          primary_key: [issue_id, horizon_days]
+          unique_keys:
+            - [binding_row_sha256]
+          array_order:
+            revision_reasons: frozen_revision_reason_order
+          formal_target_set_recomputed_from_window_membership_rows: true
+          change_sets_recomputed_against_previous_truth_target: true
+          sort_profile: stage2p_formal_window_target_binding_rows_sort_v1
+          expected_sort_order_sha256: 2ed09c6be3bed9d7656eea7ee0542eae7e22ad917280c1a89d12771ec93dca37
+          sort_spec:
+            keys:
+              - field: issue_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: horizon_days
+                direction: numeric_ascending
+                nulls: forbidden
+            tie_breaker: binding_row_sha256_unsigned_UTF8_ascending
+            duplicate_primary_key_action: fail_closed
+      scientific_target_projection:
+        row_schema_ref: '#/$defs/FormalScientificTargetRow'
+        expected_row_schema_sha256: 1d7aaef2ab13000af39c532f88b39838eac637cc9207c85c917cf46b8304494e
+        row_self_hash_field: target_row_sha256
+        inclusion: only_M5_6_and_full_study_area_membership_rows
+        ordered_fields:
+          - target_row_sha256
+          - issue_id
+          - horizon_days
+          - canonical_event_id
+          - identity_component_sha256
+          - associated_event_ids
+          - preferred_origin_time_utc
+          - preferred_longitude_deg
+          - preferred_latitude_deg
+          - preferred_mag_numeric
+          - study_region_identity_sha256
+          - frozen_support_domain_member
+          - support_cell_identity_sha256
+        explicitly_excluded_non_scientific_fields:
+          - provider_updated_at_utc
+          - raw_feature_sha256
+          - normalized_row_sha256
+          - deduplicated_row_sha256
+          - preferred_field_row_sha256
+          - membership_row_sha256
+        sort_spec:
+          keys:
+            - field: canonical_event_id
+              direction: unsigned_UTF8_ascending
+              nulls: forbidden
+          tie_breaker: target_row_sha256_unsigned_UTF8_ascending
+        expected_sort_order_sha256: 3576730594ca027678918e02e14de7cb31162dc258cdc8fe35a6d56d76571dac
+        target_set_identity_recomputed:
+          - unique_event_count
+          - ordered_event_ids_sha256
+          - target_rows_content_sha256
+          - region_membership_sha256
+          - target_rows.artifact_id_equals_file_sha256
+          - target_rows.row_count_equals_unique_event_count
+          - target_rows.content_sha256_equals_target_rows_content_sha256
+          - target_rows.role_profile_schema_and_sort_equal_registry
+      target_change_derivation:
+        prior_and_current_target_rows_required_by_content_sha256: true
+        reason_evidence_inputs:
+          - prior_mature_raw_normalized_deduplicated_and_preferred_rows_when_available
+          - current_formal_raw_normalized_deduplicated_and_preferred_rows
+        identity_matching_starts_from_full_observable_alias_rows_not_only_target_rows: true
+        identity_match_graph: associated_event_id_overlap
+        one_to_one_assignment_order:
+          - alias_intersection_count_descending
+          - previous_canonical_event_id_unsigned_UTF8_ascending
+          - current_canonical_event_id_unsigned_UTF8_ascending
+        used_previous_or_current_row_cannot_match_again: true
+        unmatched_current_action:
+          change_set: added
+          reason: current_target_added_prior_not_observed
+        unmatched_previous_action:
+          change_set: removed
+          reason: previous_target_removed_current_not_observed
+        unmatched_reason_cannot_claim_late_magnitude_location_or_origin_cause: true
+        matched_canonical_row_difference_action: modified
+        merge_and_split_reasons_recomputed_from_alias_overlap_components: true
+        added_rows:
+          row_schema_ref: '#/$defs/FormalAddedTargetChangeRow'
+          expected_row_schema_sha256: dc2825ddadcd5e2d9306ec1f09c97712aa2e0e03661e833d3ebc2ca2c95dbdd7
+          sort_spec:
+            keys:
+              - field: current_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: current_target_row_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+          expected_sort_order_sha256: cfc1a0baf554c8ae292326a126d99b243c86dbc19e4a33893bfc58690bffc1fd
+          ordered_event_ids_sha256_rule: >-
+            SHA256_of_seismoflux_canonical_json_v1_ordered_current_event_id_array
+        removed_rows:
+          row_schema_ref: '#/$defs/FormalRemovedTargetChangeRow'
+          expected_row_schema_sha256: 54ad158db41cbc4e6942f450415d0fb46d09b887af36b3922a9b753aab94baed
+          sort_spec:
+            keys:
+              - field: previous_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: previous_target_row_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+          expected_sort_order_sha256: e7cbd266033b6ee6d7e4639e8edc3a1bef6f9141fec8835c0079216f7393c410
+          ordered_event_ids_sha256_rule: >-
+            SHA256_of_seismoflux_canonical_json_v1_ordered_previous_event_id_array
+        modified_rows:
+          row_schema_ref: '#/$defs/FormalModifiedTargetChangeRow'
+          expected_row_schema_sha256: 474d549580dbb150c623346c30d705deef980d91aec927a4b78171b3e7f8775a
+          sort_spec:
+            keys:
+              - field: previous_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: current_event_id
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: previous_target_row_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+              - field: current_target_row_sha256
+                direction: unsigned_UTF8_ascending
+                nulls: forbidden
+          expected_sort_order_sha256: 57133fc7336b9a9be721ad127a9359ba062be0235049ded7bda5358a68bab3b5
+          ordered_event_ids_sha256_rule: >-
+            SHA256_of_seismoflux_canonical_json_v1_ordered_array_of_objects
+            _with_exactly_previous_event_id_and_current_event_id
+          reasons_order:
+            - magnitude_revision
+            - location_revision
+            - origin_time_revision_or_window_boundary_reassignment
+            - identity_revision
+            - dedup_merge
+            - dedup_split
+        ChangeSetIdentity_recomputed_from_exact_rows: true
+        change_rows_content_sha256_rule: >-
+          SHA256_of_seismoflux_canonical_json_v1_exact_rows_sorted_by_each
+          _change_profile_sort_spec
+        ChangeSetIdentity_row_count_equals_exact_row_array_length: true
+      full_cross_table_rebuild:
+        exact_chain: >-
+          raw_response_to_normalized_to_global_deduplicated_to_preferred_fields
+          _to_window_membership_to_formal_window_target_bindings
+        every_stage_recomputed_from_predecessor_and_compared_row_for_row: true
+        downstream_hash_recomputation_does_not_excuse_semantic_row_change: true
+        missing_extra_duplicate_reordered_or_cross_window_row_action: fail_closed
+    snapshot_observed_equals_query_fetch_completed_at_utc: true
+    completed_after_all_local_window_bindings_and_before_revision_derivation: true
+    missing_or_mixed_source_snapshot_action: evidence_insufficient_before_effect_rows_open
+    failure_branch:
+      manifest_and_manifest_sha256: null
+      append_only_failure_evidence_and_sha256_required: true
+      effect_rows_and_targets_opened: false
+      formal_query_failure_statuses:
+        - not_run_no_complete_scope
+        - not_run_scheduled_issue_cap_terminal
+        - failed_count_preflight
+        - failed_count_limit
+        - failed_query_fetch
+        - failed_query_parse_or_count_mismatch
+        - failed_local_derivation_or_freeze
+      scheduled_issue_cap_130_status: not_run_scheduled_issue_cap_terminal
+  formal_window_target_binding:
+    one_row_per_selected_issue_and_horizon: true
+    manifest_hash_inside_row_forbidden_to_avoid_hash_cycle: true
+    source_snapshot_sha256_required: true
+    binds_previous_truth_and_target_hashes: true
+    binds_formal_preferred_subset_and_derived_target_set: true
+    changed_row_requires_append_only_TruthRevisionRecord: true
+    unchanged_row_reuses_previous_truth_only_after_row_level_target_hash_equality_recomputed: true
+    truth_snapshot_unavailable_remains_unavailable: true
+    unavailable_exposure_recovery_or_replacement_forbidden: true
+  truth_revision_local_derivation:
+    remote_query_count_or_acquisition_fields_forbidden: true
+    formal_manifest_source_snapshot_and_binding_row_hashes_required: true
+    revision_observed_equals_manifest_snapshot_observed_at_utc: true
+    time_order: >-
+      manifest_freeze_complete_lte_revision_derive_start_lte_revision_derive_complete
+      _lte_revision_seal_lte_record_core
+    historical_revision_chain_may_reference_different_evaluation_manifests: true
+    current_evaluation_changed_rows_must_reference_current_manifest: true
+    revision_reasons_are_unique_array_in_frozen_order: true
+    revision_reason_order:
+      - current_target_added_prior_not_observed
+      - previous_target_removed_current_not_observed
+      - magnitude_revision
+      - location_revision
+      - origin_time_revision_or_window_boundary_reassignment
+      - identity_revision
+      - dedup_merge
+      - dedup_split
+    formal_binding_and_revision_reason_arrays_must_match: true
+  magnitude_location_identity_revision_policy_frozen: true
+  cross_catalog_deduplication_policy_frozen: true
+  M5_9_to_M6_0_boundary_policy_frozen: true
+
+evaluation:
+  alarm_area:
+    target_budget_km2: 600000
+    selection: complete_prefix_with_cumulative_exact_area_lte_budget
+    rank_value: normalized_25km_cell_mass_divided_by_exact_clipped_cell_area
+    tie_break: [cell_row_ascending, cell_column_ascending, cell_id_ascending]
+    partial_cell_skip_oversized_cell_or_budget_expansion: forbidden
+    actual_area_must_be_recorded: true
+    ordered_full_ranking_sha256_required: true
+    selected_complete_prefix_sha256_required: true
+    selected_cell_count_required: true
+    next_cell_would_exceed_budget_or_domain_exhausted_required: true
+    next_unselected_rank_position_cell_id_exact_area_and_row_sha256_required: true
+    maximum_complete_25km_cell_area_km2: 625.0
+    maximum_pairwise_actual_alarm_area_difference_km2: 625.0
+    same_grid_area_budget_and_tie_rule_all_models: true
+  formal_exposures:
+    selection: earliest_issue_greedy_nonoverlap_separately_within_each_horizon
+    selection_inputs: on_time_status_issue_time_horizon_only
+    zero_event_exposures_retained: true
+    issue_archive_is_not_independent_trial_count: true
+    selected_exposure_manifest_frozen_before_effect_rows_open: true
+    selected_truth_snapshot_unavailable_action: no_replacement_horizon_not_evaluable
+    event_count_hit_score_or_model_rank_dependent_replacement_forbidden: true
+  sample_gate:
+    horizon_union_minimum_unique_deduplicated_supported_M5_6_events: 20
+    minimum_unique_target_clusters: 10
+    every_horizon_must_be_evaluable: true
+    evaluable_horizon_definition: >-
+      at_least_one_scored_supported_unique_M5_6_event_complete_selected_exposures
+      _and_no_selected_truth_snapshot_unavailable
+    M6plus_never_counts_toward_gate: true
+  information_gain:
+    unit: natural_log_nats_per_supported_unique_M5_6_event
+    event_density_operator: continuous_boundary_normalized_75km_KDE_at_projected_event_coordinate
+    grid_lookup_interpolation_or_cell_average: forbidden
+    target_scope: frozen_G1_LS_supported_targets_only
+    common_rate_and_compensator: identical_across_P0_P1_PP_and_cancel_in_pairwise_contrast
+    zero_or_nonfinite_density_action: evidence_insufficient
+    per_horizon_estimator: sum_paired_event_log_density_ratio_divided_by_supported_unique_event_count
+    numerical_summation: deterministic_float64_pairwise
+    equality_absolute_tolerance: 1.0e-12
+  strict_recall:
+    target_scope: full_study_area_all_unique_M5_6_targets
+    unsupported_target_action: common_not_hit_for_P0_P1_PP
+    hit_rule: target_projected_25km_cell_is_in_complete_alarm_prefix
+    per_horizon_estimator: unique_hits_divided_by_full_study_area_unique_target_count
+    zero_denominator_action: horizon_not_evaluable
+  macro_aggregation:
+    horizons_days: [7, 30, 90]
+    weights: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+    rule: equal_weight_across_three_horizons
+    order: compute_each_horizon_estimator_then_arithmetic_mean_three_horizons
+  target_clusters:
+    algorithm: connected_components
+    temporal_link_days: 30
+    spatial_link_km: 75
+    temporal_link_threshold_seconds: 2592000
+    temporal_link_operator: absolute_origin_time_difference_seconds_lte_2592000
+    spatial_distance_implementation: pyproj.Geod_3_7_2_ellps_WGS84_inv_float64_distance_m
+    spatial_link_threshold_m: 75000.0
+    spatial_link_operator: geodesic_distance_m_lte_75000
+    comparison_tolerance_m: 0.0
+    link_rule: temporal_link_operator_and_spatial_link_operator
+    transitive_closure: true
+    isolated_event_is_singleton: true
+    stable_order: earliest_origin_time_then_utf8_event_id
+    component_id_rule: SHA256_of_stage2p_target_cluster_v1_NUL_seismoflux_canonical_json_v1_sorted_unique_member_event_ids
+    graph_scope: >-
+      one_graph_per_evaluation_input_freeze_over_the_unique_full_study_area
+      _M5_6_event_union_of_all_selected_issues_and_all_three_horizons
+    horizon_specific_or_issue_specific_reclustering_forbidden: true
+    cluster_membership_is_evaluation_level_not_part_of_physical_truth_target_identity: true
+    52_to_104_cluster_merges_do_not_create_TruthRevision: true
+    evaluation_freeze_cluster_membership_artifact_required: true
+    same_physical_event_all_issue_and_horizon_contributions_share_block: true
+  horizon_evaluability:
+    derived_not_operator_selected: true
+    required_evidence:
+      - complete_exposure_count
+      - truth_available_complete_exposure_count
+      - selected_truth_snapshot_unavailable_count
+      - supported_unique_M5_6_event_count
+      - full_study_area_unique_M5_6_event_count
+      - unique_target_cluster_count
+      - all_required_forecast_densities_finite_positive
+    false_reason_enum:
+      - no_complete_exposure
+      - truth_unavailable
+      - zero_supported_denominator
+      - zero_full_study_area_denominator
+      - zero_target_cluster_denominator
+      - invalid_forecast_density
+      - formal_freeze_unavailable
+      - scheduled_issue_cap_terminal_before_formal_freeze
+    semantic_recomputation_required: true
+    exposure_partition_identity: >-
+      complete_exposure_count_equals_truth_available_complete_exposure_count
+      _plus_selected_truth_snapshot_unavailable_count
+    formal_freeze_unavailable_contract:
+      target_blind_exposure_and_truth_availability_fields_remain_actual: true
+      supported_full_and_cluster_counts: null
+      all_required_forecast_densities_finite_positive: null
+      evaluable: false
+      attempted_freeze_failure_reason: formal_freeze_unavailable
+      scheduled_issue_cap_reason: scheduled_issue_cap_terminal_before_formal_freeze
+      zero_or_empty_target_substitution_for_unavailable_forbidden: true
+  bootstrap:
+    replications: 2000
+    paired: true
+    resampling_unit: target_cluster_connected_component
+    generator: numpy.random.PCG64
+    root_seed: 147
+    generator_initialization_exact: numpy.random.Generator(numpy.random.PCG64(147))
+    seed_namespace_role: identity_label_only_not_seed_derivation
+    sampling: sample_target_clusters_with_replacement_same_cluster_count_as_observed
+    complete_index_matrix_generated_and_frozen_before_effect_rows_open: true
+    redraw_or_discard_replicates_forbidden: true
+    every_replicate_all_three_supported_and_full_region_denominators_must_be_positive: true
+    any_zero_denominator_replicate_action: evidence_insufficient_before_effect_rows_open
+    formal_freeze_unavailable_status: not_run_formal_freeze_unavailable
+    formal_freeze_unavailable_index_matrix_sha256: null
+    formal_freeze_unavailable_generated_replication_count: 0
+    formal_freeze_unavailable_zero_denominator_replication_count: null
+    formal_freeze_unavailable_frozen_before_effect_rows_open: false
+    accepted_replication_count_must_equal: 2000
+    replicate_contribution_rule: >-
+      duplicate_all_event_and_exposure_contributions_by_sampled_cluster_multiplicity
+      _then_recompute_each_horizon_denominator_and_macro
+    percentile_method: numpy_linear
+    identity_namespace_utf8_exact: >-
+      seismoflux|stage2p-prospective-recent-seismicity-v1|paired-target-cluster-bootstrap|PCG64|root-seed=147|v1
+  simultaneous_inference:
+    method: Bonferroni_two_sided_four_endpoint_family
+    family_confidence_level: 0.95
+    endpoint_count: 4
+    lower_quantile: 0.00625
+    upper_quantile: 0.99375
+    endpoints:
+      - P1_minus_P0_macro_information_gain
+      - P1_minus_PP_macro_information_gain
+      - P1_minus_P0_macro_recall_gain
+      - P1_minus_PP_macro_recall_gain
+  pass_gate:
+    all_four_familywise_lower_bounds_gt_zero: true
+    P1_minus_P0_macro_recall_point_gain_minimum: 0.05
+  regional_robustness:
+    region_count: 39
+    region_manifest_path: data/manifests/anomaly_increment_r2_spatial_strata.json
+    region_manifest_file_sha256: 283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83
+    additive_closure_absolute_tolerance: 1.0e-10
+    largest_positive_region_tie_break: unsigned_UTF8_region_id_ascending
+    largest_positive_cluster_tie_break: unsigned_UTF8_component_id_ascending
+    remove_largest_positive_cluster_all_four_point_contrasts_remain_positive: true
+    frozen_denominator_retained_after_cluster_removal: true
+    remove_largest_positive_region_all_four_point_contrasts_remain_positive: true
+    frozen_denominator_retained_after_region_removal: true
+  formal_looks:
+    count_basis: on_time_issue_sequence_only
+    allowed_on_time_issue_counts: [52, 104]
+    first_look_requires_all_90d_windows_mature: true
+    sample_gate_requires_minimum_event_count_and_every_horizon_evaluable: true
+    first_checkpoint_if_sample_gate_fails: >-
+      continue_blind_without_opening_confirmatory_contrasts
+    final_look_requires_all_90d_windows_mature: true
+    final_checkpoint_if_sample_gate_fails: evidence_insufficient_and_stop
+    intermediate_confirmatory_effect_display_or_testing_forbidden: true
+    evaluation_freeze_required_before_effect_rows_open: true
+    evaluation_record_phases: [input_freeze, result_seal]
+    input_freeze_must_precede_effect_row_open: true
+    input_freeze_selected_TSA_response_must_precede_effect_row_open: true
+    effect_row_open_must_precede_result_core_freeze_and_TSA: true
+    result_seal_must_immediately_follow_authorized_input_freeze: true
+    result_seal_contains_four_endpoints_intervals_robustness_gate_and_decision: true
+    evaluation_code_commit_and_sha256_frozen_in_input_freeze: true
+    uv_lock_and_pyproject_sha256_frozen_in_input_freeze: true
+    ordered_issue_prediction_seal_rule: >-
+      first_52_or_104_on_time_issues_in_on_time_issue_sequence_ascending
+    ordered_truth_record_rule: >-
+      same_issue_order_then_horizon_7_30_90_using_current_formal_binding;
+      _changed_rows_select_current_manifest_revision_unchanged_rows_select
+      _recomputed_equal_previous_truth_and_unavailable_rows_remain_unavailable
+    result_seal_must_exactly_reproduce_every_input_freeze_field: true
+    result_seal_only_mutable_top_level_fields:
+      - evaluation_sequence
+      - phase
+      - previous_evaluation_freeze_sha256
+      - input_freeze_sha256
+      - frozen_at_utc
+      - record_core_frozen_at_utc
+      - timestamp_deadline_utc
+      - effect_rows_opened_at_utc
+      - status
+      - confirmatory_result
+      - timestamp_attempt_evidence
+      - remote_timestamp
+      - content_sha256
+    invalid_execution_has_no_fabricated_endpoint_or_robustness_values: true
+    invalid_execution_stops_without_rerun_or_test_tuning: true
+    maximum_confirmatory_result_seals: 1
+    second_confirmatory_look_forbidden: true
+
+record_contract:
+  schema_path: data/contracts/stage2p_prospective_records.json
+  canonicalization: seismoflux_canonical_json_v1
+  content_sha256_rule: SHA256_of_canonical_record_excluding_content_sha256
+  record_types:
+    - TargetCohortDefinition
+    - IssueInputSnapshotRecord
+    - MatureTruthSnapshotRecord
+    - TruthRevisionRecord
+    - EvaluationFreezeRecord
+  evaluation_record_phase_rule: >-
+    EvaluationFreezeRecord_input_freeze_then_if_authorized_exactly_one_result_seal
+  additional_properties_forbidden: true
+  all_five_records_code_manifest_sha256_must_equal_cohort: true
+  append_only_chain_required: true
+  create_only_no_overwrite: true
+  symlink_reparse_hardlink_and_path_escape_forbidden: true
+  identity_formulas:
+    code_manifest_manifest_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_CodeManifestIdentity_excluding
+      _exactly_manifest_sha256
+    remote_tag_receipt_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_RemoteTagVerificationReceipt
+      _excluding_exactly_receipt_sha256
+    formal_freeze_source_manifest_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_FormalFreezeSourceManifestIdentity
+      _excluding_exactly_manifest_sha256
+    formal_freeze_source_snapshot_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_object_binding_profile_source_request
+      _response_headers_raw_response_bytes_status_and_fetch_times
+    formal_window_binding_row_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_FormalWindowTargetBindingRow
+      _excluding_exactly_binding_row_sha256
+    visualization_evidence_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_VisualizationEvidence_excluding
+      _exactly_visualization_evidence_sha256
+    replay_visualization_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_ReplayVisualizationEvidence
+      _excluding_exactly_replay_visualization_sha256
+    snapshot_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_SourceSnapshot_excluding_exactly
+      _snapshot_id_and_snapshot_sha256
+    snapshot_id: equals_snapshot_sha256
+    prediction_seal_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_PredictionSeal_excluding_exactly
+      _prediction_seal_id_and_prediction_seal_sha256
+    prediction_seal_id: equals_prediction_seal_sha256
+    truth_snapshot_sha256: >-
+      SHA256_of_seismoflux_canonical_json_v1_TruthSnapshot_excluding_exactly
+      _truth_snapshot_id_and_truth_snapshot_sha256
+    truth_snapshot_id: equals_truth_snapshot_sha256
+    artifact_hash: SHA256_of_exact_stored_bytes
+  streams:
+    cohort:
+      stream_key: experiment_id
+      relative_path: cohort/TargetCohortDefinition.json
+      genesis_previous_sha256: null
+      maximum_records: 1
+    issue:
+      stream_key: experiment_id
+      relative_path: issues/{scheduled_issue_sequence:04d}_{issue_id}.json
+      sequence: scheduled_issue_sequence_strictly_contiguous_from_1
+      previous: immediately_preceding_scheduled_issue_record_content_sha256
+      unique_key: [issue_id, scheduled_issue_sequence]
+    mature_truth:
+      stream_key: [issue_id, horizon_days]
+      relative_path: truth/{issue_id}/h{horizon_days:03d}/r000.json
+      genesis_previous_sha256: null
+      unique_key: [issue_id, horizon_days, revision_sequence]
+    truth_revision:
+      stream_key: [issue_id, horizon_days]
+      relative_path: truth/{issue_id}/h{horizon_days:03d}/r{revision_sequence:03d}.json
+      sequence: revision_sequence_strictly_contiguous_from_1
+      previous: immediately_preceding_truth_record_content_sha256
+      unique_key: [issue_id, horizon_days, revision_sequence]
+    evaluation:
+      stream_key: experiment_id
+      relative_path: evaluation/{evaluation_sequence:02d}_{phase}.json
+      sequence: evaluation_sequence_strictly_contiguous_from_1
+      previous: immediately_preceding_evaluation_record_content_sha256
+      maximum_result_seal_records: 1
+  durable_install:
+    temporary_file_same_directory: true
+    create_final_with_O_EXCL_or_equivalent_create_new: true
+    flush_file_and_directory_before_completion_marker: true
+    reopen_and_verify_exact_bytes_and_sha256: true
+    existing_destination_action: fail_without_compare_or_overwrite
+    ancestor_reparse_symlink_hardlink_or_path_escape_action: fail_closed
+    delete_overwrite_rename_or_reorder_public_API: forbidden
+  cross_record_validator_required: true
+  trusted_release_manifest_contract:
+    profile: stage2p_trusted_release_manifest_v1
+    supplied_by_caller_from_verified_remote_peeled_tag_and_commit_tree: true
+    required_keyword_argument_for_exact_bytes: trusted_release_manifest_file_sha256
+    trusted_release_manifest_file_sha256_is_not_embedded_in_manifest_to_avoid_self_reference: true
+    semantic_manifest_sha256_and_exact_file_sha256_are_distinct_identities: true
+    deriving_from_any_record_or_unverified_worktree_forbidden: true
+    required_fields:
+      - profile
+      - implementation_status
+      - protocol_tag
+      - code_tag
+      - protocol_commit
+      - code_commit
+      - files
+      - code_commit_mirrored_protocol_files
+      - component_paths
+      - protocol_config_path
+      - record_schema_path
+      - timestamp_trust_registry
+      - timestamp_trust_registry_sha256
+      - manifest_sha256
+    implementation_status_for_Stage2P_1A: stage2p1b_required
+    Stage2P_1A_must_never_return_real_ready: true
+    protocol_tag_must_be_verified_before_TargetCohortDefinition: true
+    code_tag_is_null_until_Stage2P_1B_synthetic_acceptance: true
+    file_identity:
+      key: repository_relative_POSIX_path
+      required_fields: [file_sha256, git_blob_sha1, commit_role]
+      file_sha256_rule: SHA256_of_exact_tagged_file_bytes
+      git_blob_sha1_rule: SHA1_of_UTF8_git_blob_space_decimal_byte_count_NUL_plus_exact_file_bytes
+      commit_role_values: [protocol_commit, code_commit]
+      bytes_required_in_artifacts_by_sha256: true
+    fixed_component_paths:
+      parser_code_sha256: src/seismoflux/stage2p/acquisition.py
+      normalization_config_sha256: configs/prospective_recent_seismicity.yaml
+      deduplication_code_sha256: src/seismoflux/stage2p/catalog.py
+      deduplication_config_sha256: configs/prospective_recent_seismicity.yaml
+      revision_policy_sha256: configs/prospective_recent_seismicity.yaml
+      model_code_sha256: src/seismoflux/stage2p/forecast.py
+      evaluation_code_sha256: src/seismoflux/stage2p/evaluation.py
+      visualization_code_sha256: src/seismoflux/stage2p/visualization.py
+      semantic_validator_code_sha256: src/seismoflux/stage2p/validation.py
+      environment_lock_file_sha256: uv.lock
+      pyproject_file_sha256: pyproject.toml
+    fixed_path_commit_roles:
+      configs/prospective_recent_seismicity.yaml: protocol_commit
+      data/contracts/stage2p_prospective_records.json: protocol_commit
+      src/seismoflux/stage2p/acquisition.py: code_commit
+      src/seismoflux/stage2p/catalog.py: code_commit
+      src/seismoflux/stage2p/forecast.py: code_commit
+      src/seismoflux/stage2p/evaluation.py: code_commit
+      src/seismoflux/stage2p/visualization.py: code_commit
+      src/seismoflux/stage2p/validation.py: code_commit
+      src/seismoflux/stage2p/__init__.py: code_commit
+      uv.lock: code_commit
+      pyproject.toml: code_commit
+    code_commit_mirrored_protocol_files:
+      implementation_status_stage2p1b_required_exact_value: {}
+      implementation_status_stage2p1b_synthetic_accepted_exact_paths:
+        - configs/prospective_recent_seismicity.yaml
+        - data/contracts/stage2p_prospective_records.json
+      each_entry_commit_role: code_commit
+      file_sha256_and_git_blob_sha1_must_equal_same_path_in_protocol_commit_files: true
+    code_commit_protocol_config_and_schema_bytes_must_equal_protocol_commit: true
+    component_paths_key_set_must_equal_CodeManifestIdentity_hash_fields_except_manifest_sha256: true
+    Stage2P_1A_missing_future_1B_component_paths_allowed_only_while_status_stage2p1b_required: true
+    Stage2P_1A_required_existing_protocol_files:
+      - configs/prospective_recent_seismicity.yaml
+      - data/contracts/stage2p_prospective_records.json
+      - uv.lock
+      - pyproject.toml
+      - src/seismoflux/stage2p/validation.py
+      - src/seismoflux/stage2p/__init__.py
+    Stage2P_1A_path_commit_roles:
+      configs/prospective_recent_seismicity.yaml: protocol_commit
+      data/contracts/stage2p_prospective_records.json: protocol_commit
+      uv.lock: protocol_commit
+      pyproject.toml: protocol_commit
+      src/seismoflux/stage2p/validation.py: protocol_commit
+      src/seismoflux/stage2p/__init__.py: protocol_commit
+    Stage2P_1B_accepted_requires_every_component_path_in_tagged_commit: true
+    timestamp_registry_source: >-
+      strict_parse_of_protocol_config_bytes_from_verified_protocol_commit_at
+      _remote_timestamp.trusted_registry
+    timestamp_registry_must_equal_tagged_config_and_recomputed_sha256: true
+    CodeManifest_component_role_to_path_mapping_must_be_exact_and_recomputed: true
+    manifest_sha256_rule: >-
+      SHA256_of_seismoflux_canonical_json_v1_manifest_excluding_exactly
+      _manifest_sha256
+    missing_path_bytes_hash_tag_or_role_action: fail_closed
+  lifecycle_validator_artifacts_by_sha256_required:
+    - failed_candidate_on_time_core_bytes_if_timestamp_failure
+    - rfc3161_request_and_response_bytes_for_every_attempt
+    - trusted_release_manifest_file_bytes
+    - every_selected_on_time_issue_raw_source_response
+    - every_selected_on_time_issue_normalized_rows
+    - every_selected_on_time_issue_deduplicated_rows
+    - every_selected_on_time_issue_causal_model_view_rows
+    - every_selected_on_time_issue_P0_R30_RP30_event_rows
+    - frozen_grid_cell_geometry_and_exact_clipped_areas
+    - every_selected_on_time_issue_P0_P1_PP_component_state
+    - every_selected_on_time_issue_P0_P1_PP_density_float64_arrays
+    - every_selected_on_time_issue_complete_grid_score_rows
+    - every_selected_on_time_issue_complete_ranked_grid_rows
+    - every_selected_on_time_issue_alarm_prefix_rows_and_mask
+    - every_selected_on_time_issue_forecast_bundle_manifest
+    - every_selected_on_time_issue_static_and_interactive_visualization_bytes
+    - formal_freeze_raw_response
+    - formal_freeze_normalized_rows
+    - formal_freeze_deduplicated_rows
+    - formal_freeze_preferred_field_rows
+    - formal_freeze_window_membership_rows
+    - formal_window_target_binding_rows
+    - target_rows
+    - selected_exposure_manifest_embedded_in_evaluation_record
+    - alarm_area_manifest_embedded_in_evaluation_record
+    - cluster_membership_rows
+    - point_contribution_rows
+    - region_contribution_rows
+    - cluster_contribution_rows
+    - bootstrap_index_rows
+    - effect_rows_manifest_exact_file_bytes
+    - alarm_area_comparison_exact_file_bytes
+    - four_endpoint_bootstrap_distribution_rows
+    - endpoint_results_canonical_object_bytes
+    - robustness_results_canonical_object_bytes
+    - valid_or_invalid_result_bundle_manifest_exact_file_bytes
+  missing_or_hash_mismatched_lifecycle_artifact_action: fail_closed
+  Stage2P_1A_lifecycle_scope:
+    freezes_all_required_artifact_profiles_and_external_trust_boundaries: true
+    record_and_cross_record_semantics_must_pass: true
+    actual_ASN1_CMS_table_forecast_and_evaluation_byte_rebuild: Stage2P_1B
+    any_real_execution_or_real_ready_claim: forbidden
+  full_five_record_synthetic_lifecycle_required_before_code_tag: true
+  mature_truth_and_revision_append_only_replay_visualization_required: true
+  original_prediction_visualizations_must_remain_unmodified: true
+  canonical_json_duplicate_key_rejection_required: true
+
+artifact_profile_registry:
+  profile: stage2p_artifact_profile_registry_v1
+  scope: Stage2P_1A_contract_only_Stage2P_1B_must_implement_exact_byte_rebuild
+  canonical_json:
+    profile: seismoflux_canonical_json_v1
+    raw_bytes_must_equal_canonical_json_bytes_of_strictly_parsed_object: true
+    duplicate_keys_NaN_Infinity_and_non_UTF8_forbidden: true
+  canonical_jsonl:
+    profile: seismoflux_canonical_jsonl_v1
+    encoding: UTF-8
+    byte_order_mark: forbidden
+    row_encoding: seismoflux_canonical_json_v1
+    row_separator_hex: 0a
+    nonempty_file_final_separator_required: true
+    empty_table_file_bytes: empty
+    duplicate_rows_forbidden: true
+    row_sha256_rule: SHA256_of_canonical_row_excluding_exactly_its_single_self_hash_field
+    file_sha256_rule: SHA256_of_exact_file_bytes
+    content_sha256_rule: SHA256_of_canonical_JSON_ordered_array_of_strictly_parsed_rows
+    schema_sha256_rule: SHA256_of_canonical_JSON_exact_referenced_$defs_object_retaining_$ref
+    sort_order_sha256_rule: SHA256_of_canonical_JSON_exact_sort_spec
+    artifact_id_must_equal_file_sha256: true
+  identity_schemas:
+    Float64BitsHex:
+      schema_ref: '#/$defs/Float64BitsHex'
+      expected_schema_sha256: 7871b1347940fe659a8e6a2d80f614484c65febba61810109be65b28303312b1
+    TableArtifactIdentity:
+      schema_ref: '#/$defs/TableArtifactIdentity'
+      expected_schema_sha256: afc601756922bc40b3af207060afeec390ac8f639a4c652033f67d9eefead3ea
+    RawArrayArtifactIdentity:
+      schema_ref: '#/$defs/RawArrayArtifactIdentity'
+      expected_schema_sha256: 6a316bed1c8e56f07c60a448eab118ef5693cdb804eddaa07ea51e9e8b55f542
+    Float64ArrayArtifactIdentity:
+      schema_ref: '#/$defs/Float64ArrayArtifactIdentity'
+      expected_schema_sha256: 4ee0fd28c062194fc6b1f96084d0537f6062954ba01f3d138f55c6d70e017da1
+    MaskArrayArtifactIdentity:
+      schema_ref: '#/$defs/MaskArrayArtifactIdentity'
+      expected_schema_sha256: df25e120a50dfa9a96faca59aff1f979ef73b4fa95655e62dd67fdc6fc83dbec
+    GridFamilyIdentity:
+      schema_ref: '#/$defs/GridFamilyIdentity'
+      expected_schema_sha256: f6e9da8dfe7fd3c7edaf5814569d5038915a6b981c163945e3cca20a4f227b3a
+    DensityIdentity:
+      schema_ref: '#/$defs/DensityIdentity'
+      expected_schema_sha256: 4f33f47488f7323773ee5c32f055222511b1e4a13d7e2fd30fbda09d154e146d
+    ForecastArtifactSetIdentity:
+      schema_ref: '#/$defs/ForecastArtifactSetIdentity'
+      expected_schema_sha256: 3ae51d5aaf5e81624ebb58521c952b653bbcd2b20ed601ec4c7f8d2e0b3bba8f
+    SelectedExposureRow:
+      schema_ref: '#/$defs/SelectedExposureRow'
+      expected_schema_sha256: ee2d9b532c534244c576a49a3c243ea73d7fe341856c36898e23bb417b57b09f
+    SelectedExposureManifest:
+      schema_ref: '#/$defs/SelectedExposureManifest'
+      expected_schema_sha256: 3dd6742f69fa89463491fa3c73374412b5fb40ca00818b4849e71e568cfba005
+    AlarmAreaManifestEntry:
+      schema_ref: '#/$defs/AlarmAreaManifestEntry'
+      expected_schema_sha256: 223c759aee311936e96179f75a0d506192715dca47b6aeb05c1029ace8cb1f2a
+    AlarmAreaManifest:
+      schema_ref: '#/$defs/AlarmAreaManifest'
+      expected_schema_sha256: ee499ed45a43be76ef8d79766178ea88ba7cbd2baf2e6b86cd70d0dc6510d0e3
+    AlarmAreaComparison:
+      schema_ref: '#/$defs/AlarmAreaComparison'
+      expected_schema_sha256: 6f6d995674c8f1e4a78069dd3cb5e361e076379ffa5d2e49acb59f9bc160f179
+    PointContributionArtifactMap:
+      schema_ref: '#/$defs/PointContributionArtifactMap'
+      expected_schema_sha256: e5df32202e789f91e3bad5015f97675e38bd712b318e78268e8f65e080d8de12
+    RegionContributionArtifactMap:
+      schema_ref: '#/$defs/RegionContributionArtifactMap'
+      expected_schema_sha256: 3627311323586d15f3e6123d394ebc63e5ea94333ab2adc17e4447f26e2718e8
+    ClusterContributionArtifactMap:
+      schema_ref: '#/$defs/ClusterContributionArtifactMap'
+      expected_schema_sha256: e7c6782c1dc8099eed4932b44f6f991d448e3657580d05fc76cb45449cc10f94
+    BootstrapDistributionArtifactMap:
+      schema_ref: '#/$defs/BootstrapDistributionArtifactMap'
+      expected_schema_sha256: 46a7f89a325d2bcbb91d2366cc98d0239aeace1d3c8e9ff4cc0f2fa24d2aa7a8
+  formal_table_registry_path: target_cohort.formal_freeze_source_manifest.derived_table_registry
+  tables:
+    source_normalized_rows:
+      identity_schema_ref: '#/$defs/SourceNormalizedRowsArtifactIdentity'
+      table_role: source_normalized_rows
+      row_schema_ref: '#/$defs/FormalNormalizedRow'
+      expected_row_schema_sha256: edbc68907cfc2b4c321b78c11a254b32b7720c19e34211796df2c29f8ba96dd2
+      sort_profile: stage2p_source_normalized_rows_sort_v1
+      sort_spec:
+        - [source_feature_id, unsigned_UTF8_ascending]
+        - [provider_updated_at_utc, UTC_ascending]
+        - [raw_feature_sha256, lowercase_hex_ascending]
+        - [raw_feature_index, integer_ascending]
+        - [normalized_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 72ad70e6c7c90bba8bd1240004c51b55dc1ca21a70c4e08b7c918be43797a895
+      scientific_scope: prospective_ComCat_acquisition_only_not_local_baseline
+    source_deduplicated_rows:
+      identity_schema_ref: '#/$defs/SourceDeduplicatedRowsArtifactIdentity'
+      table_role: source_deduplicated_rows
+      row_schema_ref: '#/$defs/FormalDeduplicatedRow'
+      expected_row_schema_sha256: 201be88ebfd8cf21501bf2a195dde9e79d4832a30e8ac33367cbc2700b169342
+      sort_profile: stage2p_source_deduplicated_rows_sort_v1
+      sort_spec:
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [identity_component_sha256, lowercase_hex_ascending]
+        - [deduplicated_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 54e6b2f4abe6898374cbdbc6d9545183222f8c3ae46d25705e1893a0194c6ab1
+      scientific_scope: prospective_ComCat_acquisition_only_not_local_baseline
+    causal_model_view_rows:
+      identity_schema_ref: '#/$defs/CausalModelViewRowsArtifactIdentity'
+      table_role: causal_model_view_rows
+      row_schema_ref: '#/$defs/CausalModelViewRow'
+      expected_row_schema_sha256: c54f3b687e29ee5dd228d0ba7e4a593e5fb15b4aed725352969da7a9c7f266e5
+      sort_profile: stage2p_causal_model_view_rows_sort_v1
+      sort_spec:
+        - [preferred_origin_time_utc, UTC_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [identity_component_sha256, lowercase_hex_ascending]
+        - [causal_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: ef16e63385d9760699d79fa81594ba4191f10f01468dd2e20232666b4c3c1867
+      joins:
+        local_baseline:
+          source: frozen_normalized_local_catalog_rows
+          available_at_utc: exact_frozen_local_catalog_available_at
+          first_seen_at_utc: exact_frozen_local_catalog_available_at
+          provider_updated_at_utc: null
+        prospective_comcat:
+          source: source_deduplicated_rows
+          first_seen_at_utc: first_sealed_snapshot_fetch_completed_at_containing_any_alias
+          available_at_utc: equals_first_seen_at_utc_conservative_rule
+          provider_updated_at_utc: exact_selected_ComCat_feature_updated
+      every_row_origin_available_and_first_seen_must_be_before_issue_cutoffs: true
+    cutover_match_rows:
+      identity_schema_ref: '#/$defs/CutoverMatchRowsArtifactIdentity'
+      table_role: cutover_match_rows
+      row_schema_ref: '#/$defs/CutoverMatchRow'
+      expected_row_schema_sha256: 83e21c98ab252c066f08d88bb9f396e89033abd71eb182fba645eaa3b5ea99f1
+      sort_profile: stage2p_cutover_match_rows_sort_v1
+      sort_spec:
+        - [absolute_origin_time_delta_seconds, numeric_ascending]
+        - [WGS84_geodesic_distance_km, numeric_ascending]
+        - [absolute_magnitude_delta, numeric_ascending]
+        - [comcat_event_id, unsigned_UTF8_ascending]
+        - [local_event_id, unsigned_UTF8_ascending]
+        - [cutover_match_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 5cf82ec1fd03b8a5d27b37580fdfbbe205d48e114d685ee5e7c438d035ba2f86
+      exact_scientific_thresholds:
+        maximum_time_delta_seconds: 300
+        maximum_distance_km: 50
+        maximum_magnitude_delta: 0.5
+      distance_implementation_comparison_tolerance_m: 1.0e-6
+    event_set_rows:
+      identity_schema_ref: '#/$defs/EventSetRowsArtifactIdentity'
+      table_roles: [P0_event_rows, R30_event_rows, RP30_event_rows]
+      row_schema_ref: '#/$defs/EventSetRow'
+      expected_row_schema_sha256: 6f14c457d91770fcae3c556ba3827d1242ecd74aceacc39635702b22d217eb25
+      sort_profile: stage2p_event_set_rows_sort_v1
+      sort_spec:
+        - [joined_causal_preferred_origin_time_utc, UTC_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [event_set_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 2ca5ffb624ad711ca938998725791ddcc6c98cec93efe577b11af67814727035
+    truth_normalized_rows:
+      identity_schema_ref: '#/$defs/TruthNormalizedRowsArtifactIdentity'
+      table_role: truth_normalized_rows
+      row_schema_ref: '#/$defs/FormalNormalizedRow'
+      expected_row_schema_sha256: edbc68907cfc2b4c321b78c11a254b32b7720c19e34211796df2c29f8ba96dd2
+      sort_profile: stage2p_truth_normalized_rows_sort_v1
+      sort_spec:
+        - [source_feature_id, unsigned_UTF8_ascending]
+        - [provider_updated_at_utc, UTC_ascending]
+        - [raw_feature_sha256, lowercase_hex_ascending]
+        - [raw_feature_index, integer_ascending]
+        - [normalized_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 72ad70e6c7c90bba8bd1240004c51b55dc1ca21a70c4e08b7c918be43797a895
+    truth_deduplicated_rows:
+      identity_schema_ref: '#/$defs/TruthDeduplicatedRowsArtifactIdentity'
+      table_role: truth_deduplicated_rows
+      row_schema_ref: '#/$defs/FormalDeduplicatedRow'
+      expected_row_schema_sha256: 201be88ebfd8cf21501bf2a195dde9e79d4832a30e8ac33367cbc2700b169342
+      sort_profile: stage2p_truth_deduplicated_rows_sort_v1
+      sort_spec:
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [identity_component_sha256, lowercase_hex_ascending]
+        - [deduplicated_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 54e6b2f4abe6898374cbdbc6d9545183222f8c3ae46d25705e1893a0194c6ab1
+    truth_window_membership_rows:
+      identity_schema_ref: '#/$defs/TruthWindowMembershipRowsArtifactIdentity'
+      table_role: truth_window_membership_rows
+      row_schema_ref: '#/$defs/TruthWindowMembershipRow'
+      expected_row_schema_sha256: e99333ded63884d81e912dd705b16b7a4f57d7e17a7fcb224293698e9fbef480
+      sort_profile: stage2p_truth_window_membership_rows_sort_v1
+      sort_spec:
+        - [issue_id, unsigned_UTF8_ascending]
+        - [horizon_days, numeric_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [membership_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: ad4308f9fe900aad926b1c0dc9693b173bcb57dcfd719e6ef738a7aa07a12e20
+      global_target_cluster_field_forbidden: true
+    scientific_target_rows:
+      identity_schema_ref: '#/$defs/ScientificTargetRowsArtifactIdentity'
+      table_role: scientific_target_rows
+      row_schema_ref: '#/$defs/FormalScientificTargetRow'
+      expected_row_schema_sha256: 1d7aaef2ab13000af39c532f88b39838eac637cc9207c85c917cf46b8304494e
+      sort_profile: stage2p_scientific_target_rows_sort_v1
+      sort_spec:
+        - [issue_id, unsigned_UTF8_ascending]
+        - [horizon_days, numeric_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [target_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 7ac025ab9995fe9bf5c09033e7f95a9509cac83ac8563561cf860191d4f2f703
+      cluster_identity_forbidden: true
+    grid_cell_geometry_rows:
+      identity_schema_ref: '#/$defs/GridCellGeometryRowsArtifactIdentity'
+      table_role: grid_cell_geometry_rows
+      row_schema_ref: '#/$defs/GridCellGeometryRow'
+      expected_row_schema_sha256: 114b92f37d345a05b352bb2d75a929f5144c56b6f56ff98e799ecd1bf632cd4f
+      sort_profile: stage2p_grid_cell_geometry_rows_sort_v1
+      sort_spec:
+        - [cell_size_km, frozen_order_50_then_25_then_12_5]
+        - [row, integer_ascending]
+        - [column, integer_ascending]
+        - [cell_id, unsigned_UTF8_ascending]
+        - [grid_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: d28fa59c4c83c633f70e807a2b27c16c9344209027d66ae28fb4dae72f1bb39a
+      exact_layer_order_km: [50, 25, 12.5]
+      row_and_column_are_signed_floor_indices: true
+      parent_25km_cell_id_rule:
+        12_5km: required_floor_child_row_and_column_divide_2
+        25km_and_50km: null
+      parent_mapping_rule: 12_5km_child_row_column_floor_divide_2_to_25km
+    complete_grid_score_rows:
+      identity_schema_ref: '#/$defs/GridScoreRowsArtifactIdentity'
+      table_role: complete_grid_score_rows
+      row_schema_ref: '#/$defs/GridScoreRow'
+      expected_row_schema_sha256: 450a18ffb71e41ebc3a4f7d3e42b1ea10bb56acb948235bb6658b074bd9586cb
+      sort_profile: stage2p_complete_grid_score_rows_sort_v1
+      sort_spec:
+        - [cell_order_index_0_based, integer_ascending]
+        - [row, integer_ascending]
+        - [column, integer_ascending]
+        - [cell_id, unsigned_UTF8_ascending]
+        - [score_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: d888e26cd14f59d8deb9208428b2ff66c3e8103a13d31f19c40ccb99eafbd39a
+    ranked_grid_rows:
+      identity_schema_ref: '#/$defs/RankedGridRowsArtifactIdentity'
+      table_role: ranked_grid_rows
+      row_schema_ref: '#/$defs/RankedGridRow'
+      expected_row_schema_sha256: 0ee7ac71799616e2ad4adcd0db052592abbf2329d1f667690d77aa155763d581
+      sort_profile: stage2p_ranked_grid_rows_sort_v1
+      sort_spec:
+        - [rank_position_1_based, integer_ascending]
+        - [ranked_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: f0fef2f920790e02672e4f8130c75ce0b5da46ca112c878ea5534025fc684a21
+      ranking_rule: score_desc_then_row_column_cell_id_unsigned_UTF8_ascending
+    alarm_prefix_rows:
+      identity_schema_ref: '#/$defs/AlarmPrefixRowsArtifactIdentity'
+      table_role: alarm_prefix_rows
+      row_schema_ref: '#/$defs/AlarmPrefixRow'
+      expected_row_schema_sha256: f9c3594cbb89fb28060d026f1fc71f2078881fa3edaac6dc03e0414789ea5c32
+      sort_profile: stage2p_alarm_prefix_rows_sort_v1
+      sort_spec:
+        - [rank_position_1_based, integer_ascending]
+        - [prefix_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 15595e644b0def719c2b7a2ba6b511696d7fdba81ac8c5274b87907dc437a914
+    cluster_membership_rows:
+      identity_schema_ref: '#/$defs/ClusterMembershipRowsArtifactIdentity'
+      table_role: cluster_membership_rows
+      row_schema_ref: '#/$defs/ClusterMembershipRow'
+      expected_row_schema_sha256: 8152d95b113ebe06897f583aa5cb6bda814a9e7ddf061d92d9054075521c8f47
+      sort_profile: stage2p_cluster_membership_rows_sort_v1
+      sort_spec:
+        - [preferred_origin_time_utc, UTC_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [cluster_membership_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: d42f3a5534d4f641281e37804d091450ea06e70e5e44bb6006d55cf0c4eadd09
+    point_contribution_rows:
+      identity_schema_ref: '#/$defs/PointContributionRowsArtifactIdentity'
+      table_role: point_contribution_rows
+      row_schema_ref: '#/$defs/PointContributionRow'
+      expected_row_schema_sha256: 13fab43f61a329eb617f1e5008952212b87f536fb7e3e550c3c7b362193911d1
+      sort_profile: stage2p_point_contribution_rows_sort_v1
+      sort_spec:
+        - [endpoint_id, frozen_four_endpoint_order]
+        - [horizon_days, numeric_ascending]
+        - [issue_id, unsigned_UTF8_ascending]
+        - [canonical_event_id, unsigned_UTF8_ascending]
+        - [target_row_sha256, lowercase_hex_ascending]
+        - [point_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 669015802401c8dad30941a95f5b5fcef5a592bebca1da5f3fdb833a437d70f2
+    region_contribution_rows:
+      identity_schema_ref: '#/$defs/RegionContributionRowsArtifactIdentity'
+      table_role: region_contribution_rows
+      row_schema_ref: '#/$defs/RegionContributionRow'
+      expected_row_schema_sha256: c60eec713cba1544c4880b69c3912d53b0badbaa2a5b13543329c952e087aea8
+      sort_profile: stage2p_region_contribution_rows_sort_v1
+      sort_spec:
+        - [endpoint_id, frozen_four_endpoint_order]
+        - [study_region_identity_sha256, lowercase_hex_ascending]
+        - [region_contribution_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 3aa224209029a1f2f7931c187c6abef4e7d3586f4c8d0efb25e58a7d94b96fde
+    cluster_contribution_rows:
+      identity_schema_ref: '#/$defs/ClusterContributionRowsArtifactIdentity'
+      table_role: cluster_contribution_rows
+      row_schema_ref: '#/$defs/ClusterContributionRow'
+      expected_row_schema_sha256: 746ea86f3ad11074621d77f9bcf89995846450a925df0d3fc6f809b687b35e6f
+      sort_profile: stage2p_cluster_contribution_rows_sort_v1
+      sort_spec:
+        - [endpoint_id, frozen_four_endpoint_order]
+        - [global_target_cluster_identity_sha256, lowercase_hex_ascending]
+        - [cluster_contribution_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 398227d4e01067d21dfdcd81eedb4d2f2e360de5927509f2438907f69b6ca358
+    bootstrap_index_rows:
+      identity_schema_ref: '#/$defs/BootstrapIndexRowsArtifactIdentity'
+      table_role: bootstrap_index_rows
+      row_schema_ref: '#/$defs/BootstrapIndexRow'
+      expected_row_schema_sha256: e9de612563a37b5e59bcbcb95addbbaf1409c2bd02ceafd394fa7ad0ec97f31c
+      sort_profile: stage2p_bootstrap_index_rows_sort_v1
+      sort_spec:
+        - [replicate_index_0_based, integer_ascending]
+        - [draw_position_0_based, integer_ascending]
+        - [bootstrap_index_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 3284c6ada052e20402c73524b2640c8914a0267855116e6ee039684c7544c289
+    bootstrap_distribution_rows:
+      identity_schema_ref: '#/$defs/BootstrapDistributionRowsArtifactIdentity'
+      table_role: bootstrap_distribution_rows
+      row_schema_ref: '#/$defs/BootstrapDistributionRow'
+      expected_row_schema_sha256: 92a628f57a6cfb7c6c1b948cca1bf1d3cc151fb4cd5c6cc53572f28cb85fe43d
+      sort_profile: stage2p_bootstrap_distribution_rows_sort_v1
+      sort_spec:
+        - [endpoint_id, frozen_four_endpoint_order]
+        - [replicate_index_0_based, integer_ascending]
+        - [bootstrap_distribution_row_sha256, lowercase_hex_ascending]
+      expected_sort_order_sha256: 5333cef10f8fbe1b36fc110034a272b17d1f6d320db894eb68513f60104d43a8
+  embedded_manifests:
+    selected_exposure:
+      schema_ref: '#/$defs/SelectedExposureManifest'
+      expected_schema_sha256: 3dd6742f69fa89463491fa3c73374412b5fb40ca00818b4849e71e568cfba005
+      construction_time: before_formal_query_and_before_effect_rows_open
+      candidate_axis: exact_EvaluationFreezeRecord_ordered_issue_prediction_seal_sha256
+      row_sort:
+        - [horizon_days, frozen_order_7_then_30_then_90]
+        - [selection_ordinal_1_based, integer_ascending_contiguous_from_1]
+        - [scheduled_issue_sequence, integer_ascending]
+        - [issue_id, unsigned_UTF8_ascending]
+      selection_rebuild: >-
+        earliest_issue_greedy_nonoverlap_separately_by_horizon_using_only
+        _on_time_status_issue_time_and_horizon
+      selected_exposure_manifest_union_sha256_rule: >-
+        SHA256_of_seismoflux_canonical_json_v1_exact_SelectedExposureManifest
+      horizon_selected_exposure_manifest_sha256_rule: >-
+        SHA256_of_seismoflux_canonical_json_v1_ordered_rows_filtered_to_horizon
+      truth_availability_projection_fields:
+        - horizon_days
+        - selection_ordinal_1_based
+        - issue_id
+        - prediction_seal_sha256
+        - selected_truth_record_sha256
+        - selected_truth_revision_sequence
+        - truth_record_status
+        - truth_available
+      horizon_truth_availability_manifest_sha256_rule: >-
+        SHA256_of_seismoflux_canonical_json_v1_ordered_truth_availability
+        _projection_filtered_to_horizon
+      truth_availability_manifest_union_sha256_rule: >-
+        SHA256_of_seismoflux_canonical_json_v1_full_ordered_truth_availability
+        _projection
+      unavailable_rows_retained_without_replacement: true
+      formal_window_binding_success_must_have_exact_one_to_one_join: true
+    alarm_area:
+      schema_ref: '#/$defs/AlarmAreaManifest'
+      expected_schema_sha256: ee499ed45a43be76ef8d79766178ea88ba7cbd2baf2e6b86cd70d0dc6510d0e3
+      entry_schema_ref: '#/$defs/AlarmAreaManifestEntry'
+      entry_expected_schema_sha256: 223c759aee311936e96179f75a0d506192715dca47b6aeb05c1029ace8cb1f2a
+      entry_axis: >-
+        each_distinct_prediction_seal_used_by_selected_exposure_rows_once
+        _in_scheduled_issue_sequence_ascending
+      alarm_area_manifest_sha256_rule: >-
+        SHA256_of_seismoflux_canonical_json_v1_exact_AlarmAreaManifest
+      every_entry_rebuilt_from_exact_PredictionSeal_and_ForecastBundle: true
+      maximum_allowed_pairwise_difference_km2_exact_float64: 625.0
+      maximum_allowed_pairwise_difference_km2_float64_hex: '4083880000000000'
+      comparison_schema_ref: '#/$defs/AlarmAreaComparison'
+      comparison_expected_schema_sha256: 6f6d995674c8f1e4a78069dd3cb5e361e076379ffa5d2e49acb59f9bc160f179
+      comparison_file_profile: exact_seismoflux_canonical_json_v1
+      comparison_sha256_rule: SHA256_of_exact_comparison_file_bytes
+      comparison_maximum_rule: >-
+        exact_maximum_of_all_entry_maximum_pairwise_values_or_positive_zero
+        _for_empty_entries
+      partial_or_missing_selected_issue_action: fail_closed
+  raw_arrays:
+    identity_schema_ref: '#/$defs/RawArrayArtifactIdentity'
+    serialization_profile: raw_numeric_binary_v1
+    float64:
+      dtype: <f8
+      bytes: headerless_IEEE754_binary64_little_endian_C_order
+      byte_count_rule: 8_times_product_of_shape
+      all_values_must_be_finite: true
+    mask:
+      dtype: '|u1'
+      bytes: headerless_uint8_C_order
+      byte_count_rule: product_of_shape
+      allowed_values: [0, 1]
+    axis_identity_must_equal_exact_index_table_or_ordered_ID_array_sha256: true
+    float64_bits_hex_profile:
+      encoding: struct_pack_big_endian_binary64_then_lowercase_hex
+      exact_python_expression: struct.pack('>d', value).hex()
+      NaN_positive_Infinity_and_negative_Infinity_forbidden: true
+  density_contract:
+    identity_schema_ref: '#/$defs/DensityIdentity'
+    identity_sha256_rule: SHA256_of_canonical_object_excluding_exactly_density_identity_sha256
+    continuous_kernel_operation: boundary_normalized_equal_weight_75km_Gaussian_KDE
+    projected_event_coordinate_array:
+      dtype: <f8
+      shape: [event_row_count, 2]
+      C_order: true
+      units: projected_meters
+      columns: [x_m, y_m]
+      axis_identity: exact_event_rows_order
+      bandwidth_conversion: 75_km_equals_75000_m_exactly
+    state_truth_table:
+      P0: kernel
+      R30: kernel_if_event_count_positive_else_P0_alias
+      RP30: kernel_if_event_count_positive_else_P0_alias
+      P1: mixture_if_R30_event_count_positive_else_P0_alias
+      PP: mixture_if_RP30_event_count_positive_else_P0_alias
+      kernel: >-
+        event_count_positive_event_rows_projected_xy_and_normalization_present;
+        _baseline_component_and_weights_null
+      mixture: >-
+        event_count_positive_event_rows_projected_xy_and_normalization_null;
+        _baseline_equals_P0_component_equals_matching_R30_or_RP30_and_weights_0_5
+      P0_alias: >-
+        event_count_zero_baseline_equals_P0_all_other_source_fields_null_and
+        _all_four_array_file_sha256_equal_P0
+    point_information_gain_operation: math.log(P1_density_divided_by_comparator_density)
+    grid_mass_arrays:
+      - mass_12_5km
+      - direct_mass_25km
+      - mass_25km
+      - direct_mass_50km
+    every_array_dtype: <f8
+    every_mass_value_finite_and_nonnegative: true
+    mass_12_5km_and_mass_25km_math_fsum_absolute_error_from_one_max: 1.0e-12
+    mass_25km_rule: deterministic_child_row_column_floor_divide_2_aggregation_of_mass_12_5km
+    mixture_operation_order: elementwise_float64_0_5_times_P0_plus_0_5_times_component_then_aggregate
+    empty_recent_component_action: P0_alias_with_all_four_array_file_sha256_equal_P0
+  forecast_cross_layer_contract:
+    grid_score_float_operation: float64_mass_25km_divided_by_exact_clipped_area_km2
+    ranked_rows_must_be_exact_score_row_permutation: true
+    ranking_rule: score_desc_then_row_column_cell_id_unsigned_UTF8_ascending
+    prefix_rule: exact_first_k_ranked_rows_with_math_fsum_area_lte_600000
+    skip_or_partial_cell_forbidden: true
+    next_row_or_domain_exhaustion_must_close_prefix: true
+    alarm_mask_dtype_and_shape: '|u1_[N_25km]'
+    alarm_mask_axis: frozen_25km_grid_order
+    mask_one_iff_cell_in_prefix: true
+    mask_sum_equals_prefix_row_count: true
+    selected_cell_ID_hash_source: canonical_JSON_prefix_rank_ordered_cell_ID_array
+    local_artifact_bundle_sha256_rule: >-
+      SHA256_of_canonical_model_artifact_object_excluding_exactly
+      _local_artifact_bundle_sha256
+  evaluation_contract:
+    frozen_endpoint_order:
+      - P1_minus_P0_macro_information_gain
+      - P1_minus_PP_macro_information_gain
+      - P1_minus_P0_macro_recall_gain
+      - P1_minus_PP_macro_recall_gain
+    cluster_membership_scope: >-
+      unique_full_study_area_M5_6_event_union_across_all_selected_exposures
+      _and_all_three_horizons_at_the_current_input_freeze
+    cluster_graph_built_once_per_input_freeze: true
+    cluster_identity_rule: existing_30d_75km_connected_component_rule
+    point_information_gain_rows_only_supported_targets: true
+    point_recall_rows_all_full_study_area_targets: true
+    unsupported_target_hits_P0_P1_PP_all_false: true
+    point_horizon_estimator: deterministic_float64_pairwise_sum_raw_divided_by_exact_row_count
+    macro_estimator: arithmetic_mean_of_7_30_90_day_horizon_estimates
+    region_rows_per_endpoint: 39
+    region_and_cluster_contribution_formula: >-
+      one_third_times_sum_over_horizons_of_group_raw_sum_divided_by
+      _the_original_frozen_global_endpoint_denominator_for_that_horizon
+    additive_closure_absolute_tolerance: 1.0e-10
+    largest_positive_tie_break: contribution_desc_then_identity_unsigned_UTF8_ascending
+    removal_denominators_remain_original: true
+    bootstrap:
+      generator_call: >-
+        numpy.random.Generator(numpy.random.PCG64(147)).integers
+        _(0_B_size_equals_2000_by_B_endpoint_false_dtype_int64)
+      cluster_position_axis: distinct_cluster_IDs_unsigned_UTF8_ascending
+      index_rows_exact_count_rule: 2000_times_B
+      draws_per_replication: B
+      index_table_frozen_before_effect_rows_open: true
+      validator_replays_every_PRNG_index: true
+      redraw_discard_or_zero_denominator_replication_removal_forbidden: true
+      distributions_per_endpoint_exact_row_count: 2000
+      quantiles: [0.00625, 0.99375]
+      quantile_function: numpy.quantile_method_linear
+    input_freeze_identity_preimages:
+      bootstrap_plan_sha256:
+        canonical_profile: seismoflux_canonical_json_v1
+        exact_source_path: evaluation.bootstrap
+        excluded_fields: []
+      statistics_policy_sha256:
+        canonical_profile: seismoflux_canonical_json_v1
+        profile_field: stage2p_statistics_policy_v1
+        exact_source_paths:
+          - evaluation.information_gain
+          - evaluation.strict_recall
+          - evaluation.macro_aggregation
+          - evaluation.target_clusters
+          - evaluation.simultaneous_inference
+          - evaluation.pass_gate
+          - evaluation.regional_robustness
+        preimage_object_keys:
+          - profile
+          - information_gain
+          - strict_recall
+          - macro_aggregation
+          - target_clusters
+          - simultaneous_inference
+          - pass_gate
+          - regional_robustness
+      region_map_sha256:
+        exact_value_path: evaluation.regional_robustness.region_manifest_file_sha256
+        actual_file_path: evaluation.regional_robustness.region_manifest_path
+        Stage2P_1B_actual_file_bytes_required: true
+      final_window_membership_sha256:
+        success_value_path: >-
+          formal_freeze_source_manifest.window_membership_rows.content_sha256
+        formal_unavailable_value: null
+    formal_freeze_scientific_availability_truth_table:
+      succeeded_single_full_cohort_response:
+        realized_target_union: actual_TargetSetIdentity
+        union_counts_and_cluster_count: actual_integers
+        final_window_membership_sha256: actual_content_sha256
+        cluster_membership_sha256: actual_content_sha256
+        horizon_target_counts_and_density_status: actual_values
+      not_run_no_complete_scope:
+        allowed_only_if_selected_exposure_rows_empty: true
+        realized_target_union: canonical_empty_TargetSetIdentity
+        union_counts_and_cluster_count: zero
+        final_window_membership_sha256: canonical_empty_table_content_sha256
+        cluster_membership_sha256: canonical_empty_table_content_sha256
+        horizon_reason: no_complete_exposure
+      formal_freeze_unavailable:
+        statuses:
+          - not_run_scheduled_issue_cap_terminal
+          - failed_count_preflight
+          - failed_count_limit
+          - failed_query_fetch
+          - failed_query_parse_or_count_mismatch
+          - failed_local_derivation_or_freeze
+        realized_target_union: null
+        union_counts_and_cluster_count: null
+        final_window_membership_sha256: null
+        cluster_membership_sha256: null
+        horizon_target_counts_and_density_status: null
+        bootstrap_status: not_run_formal_freeze_unavailable
+        zero_or_empty_substitution_for_unavailable_forbidden: true
+  manifests:
+    forecast_bundle:
+      schema_ref: '#/$defs/ForecastBundleManifest'
+      expected_schema_sha256: b032285431dee62bcaa82178ad681781db8ef00e882ce0086e58bebb383e2605
+      profile: stage2p_forecast_bundle_manifest_v1
+      file_profile: exact_canonical_JSON_without_self_hash_field
+      record_hash_rule: forecast_bundle_manifest_sha256_equals_SHA256_of_exact_file_bytes
+      slot_contracts:
+        grid_family: '#/$defs/GridFamilyIdentity'
+        grid_family.grid_geometry_rows: '#/$defs/GridCellGeometryRowsArtifactIdentity'
+        densities.P0: '#/$defs/DensityIdentity'
+        densities.R30: '#/$defs/DensityIdentity'
+        densities.RP30: '#/$defs/DensityIdentity'
+        densities.P1: '#/$defs/DensityIdentity'
+        densities.PP: '#/$defs/DensityIdentity'
+        densities.every_mass_array: '#/$defs/Float64ArrayArtifactIdentity'
+        densities.projected_xy_array_when_present: '#/$defs/Float64ArrayArtifactIdentity'
+        forecasts.P0: '#/$defs/ForecastArtifactSetIdentity'
+        forecasts.P1: '#/$defs/ForecastArtifactSetIdentity'
+        forecasts.PP: '#/$defs/ForecastArtifactSetIdentity'
+        forecasts.every_score_rows: '#/$defs/GridScoreRowsArtifactIdentity'
+        forecasts.every_ranked_rows: '#/$defs/RankedGridRowsArtifactIdentity'
+        forecasts.every_alarm_prefix_rows: '#/$defs/AlarmPrefixRowsArtifactIdentity'
+        forecasts.every_alarm_mask: '#/$defs/MaskArrayArtifactIdentity'
+    effect_rows:
+      schema_ref: '#/$defs/EffectRowsManifest'
+      expected_schema_sha256: 8b5251145e5207f63e4f20f4104768f3c1bfd08f458cdfce913c9757e7816e32
+      profile: stage2p_effect_rows_manifest_v1
+      file_profile: exact_canonical_JSON_without_self_hash_field
+      record_hash_rule: effect_rows_manifest_sha256_equals_SHA256_of_exact_file_bytes
+      complete_only_partial_manifest_forbidden: true
+      slot_contracts:
+        cluster_membership_rows: '#/$defs/ClusterMembershipRowsArtifactIdentity'
+        point_contribution_rows: '#/$defs/PointContributionArtifactMap'
+        region_contribution_rows: '#/$defs/RegionContributionArtifactMap'
+        cluster_contribution_rows: '#/$defs/ClusterContributionArtifactMap'
+        bootstrap_index_rows: '#/$defs/BootstrapIndexRowsArtifactIdentity'
+      endpoint_map_key_must_equal_every_row_endpoint_id: true
+      formal_run_input_freeze_and_evaluation_code_must_equal_outer_record: true
+      partial_tables_remain_audit_only_and_never_fill_complete_slots: true
+    result_bundle:
+      schema_ref: '#/$defs/ResultBundleManifest'
+      expected_schema_sha256: 3895e6bf772333deac0069470346a60a5a889560956c1ad686105f3720d9ec5e
+      profile: stage2p_result_bundle_manifest_v1
+      file_profile: exact_canonical_JSON_without_self_hash_field
+      record_hash_rule: result_bundle_sha256_equals_SHA256_of_exact_file_bytes
+      fixed_required_slots:
+        - formal_run_id
+        - input_freeze_sha256
+        - evaluation_code_commit
+        - evaluation_code_sha256
+        - execution_status
+        - failure_stage
+        - failure_code
+        - available_audit_artifact_sha256
+        - effect_rows_manifest_sha256
+        - alarm_area_comparison_sha256
+        - bootstrap_distribution_rows
+        - endpoint_results_sha256
+        - robustness_results_sha256
+      bootstrap_distribution_slot_schema: '#/$defs/BootstrapDistributionArtifactMap'
+      endpoint_map_key_must_equal_every_distribution_row_endpoint_id: true
+      available_audit_artifact_sha256_order: lowercase_hex_ascending_unique
+      valid_truth_table:
+        failure_stage: null
+        failure_code: null
+        available_audit_artifact_sha256: empty
+        effect_rows_manifest_sha256: required_complete
+        alarm_area_comparison_sha256: required_complete
+        bootstrap_distribution_rows: required_complete_four_endpoint_map
+        endpoint_results_sha256: required_complete
+        robustness_results_sha256: required_complete
+      invalid_truth_table:
+        effect_rows_open: [null, null, null, null, null]
+        alarm_area_comparison: [complete_effect, null, null, null, null]
+        bootstrap: [complete_effect, complete_alarm, null, null, null]
+        endpoint_evaluation:
+          [complete_effect, complete_alarm, complete_bootstrap, null, null]
+        robustness_evaluation:
+          [complete_effect, complete_alarm, complete_bootstrap, complete_endpoint, null]
+        result_bundle_install:
+          [complete_effect, complete_alarm, complete_bootstrap, complete_endpoint,
+           complete_robustness]
+        result_seal:
+          [complete_effect, complete_alarm, complete_bootstrap, complete_endpoint,
+           complete_robustness]
+        slot_order:
+          [effect_rows_manifest_sha256, alarm_area_comparison_sha256,
+           bootstrap_distribution_rows, endpoint_results_sha256,
+           robustness_results_sha256]
+      invalid_requires_failure_code_and_at_least_one_real_audit_artifact: true
+      completed_slot_must_reference_fully_validated_actual_bytes: true
+      partial_or_unfinished_stage_outputs_remain_audit_only: true
+      endpoint_results_sha256_preimage: >-
+        seismoflux_canonical_json_v1_exact_ValidConfirmatoryResult
+        _endpoint_results_object
+      robustness_results_sha256_preimage: >-
+        seismoflux_canonical_json_v1_exact_ValidConfirmatoryResult
+        _robustness_results_object
+      bootstrap_replicates_sha256_preimage: >-
+        seismoflux_canonical_json_v1_exact_BootstrapDistributionArtifactMap
+      invalid_result_bundle_install_semantics: >-
+        a_failed_success_candidate_never_overwrites_destination;the_separate
+        _invalid_audit_bundle_is_create_only_and_is_the_only_bundle_referenced
+        _by_InvalidConfirmatoryResult
+      result_seal_failure_semantics: >-
+        a_failed_valid_result_record_candidate_is_not_installed;one_invalid
+        _result_seal_is_create_only_installed_and_no_second_effect_look_exists
+  record_summary_cross_bindings:
+    SourceSnapshot:
+      cutover_cross_source_match_count: cutover_match_rows.row_count
+      cutover_cross_source_match_sha256: cutover_match_rows.content_sha256
+      normalized_rows: exact_source_normalized_rows_artifact
+      deduplicated_rows: exact_source_deduplicated_rows_artifact
+      causal_model_view: exact_causal_model_view_rows_artifact
+      P0_R30_RP30_EventSet: >-
+        property_name_matches_component_role_and_count_ID_hash_max_times
+        _and_content_hash_are_recomputed_from_event_rows_joined_to_causal_rows
+    TruthSnapshot:
+      window_membership_sha256: window_membership_rows.content_sha256
+      normalized_rows: exact_truth_normalized_rows_artifact
+      deduplicated_rows: exact_truth_deduplicated_rows_artifact
+      realized_target_set: >-
+        count_ordered_IDs_content_and_region_membership_recomputed_from
+        _scientific_target_rows
+    PredictionSeal:
+      forecast_bundle_manifest_sha256: exact_ForecastBundleManifest_file_sha256
+      ForecastIdentity_fields: exact_corresponding_manifest_model_object
+      visualization_evidence: exact_manifest_visualization_files
+    EvaluationFreezeRecord:
+      selected_exposure_manifest_union_sha256: >-
+        SHA256_of_exact_canonical_embedded_SelectedExposureManifest
+      horizon_selected_exposure_and_truth_availability_hashes: >-
+        exact_filtered_row_and_truth_availability_projections_from_the_same
+        _embedded_manifest
+      ordered_issue_prediction_seal_sha256: >-
+        exact_candidate_issue_prediction_seal_axis_in_selected_exposure_manifest
+      selected_exposure_rows: >-
+        mechanically_rebuilt_earliest_issue_greedy_nonoverlap_without_target
+        _event_score_hit_or_rank_inputs
+      formal_success_binding_rows: >-
+        exact_one_to_one_join_with_selected_exposure_rows_on_issue_horizon
+        _prediction_seal_window_and_truth_availability
+      final_window_membership_sha256: >-
+        formal_success_equals_formal_freeze_source_manifest
+        _window_membership_rows_content_sha256;formal_unavailable_is_null
+      cluster_membership_sha256: cluster_membership_rows.content_sha256
+      bootstrap_preflight_index_matrix_sha256: bootstrap_index_rows.content_sha256
+      bootstrap_plan_sha256: >-
+        SHA256_of_seismoflux_canonical_json_v1_exact_evaluation.bootstrap
+        _configuration_object
+      statistics_policy_sha256: >-
+        SHA256_of_seismoflux_canonical_json_v1_object_with_profile_and_exact
+        _information_gain_strict_recall_macro_aggregation_target_clusters
+        _simultaneous_inference_pass_gate_and_regional_robustness_objects
+      region_map_sha256: evaluation.regional_robustness.region_manifest_file_sha256
+      alarm_area_manifest_sha256: >-
+        SHA256_of_seismoflux_canonical_json_v1_exact_embedded_AlarmAreaManifest
+      alarm_area_manifest_entries: >-
+        exact_distinct_selected_prediction_seals_and_their_verified
+        _PredictionSeal_and_ForecastBundle_alarm_areas
+      confirmatory_endpoint_and_robustness_hashes: exact_corresponding_effect_and_result_tables
+      formal_freeze_unavailable_values: >-
+        realized_target_union_union_counts_cluster_and_final_window_are_null;
+        _horizon_target_counts_and_density_status_are_null_not_zero
+    ConfirmatoryResult:
+      formal_run_input_freeze_and_evaluation_code: exact_ResultBundleManifest_fields
+      result_bundle_sha256: SHA256_of_exact_valid_or_invalid_ResultBundleManifest_bytes
+      effect_rows_manifest_sha256: exact_complete_EffectRowsManifest_file_sha256
+      alarm_area_comparison_sha256: exact_AlarmAreaComparison_file_sha256
+      endpoint_results_sha256: >-
+        SHA256_of_canonical_exact_outer_endpoint_results_object
+      robustness_results_sha256: >-
+        SHA256_of_canonical_exact_outer_robustness_results_object
+      invalid_failure_fields_and_audit_hashes: exact_invalid_ResultBundleManifest_fields
+  Stage2P_1B_required_target_blind_tamper_tests:
+    - noncanonical_JSON_bytes
+    - row_ID_coordinate_or_time_substitution_with_all_downstream_hashes_rewritten
+    - row_reorder_duplicate_or_profile_swap
+    - P0_R30_RP30_role_swap
+    - density_array_change_with_score_rank_prefix_mask_and_bundle_rehashed
+    - ranking_tie_prefix_or_mask_tamper
+    - cluster_contribution_or_bootstrap_index_distribution_tamper
+
+implementation_isolation:
+  allowed_pure_reuse:
+    - seismoflux.background.grid.point_cell_index
+    - seismoflux.background.grid.project_study_area_to_equal_area
+    - seismoflux.background.grid.build_equal_area_grid_family
+    - seismoflux.background.grid.aggregate_fine_masses_to_coarse
+    - seismoflux.background.grid.diagnose_three_grid_convergence
+    - seismoflux.background.grid.require_three_grid_convergence
+    - seismoflux.data.common.canonical_json_bytes
+    - seismoflux.stage2s.spatial.aggregate_operational_mass_to_25km
+    - seismoflux.stage2s.spatial.build_normalized_kde
+    - seismoflux.stage2s.spatial.build_recent_component
+    - seismoflux.stage2s.spatial.event_cell_index_25km
+    - seismoflux.stage2s.spatial.mix_density
+    - seismoflux.stage2s.spatial.select_alarm_prefix
+  forbidden_reuse:
+    - seismoflux.stage2s.production
+    - seismoflux.stage2s.runner
+    - seismoflux.stage2s.evaluation
+    - seismoflux.stage2s.records
+    - seismoflux.stage2s.seals
+    - seismoflux.stage2s.spatial.build_stage2s_models
+    - seismoflux.stage2s.spatial.fit_alpha
+    - seismoflux.stage2s.spatial.fit_alpha_log_density
+    - seismoflux.anomaly_increment.kde_dev
+  AST_import_and_symbol_denylist_test_required: true
+
+storage_and_publication:
+  local_restricted:
+    source_snapshot_root: data/interim/stage2p/source_snapshots
+    truth_snapshot_root: data/interim/stage2p/truth_snapshots
+    revision_root: data/interim/stage2p/truth_revisions
+    timestamp_attachment_root: data/interim/stage2p/timestamp_attachments
+    forecast_root: outputs/prospective/stage2p/issues
+    exact_rows_coordinates_event_ids_densities_alarm_masks_and_overlays_allowed: true
+    git_ignored_required: true
+    tracked_by_git_forbidden: true
+    access_control_verification_required_before_real_issue: true
+  public:
+    allowed_categories:
+      - protocol_and_schema
+      - status
+      - sha256
+      - non_sensitive_counts
+      - license_permitted_aggregate_layers
+    exact_rows_coordinates_event_ids_and_local_paths_forbidden: true
+    aggregate_layer_requires_explicit_license: true
+    non_USGS_partner_overlay_requires_item_level_license_review: true
+    uncertain_license_overlay_action: suppress_publication_but_keep_local_research
+    aggregate_layer_requires_non_reconstruction_review: true
+    aggregate_spatial_publication_authorized_now: false
+    completion_marker_written_last: true
+    public_safe_projection_is_separate_from_full_local_record: true
+    projection_schema_and_allowlist_required_before_publication: true
+    full_local_record_publication_forbidden: true
+  local_visualization:
+    static_required_per_on_time_issue: true
+    offline_interactive_required_per_on_time_issue: true
+    remote_or_external_script_capability_forbidden: true
+    immature_truth_overlay_forbidden: true
+    static_svg_sha256_required: true
+    interactive_html_sha256_required: true
+    external_URL_and_fetch_scan_count_must_equal_zero: true
+    completion_marker_written_last: true
+    visualization_evidence_must_bind_forecast_bundle_manifest_sha256: true
+
+compute:
+  environment_lock:
+    path: uv.lock
+    file_sha256: 5d18c0e213a77dae9e133be97deef6756cbf5c9ee3d002b42bca6b2ea36e6eac
+    pyproject_file_sha256: cb12f7c87853909994296cd33c4022c78ebdbf178c4add1f97d5f333246d2fd8
+  physical_core_reserve: 2
+  max_workers_formula: min(8, physical_cores - 2)
+  minimum_physical_cores: 3
+  insufficient_physical_cores_action: block
+  blas_threads: 1
+  nested_parallelism: false
+  prediction_seal_runtime_evidence:
+    physical_core_count_required: true
+    worker_count_required: true
+    BLAS_OpenMP_thread_environment_required: true
+    host_total_physical_memory_bytes_required: true
+    host_available_memory_bytes_at_start_required: true
+    peak_resident_set_bytes_required: true
+    execution_device_required: true
+    elapsed_seconds_required: true
+    GPU_model_driver_and_runtime_required_if_GPU: true
+    CPU_requires_null_GPU_identity_fields: true
+    GPU_equivalence_receipt_required_if_GPU: true
+  gpu:
+    enabled_by_default: false
+    future_use: numerically_equivalent_acceleration_only
+    model_or_gate_change_forbidden: true
+    equivalence_test_required_before_enable: true
+
+stage_acceptance:
+  current_scientific_value_category: necessary_enabler
+  direct_prediction_improvement_demonstrated: false
+  synthetic_tests_are_scientific_evidence: false
+  real_issue_gate: closed
+  required_before_real_issue:
+    - protocol_and_code_tags_verified_remotely
+    - exact_source_license_and_RFC3161_authority_identity_frozen
+    - five_record_machine_contracts_pass_exact_schema_tests
+    - synthetic_on_time_missed_truth_revision_and_freeze_lifecycle_passes
+    - private_storage_ignore_and_access_control_gate_passes
+    - public_payload_leakage_gate_passes
+    - independent_target_blind_audit_has_no_P0_or_P1

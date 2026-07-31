@@ -1,0 +1,268 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1120" viewBox="0 0 2000 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Stage 2P-1 真正前瞻证据流</title>
+  <desc id="desc">从截至2026年7月9日的本地历史基线与之后的ComCat新数据开始，以Q=T减15分钟为共同查询截止，最迟T减5分钟冻结完整预测候选；若候选不能取得远端时间戳，最迟T减4分钟另封漏期审计，绝不把候选冒充正式预测。用同一快照生成P0、P1、PP并按不超过60万平方公里的完整格前缀不可改写归档。随后以时间上独立抓取的成熟快照等待未来7、30、90日窗口和30日迟报期。目标盲暴露清单和报警面积清单可逐行回算；正式冻结不可用时记未知而不是零。累计效果在第52或104个按时起报的唯一正式判定前保持密封，解封至少需要20个目标和10个独立震群块。当前没有提升结论，真实起报仍为NO-GO，首期不早于2026年9月10日。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0 0 L12 6 L0 12 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0 0 L12 6 L0 12 Z" fill="#b7791f"/>
+    </marker>
+    <linearGradient id="map-a" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#dbeafe"/>
+      <stop offset="0.55" stop-color="#93c5fd"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="map-b" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#dcfce7"/>
+      <stop offset="0.55" stop-color="#86efac"/>
+      <stop offset="1" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="map-c" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ede9fe"/>
+      <stop offset="0.55" stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+    <style>
+      .bg { fill: #f8fafc; }
+      .ink { fill: #0f172a; }
+      .muted { fill: #475569; }
+      .title { font: 700 42px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 21px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #475569; }
+      .status { font: 700 21px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; }
+      .step { font: 700 16px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; letter-spacing: 1px; }
+      .head { font: 700 25px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #0f172a; }
+      .body { font: 400 18px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #334155; }
+      .body-strong { font: 700 18px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #0f172a; }
+      .small { font: 400 15px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #475569; }
+      .tiny { font: 400 13px "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", sans-serif; fill: #475569; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+      .source { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2.5; }
+      .seal { fill: #f1f5f9; stroke: #475569; stroke-width: 2.5; }
+      .model { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2.5; }
+      .archive { fill: #f0fdf4; stroke: #15803d; stroke-width: 2.5; }
+      .wait { fill: #fffbeb; stroke: #d97706; stroke-width: 2.5; }
+      .locked { fill: #faf5ff; stroke: #7e22ce; stroke-width: 2.5; }
+      .decision { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.5; }
+      .danger { fill: #fff1f2; stroke: #e11d48; stroke-width: 2.5; }
+      .pill-blue { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; }
+      .pill-green { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+      .pill-amber { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; }
+      .pill-purple { fill: #f3e8ff; stroke: #7e22ce; stroke-width: 1.5; }
+      .pill-red { fill: #ffe4e6; stroke: #e11d48; stroke-width: 1.5; }
+      .divider { stroke: #cbd5e1; stroke-width: 1.5; }
+      .flow { fill: none; stroke: #64748b; stroke-width: 4; marker-end: url(#arrow-blue); }
+      .flow-wait { fill: none; stroke: #b7791f; stroke-width: 4; marker-end: url(#arrow-amber); }
+      .dash { fill: none; stroke: #7e22ce; stroke-width: 3; stroke-dasharray: 10 8; }
+      .center { text-anchor: middle; }
+      .right { text-anchor: end; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2000" height="1120"/>
+
+  <text class="title" x="55" y="62">Stage 2P-1｜真正前瞻证据如何产生</text>
+  <text class="subtitle" x="55" y="99">先封存预测，再等待未来事实；任何结果都不能倒流改变当期模型</text>
+
+  <rect class="danger" x="55" y="126" width="300" height="54" rx="16"/>
+  <text class="status center" x="205" y="160" fill="#be123c">1A 已冻结｜真实起报 NO-GO</text>
+  <rect class="pill-amber" x="375" y="126" width="440" height="54" rx="16"/>
+  <text class="status center" x="595" y="160" fill="#92400e">首期合法起报不早于 2026-09-10</text>
+  <rect class="pill-purple" x="835" y="126" width="370" height="54" rx="16"/>
+  <text class="status center" x="1020" y="160" fill="#6b21a8">累计效果：正式判定前密封</text>
+  <rect class="pill-red" x="1225" y="126" width="720" height="54" rx="16"/>
+  <text class="status center" x="1585" y="160" fill="#be123c">当前无“预测提升”结论｜图中不含真实坐标或效果数值</text>
+
+  <text class="small" x="55" y="216">起报前：Q=T−15min 为查询截止；T−5 冻结候选，失败时 T−4 另封 missed 审计</text>
+  <line x1="55" y1="228" x2="1945" y2="228" stroke="#94a3b8" stroke-width="2"/>
+
+  <!-- Step 1: data continuation -->
+  <rect class="source" x="55" y="258" width="300" height="338" rx="20"/>
+  <rect class="pill-blue" x="75" y="278" width="86" height="30" rx="15"/>
+  <text class="step center" x="118" y="299" fill="#1d4ed8">步骤 1</text>
+  <text class="head" x="75" y="345">数据接续</text>
+
+  <rect class="card" x="75" y="370" width="260" height="84" rx="13"/>
+  <text class="body-strong" x="92" y="398">本地历史基线</text>
+  <text class="body" x="92" y="426">覆盖截止 2026-07-09</text>
+  <text class="tiny" x="92" y="447">冻结旧前缀，不改写历史</text>
+
+  <text class="body-strong center" x="205" y="480">＋</text>
+
+  <rect class="card" x="75" y="498" width="260" height="84" rx="13"/>
+  <text class="body-strong" x="92" y="526">ComCat 新到数据</text>
+  <text class="body" x="92" y="554">接续基线后的新增记录</text>
+  <text class="tiny" x="92" y="575">来源、许可、原始字节与哈希</text>
+
+  <!-- Step 2: snapshot and RFC3161 -->
+  <path class="flow" d="M355 427 H385"/>
+  <rect class="seal" x="395" y="258" width="320" height="338" rx="20"/>
+  <rect x="415" y="278" width="86" height="30" rx="15" fill="#e2e8f0" stroke="#475569"/>
+  <text class="step center" x="458" y="299" fill="#334155">步骤 2</text>
+  <text class="head" x="415" y="345">T−5 候选／T−4 审计</text>
+  <text class="body" x="415" y="384">• 三模型共用同一份快照</text>
+  <text class="body" x="415" y="416">• origin_time ≤ Q</text>
+  <text class="body" x="415" y="448">• available／first_seen &lt; T</text>
+  <text class="body" x="415" y="480">• 快照／解析／去重／候选字节</text>
+  <line class="divider" x1="415" y1="500" x2="695" y2="500"/>
+  <rect class="pill-blue" x="415" y="518" width="280" height="42" rx="12"/>
+  <text class="body-strong center" x="555" y="545">RFC 3161 远端时间戳</text>
+  <text class="tiny center" x="555" y="580">候选 TSA 失败：generated=true，installed=false</text>
+
+  <!-- Step 3: three models -->
+  <path class="flow" d="M715 427 H745"/>
+  <rect class="model" x="755" y="258" width="470" height="338" rx="20"/>
+  <rect class="pill-green" x="775" y="278" width="86" height="30" rx="15"/>
+  <text class="step center" x="818" y="299" fill="#166534">步骤 3</text>
+  <text class="head" x="775" y="345">同一快照生成三模型</text>
+
+  <rect class="card" x="775" y="367" width="430" height="59" rx="12"/>
+  <text class="body-strong" x="793" y="393">P0｜长期 75 km KDE</text>
+  <text class="small" x="793" y="415">同一 T 前快照中 origin≤Q 的合格历史</text>
+
+  <rect class="card" x="775" y="438" width="430" height="59" rx="12"/>
+  <text class="body-strong" x="793" y="464">P1｜0.5×P0 + 0.5×R30</text>
+  <text class="small" x="793" y="486">(Q−30d,Q] M4+；空窗时精确等于 P0</text>
+
+  <rect class="card" x="775" y="509" width="430" height="69" rx="12"/>
+  <text class="body-strong" x="793" y="535">PP｜0.5×P0 + 0.5×RP30</text>
+  <text class="small" x="793" y="557">(Q−60d,Q−30d]；与 R30 精确等长</text>
+  <text class="tiny" x="793" y="575">不是 T−30 时点的反事实快照</text>
+
+  <!-- Step 4: immutable archive and maps -->
+  <path class="flow" d="M1225 427 H1255"/>
+  <rect class="archive" x="1265" y="258" width="360" height="338" rx="20"/>
+  <rect class="pill-green" x="1285" y="278" width="86" height="30" rx="15"/>
+  <text class="step center" x="1328" y="299" fill="#166534">步骤 4</text>
+  <text class="head" x="1285" y="345">不可改写预测归档</text>
+
+  <g transform="translate(1285 371)">
+    <rect x="0" y="0" width="96" height="82" rx="9" fill="url(#map-a)" stroke="#2563eb"/>
+    <path d="M10 61 C25 40 42 68 59 36 C71 18 81 31 88 14" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <rect x="12" y="12" width="35" height="26" fill="none" stroke="#0f172a" stroke-width="3"/>
+    <text class="body-strong center" x="48" y="104">P0</text>
+  </g>
+  <g transform="translate(1397 371)">
+    <rect x="0" y="0" width="96" height="82" rx="9" fill="url(#map-b)" stroke="#15803d"/>
+    <path d="M9 58 C27 67 35 28 53 43 C67 54 78 25 88 18" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <rect x="43" y="24" width="38" height="28" fill="none" stroke="#0f172a" stroke-width="3"/>
+    <text class="body-strong center" x="48" y="104">P1</text>
+  </g>
+  <g transform="translate(1509 371)">
+    <rect x="0" y="0" width="96" height="82" rx="9" fill="url(#map-c)" stroke="#6d28d9"/>
+    <path d="M10 63 C20 38 42 48 55 29 C67 12 80 42 88 20" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <rect x="20" y="34" width="42" height="29" fill="none" stroke="#0f172a" stroke-width="3"/>
+    <text class="body-strong center" x="48" y="104">PP</text>
+  </g>
+
+  <text class="small" x="1285" y="512">相对强度 + ≤600,000 km² 完整格前缀</text>
+  <text class="small" x="1285" y="537">静态图 + 单文件离线交互页</text>
+  <text class="small" x="1285" y="562">代码／协议／输入／模型／输出哈希</text>
+  <text class="tiny" x="1285" y="584">一经起报永久保留；迟发不得补图</text>
+
+  <!-- Step 5: future horizons -->
+  <path class="flow" d="M1625 427 H1655"/>
+  <rect class="wait" x="1665" y="258" width="280" height="338" rx="20"/>
+  <rect class="pill-amber" x="1685" y="278" width="86" height="30" rx="15"/>
+  <text class="step center" x="1728" y="299" fill="#92400e">步骤 5</text>
+  <text class="head" x="1685" y="345">等待未来窗口</text>
+  <text class="small" x="1685" y="378">目标区间严格为 (T, T+h]</text>
+
+  <rect class="card" x="1685" y="401" width="240" height="45" rx="11"/>
+  <text class="body-strong center" x="1805" y="430">7 日</text>
+  <rect class="card" x="1685" y="458" width="240" height="45" rx="11"/>
+  <text class="body-strong center" x="1805" y="487">30 日</text>
+  <rect class="card" x="1685" y="515" width="240" height="45" rx="11"/>
+  <text class="body-strong center" x="1805" y="544">90 日</text>
+  <text class="tiny center" x="1805" y="581">逐窗口时间不重叠｜零事件 exposure 保留</text>
+
+  <text class="small" x="55" y="644">起报后：只追加成熟事实；预测内容与哈希保持不变</text>
+  <line x1="55" y1="656" x2="1945" y2="656" stroke="#94a3b8" stroke-width="2"/>
+
+  <!-- Downward continuation -->
+  <path class="flow-wait" d="M1805 596 V686"/>
+
+  <!-- Step 6: truth maturity -->
+  <rect class="wait" x="1535" y="696" width="410" height="273" rx="20"/>
+  <rect class="pill-amber" x="1555" y="716" width="86" height="30" rx="15"/>
+  <text class="step center" x="1598" y="737" fill="#92400e">步骤 6</text>
+  <text class="head" x="1555" y="783">时间上独立抓取的成熟真值</text>
+  <text class="body" x="1555" y="819">成熟时刻：T + h + 30 日</text>
+
+  <g transform="translate(1555 844)">
+    <rect class="card" x="0" y="0" width="82" height="40" rx="10"/>
+    <text class="small center" x="41" y="26">truth v1</text>
+    <path class="flow-wait" d="M90 20 H126"/>
+    <rect class="card" x="136" y="0" width="82" height="40" rx="10"/>
+    <text class="small center" x="177" y="26">truth v2</text>
+    <path class="flow-wait" d="M226 20 H262"/>
+    <rect class="card" x="272" y="0" width="103" height="40" rx="10"/>
+    <text class="small center" x="323.5" y="26">成熟版本</text>
+  </g>
+  <text class="small" x="1555" y="916">独立请求｜只追加｜preferred origin 修订归属</text>
+  <text class="small" x="1555" y="943">主目标 M5_6=[5.0,6.0)；M6+ 仅探索</text>
+
+  <!-- Step 7: sealed effects -->
+  <path class="flow" d="M1535 833 H1497"/>
+  <rect class="locked" x="1115" y="696" width="370" height="273" rx="20"/>
+  <rect class="pill-purple" x="1135" y="716" width="86" height="30" rx="15"/>
+  <text class="step center" x="1178" y="737" fill="#6b21a8">步骤 7</text>
+  <text class="head" x="1135" y="783">累计效果密封库</text>
+
+  <g transform="translate(1140 807)">
+    <rect x="0" y="35" width="56" height="50" rx="9" fill="#f3e8ff" stroke="#7e22ce" stroke-width="3"/>
+    <path d="M12 35 V24 C12 7 44 7 44 24 V35" fill="none" stroke="#7e22ce" stroke-width="6"/>
+    <circle cx="28" cy="59" r="5" fill="#7e22ce"/>
+    <path d="M28 64 V74" stroke="#7e22ce" stroke-width="4"/>
+  </g>
+  <text class="body" x="1210" y="831">支持域 IG＋全研究区严格召回</text>
+  <text class="body" x="1210" y="863">暴露／报警面积清单、震群／区域贡献</text>
+  <text class="body" x="1210" y="895">正式 look 前不得查看或据此调模</text>
+  <line class="divider" x1="1135" y1="916" x2="1465" y2="916"/>
+  <text class="tiny" x="1135" y="943">成熟后可追加单期事件叠加，但不得展示累计优劣</text>
+
+  <!-- Step 8: only formal look -->
+  <path class="flow" d="M1115 833 H1077"/>
+  <rect class="decision" x="595" y="696" width="430" height="273" rx="20"/>
+  <rect x="615" y="716" width="86" height="30" rx="15" fill="#ffedd5" stroke="#c2410c"/>
+  <text class="step center" x="658" y="737" fill="#9a3412">步骤 8</text>
+  <text class="head" x="615" y="783">52／104 期唯一正式判定</text>
+  <text class="body-strong" x="615" y="820">第 52 个按时起报成熟：</text>
+  <text class="small" x="635" y="849">清单可回算、三窗可评、N≥20、B≥10 → 唯一 look</text>
+  <text class="small" x="635" y="875">任一门不足 → 对比仍密封，盲封至 104</text>
+  <text class="body-strong" x="615" y="910">第 104 个按时起报成熟：</text>
+  <text class="small" x="635" y="939">未知≠零；valid／invalid bundle 均只封一次</text>
+
+  <!-- Future outcomes, not current results -->
+  <path class="flow" d="M595 833 H557"/>
+  <rect class="card" x="55" y="696" width="450" height="273" rx="20"/>
+  <rect x="75" y="716" width="126" height="30" rx="15" fill="#e2e8f0" stroke="#64748b"/>
+  <text class="step center" x="138" y="737" fill="#334155">未来才产生</text>
+  <text class="head" x="75" y="783">正式结论的三种状态</text>
+  <rect class="pill-green" x="75" y="808" width="410" height="39" rx="11"/>
+  <text class="small center" x="280" y="833">通过：仅形成 direct_improvement 候选证据</text>
+  <rect class="pill-red" x="75" y="859" width="410" height="39" rx="11"/>
+  <text class="small center" x="280" y="884">失败：停止 P1，保留 P0，不针对 cohort 调参</text>
+  <rect class="pill-amber" x="75" y="910" width="410" height="39" rx="11"/>
+  <text class="small center" x="280" y="935">证据不足：达到最长投入后停止该候选</text>
+
+  <!-- Seal boundary annotation -->
+  <path class="dash" d="M1085 676 V989"/>
+  <text class="tiny center" x="1085" y="1013" fill="#6b21a8">效果解封边界</text>
+
+  <!-- Footer legend and status -->
+  <rect x="55" y="1018" width="1890" height="72" rx="17" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text class="body-strong" x="78" y="1050">图例</text>
+  <rect class="pill-blue" x="145" y="1034" width="24" height="24" rx="6"/>
+  <text class="small" x="180" y="1052">数据／溯源</text>
+  <rect class="pill-green" x="310" y="1034" width="24" height="24" rx="6"/>
+  <text class="small" x="345" y="1052">预测／不可改写归档</text>
+  <rect class="pill-amber" x="560" y="1034" width="24" height="24" rx="6"/>
+  <text class="small" x="595" y="1052">等待／成熟</text>
+  <rect class="pill-purple" x="735" y="1034" width="24" height="24" rx="6"/>
+  <text class="small" x="770" y="1052">密封／禁止提前查看</text>
+  <rect class="pill-red" x="985" y="1034" width="24" height="24" rx="6"/>
+  <text class="small" x="1020" y="1052">当前阻断或停止</text>
+  <text class="small right" x="1920" y="1052">门控含义：先验规则，不是已经观察到的模型效果</text>
+  <text class="tiny" x="78" y="1077">真实发行前仍须完成：1B 纯合成同路径验收与独立审计、代码提交推送及远端标签核验；当前不授权真实数据。</text>
+</svg>

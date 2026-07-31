@@ -16,6 +16,9 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
+  "asn1crypto==1.5.1",
+  "cryptography==49.0.0",
+  "jsonschema==4.20.0",
   "matplotlib==3.11.0",
   "numpy==2.4.6",
   "openpyxl==3.1.5",

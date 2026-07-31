@@ -7,9 +7,12 @@
 - 阶段 2S 目标盲协议本地冻结日期：2026-07-30
 - 阶段 2S 正式执行日期：2026-07-30
 - 阶段 2P 目标盲路线复审日期：2026-07-31
+- 阶段 2P-1A 前瞻预登记冻结日期：2026-07-31
 - 状态：阶段 4A 与 Stage 2S 均已停止；继续保留 75 km KDE。Stage 2P-0 已选择最小近期地震
-  真正前瞻筛查，但尚未授予真实发行权；必须先完成 Stage 2P-1 预登记、代码前合同和验收。
-  锁定测试未读取
+  真正前瞻筛查；Stage 2P-1A 候选审计已 GO 并唯一跃迁为 accepted/frozen，但尚未授予执行权或
+  真实发行权。下一步只允许在精确最终字节复验、提交、推送和远端标签回读闭合后进入 Stage
+  2P-1B 纯合成链。当前 `protocol_frozen=true`、`execution_authorized=false`、
+  `real_issue_authorized=false`；锁定测试未读取
 - 对应机器配置：`configs/research_protocol.yaml`
 - 首次冻结标签：`v0.1.0-data-contract`；阶段 2 成绩前冻结标签：`v0.2.0-background-protocol`
 
@@ -158,23 +161,25 @@ target read 均已消费，禁止修改冻结代码后重开目录、恢复或�
 它尚未证明固定面积严格召回。近期地震、动态异常、构造和复杂模型均没有新增效果证据。已经发生的
 历史数据不能再包装成真正前瞻考试，因此选择从下一合法起报开始保存不可回填的未来证据。
 
-Stage 2P 只检验（`T` 为本期起报时刻）：
+Stage 2P 只检验（`T` 为本期起报时刻，`Q=T-15min` 为共同查询结束和起源截止）：
 
 - `P0(T)`：冻结 G1-LS 选出的支持域、资格、归一规则和 75 km 带宽，但每期从同一 `T` 前封存
-  快照中用全部届时可用的合格历史事件因果重建；
+  快照中用截至 `Q` 且届时可用的合格历史事件因果重建；
 - `P1(T)`：`0.5 * P0(T) + 0.5 * R30(T)`；
 - `PP(T)`：`0.5 * P0(T) + 0.5 * RP30(T)`。
 
 `final_validation` 的旧密度只作方法选择证据，不进入 2026 年以后的主比较。`R30` 和 `RP30`
-分别是同一 `T` 快照中最近 30 天及前 60 至 30 天的 M4+ 事件 75 km KDE；PP 只称 `T` 时已知
-的旧起源时窗对照。空窗精确退化为 P0。固定 0.5 是归一密度混合系数，不是贡献率或最优权重；
-失败只否定这个固定候选。
+分别是同一 `T` 前快照中 `(Q-30d,Q]` 与 `(Q-60d,Q-30d]` 两个精确等长 M4+ 起源窗的 75 km
+KDE；PP 只称 `T` 时已知的旧起源时窗对照。空窗精确退化为 P0。固定 0.5 是归一密度混合系数，
+不是贡献率或最优权重；失败只否定这个固定候选。
 
 每周四 `00:00 Asia/Shanghai` 起报。首个合法起报只能是协议/代码标签远端核验后的下一规则
-起报；迟发记为 `missed_issue`，不得补图。起报前必须完成源身份/许可、抓取开始和结束、响应或
-文件身份、原始/规范化/去重哈希和计数、解析/配置/去重代码、新鲜度、首次可用规则、上一期哈希
-及 `seal_completed_at < T` 的封印和远端时间锚。三模型共享 7/30/90 天、`M5_6`、相同率、
-支持域、25 km 格网和 600,000 平方公里完整报警前缀。
+起报；迟发记为 `missed_issue`，不得补图。正式抓取只能在 Q 到达后开始；可安装的完整源快照、
+预测和报警候选必须最迟在 `T-5min` 冻结，并取得 `genTime<T-5min` 的候选远端时间戳。候选形成
+前失败时不生成预测；候选已完整生成但候选 TSA 失败时，只保留本地受限候选且不安装为正式预测。
+两类失败都必须最迟在 `T-4min` 冻结 missed 审计 core，并用独立 TSA 请求在 T 前取得审计时间锚。
+三模型共享 7/30/90 天、`M5_6`、相同率、G1-LS 支持域、25 km 格网和“完整格累计面积不超过
+600,000 平方公里”的规则；每个模型记录实际完整前缀和实际面积。
 
 首期前还必须冻结目标真值来源/许可、窗口成熟与迟报等待、震级/位置/身份修订、跨目录去重、
 M5.9/M6.0 边界、目标 cohort 哈希和只追加的评价版本。原始行和精确坐标默认本地受限；公开
@@ -184,15 +189,17 @@ M5.9/M6.0 边界、目标 cohort 哈希和只追加的评价版本。原始行�
 `valid_from`，并生成静态图和离线交互页。预测立即可看，成熟后可追加单期事件叠加；确认性累计
 对比在唯一正式判定前保持密封。
 
-52 个周起报只是归档水位。正式评分在每个窗口确定性选时间不重叠 exposure 并保留零事件；
-同一事件跨起报/窗口的贡献进入同一预登记震群块。最低样本为 20 个唯一去重 `M5_6` 事件，M6+
-不能凑门。2,000 次配对震群块 Bootstrap 形成一个 95% familywise 同时区间族：`P1-P0`、
+52 个按时周起报只是归档水位。正式评分在每个窗口只按 on_time/issue time/horizon 确定性选
+时间不重叠 exposure 并保留零事件；已选真值不可用项禁止替补。同一事件跨起报/窗口的贡献进入
+同一预登记震群块。最低样本为 20 个唯一去重 `M5_6` 事件和 10 个独立震群块，M6+ 不能凑门。
+2,000 次配对震群块 Bootstrap 形成一个 95% familywise 同时区间族：`P1-P0`、
 `P1-PP` 的宏信息增益和严格召回下界均大于 0，且 `P1-P0` 召回至少提高 5 个百分点；移除最大
 正贡献震群或区域后全部确认性点估计仍为正。
 
-第 52 期全部 90 天窗口成熟且样本门满足时只正式判定一次；若样本不足，不打开对比行，盲封存至
-第 104 期成熟后唯一最终判定。届时仍不足则以 `evidence_insufficient` 停止 P1，期间禁止反复
-检验或展示确认性累计对比。
+第 52 个按时期的全部 90 天窗口成熟且三个 horizon 可评价、事件门和震群块门满足时只正式判定
+一次；若任一基本门不足且从未打开效果行，只冻结第一次输入并盲积累。第 104 个按时期成熟后允许
+第二次、也是最后一次输入冻结；若门届时满足才打开全线唯一一次确认性效果，仍不足则不创建结果
+封印，以 `evidence_insufficient` 停止 P1。期间禁止反复检验或展示确认性累计对比。
 
 Stage 2P 是研究性前瞻证据采集，不是阶段 10 业务影子，不表示 G8 通过，也不运行或绕过锁定测试。
 异常增量作为第二挑战者，在首条前瞻线开始后、任何 P 效果指标解封前另立协议和有效日，不得阻塞
@@ -205,6 +212,193 @@ Stage 2P 是研究性前瞻证据采集，不是阶段 10 业务影子，不表�
 - `next_scientific_test`: 首期前完成 Stage 2P-1 源/真值/模型身份/统计/许可机器合同、同路径合成
   验收、提交、推送和远端标签核验
 - `stop_condition`: 首期合同不闭合则不发行；正式门失败或 104 期仍证据不足则停止 P1 并保留 P0
+
+## 0.6 阶段 2P-1A 真正前瞻预登记候选
+
+本节冻结未来怎样保存预测和怎样只看一次答案，不运行模型，也不形成效果结论。外行版是：每周四
+同时封存长期多发区图 P0、加入最近 30 天地震的图 P1、加入再早 30 天地震的公平对照图 PP；
+三张图用同一个当时可见的数据快照和同一套“不超过 600,000 平方公里”的完整格前缀规则，且
+记录各自实际面积，等未来地震成熟后再按固定规则判断 P1 是否同时胜过另两张图。完整逐字段合同见
+`docs/phase2p1_prospective_preregistration.md`，并作为本协议的 Stage 2P-1A 组成部分。
+
+阶段边界不得混用：Stage 2P-1A 只冻结 schema、规范字节、工件 profile、外部信任边界、状态机和
+统计语义，并要求未实现的真实字节路径失败闭合；其实现状态只能是 `stage2p1b_required`，不能声称
+ASN.1/CMS、目录表、预测数组或评价字节已经可重建。Stage 2P-1B 才以纯合成数据实现并逐字节演练
+acquisition→表→P0/P1/PP→展示→成熟真值→revision→input freeze→result seal；合成验收和代码
+标签远端核验前，禁止真实目录、真实网络、真实 issue 和新前瞻目标读取。
+
+Stage 2P-1A 候选审计 GO 也不等于阶段完成。2026-07-31 GO 后已在同一候选中完成唯一状态跃迁：
+`accepted`、`protocol_frozen=true`，execution/real 授权仍为 false；随后必须对这组精确最终
+字节复验，复验 GO 后再提交、推送、创建 annotated 协议标签并回读 tag object 与 peeled commit。
+只有远端回读闭合后才可声明 1A 完成并进入 1B，标签后不得改写本阶段协议字节。
+
+`T` 为每周四 `00:00 Asia/Shanghai` 的规则起报，`Q=T-15min` 为共同查询结束和起源截止。
+三个确认性模型固定为：
+
+- `P0(T)`：从同一 T 前不可变快照中截止 Q 的事件重建长期 75 km KDE；
+- `P1(T)=0.5*P0(T)+0.5*R30(T)`，其中 R30 起源窗为 `(Q-30d,Q]`；
+- `PP(T)=0.5*P0(T)+0.5*RP30(T)`，其中 RP30 起源窗为 `(Q-60d,Q-30d]`。
+
+P0、R30、RP30 使用同一快照、同一可见截止和同一选择函数；两个近期窗都是精确 30 天。RP30
+是 T 时已知的旧起源时窗，
+不是 T-30d 的反事实快照。旧 Stage 2S RP 选择器、runner、RoleSession、fold/master seal、
+attempt、拟合、Bootstrap 和 gate 禁止复用。空的近期窗使对应组合逐数组精确退化为 P0。固定
+0.5 只是两个归一密度的混合系数，不是贡献率、最优权重或绝对发震概率。
+
+本地目录仅作 P0 历史基线，固定截止 `2026-07-09T04:25:56Z`。其后的预测增量与未来目标真值
+统一来自 USGS ComCat，并先做完整 60 天同源洗脱。权威来源为
+[USGS FDSN Event Web Service](https://earthquake.usgs.gov/fdsnws/event/1/)、
+[ComCat](https://earthquake.usgs.gov/data/comcat/index.php)、
+[ComCat DOI](https://doi.org/10.5066/F7MS3QZH)、
+[ANSS Data and Products Policy](https://www.usgs.gov/media/files/anss-data-and-products-policy) 和
+[USGS Data Licensing](https://www.usgs.gov/data-management/data-licensing)。第一期不得早于
+`2026-09-10 00:00 Asia/Shanghai`，且必须是协议标签和代码标签的远端对象及 peeled commit
+均核验后的下一规则起报；错过不补发。
+
+ComCat 在中国的 M4 覆盖、震级口径和修订节奏可能与本地目录不同。60 天洗脱只消除 R30/PP
+换源混杂，不证明源完全或两源等价；覆盖差异只记录并限制结论范围，不设效果相关硬阈值。一次
+官方抓取或冻结目标无关支持证据未按时取得可记 `missed_issue`；官方来源、政策、schema 或
+目标无关支持证据持续中断或实质变化时暂停后续发行并作目标盲修订。不得补发，也不得看目标后
+换源或调参。查询固定下探至 `minmagnitude=3.9`，解析后按数值严格过滤 `mag>=4.0`。切源缝隙的跨源
+去重只在起源时间差不超过 300 秒、WGS84 距离不超过 50 km 且 `abs(ΔM)<=0.5` 时成立；按
+时间差、距离、震级差和稳定 ID 作确定性一对一匹配，local anchor 优先，ComCat ID 只作 crosswalk。
+
+每期正式抓取只能在 `Q` 到达后开始，事件必须满足 `origin_time<=Q` 且
+`available_at/first_seen_at<T`。源记录绑定请求参数、原始响应字节、HTTP 身份、抓取时刻、
+解析/规范化/去重身份、P0/R30/RP30 事件集合、哈希和上一期记录哈希。可安装的完整源快照、
+P0/P1/PP 预测和完整 25 km 报警前缀候选必须最迟在 `T-5min` 冻结。所有 schema 要求 remote
+timestamp 的正式记录均使用同一 RFC3161 core：按
+`seismoflux_canonical_json_v1` 编码，只且恰好排除顶层
+`timestamp_attempt_evidence`、`remote_timestamp`、`content_sha256`，禁止递归排除和嵌套
+proof/token；每条 token 的 `genTime` 必须早于其 record-specific deadline，Issue 候选 deadline
+精确为 `T-5min`。TSA 有序主备固定为 DigiCert 主、Sectigo 备；只有主站形成可验证失败证据后
+才能尝试备站，不能临时换第三家或改变顺序。message imprint 必须等于 core SHA-256；最终
+`content_sha256` 仍按仅排除自身的记录规则独立计算。token 是绑定附件，不是新增正式记录。
+
+候选形成前失败时写 `prediction_generated=false`、`prediction_installed=false`。完整候选已在
+T-5 前生成但两家候选 TSA 都失败时，必须保留本地受限、内容寻址的
+`FailedCandidateOnTimeCore`，写 `prediction_generated=true`、`prediction_installed=false`；
+它不是正式预测，不能公开密度或报警格。两类失败都最迟在 `T-4min` 冻结最终
+`missed_issue` 审计 core，再用与候选尝试分离的 RFC3161 请求在 T 前取得审计 token；审计 token
+也失败时不安装漏期记录并暂停 cohort。所有失败均不得补发。
+
+机器合同还要求：count/query 各自保存冻结参数对象、规范 GET URL 哈希、响应头与原始响应，并
+复算 parsed count；count 达到 20,000 时禁止 query。cohort 嵌入协议/代码 annotated tag 的远端
+object、peeled commit、核验时刻和 receipt，并冻结 parser 至 evaluator/visualizer/validator 的
+结构化 code manifest。RFC3161 使用锁定的 Python `cryptography==49.0.0` 与
+`asn1crypto==1.5.1` 路径，冻结 trust/OID/TSA/附件安装身份，`.tsq/.tsr` create-only 留存。
+
+正式状态仅允许五类只追加记录：`TargetCohortDefinition`、`IssueInputSnapshotRecord`、
+`MatureTruthSnapshotRecord`、`TruthRevisionRecord`、`EvaluationFreezeRecord`。
+`IssueInputSnapshotRecord.status=on_time|missed_issue`；on_time 嵌套源快照与 P0/P1/PP
+预测 seal、报警前缀、哈希和 `valid_from`。missed 不安装 source snapshot 或 prediction seal；
+候选形成前失败时不引用候选，候选 TSA 失败时则必须引用 T-5 前冻结的本地受限失败候选，但公开
+记录仍不得包含其预测密度或报警格。禁止覆盖历史记录，也禁止将已规范编码的 JSON 解码后再次
+规范编码。
+
+每个规则周四都递增 `scheduled_issue_sequence`，包括 missed；`on_time_issue_sequence` 只对按时
+issue 递增，missed 时为 null。52/104 检查点只按 on_time 序号。`EvaluationFreezeRecord` 用
+`phase=input_freeze|result_seal` 完成唯一正式结果闭环，仍只算上述第五类记录。scheduled 序号
+最多 130；达到 130 仍未取得 104 个按时 issue 时以证据不足停止。
+第 130 期 cap 优先于第 52 期：当时只有 52–103 个按时期也不得开启正式 look。
+
+每个 `(issue,horizon)` 的 ComCat 真值窗口为 `(T,T+h]`，在 `T+h+30d` 成熟。真值必须由与
+issue 输入分离的请求取得，称为 temporally independent mature snapshot（时间上独立抓取的成熟
+快照），不得复用 issue 响应，也不把“时间上独立抓取”误称为事件统计独立。真值查询本地严格
+过滤 `T<preferred_origin_time<=T+h`。固定重试时刻为 `0h、+6h、+24h、+72h、+168h`，按顺序
+采用第一个完整成功响应并停止；只有全部失败才实际完成五次并追加
+`MatureTruthSnapshotRecord.status=truth_snapshot_unavailable`，该 exposure 不可评分，不能记零
+、临时重试或用后续 issue 替补。每个实际 `input_freeze` 检查点只允许一次预登记的全量 cohort
+formal-freeze 尝试：第 52 个按时 issue 最多一次；只有 52 的基本样本门未满足且从未打开效果行
+时，第 104 个按时 issue 才允许第二次，全线最多两次，禁止替换失败响应或按结果重试。
+
+formal-freeze 成功时，事件数、震群数、窗口成员和目标工件必须由同一完整响应机械重算。只有
+`not_run_no_complete_scope` 可把机械空 scope 记为真实 0；scheduled cap 或任一 count/query/解析/
+本地派生失败均表示科学量不可获得，目标数、震群数、目标集合、最终窗口成员及 target-dependent
+horizon 字段必须为 null/unavailable，而不能伪装成观测到 0，Bootstrap 也必须记未运行。exposure
+选择和既有真值 availability 证据仍保留，效果行不得打开。
+
+复核成功后修订只能追加 `TruthRevisionRecord`，不能覆盖成熟快照。正式归属统一使用
+`input_freeze` 绑定的同一 formal-freeze source snapshot 的 preferred
+origin/magnitude/location/identity；preferred origin 修订若跨 `T`、`T+h` 或相邻 exposure
+边界，必须记录旧归属并按修订后 origin 确定性唯一重归属，禁止双计或挑选有利版本。来源或真值
+后续修订不能回填、重算或更换已封存的模型版本、输入、预测数组和报警前缀。
+
+局部 Mc 过高只影响相应本地支持单元，不得影响其他区域。三模型共享研究区、39 区映射、
+50/25/12.5 km 对齐网格、局部资格和相同率；三路 KDE 训练事件只取 G1-LS 支持格内合格事件，
+密度也只在该支持域连续边界归一。信息增益只用支持域目标，严格召回以全研究区目标为分母并把
+支持域外目标记为三模型共同未命中。报警取
+完整格累计精确面积不超过 600,000 平方公里的前缀，600,000 只是上限；逐模型记录完整排名、
+实际前缀、格数、实际面积和终止原因。
+
+7/30/90 天分别只按 on_time 状态、issue time 和 horizon 选择不重叠 exposure 并保留零事件；
+目标事件数、坐标、命中和分数不得影响选择。已选 exposure 的真值不可用时禁止替补，该 horizon
+不可评价。主门要求至少 20 个唯一去重 `M5_6=[5.0,6.0)` 事件和至少 10 个独立震群块。震群按
+30 天、75 km 连边的无向连通分量冻结。
+连边精确使用 `<=2592000s` 与 `pyproj.Geod 3.7.2 WGS84 inv float64 <=75000m`、零容差和传递
+闭包；component id 是固定命名空间与排序唯一事件 ID 规范字节的 SHA-256。
+
+每个 horizon 的 `A-B` 信息增益为支持域内唯一 M5–6 目标的
+`Σln(f_A(x_e)/f_B(x_e))/N_h_supported`（nats/event），其中 `f` 是支持域连续边界归一后在事件
+投影坐标直接求值的密度，禁止格查找/插值/格均值；共同率和积分补偿相消。严格召回为
+`Σhit_M(e)/N_h_all_region`，其中支持域外命中固定为 0。两类指标都先逐 horizon 计算，再按
+7/30/90 固定各 `1/3` 宏平均。无支持域目标、全区分母为零、已选真值不可用或密度为零/非有限值
+时 horizon 不可评价，不得加 density floor；对数比用 deterministic float64 pairwise summation，
+绝对容差 `1e-12`。
+
+统计使用 PCG64 根种子 147 和 2,000 次配对震群块 Bootstrap：有 B 个块时每次有放回抽 B 个，
+相同抽样同时用于全部模型/对比/horizon，重复块按乘数重复贡献并重算逐 horizon 分母与宏平均。
+四端点是 P1-P0、P1-PP 的宏信息增益和严格召回增益；使用 Bonferroni 95% familywise 双侧同时
+区间，即每端点 98.75% percentile 区间，按 NumPy `method=linear` 取 `0.625%`、`99.375%`。
+四个下界都须大于 0，P1-P0 严格召回点估计还须至少 `+5` 个百分点，并通过 39 区可加闭合、
+移除最大正贡献区域和移除最大正贡献震群后仍为正的稳健性门。
+随机流直接初始化为 `Generator(PCG64(147))`，namespace 只作身份标签；效果解封前冻结完整索引
+矩阵，禁止重抽/丢弃，任何零分母复本在盲态直接判证据不足。
+
+确认性效果最多查看一次，但输入冻结最多两次：第 52 个按时 issue 的全部 90 天窗成熟后先写
+`EvaluationFreezeRecord.phase=input_freeze`，只绑定 cohort/revision、目标无关 exposure、
+可评价性、N/B 水位、预测/代码/协议/环境/随机流和输出身份，不含效果行。只有三个 horizon
+均可评价、N>=20、B>=10 时才授权打开效果；随后必须立即写且只能写一个直接引用 input hash 的
+`phase=result_seal`。第 52 个按时期门不足且效果行从未打开时不生成 result seal，继续盲积累至
+第 104 个按时期并允许第二次 input freeze；届时仍不可评价、N<20 或 B<10 则
+`evidence_insufficient` 并停止 P1。若第 52 期已经打开效果，则不能在第 104 期再冻结或查看第二套
+确认性输入。
+
+valid/invalid `ResultBundleManifest` 都必须安装唯一规范 JSON 字节，并使 `result_bundle_sha256`
+等于该精确文件字节的 SHA-256。成功执行时还必须完整绑定 effect rows、同面积比较、2,000 次
+Bootstrap 分布、四端点和稳健性工件。授权后若执行失败，仍只追加一个 invalid result seal；其
+`ResultBundleManifest` 必须绑定 formal run、input freeze、评价代码、`invalid_execution`、
+失败阶段、错误码和当时已经实际生成的审计工件。失败阶段固定为 `effect_rows_open`、
+`alarm_area_comparison`、`bootstrap`、`endpoint_evaluation`、`robustness_evaluation`、
+`result_bundle_install` 或 `result_seal`；每个阶段之后尚未生成的成功工件字段必须为 null，
+不能用空表、零端点或伪造稳健性占位。闭合失败也永久停止，不得重跑。
+
+每期静态预测图和离线交互页随预测立即封存，可显示单期数据和成熟事件叠加，但累计命中、
+信息增益、区间和胜负在唯一正式查看前保持密封。
+可评价性必须由 exposure/真值可用性/事件分母/震群/密度证据机械重算，false 需结构化原因。
+评价代码与环境锁在 input freeze 冻结，result seal 逐字段闭合；执行失败只记录失败审计证据，
+不得伪造端点数值或重跑。成熟/修订真值通过新 replay evidence 追加 SVG 和离线 HTML，引用原
+预测图哈希且不修改原图，逐事件叠加默认只存本地受限目录。
+
+执行默认最多 8 个 worker 且至少保留 2 个物理 CPU 核；GPU 仅作与 CPU 数学等价的加速，不能
+改变模型、精度、排序或报警前缀。公开仓库只放代码、协议、配置、测试、来源/许可、哈希、计数、
+聚合强度、报警前缀和许可允许的叠加。USGS 自有数据默认公共领域，但 ComCat 伙伴来源可能例外；
+逐事件行和精确坐标始终本地受限，公开叠加逐项复核来源与许可。未获公开资格不阻断本地研究。
+
+- `science_value_category`: `necessary_enabler`
+- `direct_prediction_improvement`: `none`
+- `evidence`: 已把来源、时间、模型、只追加证据链、真值成熟、唯一统计查看、展示与资源边界写成
+  待验收合同；尚无真实 issue、未来目标或效果指标
+- `decision`: `continue_to_stage2p1b_synthetic_only_after_acceptance`
+- `next_scientific_test`: Stage 2P-1B 只用纯合成数据走通 `Q=T-15min` 同一快照、T-5 候选/T-4
+  missed 双证明、RFC3161 core/主备假服务、scheduled/on_time 序号、五类记录、时间上独立成熟
+  抓取、preferred-origin 跨界修订、真值不可用且禁止替补、formal-freeze unavailable、最多两次
+  input-freeze/一次 effect look、支持域 IG/全域召回精确估计量、至少 10 个震群块、四端点区间、
+  valid/invalid ResultBundle 和 `input_freeze→result_seal` 密封闭环
+- `stop_condition`: 合同不闭合不进入 2P-1B；合成链出现 foundational P0 则停止复审；协议和
+  代码标签远端核验前保持 `execution_authorized=false`、`real_issue_authorized=false`
+
+任何未来结论只适用于冻结的 ComCat 获取/修订链和固定 0.5 候选，不能外推为全部近期地震模型。
 
 ## 1. 唯一科学问题
 
