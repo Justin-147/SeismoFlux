@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SeismoFlux 真实科学证据浏览器</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #58667d;
+      --border: #d7deea;
+      --primary: #2c6fb7;
+      --primary-soft: #e6f0fb;
+      --positive: #16856c;
+      --positive-soft: #ddf4ed;
+      --pending: #aa7510;
+      --pending-soft: #fff2cf;
+      --danger: #a94753;
+      --danger-soft: #f8e4e7;
+      --neutral-soft: #edf1f6;
+      --shadow: 0 10px 28px rgba(35, 48, 70, .08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #10151f;
+        --surface: #18202d;
+        --text: #edf2f8;
+        --muted: #aeb9c9;
+        --border: #354054;
+        --primary: #80b8ef;
+        --primary-soft: #233b55;
+        --positive: #65d4b9;
+        --positive-soft: #183d36;
+        --pending: #f0c66a;
+        --pending-soft: #48391c;
+        --danger: #f09aa4;
+        --danger-soft: #48262b;
+        --neutral-soft: #252f3e;
+        --shadow: none;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    main { width: min(1180px, calc(100% - 28px)); margin: 28px auto 52px; }
+    h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 4vw, 2.35rem); }
+    h2 { margin: 0 0 16px; font-size: 1.35rem; }
+    h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    p { margin: 0; }
+    .subtitle { color: var(--muted); margin-bottom: 22px; }
+    .warning {
+      padding: 12px 15px;
+      border-left: 4px solid var(--pending);
+      background: var(--pending-soft);
+      margin-bottom: 20px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat, .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+    .stat { padding: 16px; }
+    .stat strong { display: block; font-size: 1.55rem; margin-bottom: 2px; }
+    .stat span { color: var(--muted); font-size: .9rem; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+    button, select {
+      font: inherit;
+      color: inherit;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 9px;
+      padding: 9px 13px;
+    }
+    button { cursor: pointer; }
+    button:hover, button:focus-visible { border-color: var(--primary); }
+    button[aria-selected="true"] {
+      color: var(--text);
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      font-weight: 700;
+    }
+    .panel { padding: 20px; }
+    [hidden] { display: none !important; }
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      gap: 20px;
+    }
+    .chart-wrap { overflow-x: auto; }
+    .chart { min-width: 590px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 92px 1fr 84px;
+      align-items: center;
+      gap: 10px;
+      margin: 11px 0;
+    }
+    .track { height: 19px; background: var(--neutral-soft); border-radius: 7px; overflow: hidden; }
+    .bar { height: 100%; background: var(--positive); border-radius: 7px; }
+    .number { font-family: Consolas, monospace; text-align: right; }
+    .ci {
+      position: relative;
+      height: 28px;
+      margin: 8px 84px 4px 102px;
+      border-top: 1px solid var(--border);
+    }
+    .ci::before {
+      content: "";
+      position: absolute;
+      left: 33.66%;
+      right: 19.59%;
+      top: 10px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--text);
+    }
+    .ci::after {
+      content: "";
+      position: absolute;
+      left: 57.45%;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--surface);
+      transform: translateX(-50%);
+    }
+    .legend-note { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+    .status-list { display: grid; gap: 9px; }
+    .status {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .status.positive { background: var(--positive-soft); }
+    .status.pending { background: var(--pending-soft); }
+    .status.excluded { background: var(--danger-soft); }
+    .status small { display: block; color: var(--muted); margin-top: 3px; }
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    label { font-weight: 700; }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .detail {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .detail dt { color: var(--muted); font-size: .86rem; }
+    .detail dd { margin: 3px 0 0; }
+    .model-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .model-detail {
+      display: grid;
+      grid-template-columns: minmax(240px, .75fr) minmax(0, 1.25fr);
+      gap: 18px;
+      padding: 16px;
+      background: var(--neutral-soft);
+      border-radius: 12px;
+    }
+    .components { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+    .chip {
+      display: inline-block;
+      padding: 6px 9px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      font-size: .9rem;
+    }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .fold {
+      border-top: 5px solid var(--primary);
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .fold small { color: var(--muted); display: block; }
+    .footer-note { color: var(--muted); margin-top: 15px; font-size: .9rem; }
+    @media (max-width: 820px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .evidence-grid, .model-detail { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      main { width: min(100% - 18px, 1180px); margin-top: 16px; }
+      .stats, .detail-grid, .timeline { grid-template-columns: 1fr; }
+      .panel { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>SeismoFlux 真实科学证据浏览器</h1>
+  <p class="subtitle">截至 2026-07-31｜只展示真实数据使用状态、真实模型证据和下一项直接检验</p>
+
+  <div class="warning">
+    当前还没有证明固定 600,000 平方公里报警面积下召回提高。合成 MVP 不计入真实预测成绩。
+  </div>
+
+  <section class="stats" aria-label="数据规模摘要">
+    <div class="stat"><strong>216</strong><span>个原始科学文件，全部哈希一致</span></div>
+    <div class="stat"><strong>40,898</strong><span>个合并去重物理地震</span></div>
+    <div class="stat"><strong>59,904</strong><span>条真实异常观测，覆盖 205 期</span></div>
+    <div class="stat"><strong>1</strong><span>条合法真实正模型证据</span></div>
+  </section>
+
+  <nav class="tabs" aria-label="浏览内容">
+    <button type="button" data-tab="evidence" aria-selected="true">当前证据</button>
+    <button type="button" data-tab="data" aria-selected="false">数据使用</button>
+    <button type="button" data-tab="d1" aria-selected="false">D1 下一步</button>
+  </nav>
+
+  <section id="tab-evidence" class="panel" aria-labelledby="evidence-title">
+    <h2 id="evidence-title">当前唯一真实正结果</h2>
+    <div class="evidence-grid">
+      <div class="chart-wrap">
+        <div class="chart" aria-label="75公里KDE相对均匀背景的信息增益">
+          <div class="bar-row"><span>开发折 1</span><div class="track"><div class="bar" style="width:76.3%"></div></div><span class="number">+0.5343</span></div>
+          <div class="bar-row"><span>开发折 2</span><div class="track"><div class="bar" style="width:84.5%"></div></div><span class="number">+0.5912</span></div>
+          <div class="bar-row"><span>开发折 3</span><div class="track"><div class="bar" style="width:82.4%"></div></div><span class="number">+0.5768</span></div>
+          <div class="bar-row"><span>开发折 4</span><div class="track"><div class="bar" style="width:87.3%"></div></div><span class="number">+0.6114</span></div>
+          <div class="bar-row"><span>最终验证</span><div class="track"><div class="bar" style="width:57.5%"></div></div><span class="number">+0.4022</span></div>
+          <div class="ci" aria-label="最终验证95%区间为0.2356到0.5629"></div>
+          <p class="legend-note">最终验证：96 个支持域 M≥4 目标；逐事件 Bootstrap 95% CI [+0.2356, +0.5629] nats/事件。它们不是 96 个 M5–6 独立震群。</p>
+        </div>
+      </div>
+      <div class="status-list">
+        <div class="status positive"><strong>75 km KDE：有真实正证据</strong><small>说明历史地震多发区比全国均匀猜测更有信息。</small></div>
+        <div class="status pending"><strong>固定面积召回：尚未检验</strong><small>不能把信息增益直接解释成“召回提高”。</small></div>
+        <div class="status pending"><strong>异常、近期地震、构造：效果未知</strong><small>已准备部分数据，但没有合法真实增量分数。</small></div>
+        <div class="status excluded"><strong>合成结果：不计真实成绩</strong><small>只证明计算逻辑能识别已知正、零、负情景。</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-data" class="panel" aria-labelledby="data-title" hidden>
+    <h2 id="data-title">每类数据到底用了没有</h2>
+    <div class="control-row">
+      <label for="data-select">选择数据</label>
+      <select id="data-select"></select>
+    </div>
+    <dl class="detail-grid">
+      <div class="detail"><dt>规模</dt><dd id="data-size"></dd></div>
+      <div class="detail"><dt>时间/可用范围</dt><dd id="data-time"></dd></div>
+      <div class="detail"><dt>已经做了什么</dt><dd id="data-used"></dd></div>
+      <div class="detail"><dt>尚缺什么科学证据</dt><dd id="data-missing"></dd></div>
+      <div class="detail"><dt>主要特征</dt><dd id="data-features"></dd></div>
+      <div class="detail"><dt>关键限制</dt><dd id="data-limit"></dd></div>
+    </dl>
+  </section>
+
+  <section id="tab-d1" class="panel" aria-labelledby="d1-title" hidden>
+    <h2 id="d1-title">D1：下一次真实历史回放比较</h2>
+    <div id="model-buttons" class="model-buttons" aria-label="D1模型"></div>
+    <div class="model-detail">
+      <div>
+        <h3 id="model-name"></h3>
+        <div id="model-components" class="components"></div>
+      </div>
+      <div>
+        <p id="model-question"></p>
+        <p id="model-method" class="footer-note"></p>
+      </div>
+    </div>
+    <div class="timeline" aria-label="三个时间外推折">
+      <div class="fold"><strong>时间折 1</strong><small>起报：[2023-07-01, 2024-04-01)</small></div>
+      <div class="fold"><strong>时间折 2</strong><small>起报：[2024-07-01, 2025-04-01)</small></div>
+      <div class="fold"><strong>时间折 3</strong><small>起报：[2025-07-01, 2026-04-01)</small></div>
+    </div>
+    <p class="footer-note">主指标：未来 30 天独立 M5–6 震群在不超过 600,000 km² 报警区内的严格召回。最多 10 个异常组分数用 M4+ 训练，再检验能否迁移到 M5–6；训练与评估之间保留 90 天隔离。</p>
+  </section>
+</main>
+
+<script>
+  const tabs = [...document.querySelectorAll("[data-tab]")];
+  tabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      tabs.forEach((item) => item.setAttribute("aria-selected", String(item === button)));
+      ["evidence", "data", "d1"].forEach((name) => {
+        document.getElementById(`tab-${name}`).hidden = name !== button.dataset.tab;
+      });
+    });
+  });
+
+  const dataRows = [
+    {
+      name: "地震目录",
+      size: "43,785 条来源记录，合并去重后 40,898 个物理事件；29,637 个在研究区内。",
+      time: "1899-12-31 至 2026-07-09；模型按起报时刻截断。",
+      used: "建立局部 Mc、均匀背景和 75 km KDE；完成四折开发与最终验证。",
+      missing: "最近 30 天活动是否提高固定面积召回，尚无合法真实结果。",
+      features: "历史 M4+ 空间分布、最近 30 天 M4+ 活动、未来 M5–6 目标。",
+      limit: "缺少权威逐事件发布时间和震级类型；available_at≈发震时刻偏乐观。"
+    },
+    {
+      name: "205 期异常周报",
+      size: "59,904 条观测；3,217,885 行起报日×网格特征；72 个逻辑特征。",
+      time: "报告期 2022-07-20 至 2026-07-01；每次只用当时已到达的报告。",
+      used: "完成因果状态重建、多尺度快照和 4–52 周动态轨迹。",
+      missing: "没有完成真实标签训练、固定面积召回、信息增益或置乱效果。",
+      features: "异常数量、新增/结束、年龄、持续、学科协同、空间集中/扩散、报告活动代理。",
+      limit: "缺两期报告；大量右删失；没有独立完整台站名册。"
+    },
+    {
+      name: "断层与长期危险性",
+      size: "519 个断层段、7,339 个点、7,216 条真实迹线。",
+      time: "当前完整快照只能证明在 2026-07-13 可用。",
+      used: "完成标准化、属性连接和质量审计；尚未进入真实预测模型。",
+      missing: "从合法可用日期后对 90/180/365 天前瞻结果的增量。",
+      features: "距离、密度、滑动速率、复发周期、破裂空段、闭锁、库仑应力和综合得分。",
+      limit: "当前危险性不能倒灌历史；真实迹线与属性段映射尚未人工接受。"
+    },
+    {
+      name: "底图",
+      size: "1,468 个标准底图要素；6 个 GMT/DAT 原始文件。",
+      time: "静态地理背景。",
+      used: "中国大陆边界用于目标无关研究区；其余用于构造分层和展示。",
+      missing: "底图本身不是需要证明的预测信号。",
+      features: "国界、一级/二级地块、周边板块和断层迹线。",
+      limit: "不能把底图美观或区域标签误当作预测效果。"
+    },
+    {
+      name: "人工预测字段",
+      size: "嵌在异常 XLS 中，没有作为独立模型表使用。",
+      time: "部分字段可能包含事后效能或人工结论。",
+      used: "当前客观模型主动排除；只保留排除标记。",
+      missing: "以后可作为独立人工基线评价，不能混入客观模型训练。",
+      features: "预测地点、区域、震级、时间、分析意见和效能。",
+      limit: "直接混入会造成泄漏，并无法拆分异常客观信息的贡献。"
+    }
+  ];
+  const dataSelect = document.getElementById("data-select");
+  dataRows.forEach((row, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = row.name;
+    dataSelect.appendChild(option);
+  });
+  function renderData() {
+    const row = dataRows[Number(dataSelect.value)];
+    ["size", "time", "used", "missing", "features", "limit"].forEach((key) => {
+      document.getElementById(`data-${key}`).textContent = row[key];
+    });
+  }
+  dataSelect.addEventListener("change", renderData);
+  renderData();
+
+  const models = [
+    {id: "B0", name: "B0｜长期背景", components: ["75 km KDE"], question: "历史地震多发区本身能覆盖多少未来独立震群？", method: "使用起报日前可见的历史 M4+ 事件重建空间 KDE。"},
+    {id: "R30", name: "B0 + R30｜近期活动", components: ["75 km KDE", "最近 30 天 M4+"], question: "最近 30 天地震活动能否在相同面积下增加召回？", method: "长期和近期空间密度在训练期选择一个混合权重。"},
+    {id: "C", name: "B0 + C｜覆盖控制", components: ["75 km KDE", "报告活动代理"], question: "报告范围变化本身会不会制造看似有用的信号？", method: "以 B0 为偏置的正则化 Poisson，只加入覆盖控制。"},
+    {id: "S", name: "B0 + C + 单期异常", components: ["75 km KDE", "覆盖控制", "当前异常"], question: "当前一期的异常状态是否比覆盖控制多提供信息？", method: "加入数量、年龄、学科协同和空间形态等 200 km 特征。"},
+    {id: "D", name: "B0 + C + 动态异常", components: ["75 km KDE", "覆盖控制", "当前异常", "4–52 周轨迹"], question: "异常的变化趋势是否比只看当前快照更有用？", method: "同一 Poisson ridge 中加入斜率、突增、加速度和回落。"},
+    {id: "FULL", name: "完整简单组合", components: ["75 km KDE", "最近 30 天 M4+", "覆盖控制", "动态异常"], question: "把地震活动和异常结合后，最终召回是否真正提高？", method: "同一时间折和面积下，与每个简化模型做配对贡献拆分。"}
+  ];
+  const modelButtons = document.getElementById("model-buttons");
+  models.forEach((model, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = model.id;
+    button.dataset.model = model.id;
+    button.setAttribute("aria-selected", String(index === 0));
+    button.addEventListener("click", () => renderModel(model.id));
+    modelButtons.appendChild(button);
+  });
+  function renderModel(id) {
+    const model = models.find((item) => item.id === id);
+    [...modelButtons.children].forEach((button) => {
+      button.setAttribute("aria-selected", String(button.dataset.model === id));
+    });
+    document.getElementById("model-name").textContent = model.name;
+    document.getElementById("model-question").textContent = model.question;
+    document.getElementById("model-method").textContent = model.method;
+    const components = document.getElementById("model-components");
+    components.replaceChildren(...model.components.map((text) => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = text;
+      return chip;
+    }));
+  }
+  renderModel("B0");
+</script>
+</body>
+</html>

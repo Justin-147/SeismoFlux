@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">SeismoFlux 当前真实科学证据总览</title>
+  <desc id="desc">展示75公里空间KDE在四个开发折和最终验证中的真实信息增益、各类数据当前使用程度，以及下一步D1真实历史回放的六个模型。</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f9fc; }
+      .panel { fill: #ffffff; stroke: #d7deea; stroke-width: 1.5; }
+      .title { fill: #172033; font: 700 34px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .subtitle { fill: #526078; font: 400 18px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .section { fill: #172033; font: 700 23px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .label { fill: #27344a; font: 500 16px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .small { fill: #526078; font: 400 14px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .tiny { fill: #66738a; font: 400 12px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .value { fill: #172033; font: 700 15px "Consolas", monospace; }
+      .axis { stroke: #aab5c7; stroke-width: 1; }
+      .grid { stroke: #e5e9f0; stroke-width: 1; }
+      .positive { fill: #218c74; }
+      .positive-soft { fill: #dff4ed; stroke: #218c74; stroke-width: 1.2; }
+      .pending { fill: #f6c453; }
+      .pending-soft { fill: #fff4d6; stroke: #d39a14; stroke-width: 1.2; }
+      .neutral-soft { fill: #edf1f6; stroke: #8090a7; stroke-width: 1.2; }
+      .excluded-soft { fill: #f7e5e7; stroke: #b45b65; stroke-width: 1.2; }
+      .line { fill: none; stroke: #3c6fb6; stroke-width: 3; }
+      .ci { stroke: #172033; stroke-width: 4; stroke-linecap: round; }
+      .dot { fill: #3c6fb6; stroke: #ffffff; stroke-width: 2; }
+      .arrow { stroke: #8e9ab0; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8e9ab0"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1400" height="900"/>
+
+  <text class="title" x="60" y="62">SeismoFlux 当前真实科学证据</text>
+  <text class="subtitle" x="60" y="94">截至 2026-07-31｜唯一真实正证据是 75 km KDE 的空间信息增益；固定面积召回尚未检验</text>
+
+  <rect class="panel" x="50" y="125" width="820" height="420" rx="16"/>
+  <text class="section" x="80" y="166">75 km 空间 KDE 相对均匀背景：真实时间外推信息增益</text>
+  <text class="small" x="80" y="194">单位：nats / 物理地震。数值越大，真实地震更倾向落在模型给出高强度的位置。</text>
+
+  <line class="axis" x1="250" y1="480" x2="815" y2="480"/>
+  <line class="grid" x1="250" y1="220" x2="250" y2="480"/>
+  <line class="grid" x1="411" y1="220" x2="411" y2="480"/>
+  <line class="grid" x1="573" y1="220" x2="573" y2="480"/>
+  <line class="grid" x1="734" y1="220" x2="734" y2="480"/>
+  <text class="tiny" x="244" y="505">0.0</text>
+  <text class="tiny" x="403" y="505">0.2</text>
+  <text class="tiny" x="565" y="505">0.4</text>
+  <text class="tiny" x="726" y="505">0.6</text>
+
+  <text class="label" x="85" y="244">开发折 1</text>
+  <rect class="positive" x="250" y="226" width="431" height="24" rx="6"/>
+  <text class="value" x="692" y="244">+0.5343</text>
+
+  <text class="label" x="85" y="292">开发折 2</text>
+  <rect class="positive" x="250" y="274" width="477" height="24" rx="6"/>
+  <text class="value" x="738" y="292">+0.5912</text>
+
+  <text class="label" x="85" y="340">开发折 3</text>
+  <rect class="positive" x="250" y="322" width="465" height="24" rx="6"/>
+  <text class="value" x="726" y="340">+0.5768</text>
+
+  <text class="label" x="85" y="388">开发折 4</text>
+  <rect class="positive" x="250" y="370" width="493" height="24" rx="6"/>
+  <text class="value" x="754" y="388">+0.6114</text>
+
+  <text class="label" x="85" y="442">最终验证</text>
+  <line class="ci" x1="440" y1="432" x2="704" y2="432"/>
+  <line class="ci" x1="440" y1="423" x2="440" y2="441"/>
+  <line class="ci" x1="704" y1="423" x2="704" y2="441"/>
+  <circle class="dot" cx="574" cy="432" r="9"/>
+  <text class="value" x="718" y="438">+0.4022</text>
+  <text class="tiny" x="438" y="463">逐事件 95% CI [+0.2356, +0.5629]，96 个支持域 M≥4 目标</text>
+
+  <rect class="positive-soft" x="80" y="516" width="760" height="1" opacity="0"/>
+
+  <rect class="panel" x="900" y="125" width="450" height="420" rx="16"/>
+  <text class="section" x="930" y="166">用户数据目前用到哪一步</text>
+
+  <rect class="positive-soft" x="930" y="195" width="390" height="54" rx="10"/>
+  <text class="label" x="950" y="218">地震目录</text>
+  <text class="small" x="950" y="239">已训练并时间外推验证长期 KDE</text>
+
+  <rect class="pending-soft" x="930" y="260" width="390" height="64" rx="10"/>
+  <text class="label" x="950" y="283">205 期异常表</text>
+  <text class="small" x="950" y="304">特征库完成；尚未形成真实预测分数</text>
+
+  <rect class="pending-soft" x="930" y="335" width="390" height="64" rx="10"/>
+  <text class="label" x="950" y="358">断层与长期危险性</text>
+  <text class="small" x="950" y="379">接入质检完成；尚未进入合法前瞻评价</text>
+
+  <rect class="neutral-soft" x="930" y="410" width="185" height="64" rx="10"/>
+  <text class="label" x="950" y="433">底图</text>
+  <text class="small" x="950" y="454">研究区与展示</text>
+
+  <rect class="excluded-soft" x="1125" y="410" width="195" height="64" rx="10"/>
+  <text class="label" x="1145" y="433">人工预测字段</text>
+  <text class="small" x="1145" y="454">防泄漏主动排除</text>
+
+  <text class="small" x="930" y="505">合成 MVP：只校验计算逻辑，不计入真实效果。</text>
+  <text class="small" x="930" y="528">真正前瞻 issue：0　｜　锁定测试：未运行</text>
+
+  <rect class="panel" x="50" y="575" width="1300" height="275" rx="16"/>
+  <text class="section" x="80" y="618">下一项直接科学检验：D1 真实历史因果回放</text>
+  <text class="small" x="80" y="646">同一数据截止、同一 25 km 网格、同一 600,000 km² 报警面积；主看未来 30 天独立 M5–6 震群召回。</text>
+
+  <rect class="neutral-soft" x="82" y="685" width="170" height="76" rx="12"/>
+  <text class="label" x="111" y="715">B0</text>
+  <text class="small" x="101" y="739">长期 75 km KDE</text>
+
+  <path class="arrow" d="M258 723 H292"/>
+
+  <rect class="neutral-soft" x="300" y="685" width="170" height="76" rx="12"/>
+  <text class="label" x="321" y="715">B0 + R30</text>
+  <text class="small" x="321" y="739">最近 30 天 M4+</text>
+
+  <path class="arrow" d="M476 723 H510"/>
+
+  <rect class="neutral-soft" x="518" y="685" width="170" height="76" rx="12"/>
+  <text class="label" x="557" y="715">B0 + C</text>
+  <text class="small" x="535" y="739">报告活动控制</text>
+
+  <path class="arrow" d="M694 723 H728"/>
+
+  <rect class="pending-soft" x="736" y="675" width="190" height="96" rx="12"/>
+  <text class="label" x="772" y="708">+ 单期异常</text>
+  <text class="small" x="757" y="733">当前状态和空间形态</text>
+  <text class="tiny" x="765" y="754">与覆盖控制公平比较</text>
+
+  <path class="arrow" d="M932 723 H966"/>
+
+  <rect class="pending-soft" x="974" y="675" width="190" height="96" rx="12"/>
+  <text class="label" x="1010" y="708">+ 动态异常</text>
+  <text class="small" x="995" y="733">4–52 周变化轨迹</text>
+  <text class="tiny" x="1001" y="754">同时做时间/空间置乱</text>
+
+  <path class="arrow" d="M1170 723 H1204"/>
+
+  <rect class="positive-soft" x="1212" y="675" width="110" height="96" rx="12"/>
+  <text class="label" x="1234" y="708">完整组合</text>
+  <text class="small" x="1235" y="733">R + C + A</text>
+  <text class="tiny" x="1228" y="754">拆分边际贡献</text>
+
+  <text class="small" x="82" y="812">结果分级：小而稳定的正提升可继续前瞻积累；平均无增量或与置乱无区别则删除对应组件，保留 B0。</text>
+  <text class="tiny" x="82" y="836">注意：96 个目标不是 M5–6 独立震群；KDE 指标是相对空间似然信息增益，不是“发震概率提高 40%”。D1 尚未运行。</text>
+</svg>
