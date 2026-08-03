@@ -125,8 +125,10 @@ RFC3161/TSA、证书链、硬件收据、逐工件外部注册和“所有窗口
 最小可追溯证据只需数据截止、配置、Git 提交、SHA-256、运行记录和不可覆盖的预测归档。
 
 完整数据盘点见 `docs/ALL_DATA_SCIENTIFIC_INVENTORY_2026-07-31.md`；完整重设计、效果等级、图件和
-停止条件见 `docs/SCIENTIFIC_REASSESSMENT_2026-07-31.md`；当前精确恢复入口见
-`docs/restart_handoff_2026-08-03_d1_0.md`。
+停止条件见 `docs/SCIENTIFIC_REASSESSMENT_2026-07-31.md`；D1-0完成记录见
+`docs/restart_handoff_2026-08-03_d1_0.md`，当前D1实现与运行恢复入口见
+`docs/restart_handoff_2026-08-03_d1_implementation.md`；D1真实回放前的实现验收见
+`docs/d1_implementation_acceptance_2026-08-03.md`。该验收为必要使能，尚无真实模型效果。
 
 ## 2. 项目名称
 
