@@ -1,5 +1,8 @@
 # SeismoFlux 重启续接交接：科学路线复审（2026-07-31）
 
+> 本文件保留S0历史。D1-0及后续恢复请以
+> `docs/restart_handoff_2026-08-03_d1_0.md`为当前入口。
+
 ## 恢复时先看这一段
 
 权威工作树：
@@ -10,9 +13,9 @@
 
 `codex/stage2-etas-science-first`
 
-本交接对应的前置提交：
+S0 科学复审提交：
 
-`7dfaff70f54002989f9ebf9b1d8b4d7fb821b5de`
+`71c5ab2`（已推送至 `origin/codex/stage2-etas-science-first`）
 
 恢复命令：
 
@@ -51,12 +54,10 @@ git diff --cached --name-status
 
 - 完整工作线：S0 全数据和路线复审 → D1 真实历史开发回放 → D2 贡献拆分 →
   P1 真正前瞻确认（与 D1 并行准备）→ F1 构造慢窗口 → 锁定确认 → 持续预测展示。
-- 当前阶段：`S0_scientific_reassessment`
-- 当前状态：三路只读审计、方案重设、文档和轻量验收均已完成；八个预定文件尚待提交和推送。
-- 当前阻断：Codex 对主仓库 `.git/worktrees` 的写入审批因应用用量上限被拒绝，`git add` 没有成功，
-  没有任何文件进入暂存区；不得用其他方法绕过。恢复后先完成本阶段提交和推送，再进入 D1-0。
-- 闭合判据：若恢复时 `git log` 已有 `docs: reset SeismoFlux around real scientific evidence` 且远端
-  分支包含该提交，则视为 S0 已提交推送；立即把本交接改为 `S0 closed / D1-0 next`，不得重复提交。
+- 当前阶段：`D1-0_executable_scientific_contract`
+- S0 状态：`closed`；数据盘点、路线复审、验收、提交和推送均已完成。
+- 当前状态：开始冻结不含模型成绩的 D1 样本水位、特征、模型公式和统计规则。
+- 恢复判据：远端分支应至少包含 `71c5ab2`；不得重复提交 S0，也不得跳过 D1-0 直接打开成绩。
 - 锁定测试：未运行。
 - 新真实模型训练：尚未启动。
 - 新真实预测成绩：尚未产生。

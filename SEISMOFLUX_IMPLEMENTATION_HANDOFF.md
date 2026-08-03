@@ -68,6 +68,16 @@ D1 先做不含效果的 D1-0 可执行合同，冻结精确时间端点、样�
 预定义异常组分数、M4+ 拟合标签、M5–6 独立震群评价、统计和发行授权；完成验收、提交和推送前
 不得打开模型命中、召回或信息增益。
 
+2026-08-03，D1-0已形成并通过评分前验收：机器合同为
+`configs/d1_retrospective_development.yaml`，精确水位为
+`data/manifests/d1_fold_water_level_manifest.json`，通俗说明和验收分别为
+`docs/d1_executable_scientific_contract.md`与`docs/d1_0_acceptance_2026-08-03.md`。三个逐步扩大的
+30天拟合池分别有8/18/29个issue和60/182/280个唯一M4+目标；外层30天有24个issue、29个
+M5–6事件和21个有效规则化震群，90天有9个issue、32个事件和22个有效震群；两窗口并集为
+33个事件、23个全局震群。独立审计在评分前把会混合时间发生率与空间位置的普通Poisson改为
+逐issue条件空间似然，使训练目标与固定面积空间召回一致。此结论仍是`necessary_enabler`，没有
+训练成绩或预测提升；上述文件完成提交、推送和远端回读后应直接进入D1真实回放。
+
 D1 的一级开发终点固定为 30 天、600,000 平方公里下的独立 M5–6 震群严格召回，并同时报告达到
 相同召回所需面积。90 天、召回—面积/Molchan 和连续空间信息增益为重要次级指标，7 天只作稀疏
 诊断。时区为 `Asia/Shanghai`，目标窗为 `(T,T+h]`；三段评估起报区间为
@@ -115,7 +125,8 @@ RFC3161/TSA、证书链、硬件收据、逐工件外部注册和“所有窗口
 最小可追溯证据只需数据截止、配置、Git 提交、SHA-256、运行记录和不可覆盖的预测归档。
 
 完整数据盘点见 `docs/ALL_DATA_SCIENTIFIC_INVENTORY_2026-07-31.md`；完整重设计、效果等级、图件和
-停止条件见 `docs/SCIENTIFIC_REASSESSMENT_2026-07-31.md`。
+停止条件见 `docs/SCIENTIFIC_REASSESSMENT_2026-07-31.md`；当前精确恢复入口见
+`docs/restart_handoff_2026-08-03_d1_0.md`。
 
 ## 2. 项目名称
 
