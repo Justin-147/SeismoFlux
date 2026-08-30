@@ -1,0 +1,28 @@
+{
+  "artifacts": {
+    "p1_0b_synthetic_comparison.svg": {
+      "bytes": 1474972,
+      "sha256": "75722664676861c8cadf9e45f4db6893fe659aa9b28f4dab05b8d22999168e41"
+    },
+    "p1_0b_synthetic_explorer.html": {
+      "bytes": 422298,
+      "sha256": "b69c4f5a2bd923fb53cf7d40d0d2dc8a8d6bbd76b9efa32ef80913f76e16b0a6"
+    },
+    "p1_0b_synthetic_forecast.html": {
+      "bytes": 194122,
+      "sha256": "36578f1b0c55f9c9fc1b68073224b9b0386b92463c22a85685f40f8170966541"
+    },
+    "p1_0b_synthetic_forecast.svg": {
+      "bytes": 548902,
+      "sha256": "5f66648d88efa9740be0880e4163691c3c11568bda3ef46707845b9229e93f8f"
+    },
+    "p1_0b_synthetic_result.json": {
+      "bytes": 1192226,
+      "sha256": "1a98fabaa66a998012d3573402912d9e0d0106a8c3996bb6ae9374367df2a6de"
+    }
+  },
+  "canonical_result_sha256": "a32fb7e1492fa73a57f8e0c9f0a03618c1889d31a5fe8a74c007c46db8530a0a",
+  "schema_version": 1,
+  "stage_id": "P1-0B",
+  "synthetic_only": true
+}
