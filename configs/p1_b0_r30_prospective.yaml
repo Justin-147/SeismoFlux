@@ -1,0 +1,263 @@
+schema_version: 1
+
+protocol:
+  protocol_id: p1-b0-r30-prospective-v1
+  stage_id: P1-0A
+  status: frozen_no_real_issue_authority
+  protocol_frozen: true
+  protocol_tag: v0.2.6-p1-b0-r30-protocol
+  planned_code_tag: v0.2.6-p1-b0-r30-code
+  real_issue_authorized: false
+  real_catalog_read_authorized: false
+  real_network_fetch_authorized: false
+  next_authorized_action: P1-0B_synthetic_dual_model_acceptance_only
+  locked_test_authorized: false
+  historical_issue_backfill_forbidden: true
+  actual_record_count: 0
+  actual_record_creation_authorized: false
+  record_chain:
+    genesis_record_type: ProtocolDefinition
+    authorization_record_type: RealIssueAuthorizationRecord
+    append_only_single_chain: true
+    content_sha256_excludes_only_content_sha256: true
+    every_non_genesis_record_requires_exact_previous_record_sha256: true
+    no_actual_record_is_created_in_P1_0A: true
+    preauthorization_missed_issue_records_allowed: true
+    forecast_truth_and_review_require_prior_authorization_record: true
+
+scientific_question:
+  primary_goal: improve_future_independent_M5_to_M6_cluster_recall_at_fixed_alarm_area
+  baseline_model: B0
+  challenger_model: B0_R30
+  primary_comparison: B0_R30_minus_B0
+  relative_intensity_not_absolute_probability: true
+
+calendar:
+  timezone: Asia/Shanghai
+  issue_rule: weekly_Thursday_00_00_Asia_Shanghai
+  fixed_valid_from_local: '2026-09-10T00:00:00+08:00'
+  fixed_valid_from_utc: '2026-09-09T16:00:00Z'
+  query_cutoff_rule: Q_equals_T_minus_15_minutes
+  first_query_cutoff_utc: '2026-09-09T15:45:00Z'
+  valid_from_is_never_shifted_or_rewritten: true
+  prerequisite_remote_closure_must_be_strictly_before_T:
+    - frozen_protocol
+    - frozen_code
+    - explicit_real_issue_authorization
+  prerequisite_failure_at_T:
+    issue_status: missed_issue
+    advance_to_next_scheduled_Thursday: true
+    backfill_forbidden: true
+    valid_from_remains_fixed: true
+  real_source_fetch_forbidden_until_all_prerequisites_closed: true
+  first_on_time_issue_may_be_later_than_valid_from: true
+  every_missed_rule_time_requires_one_MissedIssueRecord: true
+  missed_issue_record_may_be_appended_after_T: true
+  on_time_forecast_created_and_published_strictly_before_T: true
+
+data:
+  historical_local_catalog:
+    path: data/processed/stage1/debc98054172a4a1/earthquake_event.parquet
+    sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+    cutoff_utc: '2026-07-09T04:25:56Z'
+    role: frozen_long_term_history_at_or_before_cutoff
+    local_minimum_magnitude: 4.0
+  prospective_source:
+    source_id: usgs_anss_comcat_fdsn_event_api_v1
+    query_endpoint: https://earthquake.usgs.gov/fdsnws/event/1/query
+    count_endpoint: https://earthquake.usgs.gov/fdsnws/event/1/count
+    roles: [post_cutoff_model_input, future_truth]
+    origin_time_rule: strictly_after_local_cutoff
+    same_source_washout_days: 60
+    washout_purpose: ensure_recent_component_is_ComCat_only
+    washout_does_not_prove_catalog_completeness_or_source_equivalence: true
+    query_bbox:
+      minlongitude: 73.446961
+      minlatitude: 20.22909
+      maxlongitude: 135.08583
+      maxlatitude: 53.557926
+    query_minmagnitude: 3.9
+    local_minimum_magnitude: 4.0
+    raw_response_bytes_saved: true
+    response_headers_saved: true
+    raw_response_sha256_required: true
+    response_headers_sha256_required: true
+    fetch_must_complete_before_T: true
+    local_origin_time_must_be_lte_Q: true
+  source_boundary_deduplication:
+    maximum_origin_time_difference_seconds: 300
+    maximum_WGS84_distance_km: 50
+    maximum_absolute_magnitude_difference: 0.5
+    matching: deterministic_one_to_one
+    candidate_order:
+      - absolute_time_difference_ascending
+      - WGS84_distance_ascending
+      - absolute_magnitude_difference_ascending
+      - stable_source_event_id_ascending
+    anchor_priority: local_catalog
+    manual_merge_forbidden: true
+  shared_issue_snapshot:
+    one_snapshot_for_B0_and_B0_R30: true
+    include_origin_time_only_through_Q: true
+    same_support_projection_grid_and_normalization: true
+    local_Mc_affects_only_its_own_spatial_unit: true
+  excluded_inputs:
+    - anomaly_reports
+    - fault_data
+    - manually_entered_prediction_fields
+    - locked_test_targets
+
+models:
+  common:
+    kernel: gaussian_KDE
+    bandwidth_km: 75
+    support_id: local-support-f6816ab6c6581306
+    support_manifest_path: data/manifests/background_local_support_manifest.json
+    support_manifest_sha256: 632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d
+    study_area_sha256: 5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02
+  B0:
+    definition: long_term_75km_KDE
+    event_window: '[1970-01-01T00:00:00Z,Q]'
+    source_magnitude: M_gte_4
+    source_inside_study_area: true
+    source_available_at_lte_Q: true
+    source_inside_frozen_support: true
+    event_weight: equal_per_eligible_event
+    normalization_domain: frozen_full_study_area
+    support_manifest_common_Mc: 4.0
+    local_Mc_rule: frozen_local_unit_support_marker_only_no_recomputation_and_no_threshold_raise_elsewhere
+  R30:
+    definition: recent_30_day_75km_KDE
+    event_window: '(Q-30d,Q]'
+    source_for_every_event: ComCat
+  B0_R30:
+    definition: (1-alpha)*B0+alpha*R30
+    alpha: 0.25
+    expanded_definition: 0.75*B0+0.25*R30
+    empty_R30_action: fall_back_exactly_to_B0
+  forbidden_model_families:
+    - decision_tree_ensembles
+    - neural_networks
+
+alarm:
+  operational_grid_km: 25
+  maximum_alarm_area_km2: 600000
+  selection_rule: complete_cell_prefix
+  rank_value: normalized_cell_mass_divided_by_exact_clipped_cell_area
+  rank_direction: descending
+  tie_break: [row_ascending, column_ascending, cell_id_ascending]
+  partial_last_cell_forbidden: true
+  same_snapshot_support_grid_and_area_rule_for_both_models: true
+  actual_alarm_area_recorded_per_model: true
+  paired_primary_fairness:
+    initial_prefix_cap_km2: 600000
+    reference_area_rule: B0_actual_complete_cell_prefix_area_at_initial_cap
+    challenger_rule: B0_R30_complete_cell_prefix_not_exceeding_B0_reference_area
+    B0_R30_may_never_use_more_area_than_B0: true
+    actual_area_difference_recorded: true
+    actual_area_difference_must_be_less_than_B0_R30_next_complete_cell_area: true
+    absolute_area_difference_must_be_less_than_km2: 625
+    difference_failure_action: scientific_integrity_failure_not_evaluable
+
+targets:
+  magnitude_interval: '[5.0,6.0)'
+  independent_cluster_rule:
+    maximum_origin_time_difference_days: 30
+    maximum_distance_km: 75
+    connected_components: true
+    construction_scope: separately_within_each_selected_exposure
+    representative_rule: earliest_origin_time_then_unsigned_UTF8_stable_event_id
+    cross_exposure_duplicate_count_forbidden: true
+  primary_horizon_days: 30
+  secondary_horizon_days: 90
+
+evaluation:
+  primary_metric: independent_cluster_strict_recall_at_600000km2
+  comparison: B0_R30_minus_B0
+  sequential_scientific_reviews_at_cumulative_clusters: [10, 20, 30]
+  maximum_followup_months: 36
+  terminal_local: '2029-09-10T00:00:00+08:00'
+  terminal_utc: '2029-09-09T16:00:00Z'
+  exposure_selection:
+    scope: separately_within_each_horizon
+    first: earliest_on_time_issue
+    next_rule: T_next_gte_T_previous_plus_horizon_plus_30_days
+    guard_gap_days: 30
+    consequence: target_events_from_distinct_selected_windows_are_strictly_more_than_30_days_apart
+  look_cluster_selection:
+    stable_global_order: representative_origin_time_then_event_id_then_issue_id_then_cluster_id
+    cluster_10: first_10_clusters
+    cluster_20: first_20_clusters
+    cluster_30: first_30_clusters
+    terminal_time: all_mature_clusters_at_terminal_truth_cutoff
+    later_clusters_may_not_change_an_earlier_look: true
+    batch_crossing_multiple_thresholds: append_one_review_record_per_crossed_threshold_in_order
+    look_sequence_mapping:
+      cluster_10: 1
+      cluster_20: 2
+      cluster_30: 3
+      terminal_time: prior_completed_look_count_plus_1
+    terminal_36_month_and_cluster_30_tie: cluster_30_final_review
+  sequential_interval:
+    unit: paired_independent_cluster
+    bootstrap_replicates: 2000
+    generator: numpy_PCG64
+    seed: 147
+    looks: 3
+    correction: Bonferroni
+    two_sided_confidence_level: 0.9833333333333333
+    percentile_lower: 0.0083333333333333
+    percentile_upper: 0.9916666666666667
+    terminal_time_replaces_next_unreached_cluster_look: true
+  strong_evidence:
+    recall_gain_percentage_points_minimum: 5.0
+    sequentially_adjusted_interval_lower_bound_above_zero: true
+  interim_reviews:
+    cluster_counts: [10, 20]
+    action_if_scientific_integrity_is_valid: report_and_continue
+    effect_result_may_not_trigger_model_change: true
+  continuation_before_final:
+    positive_direction_allows_continued_accumulation: true
+    engineering_perfection_not_required: true
+  substantive_progress:
+    stable_additional_hit_clusters_minimum: 1
+  secondary_practical_success:
+    same_recall_alarm_area_reduction_fraction_minimum: 0.08
+    same_recall_alarm_area_reduction_km2_at_primary_budget: 48000
+  final_rule:
+    terminal_trigger: first_of_30_clusters_or_2029-09-10T00:00:00+08:00
+    no_positive_direction: stop_B0_R30_retain_B0
+    positive_but_not_strong: report_uncertain_without_claiming_confirmation
+    strong_evidence: confirm_prospective_improvement
+
+truth:
+  fetched_separately_from_issue_input: true
+  source: usgs_anss_comcat_fdsn_event_api_v1
+  target_window: '(T,T+h]'
+  maturity_rule: T_plus_h_plus_30_days
+  unavailable_is_not_zero_events: true
+  unavailable_exposure_may_not_be_replaced: true
+  later_truth_may_not_modify_original_forecast: true
+
+artifacts:
+  original_forecast_files_are_immutable: true
+  every_on_time_issue_requires:
+    - static_SVG
+    - offline_interactive_HTML
+    - machine_readable_forecast_record
+  truth_replay_creates_new_files: true
+
+retired_non_scientific_requirements:
+  - third_party_timestamping
+  - public_key_trust_chain_receipts
+  - hardware_identity_receipts
+
+resource_limits:
+  reserve_physical_cpu_cores: 2
+  maximum_fold_workers: 3
+
+science_value_review:
+  category: necessary_enabler
+  direct_prediction_evidence_created: false
+  reason: protocol_freezes_a_future_only_dual_model_test_before_any_real_issue
+  proceed_only_after: synthetic_dual_model_acceptance_passes_and_is_committed_and_pushed

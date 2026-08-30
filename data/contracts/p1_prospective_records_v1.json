@@ -1,0 +1,731 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Justin-147/SeismoFlux/data/contracts/p1_prospective_records_v1.json",
+  "title": "SeismoFlux P1 B0 versus B0_R30 prospective records",
+  "description": "Minimal append-only records for a future-only dual-model scientific comparison.",
+  "oneOf": [
+    {"$ref": "#/$defs/ProtocolDefinition"},
+    {"$ref": "#/$defs/RealIssueAuthorizationRecord"},
+    {"$ref": "#/$defs/ForecastIssueRecord"},
+    {"$ref": "#/$defs/MissedIssueRecord"},
+    {"$ref": "#/$defs/TruthSnapshotRecord"},
+    {"$ref": "#/$defs/SequentialReviewRecord"}
+  ],
+  "$defs": {
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "GitSha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "UtcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "RecordHeader": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_type",
+        "recorded_at_utc",
+        "chain_sequence",
+        "previous_record_type",
+        "previous_record_sha256",
+        "content_sha256"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "record_type": {"type": "string"},
+        "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+        "chain_sequence": {"type": "integer", "minimum": 0},
+        "previous_record_type": {
+          "oneOf": [
+            {
+              "enum": [
+                "ProtocolDefinition",
+                "RealIssueAuthorizationRecord",
+                "ForecastIssueRecord",
+                "MissedIssueRecord",
+                "TruthSnapshotRecord",
+                "SequentialReviewRecord"
+              ]
+            },
+            {"type": "null"}
+          ]
+        },
+        "previous_record_sha256": {
+          "oneOf": [
+            {"$ref": "#/$defs/Sha256"},
+            {"type": "null"}
+          ]
+        },
+        "content_sha256": {"$ref": "#/$defs/Sha256"}
+      }
+    },
+    "ModelForecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "relative_intensity_grid_sha256",
+        "alarm_mask_sha256",
+        "alarm_ranking_sha256",
+        "actual_alarm_area_km2"
+      ],
+      "properties": {
+        "model_id": {"enum": ["B0", "B0_R30"]},
+        "relative_intensity_grid_sha256": {"$ref": "#/$defs/Sha256"},
+        "alarm_mask_sha256": {"$ref": "#/$defs/Sha256"},
+        "alarm_ranking_sha256": {"$ref": "#/$defs/Sha256"},
+        "actual_alarm_area_km2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 600000
+        }
+      }
+    },
+    "ProtocolDefinition": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "protocol_id",
+            "protocol_tag",
+            "code_tag",
+            "valid_from_utc",
+            "historical_catalog_cutoff_utc",
+            "source_boundary_manifest_sha256",
+            "model_manifest_sha256",
+            "protocol_commit",
+            "real_issue_authorized"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "ProtocolDefinition"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"const": 0},
+            "previous_record_type": {"type": "null"},
+            "previous_record_sha256": {"type": "null"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "protocol_id": {"const": "p1-b0-r30-prospective-v1"},
+            "protocol_tag": {"const": "v0.2.6-p1-b0-r30-protocol"},
+            "code_tag": {"const": "v0.2.6-p1-b0-r30-code"},
+            "valid_from_utc": {"const": "2026-09-09T16:00:00Z"},
+            "historical_catalog_cutoff_utc": {"const": "2026-07-09T04:25:56Z"},
+            "source_boundary_manifest_sha256": {"$ref": "#/$defs/Sha256"},
+            "model_manifest_sha256": {"$ref": "#/$defs/Sha256"},
+            "protocol_commit": {"$ref": "#/$defs/GitSha1"},
+            "real_issue_authorized": {"const": false}
+          }
+        }
+      ]
+    },
+    "RealIssueAuthorizationRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "protocol_definition_sha256",
+            "authorization_commit",
+            "code_commit",
+            "remote_verified_at_utc",
+            "authorized_from_scheduled_issue_utc",
+            "real_issue_authorized"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "RealIssueAuthorizationRecord"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"type": "integer", "minimum": 1},
+            "previous_record_type": {
+              "enum": ["ProtocolDefinition", "MissedIssueRecord"]
+            },
+            "previous_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "protocol_definition_sha256": {"$ref": "#/$defs/Sha256"},
+            "authorization_commit": {"$ref": "#/$defs/GitSha1"},
+            "code_commit": {"$ref": "#/$defs/GitSha1"},
+            "remote_verified_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "authorized_from_scheduled_issue_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "real_issue_authorized": {"const": true}
+          }
+        }
+      ]
+    },
+    "ForecastIssueRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "issue_id",
+            "status",
+            "scheduled_issue_time_utc",
+            "query_cutoff_utc",
+            "forecast_created_at_utc",
+            "publication_completed_at_utc",
+            "protocol_definition_sha256",
+            "authorization_record_sha256",
+            "model_manifest_sha256",
+            "source_boundary_manifest_sha256",
+            "source_snapshot_sha256",
+            "code_commit",
+            "forecasts",
+            "static_svg_sha256",
+            "offline_interactive_html_sha256",
+            "B0_reference_area_km2",
+            "B0_R30_next_complete_cell_area_km2",
+            "actual_area_difference_km2",
+            "area_fairness_status",
+            "original_artifacts_immutable"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "ForecastIssueRecord"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"type": "integer", "minimum": 1},
+            "previous_record_type": {
+              "enum": [
+                "RealIssueAuthorizationRecord",
+                "ForecastIssueRecord",
+                "MissedIssueRecord",
+                "TruthSnapshotRecord",
+                "SequentialReviewRecord"
+              ]
+            },
+            "previous_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "issue_id": {"type": "string", "pattern": "^p1-[0-9]{8}T[0-9]{6}Z$"},
+            "status": {"const": "on_time"},
+            "scheduled_issue_time_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "query_cutoff_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "forecast_created_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "publication_completed_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "protocol_definition_sha256": {"$ref": "#/$defs/Sha256"},
+            "authorization_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "model_manifest_sha256": {"$ref": "#/$defs/Sha256"},
+            "source_boundary_manifest_sha256": {"$ref": "#/$defs/Sha256"},
+            "source_snapshot_sha256": {"$ref": "#/$defs/Sha256"},
+            "code_commit": {"$ref": "#/$defs/GitSha1"},
+            "forecasts": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {"$ref": "#/$defs/ModelForecast"},
+                    {
+                      "type": "object",
+                      "properties": {"model_id": {"const": "B0"}}
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {"$ref": "#/$defs/ModelForecast"},
+                    {
+                      "type": "object",
+                      "properties": {"model_id": {"const": "B0_R30"}}
+                    }
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "static_svg_sha256": {"$ref": "#/$defs/Sha256"},
+            "offline_interactive_html_sha256": {"$ref": "#/$defs/Sha256"},
+            "B0_reference_area_km2": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 600000
+            },
+            "B0_R30_next_complete_cell_area_km2": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 625
+            },
+            "actual_area_difference_km2": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMaximum": 625
+            },
+            "area_fairness_status": {"const": "passed"},
+            "original_artifacts_immutable": {"const": true}
+          }
+        }
+      ]
+    },
+    "MissedIssueRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "issue_id",
+            "status",
+            "scheduled_issue_time_utc",
+            "authorization_state",
+            "authorization_record_sha256",
+            "reason",
+            "prediction_generated",
+            "backfill_forbidden",
+            "valid_from_remains_fixed"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "MissedIssueRecord"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"type": "integer", "minimum": 1},
+            "previous_record_type": {
+              "enum": [
+                "ProtocolDefinition",
+                "RealIssueAuthorizationRecord",
+                "ForecastIssueRecord",
+                "MissedIssueRecord",
+                "TruthSnapshotRecord",
+                "SequentialReviewRecord"
+              ]
+            },
+            "previous_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "issue_id": {"type": "string", "pattern": "^p1-[0-9]{8}T[0-9]{6}Z$"},
+            "status": {"const": "missed_issue"},
+            "scheduled_issue_time_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "authorization_state": {"enum": ["not_authorized", "authorized"]},
+            "authorization_record_sha256": {
+              "oneOf": [
+                {"$ref": "#/$defs/Sha256"},
+                {"type": "null"}
+              ]
+            },
+            "reason": {
+              "enum": [
+                "protocol_not_remotely_closed_before_T",
+                "code_not_remotely_closed_before_T",
+                "real_issue_not_authorized_before_T",
+                "source_snapshot_unavailable_before_T",
+                "forecast_not_frozen_before_T"
+              ]
+            },
+            "prediction_generated": {"const": false},
+            "backfill_forbidden": {"const": true},
+            "valid_from_remains_fixed": {"const": true}
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "authorization_state": {"const": "not_authorized"},
+                "authorization_record_sha256": {"type": "null"},
+                "previous_record_type": {
+                  "enum": ["ProtocolDefinition", "MissedIssueRecord"]
+                }
+              }
+            },
+            {
+              "properties": {
+                "authorization_state": {"const": "authorized"},
+                "authorization_record_sha256": {"$ref": "#/$defs/Sha256"},
+                "previous_record_type": {
+                  "enum": [
+                    "RealIssueAuthorizationRecord",
+                    "ForecastIssueRecord",
+                    "MissedIssueRecord",
+                    "TruthSnapshotRecord",
+                    "SequentialReviewRecord"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "TruthSnapshotRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "issue_id",
+            "horizon_days",
+            "protocol_definition_sha256",
+            "authorization_record_sha256",
+            "source_snapshot_sha256",
+            "status",
+            "mature_after_utc",
+            "truth_fetched_at_utc",
+            "target_event_count",
+            "independent_cluster_count",
+            "cluster_assignment_sha256",
+            "exposure_cluster_registry_sha256",
+            "magnitude_minimum",
+            "magnitude_maximum_exclusive"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "TruthSnapshotRecord"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"type": "integer", "minimum": 1},
+            "previous_record_type": {
+              "enum": [
+                "RealIssueAuthorizationRecord",
+                "ForecastIssueRecord",
+                "MissedIssueRecord",
+                "TruthSnapshotRecord",
+                "SequentialReviewRecord"
+              ]
+            },
+            "previous_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "issue_id": {"type": "string", "pattern": "^p1-[0-9]{8}T[0-9]{6}Z$"},
+            "horizon_days": {"enum": [30, 90]},
+            "protocol_definition_sha256": {"$ref": "#/$defs/Sha256"},
+            "authorization_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "source_snapshot_sha256": {
+              "oneOf": [
+                {"$ref": "#/$defs/Sha256"},
+                {"type": "null"}
+              ]
+            },
+            "status": {"enum": ["mature_truth", "truth_snapshot_unavailable"]},
+            "mature_after_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "truth_fetched_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "target_event_count": {
+              "oneOf": [
+                {"type": "integer", "minimum": 0},
+                {"type": "null"}
+              ]
+            },
+            "independent_cluster_count": {
+              "oneOf": [
+                {"type": "integer", "minimum": 0},
+                {"type": "null"}
+              ]
+            },
+            "cluster_assignment_sha256": {
+              "oneOf": [
+                {"$ref": "#/$defs/Sha256"},
+                {"type": "null"}
+              ]
+            },
+            "exposure_cluster_registry_sha256": {
+              "oneOf": [
+                {"$ref": "#/$defs/Sha256"},
+                {"type": "null"}
+              ]
+            },
+            "magnitude_minimum": {"const": 5.0},
+            "magnitude_maximum_exclusive": {"const": 6.0}
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "status": {"const": "mature_truth"},
+                "source_snapshot_sha256": {"$ref": "#/$defs/Sha256"},
+                "target_event_count": {"type": "integer", "minimum": 0},
+                "independent_cluster_count": {"type": "integer", "minimum": 0},
+                "cluster_assignment_sha256": {"$ref": "#/$defs/Sha256"},
+                "exposure_cluster_registry_sha256": {"$ref": "#/$defs/Sha256"}
+              }
+            },
+            {
+              "properties": {
+                "status": {"const": "truth_snapshot_unavailable"},
+                "source_snapshot_sha256": {"type": "null"},
+                "target_event_count": {"type": "null"},
+                "independent_cluster_count": {"type": "null"},
+                "cluster_assignment_sha256": {"type": "null"},
+                "exposure_cluster_registry_sha256": {"type": "null"}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "SequentialReviewRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/RecordHeader"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "record_type",
+            "recorded_at_utc",
+            "chain_sequence",
+            "previous_record_type",
+            "previous_record_sha256",
+            "content_sha256",
+            "protocol_definition_sha256",
+            "authorization_record_sha256",
+            "horizon_days",
+            "review_trigger",
+            "look_sequence",
+            "prior_completed_look_count",
+            "cumulative_cluster_count",
+            "ordered_cluster_registry_sha256",
+            "selected_cluster_prefix_sha256",
+            "elapsed_months",
+            "B0_hit_clusters",
+            "B0_R30_hit_clusters",
+            "recall_gain_percentage_points",
+            "sequentially_adjusted_interval_lower",
+            "sequentially_adjusted_interval_upper",
+            "decision"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "record_type": {"const": "SequentialReviewRecord"},
+            "recorded_at_utc": {"$ref": "#/$defs/UtcTimestamp"},
+            "chain_sequence": {"type": "integer", "minimum": 1},
+            "previous_record_type": {
+              "enum": [
+                "RealIssueAuthorizationRecord",
+                "ForecastIssueRecord",
+                "MissedIssueRecord",
+                "TruthSnapshotRecord",
+                "SequentialReviewRecord"
+              ]
+            },
+            "previous_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "content_sha256": {"$ref": "#/$defs/Sha256"},
+            "protocol_definition_sha256": {"$ref": "#/$defs/Sha256"},
+            "authorization_record_sha256": {"$ref": "#/$defs/Sha256"},
+            "horizon_days": {"const": 30},
+            "review_trigger": {
+              "enum": [
+                "cluster_10",
+                "cluster_20",
+                "cluster_30",
+                "time_36_months"
+              ]
+            },
+            "look_sequence": {"type": "integer", "minimum": 1, "maximum": 3},
+            "prior_completed_look_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "cumulative_cluster_count": {"type": "integer", "minimum": 0},
+            "ordered_cluster_registry_sha256": {"$ref": "#/$defs/Sha256"},
+            "selected_cluster_prefix_sha256": {"$ref": "#/$defs/Sha256"},
+            "elapsed_months": {"type": "number", "minimum": 0, "maximum": 36},
+            "B0_hit_clusters": {"type": "integer", "minimum": 0},
+            "B0_R30_hit_clusters": {"type": "integer", "minimum": 0},
+            "recall_gain_percentage_points": {
+              "oneOf": [{"type": "number"}, {"type": "null"}]
+            },
+            "sequentially_adjusted_interval_lower": {
+              "oneOf": [{"type": "number"}, {"type": "null"}]
+            },
+            "sequentially_adjusted_interval_upper": {
+              "oneOf": [{"type": "number"}, {"type": "null"}]
+            },
+            "decision": {
+              "enum": [
+                "continue_accumulation",
+                "pause_scientific_integrity_failure",
+                "confirm_strong_prospective_improvement",
+                "report_uncertain_at_final_review",
+                "stop_B0_R30_retain_B0",
+                "report_evidence_insufficient_at_final_review"
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {"properties": {"review_trigger": {"const": "cluster_10"}}},
+              "then": {
+                "properties": {
+                  "cumulative_cluster_count": {"const": 10},
+                  "look_sequence": {"const": 1},
+                  "prior_completed_look_count": {"const": 0},
+                  "elapsed_months": {"exclusiveMaximum": 36},
+                  "decision": {
+                    "enum": [
+                      "continue_accumulation",
+                      "pause_scientific_integrity_failure"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {"properties": {"review_trigger": {"const": "cluster_20"}}},
+              "then": {
+                "properties": {
+                  "cumulative_cluster_count": {"const": 20},
+                  "look_sequence": {"const": 2},
+                  "prior_completed_look_count": {"const": 1},
+                  "elapsed_months": {"exclusiveMaximum": 36},
+                  "decision": {
+                    "enum": [
+                      "continue_accumulation",
+                      "pause_scientific_integrity_failure"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {"properties": {"review_trigger": {"const": "cluster_30"}}},
+              "then": {
+                "properties": {
+                  "cumulative_cluster_count": {"const": 30},
+                  "look_sequence": {"const": 3},
+                  "prior_completed_look_count": {"const": 2},
+                  "elapsed_months": {"maximum": 36},
+                  "decision": {
+                    "enum": [
+                      "confirm_strong_prospective_improvement",
+                      "report_uncertain_at_final_review",
+                      "stop_B0_R30_retain_B0",
+                      "pause_scientific_integrity_failure"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {"properties": {"review_trigger": {"const": "time_36_months"}}},
+              "then": {
+                "properties": {
+                  "cumulative_cluster_count": {"maximum": 29},
+                  "elapsed_months": {"const": 36},
+                  "decision": {
+                    "enum": [
+                      "confirm_strong_prospective_improvement",
+                      "report_uncertain_at_final_review",
+                      "stop_B0_R30_retain_B0",
+                      "pause_scientific_integrity_failure",
+                      "report_evidence_insufficient_at_final_review"
+                    ]
+                  }
+                },
+                "oneOf": [
+                  {
+                    "properties": {
+                      "prior_completed_look_count": {"const": 0},
+                      "look_sequence": {"const": 1},
+                      "cumulative_cluster_count": {"minimum": 0, "maximum": 9}
+                    }
+                  },
+                  {
+                    "properties": {
+                      "prior_completed_look_count": {"const": 1},
+                      "look_sequence": {"const": 2},
+                      "cumulative_cluster_count": {"minimum": 10, "maximum": 19}
+                    }
+                  },
+                  {
+                    "properties": {
+                      "prior_completed_look_count": {"const": 2},
+                      "look_sequence": {"const": 3},
+                      "cumulative_cluster_count": {"minimum": 20, "maximum": 29}
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {"cumulative_cluster_count": {"const": 0}}
+              },
+              "then": {
+                "properties": {
+                  "B0_hit_clusters": {"const": 0},
+                  "B0_R30_hit_clusters": {"const": 0},
+                  "recall_gain_percentage_points": {"type": "null"},
+                  "sequentially_adjusted_interval_lower": {"type": "null"},
+                  "sequentially_adjusted_interval_upper": {"type": "null"},
+                  "decision": {
+                    "const": "report_evidence_insufficient_at_final_review"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {"cumulative_cluster_count": {"minimum": 1}}
+              },
+              "then": {
+                "properties": {
+                  "recall_gain_percentage_points": {"type": "number"},
+                  "sequentially_adjusted_interval_lower": {"type": "number"},
+                  "sequentially_adjusted_interval_upper": {"type": "number"}
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "review_trigger": {"const": "time_36_months"},
+                  "cumulative_cluster_count": {"minimum": 1}
+                },
+                "required": ["review_trigger", "cumulative_cluster_count"]
+              },
+              "then": {
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "confirm_strong_prospective_improvement",
+                      "report_uncertain_at_final_review",
+                      "stop_B0_R30_retain_B0",
+                      "pause_scientific_integrity_failure"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

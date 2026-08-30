@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "manifest_id": "p1-b0-r30-model-v1",
+  "protocol_id": "p1-b0-r30-prospective-v1",
+  "protocol_tag": "v0.2.6-p1-b0-r30-protocol",
+  "planned_code_tag": "v0.2.6-p1-b0-r30-code",
+  "status": {
+    "protocol_frozen": true,
+    "real_issue_authorized": false,
+    "real_catalog_read_authorized": false,
+    "real_network_fetch_authorized": false,
+    "next_authorized_action": "P1-0B_synthetic_dual_model_acceptance_only"
+  },
+  "record_chain_state": {
+    "actual_record_count": 0,
+    "actual_record_creation_authorized": false,
+    "append_only_single_chain": true,
+    "genesis_record_type": "ProtocolDefinition",
+    "later_authorization_record_type": "RealIssueAuthorizationRecord"
+  },
+  "development_evidence": {
+    "d1_close_commit": "0dab57fd1491b5f4924cbae87c0b2001c6fc6b24",
+    "d1_final_attribution_result_sha256": "f9fd81887863ac8f6ac174e346a015e7e18cb0f3b9a906b1deea0c4013ec3ec9",
+    "d1_model_commit": "078e950a2b4a837f2ebaaed0d62708012c6e6e23",
+    "d1_observed_result_sha256": "6cce1e809b4de4afce37faeade5ecaa9232a5026d777b41dfeec843322b9e804",
+    "role": "retrospective_development_basis_not_prospective_confirmation"
+  },
+  "shared_construction": {
+    "bandwidth_km": 75,
+    "kernel": "gaussian_KDE",
+    "same_issue_snapshot": true,
+    "same_normalization": true,
+    "same_projection_grid": true,
+    "same_support": true,
+    "support_id": "local-support-f6816ab6c6581306"
+  },
+  "models": {
+    "B0": {
+      "definition": "long_term_75km_KDE",
+      "event_weight": "equal_per_eligible_event",
+      "event_window": "[1970-01-01T00:00:00Z,Q]",
+      "local_Mc_rule": "frozen_local_unit_support_marker_only_no_recomputation_and_no_threshold_raise_elsewhere",
+      "normalization_domain": "frozen_full_study_area",
+      "source_available_at_lte_Q": true,
+      "source_inside_frozen_support": true,
+      "source_inside_study_area": true,
+      "source_magnitude": "M_gte_4",
+      "support_manifest_common_Mc": 4.0
+    },
+    "B0_R30": {
+      "alpha": 0.25,
+      "definition": "(1-0.25)*B0+0.25*R30",
+      "empty_R30_action": "fall_back_exactly_to_B0",
+      "recent_component": {
+        "definition": "ComCat_M4plus_75km_KDE",
+        "event_window": "(Q-30d,Q]"
+      }
+    }
+  },
+  "forbidden_model_families": [
+    "decision_tree_ensembles",
+    "neural_networks"
+  ],
+  "alarm_rule": {
+    "actual_area_recorded_per_model": true,
+    "grid_km": 25,
+    "maximum_complete_cell_prefix_area_km2": 600000,
+    "partial_last_cell_forbidden": true,
+    "rank_direction": "descending",
+    "rank_value": "normalized_cell_mass_divided_by_exact_clipped_cell_area",
+    "same_rule_for_both_models": true,
+    "tie_break": [
+      "row_ascending",
+      "column_ascending",
+      "cell_id_ascending"
+    ],
+    "paired_primary_fairness": {
+      "B0_R30_may_never_use_more_area_than_B0": true,
+      "absolute_area_difference_must_be_less_than_km2": 625,
+      "actual_area_difference_must_be_less_than_B0_R30_next_complete_cell_area": true,
+      "challenger_rule": "B0_R30_complete_cell_prefix_not_exceeding_B0_reference_area",
+      "difference_failure_action": "scientific_integrity_failure_not_evaluable",
+      "initial_prefix_cap_km2": 600000,
+      "reference_area_rule": "B0_actual_complete_cell_prefix_area_at_initial_cap"
+    }
+  },
+  "forecast_semantics": {
+    "forecast_values": "relative_intensity",
+    "forecast_values_are_absolute_probabilities": false,
+    "original_issue_artifacts_immutable": true
+  },
+  "evaluation": {
+    "challenger_minus_baseline": "B0_R30_minus_B0",
+    "independent_cluster_rule": {
+      "connected_components": true,
+      "construction_scope": "separately_within_each_selected_exposure",
+      "cross_exposure_duplicate_count_forbidden": true,
+      "maximum_distance_km": 75,
+      "maximum_origin_time_difference_days": 30,
+      "representative_rule": "earliest_origin_time_then_unsigned_UTF8_stable_event_id"
+    },
+    "magnitude_maximum_exclusive": 6.0,
+    "magnitude_minimum": 5.0,
+    "maximum_followup_months": 36,
+    "terminal_local": "2029-09-10T00:00:00+08:00",
+    "terminal_utc": "2029-09-09T16:00:00Z",
+    "exposure_selection": {
+      "first": "earliest_on_time_issue",
+      "guard_gap_days": 30,
+      "next_rule": "T_next_gte_T_previous_plus_horizon_plus_30_days",
+      "scope": "separately_within_each_horizon"
+    },
+    "primary_horizon_days": 30,
+    "primary_metric": "independent_cluster_strict_recall_at_600000km2",
+    "secondary_horizon_days": 90,
+    "sequential_review_cluster_counts": [
+      10,
+      20,
+      30
+    ],
+    "look_cluster_selection": {
+      "batch_crossing_multiple_thresholds": "append_one_review_record_per_crossed_threshold_in_order",
+      "cluster_10": "first_10_clusters",
+      "cluster_20": "first_20_clusters",
+      "cluster_30": "first_30_clusters",
+      "later_clusters_may_not_change_an_earlier_look": true,
+      "look_sequence_mapping": {
+        "cluster_10": 1,
+        "cluster_20": 2,
+        "cluster_30": 3,
+        "terminal_time": "prior_completed_look_count_plus_1"
+      },
+      "terminal_36_month_and_cluster_30_tie": "cluster_30_final_review",
+      "stable_global_order": "representative_origin_time_then_event_id_then_issue_id_then_cluster_id",
+      "terminal_time": "all_mature_clusters_at_terminal_truth_cutoff"
+    },
+    "sequential_interval": {
+      "bootstrap_replicates": 2000,
+      "correction": "Bonferroni",
+      "generator": "numpy_PCG64",
+      "looks": 3,
+      "percentile_lower": 0.0083333333333333,
+      "percentile_upper": 0.9916666666666667,
+      "seed": 147,
+      "terminal_time_replaces_next_unreached_cluster_look": true,
+      "two_sided_confidence_level": 0.9833333333333333,
+      "unit": "paired_independent_cluster"
+    },
+    "strong_evidence": {
+      "recall_gain_percentage_points_minimum": 5.0,
+      "sequentially_adjusted_interval_lower_bound_above_zero": true
+    },
+    "interim_review_rule": {
+      "cluster_counts": [
+        10,
+        20
+      ],
+      "effect_result_may_not_trigger_model_change": true,
+      "scientifically_valid_action": "report_and_continue"
+    },
+    "substantive_progress": {
+      "stable_additional_hit_clusters_minimum": 1
+    },
+    "secondary_practical_success": {
+      "same_recall_alarm_area_reduction_fraction_minimum": 0.08,
+      "same_recall_alarm_area_reduction_km2_at_primary_budget": 48000
+    },
+    "terminal_no_positive_direction_action": "stop_B0_R30_retain_B0",
+    "terminal_trigger": "first_of_30_clusters_or_2029-09-10T00:00:00+08:00"
+  },
+  "forbidden_inputs_or_actions": [
+    "anomaly_features",
+    "fault_features",
+    "human_forecast_fields",
+    "locked_test_read_or_run",
+    "historical_issue_backfill",
+    "overwrite_original_forecast"
+  ],
+  "retired_non_scientific_requirements": [
+    "third_party_timestamping",
+    "public_key_trust_chain_receipts",
+    "hardware_identity_receipts"
+  ]
+}

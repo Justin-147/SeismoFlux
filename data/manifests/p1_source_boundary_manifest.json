@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "manifest_id": "p1-source-boundary-v1",
+  "historical_local_catalog": {
+    "cutoff_utc": "2026-07-09T04:25:56Z",
+    "local_restricted": true,
+    "minimum_magnitude": 4.0,
+    "path": "data/processed/stage1/debc98054172a4a1/earthquake_event.parquet",
+    "role": "frozen_long_term_history_at_or_before_cutoff",
+    "sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347"
+  },
+  "prospective_source": {
+    "bbox": {
+      "maxlatitude": 53.557926,
+      "maxlongitude": 135.08583,
+      "minlatitude": 20.22909,
+      "minlongitude": 73.446961
+    },
+    "local_filter_minimum_magnitude": 4.0,
+    "count_endpoint": "https://earthquake.usgs.gov/fdsnws/event/1/count",
+    "query_endpoint": "https://earthquake.usgs.gov/fdsnws/event/1/query",
+    "origin_time_rule": "strictly_after_2026-07-09T04:25:56Z",
+    "query_minimum_magnitude": 3.9,
+    "roles": [
+      "post_cutoff_model_input",
+      "future_truth"
+    ],
+    "source_id": "usgs_anss_comcat_fdsn_event_api_v1"
+  },
+  "acquisition_evidence": {
+    "fetch_must_complete_before_T": true,
+    "local_origin_time_must_be_lte_Q": true,
+    "raw_response_bytes_saved": true,
+    "raw_response_sha256_required": true,
+    "response_headers_saved": true,
+    "response_headers_sha256_required": true
+  },
+  "source_boundary_deduplication": {
+    "anchor_priority": "local_catalog",
+    "candidate_order": [
+      "absolute_time_difference_ascending",
+      "WGS84_distance_ascending",
+      "absolute_magnitude_difference_ascending",
+      "stable_source_event_id_ascending"
+    ],
+    "manual_merge_forbidden": true,
+    "matching": "deterministic_one_to_one",
+    "maximum_WGS84_distance_km": 50,
+    "maximum_absolute_magnitude_difference": 0.5,
+    "maximum_origin_time_difference_seconds": 300
+  },
+  "same_source_washout": {
+    "duration_days": 60,
+    "first_query_cutoff_utc": "2026-09-09T15:45:00Z",
+    "purpose": "ensure_every_R30_event_is_from_ComCat",
+    "proves_catalog_completeness_or_source_equivalence": false,
+    "required_before_first_on_time_forecast": true
+  },
+  "frozen_spatial_boundary": {
+    "study_area_sha256": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02",
+    "support_id": "local-support-f6816ab6c6581306",
+    "support_manifest_path": "data/manifests/background_local_support_manifest.json",
+    "support_manifest_sha256": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d"
+  },
+  "causal_snapshot_rules": {
+    "future_origin_or_revision_in_prior_forecast_forbidden": true,
+    "issue_query_cutoff": "Q=T-15min",
+    "local_Mc_affects_only_its_own_spatial_unit": true,
+    "one_snapshot_for_B0_and_B0_R30": true,
+    "real_epicenter_may_not_define_support_grid_or_boundaries": true
+  },
+  "cross_exposure_cluster_control": {
+    "cross_exposure_duplicate_count_forbidden": true,
+    "distance_method": "WGS84_geodesic",
+    "edge_distance_km_inclusive": 75,
+    "edge_time_days_inclusive": 30,
+    "exposure_selection": {
+      "first": "earliest_on_time_issue",
+      "guard_gap_days": 30,
+      "next_rule": "T_next_gte_T_previous_plus_horizon_plus_30_days",
+      "scope": "separately_within_each_horizon"
+    },
+    "graph_rule": "undirected_connected_components",
+    "per_exposure_clustering_only": true,
+    "representative_rule": "earliest_origin_time_then_unsigned_UTF8_stable_event_id",
+    "selected_window_target_events_are_strictly_more_than_30_days_apart": true
+  },
+  "truth": {
+    "fetched_separately_from_issue_input": true,
+    "maturity_rule": "T_plus_h_plus_30_days",
+    "source_id": "usgs_anss_comcat_fdsn_event_api_v1",
+    "target_window": "(T,T+h]",
+    "unavailable_exposure_may_not_be_replaced": true,
+    "unavailable_is_not_zero_events": true
+  },
+  "excluded_sources": [
+    "anomaly_reports",
+    "fault_data",
+    "manually_entered_prediction_fields",
+    "locked_test_targets"
+  ]
+}
