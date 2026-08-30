@@ -6,6 +6,17 @@
 
 本文件只把考试题、参赛模型、首期和评分办法预先写死。它没有发行真实预测，也没有产生新的预测效果。
 
+## 0. `v0.2.7` 预首次真实起报透明修订
+
+当前协议标签升级为 `v0.2.7-p1-b0-r30-protocol`，计划代码标签同步升级为
+`v0.2.7-p1-b0-r30-code`。原 `v0.2.6-p1-b0-r30-protocol` 的字节、标签、提交和验收记录全部保留为
+历史，不删除、不改写。
+
+这是在首个规则起报 `2026-09-10T00:00:00+08:00` 之前完成的最小科学完整性修订。修订时真实
+记录数为 0，真实目标读取数为 0，因此没有看过任何未来答案。协议 ID、`valid_from`、两个模型、
+数据边界、面积、目标、指标、阈值和起报日均不变；唯一实质澄清是把“真值已经完整可用且确实
+观察到 0 群”与“真值不可用或根本没有到期入选 exposure”分开，避免把不知道伪装成零。
+
 ## 1. 身份、状态与权限
 
 - 阶段：`P1-0A_prospective_preregistration`。
@@ -14,6 +25,8 @@
 - `valid_from`：`2026-09-10T00:00:00+08:00`。
 - 首个规则起报时刻：`2026-09-10T00:00:00+08:00`。
 - 当前 `real_issue_authorized=false`。
+- 当前协议标签：`v0.2.7-p1-b0-r30-protocol`；计划代码标签：`v0.2.7-p1-b0-r30-code`。
+- 上一标签 `v0.2.6-p1-b0-r30-protocol` 只作历史保留，不再是未来执行权威。
 - P1-0A 只定义记录合同，`actual_record_count=0`；验收时不得伪造一条看似已经运行的真实记录。
 - P1-0A 的协议、机器配置、记录合同、来源边界、模型清单、测试和验收全部提交、推送并从远端精确回读前，不得发行真实 issue。
 - 旧 `v0.2.5-prospective-science-mvp-*` 协议、代码、标签和合成结果作为历史证据保留，但不能授权本 P1，也不能把旧 `P0/P1/PP=0.5/0.5` 公式带入本试验。
@@ -173,16 +186,34 @@ cell ID 升序。随后取累计实际裁剪面积不超过 `600,000 km²` 的�
 10–19 群，终端 `look_index=2`；此前 2 个 look 时累计 20–29 群，终端 `look_index=3`。若同刻达到
 30 群则写 `cluster_30` 终判而不写 time look。整条试验最多三个效果 look。
 
-36 月终端累计 0 群时，两模型命中数都如实写 0，但召回差/效果量字段和 Bootstrap 区间字段均写
-`null`，decision 固定为 `report_evidence_insufficient_at_final_review`；不得用 0 宽度或任意数值区间
-伪装成已完成统计。
+36 月终端累计 0 群时，两模型命中数都写 0，召回差/效果量字段和 Bootstrap 区间字段均写 `null`，
+但 decision 必须由链上真值支持状态机械决定：只有至少存在一个截至终点已到期且由 30 天 guard
+selector 入选的 exposure、这些 exposure 的 Truth 全部为 `mature_truth`，并且合计确实观察到 0 个
+独立震群时，才写 `report_evidence_insufficient_at_final_review`。只要任一到期入选 exposure 的真值
+不可用，或截至终点根本没有任何到期入选 exposure（例如全期没有有效 Forecast），都只能写
+`pause_scientific_integrity_failure`。不得把“不知道”或“没有可评价 exposure”伪装成真实零群。
+JSON Schema 允许这两个零群结构值；上述跨记录的充分必要条件由单链验证器执行。
+
+`pause_scientific_integrity_failure` 在任何 look 都是终止决定，不是“以后再补数据继续”的临时状态；
+`cluster_30` 或 `time_36_months` 的任一终判也立即关闭新 issue 和复审流。终止后不得再追加 Forecast、
+Missed 或 Review，也不得追加 Protocol 或 Authorization，并且不再延续周历 missed 记录。终止后
+唯一允许追加的记录类型是 `TruthSnapshotRecord`：其 issue 的 Forecast 必须在终判前已经发行、该
+horizon 必须已由对应 guard selector 入选、同一 issue×horizon 的 Truth key 尚不存在。该 Truth 只
+用于补齐终判前已承诺但当时尚未成熟的 30/90 天随访，不能改变、重开或追加既有终判。
 
 ### 8.3 最终解释
 
 - 最终一级方向不正：停止 `B0_R30` 挑战者，后续保留 `B0`。
 - 召回至少提高 5 个百分点，且预登记序贯调整区间下界大于 0：记为强确认。
 - 最终为正但未达到上述强确认：统一记录 `report_uncertain_at_final_review`；可以如实说明至少多命中 1 群的正线索，但终判已结束，不能写成继续积累或确认提升。
-- 36 月 0 群：记录 `report_evidence_insufficient_at_final_review`，不产生效果区间。
+- 36 月真实 0 群：仅在至少一个到期入选 30 天 exposure 的 Truth 全部成熟可用且合计确实 0 群时，
+  记录 `report_evidence_insufficient_at_final_review`，不产生效果区间。
+- 36 月真值不可用或无到期入选 exposure：记录 `pause_scientific_integrity_failure`，不得声称观察到
+  0 群，也不产生效果区间。
+- 任一 look 的 `pause_scientific_integrity_failure` 和任一 `cluster_30`/`time_36_months` 终判都会
+  立即终止新 issue 与复审，不再追加 Protocol、Authorization、Forecast、Missed 或 Review；仅可为
+  终判前已发行、对应 horizon 已 guard-selected 且 Truth key 尚不存在的 exposure 追加
+  `TruthSnapshotRecord`，以完成承诺随访，且不得改变既有终判。
 - 相同召回少用约 8% 面积：记为次级实用成功，但不单独宣称一级效果已确认。
 
 所有结论同时报告 30/90 天、两模型原始命中数、实际报警面积、差值、区间和失败案例，不只展示赢家。

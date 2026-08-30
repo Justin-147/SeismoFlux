@@ -653,8 +653,14 @@ p1_b0_r30_current_authority:
   record_schema_path: data/contracts/p1_prospective_records_v1.json
   source_boundary_manifest_path: data/manifests/p1_source_boundary_manifest.json
   model_manifest_path: data/manifests/p1_model_manifest.json
-  protocol_tag: v0.2.6-p1-b0-r30-protocol
-  planned_code_tag: v0.2.6-p1-b0-r30-code
+  protocol_tag: v0.2.7-p1-b0-r30-protocol
+  planned_code_tag: v0.2.7-p1-b0-r30-code
+  previous_protocol_tag: v0.2.6-p1-b0-r30-protocol
+  revision_kind: pre_first_real_issue_scientific_integrity_clarification
+  revision_completed_before_first_rule_issue: true
+  actual_record_count_at_revision: 0
+  real_target_read_count_at_revision: 0
+  protocol_id_valid_from_models_metrics_and_thresholds_unchanged: true
   supersedes_old_stage2p_for_future_execution: true
   old_stage2p_bytes_and_tags_remain_historical: true
   model_ids: [B0, B0_R30]
@@ -663,6 +669,29 @@ p1_b0_r30_current_authority:
   secondary_horizon_days: 90
   maximum_alarm_area_km2: 600000
   valid_from_local: '2026-09-10T00:00:00+08:00'
+  zero_cluster_terminal_semantics:
+    observed_zero_requires_at_least_one_due_guard_selected_primary_exposure: true
+    observed_zero_requires_all_due_selected_truth_status: mature_truth
+    observed_zero_decision: report_evidence_insufficient_at_final_review
+    unavailable_or_no_due_selected_exposure_decision: pause_scientific_integrity_failure
+    cross_record_iff_enforced_by: record_chain_validator
+  termination_semantics:
+    pause_scientific_integrity_failure_is_terminal: true
+    cluster_30_or_time_36_closes_new_issue_and_review_stream: true
+    records_allowed_after_terminal_decision:
+      - TruthSnapshotRecord
+    record_types_forbidden_after_terminal_decision:
+      - ProtocolDefinition
+      - RealIssueAuthorizationRecord
+      - ForecastIssueRecord
+      - MissedIssueRecord
+      - SequentialReviewRecord
+    post_terminal_truth_allowed_only_for_preterminal_guard_selected_exposures: true
+    post_terminal_truth_requires_issue_forecast_before_terminal_decision: true
+    post_terminal_truth_requires_new_issue_horizon_key: true
+    post_terminal_truth_completes_committed_followup_only: true
+    post_terminal_truth_may_not_change_terminal_decision: true
+    post_terminal_weekly_missed_records_forbidden: true
   real_issue_authorized: false
   real_catalog_read_authorized: false
   real_network_fetch_authorized: false

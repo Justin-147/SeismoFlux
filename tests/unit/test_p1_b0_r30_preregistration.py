@@ -126,8 +126,8 @@ def _record_chain_examples() -> list[dict[str, Any]]:
         {
             **_header("ProtocolDefinition", 0, None, "2026-08-30T00:00:00Z"),
             "protocol_id": "p1-b0-r30-prospective-v1",
-            "protocol_tag": "v0.2.6-p1-b0-r30-protocol",
-            "code_tag": "v0.2.6-p1-b0-r30-code",
+            "protocol_tag": "v0.2.7-p1-b0-r30-protocol",
+            "code_tag": "v0.2.7-p1-b0-r30-code",
             "valid_from_utc": "2026-09-09T16:00:00Z",
             "historical_catalog_cutoff_utc": "2026-07-09T04:25:56Z",
             "source_boundary_manifest_sha256": _sha("source-boundary"),
@@ -319,8 +319,17 @@ def test_protocol_is_frozen_but_only_synthetic_acceptance_is_authorized() -> Non
     protocol = config["protocol"]
 
     assert protocol["protocol_frozen"] is True
-    assert protocol["protocol_tag"] == "v0.2.6-p1-b0-r30-protocol"
-    assert protocol["planned_code_tag"] == "v0.2.6-p1-b0-r30-code"
+    assert protocol["protocol_tag"] == "v0.2.7-p1-b0-r30-protocol"
+    assert protocol["planned_code_tag"] == "v0.2.7-p1-b0-r30-code"
+    assert protocol["revision"] == {
+        "previous_protocol_tag": "v0.2.6-p1-b0-r30-protocol",
+        "kind": "pre_first_real_issue_scientific_integrity_clarification",
+        "completed_before_first_rule_issue": True,
+        "actual_record_count_at_revision": 0,
+        "real_target_read_count_at_revision": 0,
+        "protocol_id_valid_from_models_metrics_and_thresholds_unchanged": True,
+        "purpose": ("distinguish_observed_zero_clusters_from_unavailable_or_absent_truth_support"),
+    }
     assert protocol["real_issue_authorized"] is False
     assert protocol["real_catalog_read_authorized"] is False
     assert protocol["real_network_fetch_authorized"] is False
@@ -448,6 +457,9 @@ def test_model_alarm_target_and_sequential_decision_are_frozen() -> None:
     config = _load_yaml()
     model = _load_json(MODEL_PATH)
 
+    assert model["protocol_tag"] == "v0.2.7-p1-b0-r30-protocol"
+    assert model["planned_code_tag"] == "v0.2.7-p1-b0-r30-code"
+    assert model["protocol_revision"] == config["protocol"]["revision"]
     assert set(model["models"]) == {"B0", "B0_R30"}
     assert model["shared_construction"]["bandwidth_km"] == 75
     assert model["models"]["B0_R30"]["alpha"] == 0.25
@@ -537,6 +549,54 @@ def test_model_alarm_target_and_sequential_decision_are_frozen() -> None:
     }
     assert evaluation["terminal_no_positive_direction_action"] == ("stop_B0_R30_retain_B0")
     assert evaluation["terminal_trigger"] == ("first_of_30_clusters_or_2029-09-10T00:00:00+08:00")
+    assert evaluation["zero_cluster_terminal_semantics"] == {
+        "evidence_insufficient_requires_at_least_one_due_guard_selected_primary_exposure": True,
+        "evidence_insufficient_requires_all_due_selected_truth_status": "mature_truth",
+        "evidence_insufficient_requires_total_independent_cluster_count": 0,
+        "unavailable_due_selected_truth_action": "pause_scientific_integrity_failure",
+        "no_due_guard_selected_primary_exposure_action": "pause_scientific_integrity_failure",
+        "cross_record_iff_enforced_by": "record_chain_validator",
+    }
+    assert evaluation["termination_semantics"] == {
+        "pause_scientific_integrity_failure_is_terminal": True,
+        "cluster_30_or_time_36_closes_new_issue_and_review_stream": True,
+        "records_allowed_after_terminal_decision": ["TruthSnapshotRecord"],
+        "record_types_forbidden_after_terminal_decision": [
+            "ProtocolDefinition",
+            "RealIssueAuthorizationRecord",
+            "ForecastIssueRecord",
+            "MissedIssueRecord",
+            "SequentialReviewRecord",
+        ],
+        "post_terminal_truth_allowed_only_for_preterminal_guard_selected_exposures": True,
+        "post_terminal_truth_requires_issue_forecast_before_terminal_decision": True,
+        "post_terminal_truth_requires_new_issue_horizon_key": True,
+        "post_terminal_truth_completes_committed_followup_only": True,
+        "post_terminal_truth_may_not_change_terminal_decision": True,
+        "post_terminal_weekly_missed_records_forbidden": True,
+    }
+    assert (
+        config["evaluation"]["final_rule"]["zero_cluster_terminal_semantics"]
+        == (evaluation["zero_cluster_terminal_semantics"])
+    )
+    assert config["evaluation"]["final_rule"]["pause_scientific_integrity_failure_is_terminal"]
+    assert config["evaluation"]["final_rule"][
+        "terminal_decision_closes_new_issue_and_review_stream"
+    ]
+    assert config["evaluation"]["final_rule"]["records_allowed_after_terminal_decision"] == [
+        "TruthSnapshotRecord"
+    ]
+    assert config["evaluation"]["final_rule"]["record_types_forbidden_after_terminal_decision"] == [
+        "ProtocolDefinition",
+        "RealIssueAuthorizationRecord",
+        "ForecastIssueRecord",
+        "MissedIssueRecord",
+        "SequentialReviewRecord",
+    ]
+    assert config["evaluation"]["final_rule"][
+        "post_terminal_truth_requires_issue_forecast_before_terminal_decision"
+    ]
+    assert config["evaluation"]["final_rule"]["post_terminal_truth_requires_new_issue_horizon_key"]
     assert model["forbidden_model_families"] == [
         "decision_tree_ensembles",
         "neural_networks",
@@ -611,6 +671,13 @@ def test_record_schema_is_strict_minimal_and_dual_model_only() -> None:
         "authorization_commit",
         "remote_verified_at_utc",
         "protocol_definition_sha256",
+    }
+    zero_cluster_rule = schema["$defs"]["SequentialReviewRecord"]["allOf"][1]["allOf"][4]
+    assert zero_cluster_rule["then"]["properties"]["decision"] == {
+        "enum": [
+            "report_evidence_insufficient_at_final_review",
+            "pause_scientific_integrity_failure",
+        ]
     }
 
 
@@ -796,7 +863,9 @@ def test_batch_cluster_arrival_emits_every_crossed_look_in_order() -> None:
     assert list(validator.iter_errors(terminal_continue))
 
 
-def test_zero_cluster_terminal_review_is_evidence_insufficient_not_zero_gain() -> None:
+def test_zero_cluster_terminal_schema_allows_observed_zero_or_integrity_pause_not_zero_gain() -> (
+    None
+):
     schema = _load_json(SCHEMA_PATH)
     validator = Draft202012Validator(schema)
     review = _record_chain_examples()[-1]
@@ -817,6 +886,11 @@ def test_zero_cluster_terminal_review_is_evidence_insufficient_not_zero_gain() -
         }
     )
     assert not list(validator.iter_errors(zero_terminal))
+
+    unavailable_or_absent_truth_support = _seal(
+        {**zero_terminal, "decision": "pause_scientific_integrity_failure"}
+    )
+    assert not list(validator.iter_errors(unavailable_or_absent_truth_support))
 
     false_zero_gain = _seal({**zero_terminal, "recall_gain_percentage_points": 0.0})
     assert list(validator.iter_errors(false_zero_gain))
@@ -872,6 +946,39 @@ def test_current_research_authority_points_to_the_same_frozen_contract() -> None
     assert authority["model_ids"] == ["B0", "B0_R30"]
     assert authority["B0_R30_formula"] == "0.75_B0_plus_0.25_R30"
     assert authority["valid_from_local"] == config["calendar"]["fixed_valid_from_local"]
+    assert authority["protocol_tag"] == "v0.2.7-p1-b0-r30-protocol"
+    assert authority["planned_code_tag"] == "v0.2.7-p1-b0-r30-code"
+    assert authority["previous_protocol_tag"] == "v0.2.6-p1-b0-r30-protocol"
+    assert authority["revision_kind"] == ("pre_first_real_issue_scientific_integrity_clarification")
+    assert authority["revision_completed_before_first_rule_issue"] is True
+    assert authority["actual_record_count_at_revision"] == 0
+    assert authority["real_target_read_count_at_revision"] == 0
+    assert authority["protocol_id_valid_from_models_metrics_and_thresholds_unchanged"] is True
+    assert authority["zero_cluster_terminal_semantics"] == {
+        "observed_zero_requires_at_least_one_due_guard_selected_primary_exposure": True,
+        "observed_zero_requires_all_due_selected_truth_status": "mature_truth",
+        "observed_zero_decision": "report_evidence_insufficient_at_final_review",
+        "unavailable_or_no_due_selected_exposure_decision": ("pause_scientific_integrity_failure"),
+        "cross_record_iff_enforced_by": "record_chain_validator",
+    }
+    assert authority["termination_semantics"] == {
+        "pause_scientific_integrity_failure_is_terminal": True,
+        "cluster_30_or_time_36_closes_new_issue_and_review_stream": True,
+        "records_allowed_after_terminal_decision": ["TruthSnapshotRecord"],
+        "record_types_forbidden_after_terminal_decision": [
+            "ProtocolDefinition",
+            "RealIssueAuthorizationRecord",
+            "ForecastIssueRecord",
+            "MissedIssueRecord",
+            "SequentialReviewRecord",
+        ],
+        "post_terminal_truth_allowed_only_for_preterminal_guard_selected_exposures": True,
+        "post_terminal_truth_requires_issue_forecast_before_terminal_decision": True,
+        "post_terminal_truth_requires_new_issue_horizon_key": True,
+        "post_terminal_truth_completes_committed_followup_only": True,
+        "post_terminal_truth_may_not_change_terminal_decision": True,
+        "post_terminal_weekly_missed_records_forbidden": True,
+    }
     assert authority["real_issue_authorized"] is False
     assert authority["real_catalog_read_authorized"] is False
     assert authority["real_network_fetch_authorized"] is False

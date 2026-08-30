@@ -1,5 +1,30 @@
 # SeismoFlux P1-0A 真正前瞻预登记验收（2026-08-30）
 
+## `v0.2.7` 预首次真实起报科学完整性修订
+
+P1-0B 纯合成审计发现，原 `v0.2.6` 合同没有在 36 月累计 0 群时区分“真值已完整可用且确实
+0 群”与“真值不可用或根本没有到期入选 exposure”。当前候选因此透明升级为
+`v0.2.7-p1-b0-r30-protocol`，计划代码标签为 `v0.2.7-p1-b0-r30-code`。
+
+本修订发生在首个规则起报 `2026-09-10T00:00:00+08:00` 之前；修订时真实记录数为 0、真实目标
+读取数为 0，没有利用未来答案。协议 ID、`valid_from`、模型、数据、面积、目标、指标、阈值和起报日
+全部不变。原 `v0.2.6` 的提交、标签、远端回读与以下历史验收证据原样保留；它们不被删除或改写。
+`v0.2.7` 只有在自身测试、验收、提交、推送和远端回读完成后才闭合，而且闭合本身仍不授权真实
+issue。
+
+修订后的零群规则是：只有至少一个到期且由 30 天 guard selector 入选的 exposure、全部相应 Truth
+均为 `mature_truth`、合计确实为 0 群，才可写
+`report_evidence_insufficient_at_final_review`。任一到期入选 Truth 不可用，或截至终点没有任何到期
+入选 exposure，都只能写 `pause_scientific_integrity_failure`；不得把未知或无可评价 exposure 当成
+真实零群。JSON Schema 允许这两个结构值，跨记录的充分必要条件由记录链验证器执行。
+
+同时澄清终止边界：任何 look 写出 `pause_scientific_integrity_failure` 都立即终止本试验；
+`cluster_30` 或 `time_36_months` 的任一终判也立即关闭新 issue 与复审流。上述决定之后不得再追加
+Protocol、Authorization、Forecast、Missed 或 Review，也不再延续周历 missed。终止后唯一允许追加的
+记录类型是 `TruthSnapshotRecord`，而且 issue 的 Forecast 必须在终判前已经发行、该 horizon 必须已经
+由对应 guard selector 入选、同一 issue×horizon 的 Truth key 尚不存在；它只用于完成已经承诺的
+30/90 天随访，不得改变、重开或追加既有终判。
+
 ## 当前结论
 
 验收：`PASS`。阶段状态：`accepted_closed`。远端闭合：`verified`。
@@ -41,7 +66,7 @@ P1-0A 候选已经把 `B0_R30` 对 `B0` 的真正前瞻科学问题、模型、�
 已经在同一只追加链上且早于 `T`，后续才准接 Forecast；真值和序贯复审也不得另起旁链。P1-0A 本身
 只冻结这些类型，`actual_record_count=0`。
 
-30 天主终点的 10/20/30 look 使用封口震群按 `(代表时间,event_id,issue_id,cluster_id)` 的全局顺序前缀；90 天不进入序贯 decision。一次成熟批次跨过多个门时必须依 10→20→30 连续写记录。36 月先到时 `elapsed_months=36`，用全部成熟群替代下一未到 look：prior look/count 只能是 `0→0..9`、`1→10..19`、`2→20..29`，终端 look 为 `prior+1`；同刻达到 30 群只写 `cluster_30`。36 月为 0 群时命中写 0，效果字段和 Bootstrap 区间字段写 null，decision 为 `report_evidence_insufficient_at_final_review`。全程最多三看。
+30 天主终点的 10/20/30 look 使用封口震群按 `(代表时间,event_id,issue_id,cluster_id)` 的全局顺序前缀；90 天不进入序贯 decision。一次成熟批次跨过多个门时必须依 10→20→30 连续写记录。36 月先到时 `elapsed_months=36`，用全部成熟群替代下一未到 look：prior look/count 只能是 `0→0..9`、`1→10..19`、`2→20..29`，终端 look 为 `prior+1`；同刻达到 30 群只写 `cluster_30`。36 月累计 0 群时命中写 0，效果字段和 Bootstrap 区间字段写 null；只有至少一个到期入选 30 天 exposure 的 Truth 全部成熟可用且合计确实 0 群时，decision 才为 `report_evidence_insufficient_at_final_review`，任一到期入选 Truth 不可用或根本没有到期入选 exposure 时只能 `pause_scientific_integrity_failure`。全程最多三看。
 旧 v0.2.5 的 P0/P1/PP、7/30/90 宏平均和旧 selector 不提供当前权限。
 
 ## missed 与继续规则

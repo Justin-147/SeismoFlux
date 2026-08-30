@@ -120,8 +120,8 @@
             "previous_record_sha256": {"type": "null"},
             "content_sha256": {"$ref": "#/$defs/Sha256"},
             "protocol_id": {"const": "p1-b0-r30-prospective-v1"},
-            "protocol_tag": {"const": "v0.2.6-p1-b0-r30-protocol"},
-            "code_tag": {"const": "v0.2.6-p1-b0-r30-code"},
+            "protocol_tag": {"const": "v0.2.7-p1-b0-r30-protocol"},
+            "code_tag": {"const": "v0.2.7-p1-b0-r30-code"},
             "valid_from_utc": {"const": "2026-09-09T16:00:00Z"},
             "historical_catalog_cutoff_utc": {"const": "2026-07-09T04:25:56Z"},
             "source_boundary_manifest_sha256": {"$ref": "#/$defs/Sha256"},
@@ -685,7 +685,10 @@
                   "sequentially_adjusted_interval_lower": {"type": "null"},
                   "sequentially_adjusted_interval_upper": {"type": "null"},
                   "decision": {
-                    "const": "report_evidence_insufficient_at_final_review"
+                    "enum": [
+                      "report_evidence_insufficient_at_final_review",
+                      "pause_scientific_integrity_failure"
+                    ]
                   }
                 }
               }

@@ -5,8 +5,16 @@ protocol:
   stage_id: P1-0A
   status: frozen_no_real_issue_authority
   protocol_frozen: true
-  protocol_tag: v0.2.6-p1-b0-r30-protocol
-  planned_code_tag: v0.2.6-p1-b0-r30-code
+  protocol_tag: v0.2.7-p1-b0-r30-protocol
+  planned_code_tag: v0.2.7-p1-b0-r30-code
+  revision:
+    previous_protocol_tag: v0.2.6-p1-b0-r30-protocol
+    kind: pre_first_real_issue_scientific_integrity_clarification
+    completed_before_first_rule_issue: true
+    actual_record_count_at_revision: 0
+    real_target_read_count_at_revision: 0
+    protocol_id_valid_from_models_metrics_and_thresholds_unchanged: true
+    purpose: distinguish_observed_zero_clusters_from_unavailable_or_absent_truth_support
   real_issue_authorized: false
   real_catalog_read_authorized: false
   real_network_fetch_authorized: false
@@ -229,6 +237,29 @@ evaluation:
     no_positive_direction: stop_B0_R30_retain_B0
     positive_but_not_strong: report_uncertain_without_claiming_confirmation
     strong_evidence: confirm_prospective_improvement
+    pause_scientific_integrity_failure_is_terminal: true
+    terminal_decision_closes_new_issue_and_review_stream: true
+    records_allowed_after_terminal_decision:
+      - TruthSnapshotRecord
+    record_types_forbidden_after_terminal_decision:
+      - ProtocolDefinition
+      - RealIssueAuthorizationRecord
+      - ForecastIssueRecord
+      - MissedIssueRecord
+      - SequentialReviewRecord
+    post_terminal_truth_allowed_only_for_preterminal_guard_selected_exposures: true
+    post_terminal_truth_requires_issue_forecast_before_terminal_decision: true
+    post_terminal_truth_requires_new_issue_horizon_key: true
+    post_terminal_truth_completes_committed_followup_only: true
+    post_terminal_truth_may_not_change_terminal_decision: true
+    post_terminal_weekly_missed_records_forbidden: true
+    zero_cluster_terminal_semantics:
+      evidence_insufficient_requires_at_least_one_due_guard_selected_primary_exposure: true
+      evidence_insufficient_requires_all_due_selected_truth_status: mature_truth
+      evidence_insufficient_requires_total_independent_cluster_count: 0
+      unavailable_due_selected_truth_action: pause_scientific_integrity_failure
+      no_due_guard_selected_primary_exposure_action: pause_scientific_integrity_failure
+      cross_record_iff_enforced_by: record_chain_validator
 
 truth:
   fetched_separately_from_issue_input: true
