@@ -2,7 +2,7 @@
 
 ## 验收结论
 
-科学验收：`PASS`。当前状态：`accepted_pending_commit_and_remote_closure`。科学价值：
+科学验收：`PASS`。当前状态：`accepted_closed`。远端闭合：`verified`。科学价值：
 `necessary_enabler`。直接真实预测证据：`none`。
 
 P1-0B 证明的是“冻结方法会按预定逻辑工作”，不是“已经证明能预测真实地震”。本阶段没有读取
@@ -12,8 +12,10 @@ P1-0B 证明的是“冻结方法会按预定逻辑工作”，不是“已经�
 
 本候选绑定已远端闭合的协议提交
 `0f43f15bc983a37157f1b129976c7ec0ea47fc7d` 和标签
-`v0.2.7-p1-b0-r30-protocol`。P1-0B 自身的提交、标签、推送与远端回读将在候选测试全部通过后
-补入本文件和交接文档。
+`v0.2.7-p1-b0-r30-protocol`。P1-0B 科学产物提交为
+`1f9a10dd9127e1978e407f5c36e3c3426c7e6b5e`，注释标签为
+`v0.2.7-p1-b0-r30-synthetic`；远端分支与标签解引用均已回读到该提交，标签对象为
+`7dd34cae290e26c99f4459d6fd1c2865a87da6ee`。
 
 ## 用了什么数据
 
@@ -94,6 +96,7 @@ P1-0B 审计发现并在 `v0.2.7` 透明修订：
 
 - 三套已知答案和完整单链科学反例：`38 passed`；
 - 静态图、完全离线交互和预登记一致性：`39 passed`；
+- 最终合并复跑：`77 passed in 141.13s`；
 - Ruff lint、格式、strict Mypy 和 `git diff --check`：全部通过；
 - 六件产物在最终源代码上重新生成后逐字节复算：`PASS`；
 - 当前产物清单 SHA-256：
@@ -117,10 +120,13 @@ P1-0B 审计发现并在 `v0.2.7` 透明修订：
 前提下完成代码冻结和授权评审。P1-0C 未闭合前，不发行真实 issue；锁定测试继续禁止。
 
 - `acceptance`: `PASS`
-- `stage_status`: `accepted_pending_commit_and_remote_closure`
+- `stage_status`: `accepted_closed`
+- `remote_closure`: `verified`
+- `stage_commit`: `1f9a10dd9127e1978e407f5c36e3c3426c7e6b5e`
+- `stage_tag`: `v0.2.7-p1-b0-r30-synthetic`
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none`
 - `evidence`: 三组纯合成已知答案在相同报警面积下分别恢复正、零、负方向；尚无真实前瞻结果。
-- `decision`: `close_P1_0B_then_start_P1_0C_raw_to_score_closure`
+- `decision`: `P1_0B_closed_start_P1_0C_raw_to_score_closure`
 - `next_scientific_test`: 从冻结原始目录和报警掩膜机械重算真实记录的事件、震群与命中。
 - `stop_condition`: 原始数据到得分不能逐项重算，或起报图含未来目标时，不得授权任何真实 issue。
