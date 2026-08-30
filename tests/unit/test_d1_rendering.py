@@ -441,6 +441,8 @@ def test_canonical_optional_placebo_and_robustness_are_bound_and_rendered(
     explorer = rendered.explorer_html_path.read_text(encoding="utf-8")
     assert "时间/空间置乱归因已完成" in effects
     assert "时间/空间置乱和稳健性诊断均已完成" in report
+    assert "D1阶段最终机制归因" in report
+    assert "必须完成时间置乱" not in report
     assert "区域与逐震群稳健性" in report
     assert "robustnessRows" in explorer
     manifest = json.loads(rendered.manifest_path.read_text(encoding="utf-8"))

@@ -2812,6 +2812,11 @@ def _render_science_report(
         final_status = f"时间/空间置乱已完成；{ROBUSTNESS_PENDING_LABEL}"
     else:
         final_status = PLACEBO_PENDING_LABEL
+    conclusion_status = (
+        f"D1阶段最终诊断已经齐全。{final_status}"
+        if placebo_complete and robustness_complete
+        else f"这还不是最终科学结论。{final_status}"
+    )
     component_rows = "\n".join(
         "| "
         + " | ".join(
@@ -2828,6 +2833,24 @@ def _render_science_report(
         for item in components
     )
     training = "\n".join(_training_lines(payload))
+    component_status_summary = "；".join(
+        f"{item.label}：{_component_status_zh(item.attribution_status)}" for item in components
+    )
+    if placebo_complete and robustness_complete:
+        science_value_next_step = (
+            "这一步直接回答“模型在未参与训练的后来时间段上，固定报警面积后是否比长期背景多覆盖独立震群”，"
+            "因此属于对最终预测目标的直接检验。时间/空间置乱、区域贡献和去单震群诊断均已完成。"
+            f"D1阶段最终机制归因为：{component_status_summary}。未通过归因的组件不得认领完整组合的总提升。"
+            f"当前最佳中间模型为 `{best_intermediate}`；下一项科学检验应在新的 `valid_from` 下预登记真正前瞻比较，"
+            "而不是继续针对本次开发成绩复杂化模型。锁定测试和真正前瞻预测均未运行。"
+        )
+    else:
+        science_value_next_step = (
+            "这一步直接回答“模型在未参与训练的后来时间段上，固定报警面积后是否比长期背景多覆盖独立震群”，"
+            "因此属于对最终预测目标的直接检验。当前 strong/promising/weak 等词只表示**原始预测效果预分类**。"
+            "必须完成时间置乱、空间置乱、区域贡献和去单震群诊断，确认增益不是报告日历、空间结构或单一震群造成，"
+            "之后才能给出最终机制归因与是否进入真正前瞻预测的决定。锁定测试和真正前瞻预测均未运行。"
+        )
     return f"""# SeismoFlux D1 真实历史开发回放科学报告
 
 > **{RETROSPECTIVE_LABEL}**<br>
@@ -2835,7 +2858,7 @@ def _render_science_report(
 
 ## 一句话结论
 
-本轮把六种方法放到过去从未参与各折训练的时间段上，统一限制报警面积，再看能否多覆盖独立的 M5–6 规则震群。完整组合 `{FULL_MODEL}` 的**原始预测效果预分类**为“{level_zh}”：相对长期背景 B0 多命中 {full_decision.pooled_hit_gain} 个震群，召回变化 {full_decision.pooled_recall_gain:+.1%}。这还不是最终科学结论。{final_status}
+本轮把六种方法放到过去从未参与各折训练的时间段上，统一限制报警面积，再看能否多覆盖独立的 M5–6 规则震群。完整组合 `{FULL_MODEL}` 的**原始预测效果预分类**为“{level_zh}”：相对长期背景 B0 多命中 {full_decision.pooled_hit_gain} 个震群，召回变化 {full_decision.pooled_recall_gain:+.1%}。{conclusion_status}
 
 ## 用了什么数据
 
@@ -2891,7 +2914,7 @@ def _render_science_report(
 
 ## 当前科学价值与下一步
 
-这一步直接回答“模型在未参与训练的后来时间段上，固定报警面积后是否比长期背景多覆盖独立震群”，因此属于对最终预测目标的直接检验。当前 strong/promising/weak 等词只表示**原始预测效果预分类**。必须完成时间置乱、空间置乱、区域贡献和去单震群诊断，确认增益不是报告日历、空间结构或单一震群造成，之后才能给出最终机制归因与是否进入真正前瞻预测的决定。锁定测试和真正前瞻预测均未运行。
+{science_value_next_step}
 """
 
 
