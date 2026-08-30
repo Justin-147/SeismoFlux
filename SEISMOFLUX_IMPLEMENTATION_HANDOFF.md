@@ -205,7 +205,9 @@ P1 不再训练或调参。每周四 `00:00 Asia/Shanghai` 为 `T`，共同截�
 `RealIssueAuthorizationRecord`；只有该记录在同一链上且早于对应 `T`，才能追加 Forecast，之后的
 missed、真值和复审也不得另起旁链。P1-0A 只冻结合同，当前实际记录数为 0。
 
-P1-0A 当前仍为 `necessary_enabler`、没有真实效果、`real_issue_authorized=false`。异常、断层、
+P1-0A 已由冻结提交 `d793d3359e7caf71efbef32b76bb887f5511ad78` 和标签
+`v0.2.6-p1-b0-r30-protocol` 完成验收、推送与远端回读。它仍只属于 `necessary_enabler`、没有真实效果、
+`real_issue_authorized=false`。异常、断层、
 人工预测、树模型、神经网络和锁定测试均不进入本试验；RFC3161/TSA、证书链、硬件收据和逐工件
 外部注册明确退休。P1-0A 通过相称验收并远端闭合后，只允许进入 P1-0B 双模型纯合成演练；P1-0B
 不得联网、不得读取本地目录截止后的真实新增目录或未来真实目标，也不授权真实 issue。验收和恢复

@@ -4,7 +4,7 @@
 
 整个项目尚未完成。D1 已由提交 `0dab57fd1491b5f4924cbae87c0b2001c6fc6b24` 完成验收、提交、推送和远端回读，科学结论是：简单模型 `B0_R30` 在真实历史三折时间外推中比 `B0` 多命中 4/21 个独立震群；异常组件没有显示额外增量，因此停止异常复杂化，不打开锁定测试。
 
-当前正在做 P1-0A：在未来答案出现前冻结 `B0_R30` 对 `B0` 的真正前瞻考试规则。它没有真实 issue 和新效果，状态是 `necessary_enabler`，`real_issue_authorized=false`。
+P1-0A 已由冻结提交 `d793d3359e7caf71efbef32b76bb887f5511ad78` 和标签 `v0.2.6-p1-b0-r30-protocol` 完成验收、推送和远端回读。它没有真实 issue 和新效果，科学价值是 `necessary_enabler`，`real_issue_authorized=false`。当前紧邻工作是 P1-0B 纯合成双模型演练。
 
 ## 外行版：现在在做什么
 
@@ -18,8 +18,8 @@ P1-0A 就是在开考前把规则写死：每周什么时候画图、两张图�
 | --- | --- | --- |
 | S0 全数据与路线复审 | 已闭合 | 确认科学优先和真实证据边界 |
 | D1 历史因果回放与异常置乱 | 已闭合并推送 | `B0_R30` 是当前最佳简单候选；异常不再复杂化 |
-| P1-0A 前瞻预登记 | 候选形成，待最终测试/验收/提交/推送/远端回读 | 只冻结规则，无真实效果 |
-| P1-0B 双模型纯合成 | 未开始 | 只检验计算和图件逻辑，不读新增真实目录、不联网 |
+| P1-0A 前瞻预登记 | 已闭合并远端回读 | 只冻结规则，无真实效果 |
+| P1-0B 双模型纯合成 | 下一阶段，已获启动授权 | 只检验计算和图件逻辑，不读新增真实目录、不联网 |
 | P1 真实按时发行 | 未授权、0期 | 必须等待前两步分别闭合后另行授权 |
 | P1 30/90天成熟评价 | 未开始 | 只能评价未来按时保存的真实预测 |
 | 锁定测试 | 未打开 | 当前继续禁止 |
@@ -82,19 +82,17 @@ P1-0A 候选范围固定为：
 
 工作树：`D:\AIPred\SeismoFlux\data\interim\worktrees\science_first`。
 
-1. 运行 `git status --short`，确认只看到本轮 P1-0A 精确文件和原有 15 个 Stage4 未跟踪草稿；不要回退其他代理的修改。
-2. 对照 `docs/p1_b0_r30_prospective_preregistration.md`，核对 YAML、记录合同和两份清单中的公式、时间、数据截止、面积、目标、权限完全一致。
-3. 运行 `tests/unit/test_p1_b0_r30_preregistration.py` 及相称的治理/解析检查；禁止运行锁定测试。
-4. 将精确结果写入 `docs/p1_0a_acceptance_2026-08-30.md`。只有全部通过才改为 `accepted_for_commit_and_push`。
-5. 只暂存上列 P1-0A 文件，检查 staged diff 中没有 Stage4 草稿、真实新增目录、未来目标或旧锁定测试产物。
-6. 提交、推送并从远端回读同一提交后，才把 P1-0A 标成闭合。
-7. 紧邻下一步是 P1-0B 双模型纯合成：不联网、不读本地目录截止之后的真实新增目录、不读未来真实目标。P1-0B 另行验收、提交和推送前，`real_issue_authorized` 仍为 false。
+1. 运行 `git status --short`，确认 P1-0A 已闭合，且原有 15 个 Stage4 未跟踪草稿仍未暂存；不要回退或纳入它们。
+2. 核验分支历史包含冻结提交 `d793d3359e7caf71efbef32b76bb887f5511ad78`，协议标签解引用到同一提交。
+3. 紧邻下一步只做 P1-0B 双模型纯合成：不联网、不读本地目录截止之后的真实新增目录、不读未来真实目标。
+4. P1-0B 必须覆盖正、零、负效果和 36 月零群边界，生成静态 SVG 与完全离线交互 HTML，并验证挑战者面积不超过 B0 参考面积。
+5. P1-0B 自身验收、提交、推送和远端回读前，`real_issue_authorized`、`real_catalog_read_authorized` 和 `real_network_fetch_authorized` 均保持 false。
 
 ## 机器可检索的当前决定
 
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none`
 - `evidence`: D1 的 `B0_R30` 历史外推由 5/21 提高到 9/21；P1-0A 只冻结未来公平检验，真实 issue 和新效果为 0。
-- `decision`: `finish_P1_0A_remote_close_then_P1_0B_synthetic_only`
+- `decision`: `P1_0A_closed_start_P1_0B_synthetic_only`
 - `next_scientific_test`: 双模型纯合成正/零/负情景的同面积地图、静态图、离线交互页和评价结果。
 - `stop_condition`: 合同或合成公平性不能闭合则不发行真实 P1；不以异常、复杂模型、锁定测试或工程证明链绕过。

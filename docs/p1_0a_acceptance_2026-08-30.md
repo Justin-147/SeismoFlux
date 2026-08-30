@@ -2,11 +2,11 @@
 
 ## 当前结论
 
-本地验收：`PASS`。阶段状态：`accepted_for_commit_and_push`。远端闭合：`pending`。
+验收：`PASS`。阶段状态：`accepted_closed`。远端闭合：`verified`。
 
 P1-0A 候选已经把 `B0_R30` 对 `B0` 的真正前瞻科学问题、模型、数据边界、首期、面积、目标、序贯复审和停止条件写成明确的冻结合同。它目前只属于 `necessary_enabler`，真实 issue 数为 0，没有新的训练、测试或前瞻效果，`real_issue_authorized=false`。
 
-本文件列出的本地门和第三次独立科学复审已经通过；现在只剩精确提交、协议标签、推送和远端回读。完成前不得把 P1-0A 称为 `accepted_closed`，也不得发行真实预测。
+本文件列出的本地门、第三次独立科学复审、精确提交、协议标签、推送和远端回读已经全部通过。P1-0A 已闭合，但仍不得发行真实预测；下一阶段只授权 P1-0B 纯合成双模型演练。
 
 ## 通俗验收问题
 
@@ -75,24 +75,15 @@ P1-0A 候选已经把 `B0_R30` 对 `B0` 的真正前瞻科学问题、模型、�
 | P1-A4 评价公平性 | B0 参考面积、30 天 guard-gap selector、窗口内分群/封口/归属、仅30天序贯、稳定 look 前缀、批量跨门和36月零群 null 语义逐项冻结 | PASS | 挑战者多圈面积、错误 prior/look/count、终判继续等反例均被拒绝 |
 | P1-A5 资源与工程相称性 | 本阶段不运行大计算；无后台 P1 真实抓取/发行进程；不触碰 Stage4 草稿 | PASS | 无 Python/P1 后台；48 逻辑处理器，三次总 CPU 采样约 17.58%/4.96%/9.54%；15 个 Stage4 草稿保持未跟踪且未纳入 |
 | P1-A6 文本与差异 | 格式/差异检查通过，精确暂存只含上列 10 个文件 | PASS | Ruff、format、strict Mypy、`git diff --check` 全部通过；治理回归 `43 passed in 48.73s` |
-| P1-A7 远端闭合 | 提交、推送并远端回读到同一提交；闭合前真实发行仍禁止 | PENDING | 等待精确提交、标签、推送和 `ls-remote` 回读 |
+| P1-A7 远端闭合 | 提交、推送并远端回读到同一提交；闭合前真实发行仍禁止 | PASS | 冻结提交与远端分支均为 `d793d3359e7caf71efbef32b76bb887f5511ad78`；标签对象 `627be886d336d46f7fde37ba71f0772e5f7bb12d`，解引用同为 `d793d3359e7caf71efbef32b76bb887f5511ad78` |
 
 建议的相称最终命令范围为：聚焦 P1-0A 单元测试、配置/JSON 解析、与本改动相关的治理回归、Ruff/格式（如适用）和 `git diff --check`。不得运行锁定测试，也不得把全仓测试数量当作预测效果。
 
 ## 当前验收决定
 
-当前决定为：
-
-- `acceptance`: `PASS_local`
-- `stage_status`: `accepted_for_commit_and_push`
-- `remote_closure`: `pending`
-- `real_issue_authorized`: `false`
-- `next_stage_authorized_after_remote_close`: `P1-0B_synthetic_only`
-
-只有 P1-A7 完成后，才可把本节更新为：
-
 - `acceptance`: `PASS`
 - `stage_status`: `accepted_closed`
+- `remote_closure`: `verified`
 - `real_issue_authorized`: `false`
 - `next_stage_authorized`: `P1-0B_synthetic_only`
 
@@ -104,6 +95,6 @@ P1-0A 候选已经把 `B0_R30` 对 `B0` 的真正前瞻科学问题、模型、�
 - `direct_prediction_improvement`: `none`
 - `evidence`: 冻结了 D1 最佳简单候选的未来公平检验规则；真实 issue、成熟目标和新效果均为 0。
 - `uncertainty_change`: 尚未降低 `B0_R30` 是否真正提高未来召回的不确定性，只降低了未来试验被事后改规则的风险。
-- `decision`: `local_acceptance_PASS_waiting_exact_commit_push_remote_readback`
+- `decision`: `P1_0A_closed_proceed_P1_0B_synthetic_only`
 - `next_scientific_test`: P1-0B 纯合成双模型正/零/负演练和静态/离线交互展示。
 - `stop_condition`: 合同不一致或合成链不能正确反映预设结果时不进入真实发行；不得以更多工程证明或更复杂模型绕过。
