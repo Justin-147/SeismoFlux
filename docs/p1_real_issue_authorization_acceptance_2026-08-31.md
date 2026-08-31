@@ -19,6 +19,7 @@
 - `RealIssueAuthorizationRecord` 哈希：
   `184673b3b9e11e099bd8dcb4188b5d2e6c1497623519abcc2e36258a482600b1`。
 - 远端核验与记录时间：`2026-08-31T04:36:13.436543Z`。
+- 授权激活提交：`4bd37e8d4f3cea7e19fa24917dfc6372894b15a0`；公开分支头已实际回读到该提交。
 - 授权生效 T：`2026-09-09T16:00:00Z`；首期 Q：`2026-09-09T15:45:00Z`。
 
 ## 科学边界
@@ -32,7 +33,7 @@
 ## 科学价值复审
 
 - `acceptance`: `PASS`
-- `stage_status`: `authorization_record_ready_for_remote_closure`
+- `stage_status`: `accepted_remote_closed`
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none_new`
 - `evidence`: `public_authority_and_frozen_start_boundary`
