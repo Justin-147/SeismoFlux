@@ -140,15 +140,15 @@ PNG 后人工目视。双图使用相同范围与色标，均显示 600,000 km²
 | `T` 后补发、倒签和错误中断恢复被拒绝 | 通过 | 推送失败、跨 T、远端先闭合、本地中断及 missed 分叉测试 |
 | 静态 SVG 与离线交互页实际检查 | 通过（见边界说明） | 合成夹具静态图目视；离线 HTML 内容与交互结构由测试验证 |
 | 聚焦测试、Ruff、严格 Mypy、`git diff --check` | 通过 | 65 passed/104.46s；Ruff 通过；runner+prospective strict Mypy 通过；diff check 通过 |
-| 提交、注释标签、推送和远端回读 | 待闭合 | 代码验收完成后执行，不提前填写身份 |
+| 提交、注释标签、推送和远端回读 | 通过 | 远端分支和标签剥离值均回读为 `db93e9ac8cd2997859fdd8815fa4d026b10fd95e` |
 | 15 个既有 Stage4 未跟踪草稿未触碰 | 通过 | 精确路径状态复核；提交时只显式加入 P1 文件 |
 
 待填身份：
 
-- `operations_commit`: **待主执行者填入**
+- `operations_commit`: `db93e9ac8cd2997859fdd8815fa4d026b10fd95e`
 - `operations_tag`: `v0.2.7-p1-b0-r30-ops`
-- `remote_branch_readback`: **待主执行者填入**
-- `remote_tag_peeled_readback`: **待主执行者填入**
+- `remote_branch_readback`: `db93e9ac8cd2997859fdd8815fa4d026b10fd95e`
+- `remote_tag_peeled_readback`: `db93e9ac8cd2997859fdd8815fa4d026b10fd95e`
 - `tests`: `65 passed in 104.46s`; Ruff passed; strict Mypy passed on runner and prospective
 - `visual_qa`: synthetic fixture only; static SVG rendered and visually inspected; offline HTML structure and interactions tested
 - `network_accessed_for_future_catalog`: `false`（截至本阶段验收；不得为验收提前读取首期目录）
@@ -169,8 +169,8 @@ PNG 后人工目视。双图使用相同范围与色标，均显示 600,000 km²
 ## 当前进展、下一步与停止条件
 
 - 整个项目：**尚未完成**。
-- 本阶段：最小发行通路的实现、最终测试和视觉 QA 已完成；提交、标签、推送和远端回读
-  **正在闭合**。
+- 本阶段：最小发行通路的实现、最终测试、视觉 QA、提交、标签、推送和远端回读均已完成，
+  **阶段 O 已闭合，不再继续扩展工程功能**。
 - 用户授权：用户已明确授权依冻结 P1 v0.2.7 创建 `RealIssueAuthorizationRecord`；链上记录和远端
   身份仍须在本阶段闭合后另行形成，不能把聊天授权自动等同于已经公开闭合的机器记录。
 - 紧邻下一步：先闭合本阶段；再追加授权记录并远端回读；然后只在首个尚未到达的合法 `Q/T`
@@ -180,8 +180,8 @@ PNG 后人工目视。双图使用相同范围与色标，均显示 600,000 km²
 
 最终阶段决定在实际验收后填写：
 
-- `acceptance`: **待主执行者填入**
-- `stage_status`: **待主执行者填入**
+- `acceptance`: `GO`
+- `stage_status`: `accepted_remote_closed`
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none_new`
 - `historical_evidence_only`: `B0 5/21 -> B0_R30 9/21`
