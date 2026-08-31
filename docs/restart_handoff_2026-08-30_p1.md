@@ -1,10 +1,39 @@
 # SeismoFlux P1 中断恢复交接（2026-08-30）
 
+## 2026-08-31 Codex 重启安全点（最高优先级）
+
+可以安全重启 Codex。当前没有 Python 后台任务，也没有需要续跑的模型计算。P1-0C 已完成科学验收、
+提交、标签、推送和远端回读；科学提交为
+`c71c97790adcf33f6c8121e367317857dc8dff31`，注释标签
+`v0.2.7-p1-b0-r30-code` 解引用到该提交。闭合记录提交为
+`24ea3627f9d10d254658d211fdae8d3fcf56f700`；本次重启安全点会在它之后增加一个只修改交接文档的
+提交，因此重启后应以当前分支 HEAD 与远端跟踪分支相等为准，不要把 `24ea362` 误当作永远不变的
+分支头。
+
+当前工作树除交接文档更新外，只有既有 15 个 Stage4 未跟踪草稿：7 个
+`src/seismoflux/anomaly_increment/kde_dev_*.py` 和 8 个
+`tests/unit/test_stage4_kde_dev_*.py`。它们未暂存、未提交，重启后不得删除、移动、修改或批量暂存。
+
+重启后按以下顺序恢复，不需要重新运行 P1-0C：
+
+1. 进入工作树 `D:\AIPred\SeismoFlux\data\interim\worktrees\science_first`，确认分支为
+   `codex/stage2-etas-science-first`。
+2. 运行 `git status --short`，只允许看到上述 15 个 Stage4 未跟踪草稿。
+3. 确认 `git rev-parse HEAD` 与 `git rev-parse origin/codex/stage2-etas-science-first` 相等；确认
+   `git rev-parse 'v0.2.7-p1-b0-r30-code^{}'` 为科学提交 `c71c977...`。
+4. 阅读本节、唯一蓝图第 1.6 节和 `docs/p1_0c_acceptance_2026-08-31.md`，不要重新优化 P1-0C。
+5. `real_issue_authorized=false` 仍有效。没有用户另行显式 `RealIssueAuthorizationRecord` 时，只能
+   维持科学心跳，不能创建真实 issue、联网取未来目录或运行锁定测试。
+
+科学心跳自动化 id 为 `seismoflux`，每 30 分钟检查是否推进最终召回目标、是否跑偏、是否陷入工程
+细节以及是否需要调整计划。Codex 重启不需要停止或重建该心跳。
+
 ## 2026-08-31 P1-0C 实时续接更新（优先于下文旧状态）
 
 P1-0C 已完成科学验收、提交、打标签、推送和远端回读，阶段已经关闭；真实发行仍未授权。科学提交
-为 `c71c97790adcf33f6c8121e367317857dc8dff31`，注释标签为 `v0.2.7-p1-b0-r30-code`，远端分支
-与标签解引用均已回读到该科学提交。冻结历史适配稳定读取 40,898 条目录、15,697 个 25 km 格，B0
+为 `c71c97790adcf33f6c8121e367317857dc8dff31`，注释标签为 `v0.2.7-p1-b0-r30-code`；标签解引用
+到该科学提交，远端分支随后包含闭合记录和重启交接文档。冻结历史适配稳定读取 40,898 条目录、
+15,697 个 25 km 格，B0
 入选 5,991 条、R30 为 0；空 R30 时两模型质量逐位相同，两边各圈 995 格、
 599,494.3733448011 km²。
 

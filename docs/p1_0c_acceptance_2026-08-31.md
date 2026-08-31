@@ -130,7 +130,8 @@ P1-0C 科学验收和远端闭合通过。每一个命中都能从 exact raw tru
 - `real_issue_authorized`: `false`
 - `science_commit`: `c71c97790adcf33f6c8121e367317857dc8dff31`
 - `annotated_tag`: `v0.2.7-p1-b0-r30-code`
-- `remote_branch_readback`: `c71c97790adcf33f6c8121e367317857dc8dff31`
+- `science_remote_branch_readback_before_closure_docs`: `c71c97790adcf33f6c8121e367317857dc8dff31`
 - `remote_tag_peeled_readback`: `c71c97790adcf33f6c8121e367317857dc8dff31`
+- `closure_record_commit`: `24ea3627f9d10d254658d211fdae8d3fcf56f700`
 - `decision`: `P1_0C_closed_stop_engineering_wait_for_separate_real_issue_authorization`
 - `stop_condition`: 没有另行显式 `RealIssueAuthorizationRecord` 不得进入真实起报。
