@@ -1,0 +1,103 @@
+{
+  "catalog_path": "data/processed/stage1/debc98054172a4a1/earthquake_event.parquet",
+  "locked_test_run": false,
+  "network_accessed": false,
+  "not_a_real_prospective_issue": true,
+  "query_cutoff_utc": "2026-09-09T15:45:00Z",
+  "real_history_rehearsal": {
+    "catalog": {
+      "B0_source_count": 5991,
+      "R30_source_count": 0,
+      "content_sha256": "2005f0ec465978829d0832e7228f22ecd34f1a7e9f268598979de72a5295e404",
+      "file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+      "row_count": 40898,
+      "schema_sha256": "c88d20b32a2cb599f22d1921764757b617fe19b030a0f58585652e9f7c74f3c5"
+    },
+    "empty_recent_bitwise_equal": true,
+    "method": {
+      "bandwidth_km": 75.0,
+      "challenger_formula": "0.75*B0+0.25*R30",
+      "empty_recent_fallback_to_B0": true,
+      "kernel": "gaussian_KDE",
+      "value_semantics": "relative_intensity_not_absolute_probability"
+    },
+    "models": {
+      "B0": {
+        "actual_alarm_area_km2": 599494.3733448011,
+        "alarm_mask_sha256": "edc79444d8de1e22013b35a720f914b49b4e5dde064a92c7abfc7c53d4cab828",
+        "mass_sha256": "8e1acfd4e431fbe12c2251c9e09955f5afcd2e475aaa363f89330ec91e5a2410",
+        "next_complete_cell_area_km2": 625.0,
+        "ranking_sha256": "acd8708014757b38b947064fde127668ea317fc7cfb59d8101beda1ea4ad62cf",
+        "selected_cell_count": 995
+      },
+      "B0_R30": {
+        "actual_alarm_area_km2": 599494.3733448011,
+        "alarm_mask_sha256": "f390fc56ee54bd3398d21c45dccbb27bcc47cefa6cca2e1fc0f4fc611b8d6e27",
+        "mass_sha256": "8e1acfd4e431fbe12c2251c9e09955f5afcd2e475aaa363f89330ec91e5a2410",
+        "next_complete_cell_area_km2": 625.0,
+        "ranking_sha256": "1499bf056851eada802dc3c875c175e9e8250625b00da37a4650432e32ed5c4d",
+        "selected_cell_count": 995
+      }
+    },
+    "paired_area_difference_km2": 0.0,
+    "spatial_domain": {
+      "cell_count": 15697,
+      "cell_size_km": 25.0,
+      "grid_id": "3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763",
+      "study_area_sha256": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02"
+    },
+    "support": {
+      "cell_count": 61,
+      "common_mc": 4.0,
+      "fit_end_utc": "2023-06-30T16:00:00.000000Z",
+      "indeterminate_cell_count": 9,
+      "local_mc_scope": "each_frozen_local_unit_only_no_threshold_raise_elsewhere",
+      "manifest_sha256": "632278416dfc717dbcb9d2eae048a4f13cdf7737a31e6e5e704a9dd17d7cef8d",
+      "retained_area_fraction": 1.0,
+      "retained_area_km2": 9415305.754432771,
+      "support_id": "local-support-f6816ab6c6581306",
+      "supported_cell_count": 52,
+      "unsupported_cell_count": 0
+    }
+  },
+  "real_issue_authorized": false,
+  "schema_version": 1,
+  "scientific_value": {
+    "category": "necessary_enabler",
+    "direct_prediction_improvement": "none_new",
+    "evidence": "real_frozen_history_recomputes_start_maps_and_synthetic_raw_bytes_recompute_clusters_without_future_outcomes_in_start_artifacts",
+    "next_decision": "separate_real_issue_authorization_only_after_P1_0C_acceptance"
+  },
+  "stage_id": "P1-0C",
+  "start_artifacts_unchanged_after_replay": true,
+  "status": "historical_adapter_and_raw_preimage_rehearsal_complete",
+  "study_area_path": "data/processed/china_mainland.geojson",
+  "support_manifest_path": "data/manifests/background_local_support_manifest.json",
+  "synthetic_raw_byte_known_answer": {
+    "B0_R30_hit_clusters": 6,
+    "B0_hit_clusters": 6,
+    "cluster_10_review": {
+      "B0_R30_hit_clusters": 6,
+      "B0_hit_clusters": 6,
+      "cumulative_cluster_count": 10,
+      "decision": "continue_accumulation",
+      "elapsed_months": 2.0041479291155877,
+      "horizon_days": 30,
+      "look_sequence": 1,
+      "ordered_cluster_registry_sha256": "fddc2ac37965c0a8da9c691761be56635f0369db743e197f481ad415ed4f0576",
+      "prior_completed_look_count": 0,
+      "recall_gain_percentage_points": 0.0,
+      "review_trigger": "cluster_10",
+      "selected_cluster_prefix_sha256": "9f83d1d90fb9fbe39461bd76ebccb4490c5f472394acac4f54ea0f0b2531e979",
+      "sequentially_adjusted_interval_lower": 0.0,
+      "sequentially_adjusted_interval_upper": 0.0
+    },
+    "cluster_assignment_sha256": "f238fb6d88aa58320bbee37f22772c5bd46bca7e92c587dfe73f258902c56514",
+    "forecast_svg_sha256": "ed465504c262666af0076603dcb7f850962af041177930ffa1e61ff6cbdf5bcb",
+    "independent_cluster_count": 10,
+    "observed_direction": "zero",
+    "ordered_cluster_registry_sha256": "fddc2ac37965c0a8da9c691761be56635f0369db743e197f481ad415ed4f0576",
+    "raw_source_byte_count": 3063,
+    "raw_source_sha256": "0f9ded5bba8846e49f119df2764f625726ed016fe8f306fd256fcd69f0c20f75"
+  }
+}

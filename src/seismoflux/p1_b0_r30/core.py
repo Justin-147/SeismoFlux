@@ -33,6 +33,7 @@ ReviewDecision: TypeAlias = Literal[
 ]
 
 BANDWIDTH_KM = 75.0
+AVERAGE_TROPICAL_MONTH_DAYS = 365.2425 / 12.0
 RECENT_WINDOW_DAYS = 30
 PRIMARY_HORIZON_DAYS: Literal[30] = 30
 SECONDARY_HORIZON_DAYS: Literal[90] = 90
@@ -63,6 +64,20 @@ def _utc(value: datetime, *, label: str) -> datetime:
 
 def _utc_text(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def elapsed_tropical_months(start_utc: datetime, end_utc: datetime) -> float:
+    """Return elapsed UTC time in frozen average-tropical-month units.
+
+    One month is exactly ``365.2425 / 12`` days for every sequential look;
+    calendar boundaries and caller-authored elapsed values are never used.
+    """
+
+    start = _utc(start_utc, label="start_utc")
+    end = _utc(end_utc, label="end_utc")
+    if end < start:
+        raise ValueError("end_utc must not precede start_utc")
+    return (end - start).total_seconds() / (AVERAGE_TROPICAL_MONTH_DAYS * 86_400.0)
 
 
 def _readonly_vector(value: object, *, name: str, allow_zero_sum: bool = False) -> FloatArray:
@@ -988,7 +1003,14 @@ def cluster_guarded_exposures(
     )
 
 
-def _cell_for_point(grid: tuple[GridCell, ...], *, x_km: float, y_km: float) -> GridCell:
+def locate_point_cell(grid: tuple[GridCell, ...], *, x_km: float, y_km: float) -> GridCell:
+    """Locate one point in exactly one frozen synthetic-grid cell.
+
+    Scoring and external scientific adapters share this function so a displayed
+    cell identity can never be supplied independently of the representative
+    coordinates used by the paired score.
+    """
+
     matches = [cell for cell in grid if _cell_contains_point(cell, x_km=x_km, y_km=y_km)]
     if len(matches) != 1:
         raise ValueError("target representative must fall inside exactly one frozen grid cell")
@@ -1012,7 +1034,11 @@ def score_clusters(
     scores: list[ClusterScore] = []
     for cluster in clusters:
         representative = cluster.representative
-        cell = _cell_for_point(forecast.grid, x_km=representative.x_km, y_km=representative.y_km)
+        cell = locate_point_cell(
+            forecast.grid,
+            x_km=representative.x_km,
+            y_km=representative.y_km,
+        )
         scores.append(
             ClusterScore(
                 issue_id=cluster.issue_id,
@@ -1238,6 +1264,7 @@ def build_pending_sequential_reviews(
 
 
 __all__ = [
+    "AVERAGE_TROPICAL_MONTH_DAYS",
     "BANDWIDTH_KM",
     "BOOTSTRAP_REPLICATES",
     "BOOTSTRAP_SEED",
@@ -1262,7 +1289,9 @@ __all__ = [
     "cluster_guarded_exposures",
     "cluster_target_events",
     "deduplicate_source_boundary",
+    "elapsed_tropical_months",
     "gaussian_kde_relative_intensity",
+    "locate_point_cell",
     "make_equal_area_grid",
     "ordered_cluster_registry_sha256",
     "paired_bootstrap_interval",

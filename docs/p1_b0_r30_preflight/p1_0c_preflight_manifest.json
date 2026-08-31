@@ -1,0 +1,17 @@
+{
+  "artifact_count": 6,
+  "artifacts": {
+    "p1_0c_preflight_result.json": "c6e04cc52b7bca284e9ae6dedb44edfe07e923d73b391221aab8cda2162dc7b6",
+    "p1_0c_real_history_forecast.html": "fcbfe193b8867ecc32d0c85042548ebdb80a18aafcabbd0b03028e23988233a1",
+    "p1_0c_real_history_forecast.svg": "ed465504c262666af0076603dcb7f850962af041177930ffa1e61ff6cbdf5bcb",
+    "p1_0c_synthetic_mature_replay.html": "247816cd4ba2317d31a0ebd137ea120ccf080c5f63f81f5c80099cc67fc43e92",
+    "p1_0c_synthetic_mature_replay.svg": "b00fcfc6cc95f985a635f2646dd58758f7d8cb614324b27aa2211cab6d9e107b",
+    "p1_0c_synthetic_truth_snapshot.json": "0f9ded5bba8846e49f119df2764f625726ed016fe8f306fd256fcd69f0c20f75"
+  },
+  "forecast_svg_sha256_bound_by_replay": "ed465504c262666af0076603dcb7f850962af041177930ffa1e61ff6cbdf5bcb",
+  "real_issue_authorized": false,
+  "schema_version": 1,
+  "scientific_value_category": "necessary_enabler",
+  "stage_id": "P1-0C",
+  "start_artifacts_unchanged_after_replay": true
+}
