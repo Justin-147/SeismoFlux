@@ -1,11 +1,11 @@
 # SeismoFlux P1-0C 科学验收（2026-08-31）
 
-> 本记录是 P1-0C 本地科学验收结论。代码、图件和记录在提交、推送及远端回读完成前仍不得用于
-> 真实起报；`real_issue_authorized=false` 保持不变。
+> 本记录是 P1-0C 最终科学验收与远端闭合结论。代码、图件和记录已经提交、推送并远端回读；
+> 这仍不构成真实起报授权，`real_issue_authorized=false` 保持不变。
 
 ## 一句话结论
 
-P1-0C 本地科学验收通过。每一个命中都能从 exact raw truth bytes 重新经过“标准事件、合法暴露、
+P1-0C 科学验收和远端闭合通过。每一个命中都能从 exact raw truth bytes 重新经过“标准事件、合法暴露、
 独立震群、代表事件落格、固定报警格、命中和复审”机械算回；坐标、格号、评分、复审时间或原始
 字节被协调替换都会失败。这个阶段是未来真实试验的必要准备，不是新的预测效果；
 `real_issue_authorized=false`，锁定测试未运行。
@@ -124,9 +124,13 @@ P1-0C 本地科学验收通过。每一个命中都能从 exact raw truth bytes 
 ## 阶段决定
 
 - `acceptance`: `P1_0C_PASS`
-- `stage_status`: `accepted_locally_pending_commit_push_and_remote_readback`
+- `stage_status`: `accepted_committed_tagged_pushed_remote_readback_complete`
 - `science_value_category`: `necessary_enabler`
 - `direct_prediction_improvement`: `none_new`
 - `real_issue_authorized`: `false`
-- `decision`: `commit_tag_push_and_close_P1_0C_without_changing_the_frozen_model`
-- `stop_condition`: 远端闭合前不得真实发行；没有另行显式授权记录不得自动进入真实起报。
+- `science_commit`: `c71c97790adcf33f6c8121e367317857dc8dff31`
+- `annotated_tag`: `v0.2.7-p1-b0-r30-code`
+- `remote_branch_readback`: `c71c97790adcf33f6c8121e367317857dc8dff31`
+- `remote_tag_peeled_readback`: `c71c97790adcf33f6c8121e367317857dc8dff31`
+- `decision`: `P1_0C_closed_stop_engineering_wait_for_separate_real_issue_authorization`
+- `stop_condition`: 没有另行显式 `RealIssueAuthorizationRecord` 不得进入真实起报。
