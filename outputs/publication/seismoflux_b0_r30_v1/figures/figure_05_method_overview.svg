@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="806.76pt" height="352.584pt" viewBox="0 0 806.76 352.584" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-08-31T17:08:55.301250</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.0, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 352.584 
+L 806.76 352.584 
+L 806.76 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 31.752 169.6392 
+L 152.838 169.6392 
+Q 159.534 169.6392 159.534 162.9864 
+L 159.534 87.0336 
+Q 159.534 80.3808 152.838 80.3808 
+L 31.752 80.3808 
+Q 25.056 80.3808 25.056 87.0336 
+L 25.056 162.9864 
+Q 25.056 169.6392 31.752 169.6392 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #eaf2f6; stroke: #1f6f8b; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 185.202 169.6392 
+L 306.288 169.6392 
+Q 312.984 169.6392 312.984 162.9864 
+L 312.984 87.0336 
+Q 312.984 80.3808 306.288 80.3808 
+L 185.202 80.3808 
+Q 178.506 80.3808 178.506 87.0336 
+L 178.506 162.9864 
+Q 178.506 169.6392 185.202 169.6392 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #eef1f5; stroke: #64748b; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 185.202 294.3792 
+L 306.288 294.3792 
+Q 312.984 294.3792 312.984 287.7264 
+L 312.984 211.7736 
+Q 312.984 205.1208 306.288 205.1208 
+L 185.202 205.1208 
+Q 178.506 205.1208 178.506 211.7736 
+L 178.506 287.7264 
+Q 178.506 294.3792 185.202 294.3792 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #fff0e9; stroke: #d85a30; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 338.652 231.732 
+L 470.898 231.732 
+Q 477.594 231.732 477.594 225.0792 
+L 477.594 143.5824 
+Q 477.594 136.9296 470.898 136.9296 
+L 338.652 136.9296 
+Q 331.956 136.9296 331.956 143.5824 
+L 331.956 225.0792 
+Q 331.956 231.732 338.652 231.732 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #fff8e7; stroke: #e3a62f; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 503.262 231.732 
+L 618.768 231.732 
+Q 625.464 231.732 625.464 225.0792 
+L 625.464 143.5824 
+Q 625.464 136.9296 618.768 136.9296 
+L 503.262 136.9296 
+Q 496.566 136.9296 496.566 143.5824 
+L 496.566 225.0792 
+Q 496.566 231.732 503.262 231.732 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #eaf4f1; stroke: #168f73; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 651.132 231.732 
+L 772.218 231.732 
+Q 778.914 231.732 778.914 225.0792 
+L 778.914 143.5824 
+Q 778.914 136.9296 772.218 136.9296 
+L 651.132 136.9296 
+Q 644.436 136.9296 644.436 143.5824 
+L 644.436 225.0792 
+Q 644.436 231.732 651.132 231.732 
+z
+" clip-path="url(#pbe18263e81)" style="fill: #f2ebf7; stroke: #7c5aa6; stroke-width: 1.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="36.774" y="110.582925" transform="rotate(-0 36.774 110.582925)">历史目录</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(36.774 133.435949)">1970年至起报日T</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(36.774 149.123529)">仅使用当时已可见M4+</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="190.224" y="110.595112" transform="rotate(-0 190.224 110.595112)">长期背景 B0</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(190.224 133.341121)">75 km平滑</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(190.224 149.153811)">描述长期空间易发性</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="190.224" y="235.398081" transform="rotate(-0 190.224 235.398081)">近期活动 R30</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(190.224 257.625309)">(T−30天, T]</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(190.224 273.888233)">描述短期地震聚集</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="343.674" y="167.233287" transform="rotate(-0 343.674 167.233287)">冻结混合</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(343.674 190.243734)">75% B0 + 25% R30</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(343.674 205.717751)">各折仅在更早历史中确定</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="508.284" y="167.219069" transform="rotate(-0 508.284 167.219069)">网格排序</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(508.284 189.941718)">15,697个约25 km格</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(508.284 205.712173)">输出相对强度与顺位</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="656.154" y="167.206881" transform="rotate(-0 656.154 167.206881)">固定面积评价</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(656.154 189.964828)">选取约60万 km²</text>
+    <text style="font-size: 10.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(656.154 205.706595)">事后评价30天M5–6震群</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 159.862588 124.7328 
+Q 169.021792 124.7328 176.503946 124.7328 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 172.503946 122.7328 
+L 176.503946 124.7328 
+L 172.503946 126.7328 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 158.289807 150.525681 
+Q 169.02013 199.300191 179.390121 246.436818 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 180.483969 242.100518 
+L 179.390121 246.436818 
+L 176.57739 242.95996 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 312.489756 141.867699 
+Q 322.470212 155.502289 331.460098 167.783634 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 330.711292 163.374633 
+L 331.460098 167.783634 
+L 327.483614 165.737279 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 312.117847 248.201206 
+Q 322.468864 224.804569 332.141366 202.941593 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 328.694016 205.790414 
+L 332.141366 202.941593 
+L 332.352013 207.408765 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 477.922588 184.608 
+Q 487.081792 184.608 494.563946 184.608 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 490.563946 182.608 
+L 494.563946 184.608 
+L 490.563946 186.608 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 625.792588 184.608 
+Q 634.951792 184.608 642.433946 184.608 
+" style="fill: none; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 638.433946 182.608 
+L 642.433946 184.608 
+L 638.433946 186.608 
+z
+" style="fill: #8695a5; stroke: #8695a5; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="26.73" y="39.3552" transform="rotate(-0 26.73 39.3552)">科学问题：在不提高报警面积上限的前提下，近期地震活动能否覆盖更多规则化震群？</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5d6b7e" x="26.73" y="328.752" transform="rotate(-0 26.73 328.752)">因果边界：T之后的地震只用于报警冻结后的评分；真实震中不参与候选生成、网格加密或模型训练。</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pbe18263e81">
+   <rect x="7.2" y="7.2" width="792.36" height="338.184"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -3,7 +3,11 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 *.png binary
+*.svg binary
 *.parquet binary
 *.xlsx binary
 *.xls binary
+*.docx binary
+*.pptx binary
+*.pdf binary
 outputs/prospective/p1_b0_r30/** -text

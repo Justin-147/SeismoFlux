@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="927.138405pt" height="670.79952pt" viewBox="0 0 927.138405 670.79952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-08-31T17:08:50.883713</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.0, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 670.79952 
+L 927.138405 670.79952 
+L 927.138405 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 90.476453 663.59952 
+L 564.188447 663.59952 
+L 564.188447 73.614152 
+L 90.476453 73.614152 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle" x="203.755408" y="67.326554" transform="rotate(-0 203.755408 67.326554)">长期背景 B0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle" x="409.717144" y="67.326554" transform="rotate(-0 409.717144 67.326554)">B0 + 近30天活动</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2"/>
+   <g id="text_3">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="90.275606" transform="rotate(-0 94.595687 90.275606)">01  2023-10-18  折1</text>
+   </g>
+   <g id="PathCollection_1">
+    <defs>
+     <path id="ma892c10a8a" d="M -7.745967 7.745967 
+L 7.745967 7.745967 
+L 7.745967 -7.745967 
+L -7.745967 -7.745967 
+z
+" style="stroke: #ffffff"/>
+    </defs>
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="203.755408" y="87.661423" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="203.755408" y="89.782486" transform="rotate(-0 203.755408 89.782486)">命中</text>
+   </g>
+   <g id="PathCollection_2">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="409.717144" y="87.661423" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="89.782486" transform="rotate(-0 409.717144 89.782486)">命中</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="118.370147" transform="rotate(-0 94.595687 118.370147)">02  2023-10-18  折1</text>
+   </g>
+   <g id="PathCollection_3">
+    <defs>
+     <path id="m78552e363a" d="M -7.745967 7.745967 
+L 7.745967 7.745967 
+L 7.745967 -7.745967 
+L -7.745967 -7.745967 
+z
+" style="stroke: #ffffff"/>
+    </defs>
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="115.755964" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="117.830262" transform="rotate(-0 203.755408 117.830262)">漏报</text>
+   </g>
+   <g id="PathCollection_4">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="115.755964" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="117.830262" transform="rotate(-0 409.717144 117.830262)">漏报</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="146.474033" transform="rotate(-0 94.595687 146.474033)">03  肃北 M5.0</text>
+   </g>
+   <g id="PathCollection_5">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="143.850505" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="145.924803" transform="rotate(-0 203.755408 145.924803)">漏报</text>
+   </g>
+   <g id="PathCollection_6">
+    <defs>
+     <path id="m38c10ff24c" d="M -7.745967 7.745967 
+L 7.745967 7.745967 
+L 7.745967 -7.745967 
+L -7.745967 -7.745967 
+z
+" style="stroke: #d85a30; stroke-width: 2.5"/>
+    </defs>
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m38c10ff24c" x="409.717144" y="143.850505" style="fill: #168f73; stroke: #d85a30; stroke-width: 2.5"/>
+    </g>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="145.971569" transform="rotate(-0 409.717144 145.971569)">命中</text>
+   </g>
+   <g id="patch_3">
+    <path d="M 442.527113 143.850505 
+Q 385.92993 143.850505 330.674388 143.850505 
+" style="fill: none; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 334.074388 145.550505 
+L 330.674388 143.850505 
+L 334.074388 142.150505 
+z
+" style="fill: #d85a30; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #d85a30" x="455.028726" y="146.324221" transform="rotate(-0 455.028726 146.324221)">新增</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="174.55923" transform="rotate(-0 94.595687 174.55923)">04  2023-11-22  折1</text>
+   </g>
+   <g id="PathCollection_7">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="203.755408" y="171.945047" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="203.755408" y="174.06611" transform="rotate(-0 203.755408 174.06611)">命中</text>
+   </g>
+   <g id="PathCollection_8">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="409.717144" y="171.945047" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="174.06611" transform="rotate(-0 409.717144 174.06611)">命中</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="202.653771" transform="rotate(-0 94.595687 202.653771)">05  2023-11-22  折1</text>
+   </g>
+   <g id="PathCollection_9">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="200.039588" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="202.113886" transform="rotate(-0 203.755408 202.113886)">漏报</text>
+   </g>
+   <g id="PathCollection_10">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="200.039588" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="202.113886" transform="rotate(-0 409.717144 202.113886)">漏报</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="230.748313" transform="rotate(-0 94.595687 230.748313)">06  2023-12-27  折1</text>
+   </g>
+   <g id="PathCollection_11">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="203.755408" y="228.134129" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_20">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="203.755408" y="230.255193" transform="rotate(-0 203.755408 230.255193)">命中</text>
+   </g>
+   <g id="PathCollection_12">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="409.717144" y="228.134129" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_21">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="230.255193" transform="rotate(-0 409.717144 230.255193)">命中</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="258.842854" transform="rotate(-0 94.595687 258.842854)">07  2024-03-06  折1</text>
+   </g>
+   <g id="PathCollection_13">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="256.228671" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="258.302968" transform="rotate(-0 203.755408 258.302968)">漏报</text>
+   </g>
+   <g id="PathCollection_14">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="256.228671" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="258.302968" transform="rotate(-0 409.717144 258.302968)">漏报</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="286.996333" transform="rotate(-0 94.595687 286.996333)">08  杂多 M5.5</text>
+   </g>
+   <g id="PathCollection_15">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="284.323212" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="286.39751" transform="rotate(-0 203.755408 286.39751)">漏报</text>
+   </g>
+   <g id="PathCollection_16">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m38c10ff24c" x="409.717144" y="284.323212" style="fill: #168f73; stroke: #d85a30; stroke-width: 2.5"/>
+    </g>
+   </g>
+   <g id="text_27">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="286.444275" transform="rotate(-0 409.717144 286.444275)">命中</text>
+   </g>
+   <g id="patch_4">
+    <path d="M 442.527113 284.323212 
+Q 385.92993 284.323212 330.674388 284.323212 
+" style="fill: none; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 334.074388 286.023212 
+L 330.674388 284.323212 
+L 334.074388 282.623212 
+z
+" style="fill: #d85a30; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_28">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #d85a30" x="455.028726" y="286.796928" transform="rotate(-0 455.028726 286.796928)">新增</text>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="315.135437" transform="rotate(-0 94.595687 315.135437)">09  库车 M5.0</text>
+   </g>
+   <g id="PathCollection_17">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="312.417753" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="314.492051" transform="rotate(-0 203.755408 314.492051)">漏报</text>
+   </g>
+   <g id="PathCollection_18">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m38c10ff24c" x="409.717144" y="312.417753" style="fill: #168f73; stroke: #d85a30; stroke-width: 2.5"/>
+    </g>
+   </g>
+   <g id="text_31">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="314.538817" transform="rotate(-0 409.717144 314.538817)">命中</text>
+   </g>
+   <g id="patch_5">
+    <path d="M 442.527113 312.417753 
+Q 385.92993 312.417753 330.674388 312.417753 
+" style="fill: none; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 334.074388 314.117753 
+L 330.674388 312.417753 
+L 334.074388 310.717753 
+z
+" style="fill: #d85a30; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_32">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #d85a30" x="455.028726" y="314.891469" transform="rotate(-0 455.028726 314.891469)">新增</text>
+   </g>
+   <g id="text_33">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="343.126478" transform="rotate(-0 94.595687 343.126478)">10  2024-10-16  折2</text>
+   </g>
+   <g id="PathCollection_19">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="203.755408" y="340.512295" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_34">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="203.755408" y="342.633358" transform="rotate(-0 203.755408 342.633358)">命中</text>
+   </g>
+   <g id="PathCollection_20">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="409.717144" y="340.512295" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_35">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="342.633358" transform="rotate(-0 409.717144 342.633358)">命中</text>
+   </g>
+   <g id="text_36">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="371.32452" transform="rotate(-0 94.595687 371.32452)">11  库车 M5.5</text>
+   </g>
+   <g id="PathCollection_21">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="368.606836" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="370.681134" transform="rotate(-0 203.755408 370.681134)">漏报</text>
+   </g>
+   <g id="PathCollection_22">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m38c10ff24c" x="409.717144" y="368.606836" style="fill: #168f73; stroke: #d85a30; stroke-width: 2.5"/>
+    </g>
+   </g>
+   <g id="text_38">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="370.727899" transform="rotate(-0 409.717144 370.727899)">命中</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 442.527113 368.606836 
+Q 385.92993 368.606836 330.674388 368.606836 
+" style="fill: none; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 334.074388 370.306836 
+L 330.674388 368.606836 
+L 334.074388 366.906836 
+z
+" style="fill: #d85a30; stroke: #d85a30; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_39">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #d85a30" x="455.028726" y="371.080552" transform="rotate(-0 455.028726 371.080552)">新增</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="399.315561" transform="rotate(-0 94.595687 399.315561)">12  2024-12-25  折2</text>
+   </g>
+   <g id="PathCollection_23">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="396.701377" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="398.775675" transform="rotate(-0 203.755408 398.775675)">漏报</text>
+   </g>
+   <g id="PathCollection_24">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="396.701377" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_42">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="398.775675" transform="rotate(-0 409.717144 398.775675)">漏报</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="427.410102" transform="rotate(-0 94.595687 427.410102)">13  2024-12-25  折2</text>
+   </g>
+   <g id="PathCollection_25">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="424.795919" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_44">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="426.870216" transform="rotate(-0 203.755408 426.870216)">漏报</text>
+   </g>
+   <g id="PathCollection_26">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="424.795919" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_45">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="426.870216" transform="rotate(-0 409.717144 426.870216)">漏报</text>
+   </g>
+   <g id="text_46">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="455.504644" transform="rotate(-0 94.595687 455.504644)">14  2025-01-29  折2</text>
+   </g>
+   <g id="PathCollection_27">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="203.755408" y="452.89046" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_47">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="203.755408" y="455.011523" transform="rotate(-0 203.755408 455.011523)">命中</text>
+   </g>
+   <g id="PathCollection_28">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#ma892c10a8a" x="409.717144" y="452.89046" style="fill: #168f73; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_48">
+    <text style="font-weight: 700; font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="409.717144" y="455.011523" transform="rotate(-0 409.717144 455.011523)">命中</text>
+   </g>
+   <g id="text_49">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="483.599185" transform="rotate(-0 94.595687 483.599185)">15  2025-09-10  折3</text>
+   </g>
+   <g id="PathCollection_29">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="480.985001" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_50">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="483.059299" transform="rotate(-0 203.755408 483.059299)">漏报</text>
+   </g>
+   <g id="PathCollection_30">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="480.985001" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_51">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="483.059299" transform="rotate(-0 409.717144 483.059299)">漏报</text>
+   </g>
+   <g id="text_52">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="511.693726" transform="rotate(-0 94.595687 511.693726)">16  2025-09-10  折3</text>
+   </g>
+   <g id="PathCollection_31">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="509.079543" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_53">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="511.15384" transform="rotate(-0 203.755408 511.15384)">漏报</text>
+   </g>
+   <g id="PathCollection_32">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="509.079543" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_54">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="511.15384" transform="rotate(-0 409.717144 511.15384)">漏报</text>
+   </g>
+   <g id="text_55">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="539.788268" transform="rotate(-0 94.595687 539.788268)">17  2025-10-15  折3</text>
+   </g>
+   <g id="PathCollection_33">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="537.174084" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_56">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="539.248382" transform="rotate(-0 203.755408 539.248382)">漏报</text>
+   </g>
+   <g id="PathCollection_34">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="537.174084" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_57">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="539.248382" transform="rotate(-0 409.717144 539.248382)">漏报</text>
+   </g>
+   <g id="text_58">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="567.882809" transform="rotate(-0 94.595687 567.882809)">18  2025-11-19  折3</text>
+   </g>
+   <g id="PathCollection_35">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="565.268625" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_59">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="567.342923" transform="rotate(-0 203.755408 567.342923)">漏报</text>
+   </g>
+   <g id="PathCollection_36">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="565.268625" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_60">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="567.342923" transform="rotate(-0 409.717144 567.342923)">漏报</text>
+   </g>
+   <g id="text_61">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="595.97735" transform="rotate(-0 94.595687 595.97735)">19  2025-12-24  折3</text>
+   </g>
+   <g id="PathCollection_37">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="593.363167" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_62">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="595.437465" transform="rotate(-0 203.755408 595.437465)">漏报</text>
+   </g>
+   <g id="PathCollection_38">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="593.363167" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_63">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="595.437465" transform="rotate(-0 409.717144 595.437465)">漏报</text>
+   </g>
+   <g id="text_64">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="624.071892" transform="rotate(-0 94.595687 624.071892)">20  2025-12-24  折3</text>
+   </g>
+   <g id="PathCollection_39">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="621.457708" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_65">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="623.532006" transform="rotate(-0 203.755408 623.532006)">漏报</text>
+   </g>
+   <g id="PathCollection_40">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="621.457708" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_66">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="623.532006" transform="rotate(-0 409.717144 623.532006)">漏报</text>
+   </g>
+   <g id="text_67">
+    <text style="font-size: 9.2px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #172235" x="94.595687" y="652.166433" transform="rotate(-0 94.595687 652.166433)">21  2026-01-28  折3</text>
+   </g>
+   <g id="PathCollection_41">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="203.755408" y="649.552249" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_68">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="203.755408" y="651.626547" transform="rotate(-0 203.755408 651.626547)">漏报</text>
+   </g>
+   <g id="PathCollection_42">
+    <g clip-path="url(#p58a19a4a54)">
+     <use xlink:href="#m78552e363a" x="409.717144" y="649.552249" style="fill: #d5dde5; stroke: #ffffff"/>
+    </g>
+   </g>
+   <g id="text_69">
+    <text style="font-size: 7.3px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #5d6b7e" x="409.717144" y="651.626547" transform="rotate(-0 409.717144 651.626547)">漏报</text>
+   </g>
+   <g id="text_70">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="90.476453" y="47.614152" transform="rotate(-0 90.476453 47.614152)">21个规则化震群逐一对照</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_7">
+    <path d="M 581.898593 204.590904 
+L 885.074269 204.590904 
+Q 890.954831 204.590904 890.954831 193.971167 
+L 890.954831 115.503113 
+Q 890.954831 104.883376 885.074269 104.883376 
+L 581.898593 104.883376 
+Q 576.01803 104.883376 576.01803 115.503113 
+L 576.01803 193.971167 
+Q 576.01803 204.590904 581.898593 204.590904 
+z
+" clip-path="url(#p5716ee2ae2)" style="fill: #f8fafc; stroke: #dce4ec; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 581.898593 316.688124 
+L 885.074269 316.688124 
+Q 890.954831 316.688124 890.954831 306.068387 
+L 890.954831 227.600333 
+Q 890.954831 216.980596 885.074269 216.980596 
+L 581.898593 216.980596 
+Q 576.01803 216.980596 576.01803 227.600333 
+L 576.01803 306.068387 
+Q 576.01803 316.688124 581.898593 316.688124 
+z
+" clip-path="url(#p5716ee2ae2)" style="fill: #f8fafc; stroke: #dce4ec; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 581.898593 428.785343 
+L 885.074269 428.785343 
+Q 890.954831 428.785343 890.954831 418.165607 
+L 890.954831 339.697553 
+Q 890.954831 329.077816 885.074269 329.077816 
+L 581.898593 329.077816 
+Q 576.01803 329.077816 576.01803 339.697553 
+L 576.01803 418.165607 
+Q 576.01803 428.785343 581.898593 428.785343 
+z
+" clip-path="url(#p5716ee2ae2)" style="fill: #f8fafc; stroke: #dce4ec; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 581.898593 540.882563 
+L 885.074269 540.882563 
+Q 890.954831 540.882563 890.954831 530.262827 
+L 890.954831 451.794773 
+Q 890.954831 441.175036 885.074269 441.175036 
+L 581.898593 441.175036 
+Q 576.01803 441.175036 576.01803 451.794773 
+L 576.01803 530.262827 
+Q 576.01803 540.882563 581.898593 540.882563 
+z
+" clip-path="url(#p5716ee2ae2)" style="fill: #f8fafc; stroke: #dce4ec; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_71">
+    <text style="font-weight: 700; font-size: 28px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #168f73" x="599.540281" y="152.232709" transform="rotate(-0 599.540281 152.232709)">5</text>
+   </g>
+   <g id="text_72">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="658.345908" y="133.160692" transform="rotate(-0 658.345908 133.160692)">两者都命中</text>
+   </g>
+   <g id="text_73">
+    <text style="font-size: 9.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5d6b7e" x="658.345908" y="167.835531" transform="rotate(-0 658.345908 167.835531)">长期背景已经覆盖</text>
+   </g>
+   <g id="text_74">
+    <text style="font-weight: 700; font-size: 28px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #d85a30" x="599.540281" y="264.329928" transform="rotate(-0 599.540281 264.329928)">4</text>
+   </g>
+   <g id="text_75">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="658.345908" y="245.252286" transform="rotate(-0 658.345908 245.252286)">R30新增命中</text>
+   </g>
+   <g id="text_76">
+    <text style="font-size: 9.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5d6b7e" x="658.345908" y="279.9424" transform="rotate(-0 658.345908 279.9424)">本研究的净增益</text>
+   </g>
+   <g id="text_77">
+    <text style="font-weight: 700; font-size: 28px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #b42318" x="599.540281" y="376.427148" transform="rotate(-0 599.540281 376.427148)">0</text>
+   </g>
+   <g id="text_78">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="658.345908" y="357.349506" transform="rotate(-0 658.345908 357.349506)">R30反向丢失</text>
+   </g>
+   <g id="text_79">
+    <text style="font-size: 9.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5d6b7e" x="658.345908" y="392.035167" transform="rotate(-0 658.345908 392.035167)">主终点中没有发生</text>
+   </g>
+   <g id="text_80">
+    <text style="font-weight: 700; font-size: 28px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #94a3b8" x="599.540281" y="488.524368" transform="rotate(-0 599.540281 488.524368)">12</text>
+   </g>
+   <g id="text_81">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="658.345908" y="469.452351" transform="rotate(-0 658.345908 469.452351)">两者都漏报</text>
+   </g>
+   <g id="text_82">
+    <text style="font-size: 9.5px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #5d6b7e" x="658.345908" y="504.127191" transform="rotate(-0 658.345908 504.127191)">仍需改进的主要部分</text>
+   </g>
+   <g id="text_83">
+    <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(579.938405 608.733454)">读图方式：每一行是一个按75 km / 30天规则合并后的规则化震群。</text>
+    <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; fill: #5d6b7e" transform="translate(579.938405 619.744392)">这张图展示全部样本，正文震例只负责解释‘为什么’，不能替代总体统计。</text>
+   </g>
+   <g id="text_84">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="573.404447" y="67.614152" transform="rotate(-0 573.404447 67.614152)">净变化：+4群，0群反向丢失</text>
+   </g>
+  </g>
+  <g id="text_85">
+   <text style="font-weight: 700; font-size: 20px; font-family: 'Microsoft YaHei', 'Arial', 'Noto Sans CJK SC', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #172235" x="13.379416" y="23.96875" transform="rotate(-0 13.379416 23.96875)">不是只挑好例：全部21群的命中变化</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p58a19a4a54">
+   <rect x="90.476453" y="73.614152" width="473.711994" height="589.985368"/>
+  </clipPath>
+  <clipPath id="p5716ee2ae2">
+   <rect x="573.404447" y="73.614152" width="326.697927" height="589.985368"/>
+  </clipPath>
+ </defs>
+</svg>

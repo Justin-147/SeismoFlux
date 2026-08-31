@@ -1,0 +1,238 @@
+{
+  "figures": {
+    "figure_01_primary_result.png": {
+      "width": 3149,
+      "height": 1743
+    },
+    "figure_02_all_cluster_outcomes.png": {
+      "width": 2796,
+      "height": 2049
+    },
+    "figure_03_case_studies.png": {
+      "width": 3539,
+      "height": 2452
+    },
+    "figure_04_case_rank_shifts.png": {
+      "width": 2929,
+      "height": 1477
+    },
+    "figure_05_method_overview.png": {
+      "width": 2465,
+      "height": 1077
+    }
+  },
+  "pdfs": {
+    "manuscript": {
+      "pages": 12,
+      "text_lengths": [
+        520,
+        2393,
+        1232,
+        1044,
+        1092,
+        769,
+        623,
+        458,
+        314,
+        854,
+        1365,
+        2648
+      ],
+      "page_sizes_points": [
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ],
+        [
+          595.3,
+          841.89
+        ]
+      ],
+      "fonts": [
+        "BAAAAA+Arial-BoldMT",
+        "CAAAAA+MicrosoftYaHei-Bold",
+        "DAAAAA+SimSun",
+        "EAAAAA+TimesNewRomanPSMT",
+        "FAAAAA+MicrosoftYaHei",
+        "GAAAAA+ArialMT",
+        "HAAAAA+TimesNewRomanPS-BoldMT",
+        "IAAAAA+SimSun",
+        "JAAAAA+SimSun",
+        "KAAAAA+SymbolMT"
+      ],
+      "metadata": {
+        "/Title": "近期地震活动相对长期核密度背景的回顾性区域排序增益",
+        "/Subject": "SeismoFlux retrospective scientific evaluation",
+        "/Keywords": "earthquake, forecasting, recent, seismicity, fixed, alarm, area",
+        "/Creator": "Writer",
+        "/Producer": "LibreOffice 25.8.7.3 (X86_64)",
+        "/CreationDate": "D:20260831164303+08'00'"
+      },
+      "rendered_pages": 12
+    },
+    "presentation": {
+      "pages": 12,
+      "text_lengths": [
+        163,
+        181,
+        317,
+        73,
+        69,
+        39,
+        209,
+        35,
+        153,
+        278,
+        207,
+        125
+      ],
+      "page_sizes_points": [
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ],
+        [
+          960.01,
+          540.0
+        ]
+      ],
+      "fonts": [
+        "BAAAAA+MicrosoftYaHei-Bold",
+        "CAAAAA+MicrosoftYaHei",
+        "DAAAAA+Arial-BoldMT",
+        "EAAAAA+ArialMT",
+        "GAAAAA+Calibri",
+        "HAAAAA+MicrosoftYaHei",
+        "IAAAAA+MicrosoftYaHei-Bold"
+      ],
+      "metadata": {
+        "/Title": "SeismoFlux：固定报警面积下的近期地震活动增益",
+        "/Creator": "Impress",
+        "/Producer": "LibreOffice 25.8.7.3 (X86_64)",
+        "/CreationDate": "D:20260831164355+08'00'"
+      },
+      "rendered_pages": 12
+    },
+    "poster": {
+      "pages": 1,
+      "text_lengths": [
+        3867
+      ],
+      "page_sizes_points": [
+        [
+          3369.74,
+          2384.25
+        ]
+      ],
+      "fonts": [
+        "BAAAAA+Arial-BoldMT",
+        "CAAAAA+MicrosoftYaHei-Bold",
+        "DAAAAA+MicrosoftYaHei",
+        "EAAAAA+MicrosoftYaHei",
+        "FAAAAA+TimesNewRomanPSMT"
+      ],
+      "metadata": {
+        "/Title": "SeismoFlux科学海报",
+        "/Creator": "Impress",
+        "/Producer": "LibreOffice 25.8.7.3 (X86_64)",
+        "/CreationDate": "D:20260831162915+08'00'"
+      },
+      "rendered_pages": 1
+    }
+  },
+  "science": {
+    "primary_hits": {
+      "B0": 5,
+      "B0_R30": 9
+    },
+    "paired_outcomes": {
+      "both_hit": 5,
+      "both_miss": 12,
+      "gain": 4
+    },
+    "cluster_count": 21,
+    "case_count": 4
+  },
+  "status": "passed",
+  "failures": []
+}
