@@ -40,6 +40,9 @@ outputs/backtests/**
 !outputs/backtests/.gitkeep
 outputs/prospective/**
 !outputs/prospective/.gitkeep
+!outputs/prospective/p1_b0_r30_records_v1.jsonl
+!outputs/prospective/p1_b0_r30/
+!outputs/prospective/p1_b0_r30/**
 outputs/releases/**
 !outputs/releases/.gitkeep
 outputs/run_manifests/**

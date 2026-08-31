@@ -6,3 +6,4 @@
 *.parquet binary
 *.xlsx binary
 *.xls binary
+outputs/prospective/p1_b0_r30/** -text
