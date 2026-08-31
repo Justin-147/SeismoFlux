@@ -16,15 +16,16 @@
 `db93e9ac8cd2997859fdd8815fa4d026b10fd95e`，标签 `v0.2.7-p1-b0-r30-ops`；阶段 O 已关闭，
 不要继续做与预测证据无关的工程优化。
 
-授权原文已落在 `docs/p1_real_issue_authorization_2026-08-31.md`；公开记录链的 ProtocolDefinition
-genesis 已在本地生成，哈希 `1a8e44f4a56fde0129e913a95818e05f07b0b1a9f4f2b256bb7dddcedced89c3`，
-时间 `2026-08-31T04:32:53.005504Z`。当前最高优先级安全顺序：
+授权原文和 ProtocolDefinition genesis 已在公开提交
+`a27417eaeb89955dd0e688d9d2c1b5f19f3da302` 远端闭合。genesis 哈希为
+`1a8e44f4a56fde0129e913a95818e05f07b0b1a9f4f2b256bb7dddcedced89c3`。引用该公开证据和 operations
+提交的 `RealIssueAuthorizationRecord` 已生成：内容哈希
+`184673b3b9e11e099bd8dcb4188b5d2e6c1497623519abcc2e36258a482600b1`，远端核验/记录时间
+`2026-08-31T04:36:13.436543Z`，授权从 `2026-09-09T16:00:00Z` 生效。当前最高优先级安全顺序：
 
-1. 精确提交授权证据、genesis、本节与阶段 O 身份回填；推送并远端逐字节回读。
-2. 用该远端证据提交作为 `authorization_commit`，用 `db93e9a...` 作为 `code_commit`，追加
-   `RealIssueAuthorizationRecord`；再次提交、推送并远端回读。
-3. 创建只在首期 Q（北京时间 2026-09-09 23:45）唤醒的真实起报心跳；不得提前联网取目录。
-4. 首期 T 为北京时间 2026-09-10 00:00。只有 T 前远端封存成功才算 Forecast；错过记 missed，
+1. 精确提交这条授权记录及验收/交接更新，推送并远端逐字节回读；不得混入 Stage4 草稿。
+2. 创建只在首期 Q（北京时间 2026-09-09 23:45）唤醒的真实起报心跳；不得提前联网取目录。
+3. 首期 T 为北京时间 2026-09-10 00:00。只有 T 前远端封存成功才算 Forecast；错过记 missed，
    不得补发。30 天最早 2026-11-09、90 天最早 2027-01-08 才能读取成熟真值。
 
 截至本安全点：真实 Forecast 为 0 期、没有读取首期 ComCat、没有未来真值、没有运行锁定测试；

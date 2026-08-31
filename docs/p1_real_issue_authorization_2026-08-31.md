@@ -35,3 +35,12 @@
 - `decision`: `authorize_frozen_real_prospective_only`
 - `next_scientific_test`: `first_on_time_issue_then_wait_30_90_day_truth`
 - `stop_condition`: `no_backfill_no_model_change_no_future_information`
+
+## 链上授权记录
+
+- 公开授权证据提交：`a27417eaeb89955dd0e688d9d2c1b5f19f3da302`。
+- `RealIssueAuthorizationRecord` 内容哈希：
+  `184673b3b9e11e099bd8dcb4188b5d2e6c1497623519abcc2e36258a482600b1`。
+- 远端核验与记录时间：`2026-08-31T04:36:13.436543Z`。
+- 状态：`real_issue_authorized=true`，从 `2026-09-09T16:00:00Z` 起只允许按冻结协议真实前瞻。
+- 截至记录形成时，真实 Forecast 仍为 0 期；没有提前读取首期目录或未来真值。
