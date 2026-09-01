@@ -1,0 +1,31 @@
+{
+  "artifact_count": 1,
+  "artifacts": [
+    {
+      "byte_count": 4079,
+      "path": "spatial_fold_freeze_decision.json",
+      "sha256": "d7a895071f349da1f95cbeb9e061c575a6aeeb3e6e9c15a4cce28543ebe771ee"
+    }
+  ],
+  "config_sha256": "4bb73e97a9eee8aab8eb18088097ce4fb50643b43d43f0051885b6503b1faa37",
+  "decision_id": "multitask_s1_spatial_fold_freeze_v1",
+  "evaluation_epicenter_read": false,
+  "fold_mapping_materialized": false,
+  "freeze_script_catalog_read": false,
+  "locked_test_run": false,
+  "model_score_read": false,
+  "network_accessed": false,
+  "pre_decision_preflight_nonspatial_catalog_columns_opened": true,
+  "preflight_columns": [
+    "origin_time_utc",
+    "magnitude",
+    "inside_study_area"
+  ],
+  "preflight_failed_before_producing_a_count": true,
+  "preflight_result_used_for_decision": false,
+  "public_contains_restricted_spatial_material": false,
+  "schema_version": 1,
+  "score_blind": true,
+  "selected_k": null,
+  "status": "not_materialized_scientific_fallback"
+}

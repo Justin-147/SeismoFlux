@@ -1,0 +1,130 @@
+schema_version: 1
+decision_id: "multitask_s1_spatial_fold_freeze_v1"
+created_on: "2026-09-01"
+stage: "S1_A_before_any_model_score"
+status: "not_materialized_scientific_fallback"
+score_blind: true
+science_value_category: "necessary_design_correction"
+
+scientific_question: >-
+  Can fewer spatial folds be chosen uniquely and without target leakage for model
+  selection, while preserving the 39 frozen atomic blocks for a separate transfer
+  stress test?
+
+frozen_decision:
+  selected_k: null
+  fold_mapping_materialized: false
+  fold_mapping_sha256: null
+  candidate_k_evaluated: false
+  model_selection_axis: "nested_time_forward_only"
+  reason_code: "S0_power_protocol_under_specified"
+  reason: >-
+    S0 fixed the candidate k values and a target-blind geometry algorithm, but did
+    not preregister the power estimand, null and alternative, minimum meaningful
+    effect, error rate, target power, simulation exposure, background estimator,
+    or whether every fold or only the pooled result had to pass. Choosing those
+    quantities now would create a new custom rule at the point of selection.
+
+unresolved_power_protocol_fields:
+  - "test_statistic_and_estimand"
+  - "null_and_target_blind_alternative"
+  - "minimum_scientifically_meaningful_effect"
+  - "type_I_error_rate"
+  - "target_power"
+  - "simulation_exposure_duration"
+  - "pre_evaluation_background_estimator_and_catalog_completeness_rule"
+  - "per_fold_vs_pooled_success_criterion"
+
+withdrawn_recipe_recorded_but_not_executed:
+  atomic_block_count: 39
+  projection: "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs"
+  representative_point: "centroid_of_zone_clipped_to_study_area"
+  algorithm: "coordinate_kmeans_plus_plus"
+  candidate_k_in_order: [5, 4, 3]
+  random_seed: 147
+  n_init: 100
+  execution_status: "not_run"
+
+retained_secondary_spatial_track:
+  retained: true
+  role: "final_secondary_transfer_stress_test_not_model_selection"
+  scheme: "leave_one_atomic_block_out_then_pool_all_oof_predictions"
+  atomic_block_count: 39
+  pooled_alarm_rule: >-
+    Reconstruct one national out-of-fold surface with exactly one held-out score
+    per frozen cell, then apply each national alarm-area budget exactly once.
+  may_tune_models_or_hyperparameters: false
+  m6_plus_may_select_or_balance_blocks: false
+  individual_block_effect_claims: false
+
+allowed_selection_inputs_used:
+  frozen_public_input_identities_only: true
+  frozen_geometry_content_read: false
+  pre_evaluation_catalog_used_for_selection: false
+  target_blind_power_simulation_run: false
+
+execution_audit:
+  freeze_script_catalog_read: false
+  pre_decision_preflight_nonspatial_catalog_columns_opened: true
+  preflight_columns: ["origin_time_utc", "magnitude", "inside_study_area"]
+  preflight_failed_before_producing_a_count: true
+  longitude_or_latitude_read: false
+  per_event_values_emitted: false
+  preflight_result_used_for_decision: false
+
+forbidden_actions:
+  evaluation_period_M5_or_M6_epicenters_read: false
+  M6_plus_used_for_selection: false
+  model_scores_read: false
+  hits_or_misses_read: false
+  model_training_run: false
+  locked_test_run: false
+  network_accessed: false
+  raw_zone_or_cell_mapping_published: false
+  coordinates_or_geometry_published: false
+
+input_identities:
+  s0_config:
+    path: "configs/multitask_s0.yaml"
+    sha256: "fac63c49e0c6f05beada3b268ce255483bbfc3ced37562b6236c0bd6ec71dd02"
+  s0_science_contract:
+    path: "docs/s0_science_contract.md"
+    sha256: "f9cfbb8d006be11975557e39a444b1581b4e61263be88d47b538d98ee9d26996"
+  s0_spatial_review:
+    path: "docs/s0_spatial_validation_review_2026-09-01.md"
+    sha256: "205be03acff03e1742e3326c13765b823b4735da64252cd51ad4919edd316780"
+  s0_acceptance:
+    path: "docs/s0_acceptance_2026-09-01.md"
+    sha256: "ae7a89a09d8ce6f40a1a5239bae7d2980dd47346c9da5a88ec11e1f71fe3688b"
+  spatial_manifest:
+    path: "data/manifests/anomaly_increment_r2_spatial_strata.json"
+    sha256: "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83"
+  frozen_zone_set_sha256: "294e070ca6c0ff68d74d6638ab8ec3cda08d3469b99a3958f4d21afa4fae4a62"
+  frozen_25km_cell_mapping_file_sha256: "171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e"
+
+classic_method_basis:
+  - citation: "Zhang et al. (2024), CSEP2.0 China"
+    doi: "https://doi.org/10.1111/1755-6724.15250"
+    implication: "Primary evidence remains time-forward evaluation on a pre-fixed national support."
+  - citation: "Roberts et al. (2017), structured cross-validation"
+    doi: "https://doi.org/10.1111/ecog.02881"
+    implication: "Spatial folds must match the intended transfer question; their number is not universal."
+  - citation: "Khawaja et al. (2023), power of spatial earthquake forecast tests"
+    doi: "https://doi.org/10.1093/gji/ggad030"
+    implication: >-
+      Power depends on event count and the specified forecast contrast/effect;
+      event count or k alone cannot define a universal powered design.
+
+public_output_contract:
+  output_directory: "outputs/multitask_s1/spatial_fold_freeze_v1"
+  decision_filename: "spatial_fold_freeze_decision.json"
+  manifest_filename: "artifact_manifest.json"
+  publish_atomic_block_to_fold_table: false
+  publish_raw_zone_ids: false
+  publish_cell_ids: false
+  publish_coordinates_or_geometry: false
+
+next_scientific_action: >-
+  Select catalog-only models and hyperparameters with nested time-forward folds.
+  After models are frozen, run the 39-block leave-one-block-out pooled national OOF
+  transfer stress test only as secondary evidence.

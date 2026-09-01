@@ -1,0 +1,95 @@
+{
+  "decision": {
+    "candidate_k_evaluated": false,
+    "fold_mapping_materialized": false,
+    "fold_mapping_sha256": null,
+    "model_selection_axis": "nested_time_forward_only",
+    "reason": "S0 fixed the candidate k values and a target-blind geometry algorithm, but did not preregister the power estimand, null and alternative, minimum meaningful effect, error rate, target power, simulation exposure, background estimator, or whether every fold or only the pooled result had to pass. Choosing those quantities now would create a new custom rule at the point of selection.",
+    "reason_code": "S0_power_protocol_under_specified",
+    "selected_k": null
+  },
+  "decision_id": "multitask_s1_spatial_fold_freeze_v1",
+  "execution_receipt": {
+    "candidate_k_evaluated": false,
+    "config_sha256": "4bb73e97a9eee8aab8eb18088097ce4fb50643b43d43f0051885b6503b1faa37",
+    "evaluation_epicenter_read": false,
+    "freeze_script_catalog_read": false,
+    "locked_test_run": false,
+    "longitude_or_latitude_read": false,
+    "model_score_read": false,
+    "model_training_run": false,
+    "network_accessed": false,
+    "numeric_library_threads": 1,
+    "per_event_values_emitted": false,
+    "power_simulation_run": false,
+    "pre_decision_preflight_nonspatial_catalog_columns_opened": true,
+    "preflight_columns": [
+      "origin_time_utc",
+      "magnitude",
+      "inside_study_area"
+    ],
+    "preflight_failed_before_producing_a_count": true,
+    "preflight_result_used_for_decision": false,
+    "restricted_geometry_or_mapping_content_read": false
+  },
+  "next_scientific_action": "Select catalog-only models and hyperparameters with nested time-forward folds. After models are frozen, run the 39-block leave-one-block-out pooled national OOF transfer stress test only as secondary evidence.",
+  "public_safety": {
+    "contains_cell_ids": false,
+    "contains_coordinates": false,
+    "contains_geometry": false,
+    "contains_raw_zone_ids": false,
+    "contains_zone_or_block_to_fold_mapping": false
+  },
+  "retained_secondary_spatial_track": {
+    "atomic_block_count": 39,
+    "individual_block_effect_claims": false,
+    "m6_plus_may_select_or_balance_blocks": false,
+    "may_tune_models_or_hyperparameters": false,
+    "pooled_alarm_rule": "Reconstruct one national out-of-fold surface with exactly one held-out score per frozen cell, then apply each national alarm-area budget exactly once.",
+    "retained": true,
+    "role": "final_secondary_transfer_stress_test_not_model_selection",
+    "scheme": "leave_one_atomic_block_out_then_pool_all_oof_predictions"
+  },
+  "schema_version": 1,
+  "science_value_category": "necessary_design_correction",
+  "score_blind": true,
+  "stage": "S1_A_before_any_model_score",
+  "status": "not_materialized_scientific_fallback",
+  "unresolved_power_protocol_fields": [
+    "test_statistic_and_estimand",
+    "null_and_target_blind_alternative",
+    "minimum_scientifically_meaningful_effect",
+    "type_I_error_rate",
+    "target_power",
+    "simulation_exposure_duration",
+    "pre_evaluation_background_estimator_and_catalog_completeness_rule",
+    "per_fold_vs_pooled_success_criterion"
+  ],
+  "verified_input_identities": {
+    "s0_acceptance": {
+      "hash_matches": true,
+      "sha256": "ae7a89a09d8ce6f40a1a5239bae7d2980dd47346c9da5a88ec11e1f71fe3688b"
+    },
+    "s0_config": {
+      "hash_matches": true,
+      "sha256": "fac63c49e0c6f05beada3b268ce255483bbfc3ced37562b6236c0bd6ec71dd02"
+    },
+    "s0_science_contract": {
+      "hash_matches": true,
+      "sha256": "f9cfbb8d006be11975557e39a444b1581b4e61263be88d47b538d98ee9d26996"
+    },
+    "s0_spatial_review": {
+      "hash_matches": true,
+      "sha256": "205be03acff03e1742e3326c13765b823b4735da64252cd51ad4919edd316780"
+    },
+    "spatial_manifest": {
+      "hash_matches": true,
+      "nonempty_atomic_block_count": 39,
+      "query_cell_count": 15697,
+      "restricted_content_read": false,
+      "sha256": "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83",
+      "target_or_score_read": false,
+      "zone_count": 65
+    }
+  }
+}
