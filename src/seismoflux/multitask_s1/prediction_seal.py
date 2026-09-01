@@ -543,9 +543,9 @@ def _require_configured_prediction_root(project_root: str | Path, output_root: s
         raise PredictionSealError("development-run outputs are missing")
     outputs = cast(Mapping[str, object], raw["outputs"])
     expected_values = {
-        "root": "outputs/multitask_s1/s1c0_all_m4_screen_v1",
-        "prediction_root": ("outputs/multitask_s1/s1c0_all_m4_screen_v1/prediction_phase"),
-        "score_root": "outputs/multitask_s1/s1c0_all_m4_screen_v1/score_phase",
+        "root": "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2",
+        "prediction_root": ("outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/prediction_phase"),
+        "score_root": "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase",
         "phase_roots_must_be_siblings_and_nonoverlapping": True,
     }
     if any(outputs.get(key) != value for key, value in expected_values.items()):

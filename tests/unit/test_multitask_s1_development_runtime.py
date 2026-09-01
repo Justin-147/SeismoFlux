@@ -314,6 +314,18 @@ def test_official_context_path_loads_actual_npz_into_concrete_source(
         return authorization
 
     monkeypatch.setattr(score, "_reauthorize", fake_reauthorize)
+    primary_issue = SimpleNamespace(
+        primary_exposure_selected=True,
+        maturity_status="mature",
+    )
+    mature_nonprimary = SimpleNamespace(
+        primary_exposure_selected=False,
+        maturity_status="mature",
+    )
+    unavailable_nonprimary = SimpleNamespace(
+        primary_exposure_selected=False,
+        maturity_status="unavailable",
+    )
     fake_inputs = SimpleNamespace(
         location_grid=SimpleNamespace(cell_count=runner_inputs.EXPECTED_25KM_CELL_COUNT),
         spatial_domain=SimpleNamespace(
@@ -321,10 +333,18 @@ def test_official_context_path_loads_actual_npz_into_concrete_source(
             locator=object(),
         ),
         catalog=object(),
-        outer_issues=(),
+        outer_issues=(primary_issue, mature_nonprimary, unavailable_nonprimary),
     )
     monkeypatch.setattr(runner_inputs, "load_s1_runner_inputs", lambda **kwargs: fake_inputs)
-    monkeypatch.setattr(score, "_build_primary_exposure_targets", lambda *args, **kwargs: object())
+    captured_primary_rows: list[object] = []
+
+    def fake_build_targets(*args: object, **kwargs: object) -> object:
+        rows = kwargs["primary_issue_rows"]
+        assert isinstance(rows, tuple)
+        captured_primary_rows.extend(rows)
+        return object()
+
+    monkeypatch.setattr(score, "_build_primary_exposure_targets", fake_build_targets)
     monkeypatch.setattr(
         score, "_assign_standalone_magnitude_targets", lambda *args, **kwargs: object()
     )
@@ -343,6 +363,7 @@ def test_official_context_path_loads_actual_npz_into_concrete_source(
     result = score.score_authorized_development_from_context(context)
     assert result.authorization == authorization
     assert len(authorization_calls) == 3
+    assert captured_primary_rows == [primary_issue]
 
 
 def test_run_score_rejects_before_writing_when_official_authorization_fails(

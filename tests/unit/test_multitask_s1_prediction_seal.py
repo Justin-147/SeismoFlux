@@ -757,11 +757,13 @@ def test_configured_prediction_root_rejects_alias(tmp_path: Path) -> None:
         yaml.safe_dump(
             {
                 "outputs": {
-                    "root": "outputs/multitask_s1/s1c0_all_m4_screen_v1",
+                    "root": "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2",
                     "prediction_root": (
-                        "outputs/multitask_s1/s1c0_all_m4_screen_v1/prediction_phase"
+                        "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/prediction_phase"
                     ),
-                    "score_root": "outputs/multitask_s1/s1c0_all_m4_screen_v1/score_phase",
+                    "score_root": (
+                        "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase"
+                    ),
                     "phase_roots_must_be_siblings_and_nonoverlapping": True,
                 }
             }

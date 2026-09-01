@@ -142,15 +142,19 @@ def _sealed_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ScoringC
     run_contract.parent.mkdir(parents=True)
     run_contract.write_text(
         """outputs:
-  root: outputs/multitask_s1/s1c0_all_m4_screen_v1
-  prediction_root: outputs/multitask_s1/s1c0_all_m4_screen_v1/prediction_phase
-  score_root: outputs/multitask_s1/s1c0_all_m4_screen_v1/score_phase
+  root: outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2
+  prediction_root: outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/prediction_phase
+  score_root: outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase
   phase_roots_must_be_siblings_and_nonoverlapping: true
 """,
         encoding="utf-8",
     )
     output_root = (
-        project_root / "outputs" / "multitask_s1" / "s1c0_all_m4_screen_v1" / "prediction_phase"
+        project_root
+        / "outputs"
+        / "multitask_s1"
+        / "s1c0_all_m4_screen_v1_attempt2"
+        / "prediction_phase"
     )
     monkeypatch.setattr(
         prediction_seal,
@@ -513,6 +517,16 @@ def test_authorization_and_primary_scope_fail_closed(
             context,
             catalog=catalog,
             primary_issue_rows=nonprimary,
+            grid=_grid(),
+            locator=_Locator(),
+        )
+    immature_primary = list(_primary_rows())
+    immature_primary[0] = replace(immature_primary[0], maturity_status="unavailable")
+    with pytest.raises(DevelopmentScoreError, match="only mature primary"):
+        _build_primary_exposure_targets(
+            context,
+            catalog=catalog,
+            primary_issue_rows=immature_primary,
             grid=_grid(),
             locator=_Locator(),
         )

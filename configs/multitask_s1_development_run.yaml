@@ -217,9 +217,9 @@ resources:
   benchmark_decision: "direct_exact_computation_no_approximation_required"
 
 outputs:
-  root: "outputs/multitask_s1/s1c0_all_m4_screen_v1"
-  prediction_root: "outputs/multitask_s1/s1c0_all_m4_screen_v1/prediction_phase"
-  score_root: "outputs/multitask_s1/s1c0_all_m4_screen_v1/score_phase"
+  root: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2"
+  prediction_root: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/prediction_phase"
+  score_root: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase"
   phase_roots_must_be_siblings_and_nonoverlapping: true
   historical_predictions_overwrite: false
   relative_intensity_is_absolute_probability: false

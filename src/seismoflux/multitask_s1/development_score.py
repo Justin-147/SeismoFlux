@@ -1306,10 +1306,11 @@ def score_authorized_development_from_context(
     authorization_loaded = _reauthorize(context)
     if authorization_loaded != authorization_before:
         raise DevelopmentScoreError("prediction authorization changed while inputs were loaded")
+    primary_issue_rows = tuple(row for row in inputs.outer_issues if row.primary_exposure_selected)
     primary_targets = _build_primary_exposure_targets(
         context,
         catalog=inputs.catalog,
-        primary_issue_rows=inputs.outer_issues,
+        primary_issue_rows=primary_issue_rows,
         grid=grid,
         locator=inputs.spatial_domain.locator,
     )

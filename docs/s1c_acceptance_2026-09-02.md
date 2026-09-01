@@ -72,23 +72,24 @@
 
 - 主执行者在数值库单线程下复跑S1地点、时间/震级、合同、输入、预测、封存、指标、评分、摘要和
   运行器；首次验收为128项，首次真实predict暴露近期Gaussian尾部下溢后完成最小修复，最终为
-  **129 passed in 49.30s**；
+  **129 passed in 53.80s**；
 - 独立攻击复核的封存、评分、运行和摘要定向集合：**50 passed**（与主集合有重叠，不相加冒充数量）；
 - Ruff：通过；格式检查：15个文件已格式化；strict Mypy：8个源文件无问题；
   `git diff --check`：通过；
 - 无评分真实输入预检：通过；
-- 尚未读取或构造真实外层目标/成绩；holdout、2023+ audit和一次性locked test均未打开；
+- 首次评分授权后已读取认证开发目录和完整起报账本，但在主暴露目标构造前安全停止；没有形成外层
+  目标集合、原始成绩或摘要；holdout、2023+ audit和一次性locked test均未打开；
 - `science_first`工作树既有15个Stage4未跟踪草稿未触碰。
 
 关键文件SHA-256：
 
 | 对象 | SHA-256 |
 | --- | --- |
-| S1-C0运行YAML | `454fa5775397dde69bff1fc8d6385fd2c75a058076934557660801d0ac89576d` |
+| S1-C0运行YAML | `af5ece932988827cb7f9d3db474c2541f92e54224fdefc3d820dc01d15fc0e85` |
 | 真实输入加载 | `b5e7fe0e4206f3f5f398ff004a2bd070c4e2f8248783f88d80cb4e13fcc25889` |
 | 预测核心 | `5c1aa1ef00be5dc53f1d399259d33c3da4b2c77ff9640f081ec2c80f89a4c35a` |
-| 预测封存 | `fdaa8d2b9d42f1a034a30c77e67b150f28239f829ec03b152cdec20392f29d72` |
-| 授权评分 | `5392a2efed7a96377825584b138de253663fa652a40776df95e2f496b06f59be` |
+| 预测封存 | `349c481eab976abc234e615db49a9073662ef875f42f14d1062b30013a7e7e30` |
+| 授权评分 | `b1c47aff37f7b0b2705749a1eb54983229a597a91fa7bf3220d1fd3b332e52f2` |
 | 科学摘要 | `78f18889fd22e60757f9188bf172a624e9d774f96d0ea46f74ad587367927931` |
 | 两阶段运行器 | `6206b01f834929ee843e408147404bdcef423eb8f27b763385b96efec78399c2` |
 | 命令行入口 | `4ddb2908efa654ce2bcc3a065512dd3b371a766700dfb23cefe31b1979f55700` |
@@ -110,14 +111,37 @@
 
 ```yaml
 science_value_category: necessary_enabler
-evidence: "129项S1回归检验、独立攻击及近期Gaussian下溢修复复核GO且P0/P1为0、真实无评分输入预检通过；尚无真实外层预测成绩"
-decision: GO_COMMIT_PUSH_REMOTE_READBACK_THEN_RUN_PREDICT
-next_scientific_test: "在已推送且干净的提交上运行四折S1-C0 predict，核验总封印后单独授权score，比较同面积独立震序召回及时间/震级/联合效果"
+evidence: "129项S1回归检验、两项最小修复复核GO且P0/P1为0；旧尝试四折预测成功但评分只写授权便停止，无raw_scores或summary"
+decision: GO_COMMIT_PUSH_THEN_FRESH_ATTEMPT2_PREDICT_AND_SCORE
+next_scientific_test: "在已推送且干净的修复提交上从新attempt2根重跑四折predict，核验新总封印后单独授权score，比较同面积独立震序召回及时间/震级/联合效果"
 stop_condition: "任何P0/P1、输入身份、预测根、封印、代码身份或评分授权失败立即停止；真实结果无稳定增量则停止对应模型方向，不用工程扩张追分"
 ```
 
 ## 8. 下一步
 
-提交、推送并远端回读本执行层；随后严格按`predict → 四折封印核验 → score`运行。第一批成绩一形成，
+提交、推送并远端回读主暴露接线修复；随后从全新attempt2根严格按
+`predict → 四折封印核验 → score`运行。第一批成绩一形成，
 立即制作静态图和离线交互回放，报告各折训练与检验表现、代表性命中和失败震例，并从科学效果而非
 代码数量决定哪些方向保留。S1-C0完成后进入S1-C1，不打开留出、audit或locked test。
+
+## 9. 首次运行后的两项最小修复（2026-09-02补充）
+
+首次真实运行先后暴露两项数值/接线问题，但都在产生外层成绩前安全停止：
+
+1. 近期75 km Gaussian 分量在约4000 km远处发生双精度下溢。L3始终保留至少25%的长期背景，
+   因而只允许近期分量在混合前表示为数值0；长期单模型、负值、非有限值及最终混合为0仍全部拒绝。
+   该修复未改模型、参数、数据、折、面积或指标，提交`8a237b6601437631ccb1e594c831bc2188c19226`
+   已推送并远端回读。
+2. 该提交上的四折预测及总封印完整成功，但首次评分在写入授权后发现：官方入口把完整5,215条周四
+   账本交给了只接受396条冻结主暴露的目标构造器。最小修复仅按成绩形成前已冻结的
+   `primary_exposure_selected=true`筛选；不能按成熟状态筛选，因为那会纳入重叠周窗并虚增样本。
+
+旧根`outputs/multitask_s1/s1c0_all_m4_screen_v1`保持只读。其总封印SHA-256为
+`2605fd3f20174875bfbcddd970af34ad3bca3df4a9dc11c2dadbeaaf8a95ca55`；评分区只有授权文件，
+SHA-256为`f2e2f924876c9e543dba7b0e29f1f26818a214fe196bf26da6d44e840760c0db`，没有
+`raw_scores.parquet`或`development_summary.json`，所以仍没有模型成绩或排名。
+
+修复后的新运行根固定为`outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2`，必须在修复提交、
+推送和远端回读后从零生成预测，不得复制旧NPZ、封印或授权。完整S1回归集合为129项，静态检查
+通过，独立复核为`GO`、P0/P1=`0/0`。科学价值仍是`necessary_enabler`：它保证即将得到的开发
+成绩属于预登记396个互不重叠主暴露，但本身不是预测效果提升。
