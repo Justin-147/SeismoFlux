@@ -8,6 +8,9 @@
 - 当前阶段仍是 `S1-C0_all_M4_preliminary_development_screen_implementation`，但执行层已经完成
   最终验收；正式记录见 `docs/s1c_acceptance_2026-09-02.md`。此时仍没有真实外层预测成绩，不能
   宣称地点召回、时间、震级或联合效果已经提高。
+- S1-C0执行层科学提交为 `cfdc102798e5aedff3d46402a18479151284699e`，已推送到
+  `origin/codex/p2r-multitask-multidata`并于2026-09-02 04:26（Asia/Shanghai）远端回读一致；
+  闭合记录见 `docs/s1c_remote_closure_2026-09-02.md`。
 - 实际数据根目录明确为 `D:\AIPred\SeismoFlux\data`；工作树项目根目录为
   `D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata`。不得把仓库根目录误当
   数据根目录，也不得让程序从当前目录自行猜测。
