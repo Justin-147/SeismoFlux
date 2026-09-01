@@ -1,0 +1,43 @@
+"""Score-blind, pure scientific building blocks for the S1 catalog baselines."""
+
+from seismoflux.multitask_s1.location import (
+    FROZEN_KDE_BANDWIDTHS_KM,
+    FROZEN_R30_ALPHA_CANDIDATES,
+    FROZEN_REGIONAL_TAU_YEARS,
+    CausalRecent30History,
+    CausalSpatialHistory,
+    EarlierInnerBoundary,
+    FrozenSpatialGrid,
+    KDEBandwidthCandidateAudit,
+    KDEBandwidthSelection,
+    LocationSurface,
+    fixed_origin_region_indices,
+    l0_uniform_relative_mass,
+    l1_regional_constant_relative_mass,
+    l2_gaussian_kde_relative_mass,
+    l3_b0_r30_relative_mass,
+    select_kde_bandwidth_one_se,
+    select_recent_alpha,
+    select_regional_tau,
+)
+
+__all__ = [
+    "FROZEN_KDE_BANDWIDTHS_KM",
+    "FROZEN_R30_ALPHA_CANDIDATES",
+    "FROZEN_REGIONAL_TAU_YEARS",
+    "CausalRecent30History",
+    "CausalSpatialHistory",
+    "EarlierInnerBoundary",
+    "FrozenSpatialGrid",
+    "KDEBandwidthCandidateAudit",
+    "KDEBandwidthSelection",
+    "LocationSurface",
+    "fixed_origin_region_indices",
+    "l0_uniform_relative_mass",
+    "l1_regional_constant_relative_mass",
+    "l2_gaussian_kde_relative_mass",
+    "l3_b0_r30_relative_mass",
+    "select_kde_bandwidth_one_se",
+    "select_recent_alpha",
+    "select_regional_tau",
+]

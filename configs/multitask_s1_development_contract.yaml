@@ -1,0 +1,100 @@
+schema_version: 1
+contract_id: "multitask-s1-development-contract-v1"
+status: "score_blind_development_execution_contract_frozen"
+score_blind: true
+model_scores_read: false
+locked_test_run: false
+
+source_identities:
+  multitask_s0_config:
+    path: "configs/multitask_s0.yaml"
+    sha256: "fac63c49e0c6f05beada3b268ce255483bbfc3ced37562b6236c0bd6ec71dd02"
+  issue_maturity_ledger:
+    path: "outputs/multitask_s0/s0_score_blind_20260901/issue_maturity_ledger.csv"
+    sha256: "23f581783e64ebf29b508fc95e96dd3805d5de952de6093af5f86860247096b0"
+  catalog_sample_ledger:
+    path: "outputs/multitask_s0/s0_score_blind_20260901/catalog_sample_ledger.json"
+    sha256: "bef4a85379ca2c9aaf9917f501e8a84fe59311f9ddd029fac85bde95847c223e"
+
+execution_scope:
+  enabled_roles: ["development"]
+  enabled_outer_folds:
+    - "C_DEV_2000_2004"
+    - "C_DEV_2005_2009"
+    - "C_DEV_2010_2014"
+    - "C_DEV_2015_2019"
+  holdout_enabled: false
+  audit_enabled: false
+  locked_test_enabled: false
+  construction_blocks_used_for_tuning: false
+  prediction_must_be_sealed_before_target_scoring: true
+
+causal_boundaries:
+  timezone: "Asia/Shanghai"
+  issue_weekday: "Thursday"
+  issue_local_time: "00:00:00"
+  issue_frequency_days: 7
+  horizons_days: [7, 30, 90, 180, 365]
+  target_interval: "(issue,issue+horizon]"
+  main_catalog_delay_hours: 24
+  feature_visibility_rule: "available_at<=issue-24h"
+  recent_30d_window: "(issue-30d,issue-24h]"
+  parameter_label_embargo_days: 30
+  fit_label_rule: "fit_issue+horizon<=inner_start-30d"
+  inner_target_rule: "issue+horizon<=inner_end"
+  primary_exposure_rule: "greedy_issue_ascending_next>=previous+horizon+30d"
+
+selection_fallbacks:
+  minimum_mature_inner_blocks: 2
+  minimum_positive_anchor_blocks_for_event_metric: 2
+  insufficient_mature_blocks: "independent_selection_unavailable_use_frozen_no_tuning_or_shared_model"
+  insufficient_positive_anchor_blocks: "do_not_merge_or_move_blocks_use_preregistered_proper_score_or_shared_parameter"
+  zero_anchor_block: "retain_as_zero_for_proper_scores_event_dependent_metric_is_na"
+  na_is_zero: false
+  posthoc_block_merge: false
+  m6_plus_7d_independent_hyperparameter_selection: false
+
+outer_folds:
+  - id: "C_DEV_2000_2004"
+    outer_start: "2000-01-01T00:00:00+08:00"
+    outer_end: "2005-01-01T00:00:00+08:00"
+    inner_blocks:
+      - {id: "I1", start: "1985-01-01T00:00:00+08:00", end: "1990-01-01T00:00:00+08:00"}
+      - {id: "I2", start: "1990-01-01T00:00:00+08:00", end: "1995-01-01T00:00:00+08:00"}
+      - {id: "I3", start: "1995-01-01T00:00:00+08:00", end: "1999-12-02T00:00:00+08:00"}
+  - id: "C_DEV_2005_2009"
+    outer_start: "2005-01-01T00:00:00+08:00"
+    outer_end: "2010-01-01T00:00:00+08:00"
+    inner_blocks:
+      - {id: "I1", start: "1990-01-01T00:00:00+08:00", end: "1995-01-01T00:00:00+08:00"}
+      - {id: "I2", start: "1995-01-01T00:00:00+08:00", end: "2000-01-01T00:00:00+08:00"}
+      - {id: "I3", start: "2000-01-01T00:00:00+08:00", end: "2004-12-02T00:00:00+08:00"}
+  - id: "C_DEV_2010_2014"
+    outer_start: "2010-01-01T00:00:00+08:00"
+    outer_end: "2015-01-01T00:00:00+08:00"
+    inner_blocks:
+      - {id: "I1", start: "1995-01-01T00:00:00+08:00", end: "2000-01-01T00:00:00+08:00"}
+      - {id: "I2", start: "2000-01-01T00:00:00+08:00", end: "2005-01-01T00:00:00+08:00"}
+      - {id: "I3", start: "2005-01-01T00:00:00+08:00", end: "2009-12-02T00:00:00+08:00"}
+  - id: "C_DEV_2015_2019"
+    outer_start: "2015-01-01T00:00:00+08:00"
+    outer_end: "2020-01-01T00:00:00+08:00"
+    inner_blocks:
+      - {id: "I1", start: "2000-01-01T00:00:00+08:00", end: "2005-01-01T00:00:00+08:00"}
+      - {id: "I2", start: "2005-01-01T00:00:00+08:00", end: "2010-01-01T00:00:00+08:00"}
+      - {id: "I3", start: "2010-01-01T00:00:00+08:00", end: "2014-12-02T00:00:00+08:00"}
+
+waterlevel_columns: [7, 30, 90, 180, 365]
+inner_block_waterlevels:
+  - {fold: "C_DEV_2000_2004", block: "I1", exposures: [44,29,14,8,4], m5_6_events: [8,42,52,71,71], m5_6_anchors: [8,33,41,56,56], m6_plus_events: [3,11,16,19,14], m6_plus_anchors: [2,7,9,12,10]}
+  - {fold: "C_DEV_2000_2004", block: "I2", exposures: [44,29,14,8,4], m5_6_events: [13,37,55,56,59], m5_6_anchors: [9,33,49,50,53], m6_plus_events: [2,4,9,12,12], m6_plus_anchors: [2,4,9,12,12]}
+  - {fold: "C_DEV_2000_2004", block: "I3", exposures: [43,28,14,8,4], m5_6_events: [15,50,78,83,96], m5_6_anchors: [10,40,59,64,76], m6_plus_events: [2,11,21,19,23], m6_plus_anchors: [2,5,15,16,17]}
+  - {fold: "C_DEV_2005_2009", block: "I1", exposures: [44,29,14,8,4], m5_6_events: [13,37,55,56,59], m5_6_anchors: [9,33,49,50,53], m6_plus_events: [2,4,9,12,12], m6_plus_anchors: [2,4,9,12,12]}
+  - {fold: "C_DEV_2005_2009", block: "I2", exposures: [44,29,14,8,4], m5_6_events: [15,54,78,83,96], m5_6_anchors: [10,44,59,64,76], m6_plus_events: [2,11,21,19,23], m6_plus_anchors: [2,5,15,16,17]}
+  - {fold: "C_DEV_2005_2009", block: "I3", exposures: [43,28,14,8,4], m5_6_events: [16,47,76,83,81], m5_6_anchors: [12,39,57,63,64], m6_plus_events: [3,7,13,14,14], m6_plus_anchors: [3,7,13,14,14]}
+  - {fold: "C_DEV_2010_2014", block: "I1", exposures: [44,29,14,8,4], m5_6_events: [15,54,78,83,96], m5_6_anchors: [10,44,59,64,76], m6_plus_events: [2,11,21,19,23], m6_plus_anchors: [2,5,15,16,17]}
+  - {fold: "C_DEV_2010_2014", block: "I2", exposures: [44,29,14,8,4], m5_6_events: [16,47,76,83,81], m5_6_anchors: [12,39,57,63,64], m6_plus_events: [3,7,13,14,14], m6_plus_anchors: [3,7,13,14,14]}
+  - {fold: "C_DEV_2010_2014", block: "I3", exposures: [43,28,14,8,4], m5_6_events: [28,53,75,93,89], m5_6_anchors: [15,33,46,56,52], m6_plus_events: [7,10,14,22,21], m6_plus_anchors: [3,7,10,17,15]}
+  - {fold: "C_DEV_2015_2019", block: "I1", exposures: [44,29,14,8,4], m5_6_events: [16,47,76,83,81], m5_6_anchors: [12,39,57,63,64], m6_plus_events: [3,7,13,14,14], m6_plus_anchors: [3,7,13,14,14]}
+  - {fold: "C_DEV_2015_2019", block: "I2", exposures: [44,29,14,8,4], m5_6_events: [29,56,75,93,89], m5_6_anchors: [16,36,46,56,52], m6_plus_events: [7,10,14,22,21], m6_plus_anchors: [3,7,10,17,15]}
+  - {fold: "C_DEV_2015_2019", block: "I3", exposures: [43,28,14,8,4], m5_6_events: [10,50,65,84,76], m5_6_anchors: [10,39,55,69,62], m6_plus_events: [0,4,8,12,10], m6_plus_anchors: [0,4,8,11,9]}
