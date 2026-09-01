@@ -432,13 +432,26 @@ def _target_masses(
     surface: LocationSurface,
     window: StrictlyEarlierInnerLocationWindow,
     grid: FrozenSpatialGrid,
+    *,
+    allow_numerical_zero: bool = False,
 ) -> tuple[float, ...]:
+    """Read target-cell masses, optionally retaining Gaussian underflow zeros.
+
+    A Gaussian has infinite support, but a sparse recent-only component can
+    underflow to numerical zero at a distant target.  That zero is admissible
+    only before L3 mixes the component with its strictly positive long-term
+    background.  Stand-alone L1/L2 target masses and final mixtures must remain
+    strictly positive.
+    """
+
     result: list[float] = []
     for cell_index in window.event_cell_indices:
         if not 0 <= cell_index < grid.cell_count:
             raise DevelopmentPredictionError("inner target cell is outside the frozen grid")
         mass = float(surface.cell_relative_mass[cell_index])
-        if mass <= 0.0:
+        if not math.isfinite(mass) or mass < 0.0:
+            raise DevelopmentPredictionError("an inner target received invalid numerical mass")
+        if mass == 0.0 and not allow_numerical_zero:
             raise DevelopmentPredictionError(
                 "an inner target received zero numerical mass; parameter selection is undefined"
             )
@@ -616,7 +629,12 @@ def select_location_parameters_from_strictly_earlier_inner_blocks(
                     bandwidth_km=kde_selection.selected_bandwidth_km,
                     model_id="R30_COMPONENT",
                 )
-                recent_masses = _target_masses(recent_component, context.window, grid)
+                recent_masses = _target_masses(
+                    recent_component,
+                    context.window,
+                    grid,
+                    allow_numerical_zero=True,
+                )
             for target_position, cell_index in enumerate(context.window.event_cell_indices):
                 long_mass = long_masses[target_position]
                 recent_mass = recent_masses[target_position]

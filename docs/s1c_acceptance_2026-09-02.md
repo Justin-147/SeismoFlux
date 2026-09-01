@@ -71,7 +71,8 @@
 ## 5. 验证证据
 
 - 主执行者在数值库单线程下复跑S1地点、时间/震级、合同、输入、预测、封存、指标、评分、摘要和
-  运行器：**128 passed in 53.46s**；
+  运行器；首次验收为128项，首次真实predict暴露近期Gaussian尾部下溢后完成最小修复，最终为
+  **129 passed in 49.30s**；
 - 独立攻击复核的封存、评分、运行和摘要定向集合：**50 passed**（与主集合有重叠，不相加冒充数量）；
 - Ruff：通过；格式检查：15个文件已格式化；strict Mypy：8个源文件无问题；
   `git diff --check`：通过；
@@ -85,7 +86,7 @@
 | --- | --- |
 | S1-C0运行YAML | `454fa5775397dde69bff1fc8d6385fd2c75a058076934557660801d0ac89576d` |
 | 真实输入加载 | `b5e7fe0e4206f3f5f398ff004a2bd070c4e2f8248783f88d80cb4e13fcc25889` |
-| 预测核心 | `3efc4bc406ec69bbc9a81cf1b899ceb97af174070c6230aacb3d03a88307292b` |
+| 预测核心 | `5c1aa1ef00be5dc53f1d399259d33c3da4b2c77ff9640f081ec2c80f89a4c35a` |
 | 预测封存 | `fdaa8d2b9d42f1a034a30c77e67b150f28239f829ec03b152cdec20392f29d72` |
 | 授权评分 | `5392a2efed7a96377825584b138de253663fa652a40776df95e2f496b06f59be` |
 | 科学摘要 | `78f18889fd22e60757f9188bf172a624e9d774f96d0ea46f74ad587367927931` |
@@ -109,7 +110,7 @@
 
 ```yaml
 science_value_category: necessary_enabler
-evidence: "128项S1回归检验、独立攻击复核GO且P0/P1为0、真实无评分输入预检通过；尚无真实外层预测成绩"
+evidence: "129项S1回归检验、独立攻击及近期Gaussian下溢修复复核GO且P0/P1为0、真实无评分输入预检通过；尚无真实外层预测成绩"
 decision: GO_COMMIT_PUSH_REMOTE_READBACK_THEN_RUN_PREDICT
 next_scientific_test: "在已推送且干净的提交上运行四折S1-C0 predict，核验总封印后单独授权score，比较同面积独立震序召回及时间/震级/联合效果"
 stop_condition: "任何P0/P1、输入身份、预测根、封印、代码身份或评分授权失败立即停止；真实结果无稳定增量则停止对应模型方向，不用工程扩张追分"

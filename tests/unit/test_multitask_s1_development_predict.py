@@ -18,6 +18,7 @@ from seismoflux.multitask_s1.development_predict import (
     DevelopmentPredictionError,
     FoldHorizonParameterSelection,
     InnerTimeCountSeries,
+    StrictlyEarlierInnerLocationWindow,
     build_primary_issue_prediction,
     build_strictly_earlier_inner_m4_location_block,
     build_strictly_earlier_inner_time_count_series,
@@ -306,6 +307,53 @@ def test_cached_kde_mixture_is_exactly_equivalent_and_avoids_repeat_calls(
         issue_time_utc=datetime(2000, 1, 6, tzinfo=UTC),
     )
     assert call_count - before_outer == 2
+
+
+def test_recent_kde_underflow_zero_is_allowed_only_before_positive_l3_mixture() -> None:
+    grid = FrozenSpatialGrid(
+        x_km=np.asarray([0.0, 4_000.0]),
+        y_km=np.asarray([0.0, 0.0]),
+        area_km2=np.asarray([1.0, 1.0]),
+    )
+    issue = datetime(1985, 1, 3, tzinfo=UTC)
+    window = StrictlyEarlierInnerLocationWindow(
+        fold_id=FOLD,
+        block_id="I1",
+        horizon_days=7,
+        issue_time_utc=issue,
+        interval_end_utc=issue + timedelta(days=7),
+        event_ids=("distant_target",),
+        event_cell_indices=(1,),
+    )
+    recent_underflow = l2_gaussian_kde_relative_mass(
+        CausalSpatialHistory(np.asarray([0.0]), np.asarray([0.0])),
+        grid,
+        bandwidth_km=75.0,
+        model_id="R30_COMPONENT",
+    )
+    np.testing.assert_array_equal(recent_underflow.cell_relative_mass, np.asarray([1.0, 0.0]))
+    with pytest.raises(DevelopmentPredictionError, match="zero numerical mass"):
+        development_predict._target_masses(recent_underflow, window, grid)
+    assert development_predict._target_masses(
+        recent_underflow,
+        window,
+        grid,
+        allow_numerical_zero=True,
+    ) == (0.0,)
+
+    long_surface = l2_gaussian_kde_relative_mass(
+        CausalSpatialHistory(np.asarray([0.0, 4_000.0]), np.asarray([0.0, 0.0])),
+        grid,
+        bandwidth_km=75.0,
+    )
+    mixed = development_predict._l3_from_cached_surfaces(
+        long_surface,
+        recent_underflow,
+        recent_event_count=1,
+        alpha=0.75,
+    )
+    np.testing.assert_array_equal(mixed.cell_relative_mass, np.asarray([0.875, 0.125]))
+    assert mixed.cell_relative_mass[1] > 0.0
 
 
 def test_t1_m6_plus_7d_shares_m5_6_k_or_uses_poisson_fallback() -> None:
