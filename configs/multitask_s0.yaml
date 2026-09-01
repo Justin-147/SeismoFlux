@@ -1,0 +1,669 @@
+schema_version: "1.0"
+contract_id: "seismoflux-multitask-s0-2026-09-01"
+status: "score_blind_frozen_design"
+science_value_category: "necessary_enabler"
+authoritative_plan: "docs/SEISMOFLUX_MULTITASK_MULTIDATA_SCIENCE_PLAN_2026-09-01.md"
+
+scope:
+  objective: >-
+    Improve future earthquake time, location, and magnitude forecasts without future
+    information, and attribute any improvement to data, features, and models under
+    matched alarm cost.
+  stage: "S0"
+  score_access: "forbidden"
+  model_fitting: "forbidden"
+  locked_test: "forbidden"
+  network_access: "forbidden"
+  allowed_outputs:
+    - "data identity and availability ledger"
+    - "event, episode, issue, and fold sample counts"
+    - "coverage and sample-funnel figures without candidate scores"
+  forbidden_outputs:
+    - "candidate model score"
+    - "candidate hit or recall"
+    - "candidate information gain"
+    - "candidate ranking or selected operating point"
+
+method_adoption_gate:
+  review_required_before_implementation_or_score_access: true
+  required_evidence_classes:
+    - "domestic_classic_or_common_practice"
+    - "international_classic_method"
+    - "current_mainstream_method"
+  review_fields:
+    - "source"
+    - "original_scientific_task"
+    - "key_assumptions"
+    - "known_limitations"
+    - "strict_prospective_legality"
+    - "difference_from_seismoflux_task"
+  adoption_order:
+    - "use_task-appropriate_established_method"
+    - "make_minimal_evidence-based_adaptation_when_needed"
+    - "propose_custom_method_only_when_established_options_do_not_fit"
+  custom_method_status: "testable_hypothesis_only"
+  custom_method_requirements:
+    same_sample_and_time_boundary: true
+    same_alarm_or_time_cost: true
+    paired_against_at_least_one_task_appropriate_classic_baseline: true
+    ablation_and_sensitivity_required: true
+  unreviewed_custom_method_may_enter_formal_conclusion: false
+
+time_semantics:
+  timezone: "Asia/Shanghai"
+  target_interval: "(T,T+h]"
+  catalog_primary_latency_hours: 24
+  catalog_latency_sensitivity_hours: [0, 168]
+  availability_rule: >-
+    A row is usable only when available_at is not later than the issue cutoff. When
+    no historical publication timestamp exists, use the conservative source-specific
+    proxy frozen in the data-availability ledger; never backfill later revisions.
+  issue_calendar:
+    catalog:
+      frequency: "weekly"
+      weekday: "THU"
+      issue_time_local: "00:00:00"
+      primary_cutoff: "T-24h"
+    anomaly:
+      frequency: "actual_report_issue"
+      cutoff: "available_at<=T"
+      missing_report: "unknown_with_availability_mask"
+  formal_horizons_days: [7, 30, 90, 180, 365]
+  mechanism_diagnostic_horizons_days: [1, 3, 14]
+  diagnostic_horizons_cannot_replace_formal: true
+
+magnitude_tasks:
+  formal:
+    M5_6:
+      lower_inclusive: 5.0
+      upper_exclusive: 6.0
+    M6_plus:
+      lower_inclusive: 6.0
+      upper_exclusive: null
+  training_diagnostic:
+    M4_plus:
+      lower_inclusive: 4.0
+      upper_exclusive: null
+  m4_cannot_be_formal_endpoint: true
+  magnitude_type_uncertainty_required: true
+
+study_area_and_alarm_space:
+  study_area: "frozen_china_mainland_polygon"
+  external_trigger_buffer_km: 300
+  alarm_must_be_clipped_to_study_area: true
+  base_grid_km: 25.0
+  local_refinement_km: 12.5
+  refinement_must_be_target_independent: true
+  integration_convergence_km: [50.0, 25.0, 12.5]
+  development_region_counts: [5, 8, 10, 12]
+  formal_max_region_count: 10
+  alarm_area_budgets_km2: [300000, 450000, 600000, 750000, 960000]
+  formal_max_alarm_area_km2: 960000
+  single_region_equivalent_radius_cap_km:
+    M5_6: 100.0
+    M6_plus: 150.0
+  strict_hit_buffer_km: 0.0
+  tolerance_hit_buffer_km: 70.0
+  tolerance_is_secondary_only: true
+  true_epicenter_may_define_candidate_or_refinement: false
+  nationwide_intensity_display_is_not_nationwide_alarm: true
+  operating_point_selection: "validation_only_before_outer_evaluation"
+
+episode_contract:
+  population: "apply_separately_to_each_formal_magnitude_target_set"
+  full_history_primary_rule:
+    name: "fixed_anchor_episode"
+    event_order: ["origin_time", "stable_event_id"]
+    processing: >-
+      For each current event, search every existing episode anchor. Create a new
+      anchor only when no existing anchor is eligible.
+    eligible_anchor:
+      time_after_anchor_days_min_inclusive: 0
+      time_after_anchor_days_max_inclusive: 30
+      maximum_wgs84_distance_to_anchor_km: 75.0
+    multiple_anchor_tie_break:
+      - "distance_to_anchor_ascending"
+      - "time_difference_to_anchor_ascending"
+      - "anchor_event_id_unsigned_utf8_ascending"
+    one_episode_per_event: true
+    members_extend_time_or_space_boundary: false
+    representative_event: "fixed_anchor_event"
+  p1_compatible_formal_30d_rule:
+    scope: "inside_each_guard_selected_30d_exposure_only"
+    method: "30d_75km_undirected_connected_components"
+    may_be_mixed_with_full_history_fixed_anchor_counts: false
+  sensitivity_only_rule:
+    method: "full_history_30d_75km_undirected_transitive_components"
+    may_replace_primary: false
+  water_level_note:
+    legacy_m5_6_fixed_anchor_estimate: "about_792"
+    status: "old_score_blind_audit_approximation_not_acceptance_count"
+    final_count_source: "S0_independent_sample_ledger"
+  required_report_views:
+    - "episode_anchor_or_first_event"
+    - "episode_balanced_events_each_episode_total_weight_one"
+    - "subsequent_events"
+    - "all_events"
+  interpretation: >-
+    Subsequent events are scientifically useful for sequence tracking, but they do
+    not count as multiple newly discovered independent physical regions.
+
+data_panels:
+  catalog_modern:
+    family: "earthquake_catalog"
+    expected_native_coverage: "1970+"
+    authoritative_processed_dataset: "stage1/debc98054172a4a1/earthquake_event.parquet"
+    native_coverage_skill: true
+    tasks: ["where", "when", "magnitude", "joint"]
+    availability: "event-level origin and frozen available_at/proxy"
+    initial_water_level_reference:
+      deduplicated_events: 40898
+      study_area_events: 29637
+      study_area_events_1970_plus: 28602
+      m4_plus_1970: 5991
+      m5_6_1970: 1050
+      m6_plus_1970: 222
+      m4_plus_depth_non_null: 4604
+      m4_plus_depth_non_null_fraction: 0.768
+      m4_plus_magnitude_type_non_null: 0
+    quality_rules:
+      depth: "missingness_mask_and_stratified_sensitivity_never_zero_fill"
+      magnitude_type: "not_an_available_predictor_in_current_catalog"
+      magnitude_homogenization: "uncertainty_analysis_and_future_public_data_enrichment"
+    s0_action: "recount_and_hash_without_scoring"
+  catalog_historical_large:
+    family: "earthquake_catalog"
+    expected_native_coverage: "1900+ M5+"
+    native_coverage_skill: true
+    tasks: ["magnitude", "where", "joint"]
+    quality_role: "historical_tail_sensitivity_only_until_completeness_stratified"
+  anomaly_reports:
+    family: "dynamic_anomaly"
+    expected_native_coverage: "2022-07 through 2026-07"
+    authoritative_processed_dataset: "stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541"
+    native_coverage_skill: true
+    paired_overlap_delta_required: true
+    residual_base: "causal_catalog_out_of_fold_prediction"
+    tasks: ["where", "when", "joint"]
+    initial_water_level_reference:
+      report_issues: 205
+      source_rows: 59904
+      unique_anomaly_entities: 1832
+      causal_snapshots: 205
+      issue_by_25km_rows: 3217885
+    forbidden_fields:
+      - "human_predicted_location"
+      - "human_predicted_time"
+      - "human_predicted_magnitude"
+      - "post_outcome_effectiveness"
+  simplified_fault_geometry:
+    family: "fault_geometry"
+    expected_native_coverage: "current_static_snapshot"
+    native_coverage_skill: true
+    paired_overlap_delta_required: true
+    tasks: ["where", "magnitude", "joint"]
+    initial_water_level_reference:
+      segments: 519
+      points: 7339
+    source_available_at: "2026_snapshot"
+    historical_status: "current_snapshot_structural_covariate_or_sensitivity_only_unless_historical_version_is_verified"
+  fault_attributes:
+    family: "fault_attributes"
+    expected_native_coverage: "current_snapshot_version_date_to_be_audited"
+    native_coverage_skill: true
+    paired_overlap_delta_required: true
+    tasks: ["where", "magnitude", "joint"]
+    initial_water_level_reference:
+      segments: 519
+    source_available_at: "2026_snapshot"
+    historical_status: "current_snapshot_structural_covariate_or_sensitivity_only_unless_historical_version_is_verified"
+    time_dependent_fields_rule: >-
+      Elapsed ratio, time since last large earthquake, and any changing attribute
+      require a causally reconstructable historical version; otherwise exclude them
+      from strict historical extrapolation.
+  long_term_hazard:
+    family: "long_term_hazard"
+    expected_native_coverage: "current_snapshot_version_date_to_be_audited"
+    native_coverage_skill: true
+    paired_overlap_delta_required: true
+    tasks: ["where", "magnitude", "joint"]
+    initial_water_level_reference:
+      segments: 519
+    combined_score_must_be_ablated_to_components: true
+    source_available_at: "2026_snapshot"
+    historical_status: "current_snapshot_descriptive_only_unless_historical_version_is_verified"
+    dynamic_component_rule: "reconstruct_as_of_T_or_exclude_from_strict_historical_track"
+  true_fault_traces:
+    family: "fault_geometry"
+    expected_native_coverage: "current_static_snapshot"
+    native_coverage_skill: true
+    paired_overlap_delta_required: true
+    tasks: ["where", "magnitude", "joint"]
+    initial_water_level_reference:
+      traces: 7216
+    source_available_at: "2026_snapshot"
+    historical_status: "current_snapshot_geometry_sensitivity_only_unless_historical_version_is_verified"
+  tectonic_and_map_layers:
+    family: "tectonic_partition_and_display"
+    expected_native_coverage: "current_static_snapshot"
+    tasks: ["spatial_holdout", "where_if_physical_hypothesis"]
+    initial_water_level_reference:
+      features: 1468
+    display_only_layers_cannot_be_predictors: true
+  human_forecast_baseline:
+    family: "human_forecast"
+    tasks: ["where", "when", "magnitude"]
+    role: "independent_baseline_only"
+    may_enter_objective_model: false
+  public_candidates:
+    family: "future_public_data"
+    tasks: ["where", "when", "magnitude", "joint"]
+    admission_requires:
+      - "source_and_version"
+      - "license_and_redistribution_status"
+      - "native_time_and_space_coverage"
+      - "historical_availability_or_descriptive_label"
+      - "frozen_download_identity"
+    priority:
+      - "China formal and rapid earthquake catalogs"
+      - "ISC-GEM"
+      - "Global CMT"
+      - "GEM Global Active Faults"
+      - "GSRM"
+      - "legally available regional GNSS products"
+
+coverage_comparison:
+  native_coverage_skill:
+    definition: "use each data family over its maximum causally legal sample"
+    contribution_claim_allowed: false
+  paired_overlap_delta:
+    definition: >-
+      compare base and base-plus-new-data on identical issues, targets, truth
+      versions, horizons, support, and actual alarm cost
+    contribution_claim_allowed: true
+  short_coverage_learning:
+    method: "residual_or_reweighting_on_causal_catalog_out_of_fold_predictions"
+    retrain_long_catalog_component_on_short_window: false
+    missing_values: "availability_mask_or_task_specific_late_fusion_not_zero_fill"
+
+evaluation_time_axes:
+  primary_probability_axis:
+    method: "continuous_point_process_likelihood_or_nonoverlapping_blocks_per_horizon"
+    overlapping_issue_rows_are_independent: false
+  primary_recall_axis:
+    method: "greedy_nonoverlap_per_fold_and_horizon_with_30d_guard"
+    same_target_same_lead_horizon_counted_more_than_once: false
+  operational_axis:
+    method: "weekly_catalog_issues_or_actual_anomaly_report_issues"
+    role: "calibration_replay_and_descriptive_monitoring"
+    independent_sample_claim: false
+  confidence_units: ["time_block", "episode", "construction_region"]
+
+catalog_time_folds:
+  evidence_labels:
+    development: "retrospective_development"
+    least_exposed_holdout: "least_exposed_retrospective_holdout_not_fully_blind"
+    stability_audit: "transparent_recent_stability_audit_not_blind"
+  outer_folds:
+    - id: "C_DEV_2000_2004"
+      role: "development"
+      fit_history_end_exclusive: "2000-01-01T00:00:00+08:00"
+      target_block_start: "2000-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "2005-01-01T00:00:00+08:00"
+    - id: "C_DEV_2005_2009"
+      role: "development"
+      fit_history_end_exclusive: "2005-01-01T00:00:00+08:00"
+      target_block_start: "2005-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "2010-01-01T00:00:00+08:00"
+    - id: "C_DEV_2010_2014"
+      role: "development"
+      fit_history_end_exclusive: "2010-01-01T00:00:00+08:00"
+      target_block_start: "2010-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "2015-01-01T00:00:00+08:00"
+    - id: "C_DEV_2015_2019"
+      role: "development"
+      fit_history_end_exclusive: "2015-01-01T00:00:00+08:00"
+      target_block_start: "2015-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "2020-01-01T00:00:00+08:00"
+    - id: "C_HOLDOUT_2020_2022"
+      role: "least_exposed_holdout"
+      fit_history_end_exclusive: "2020-01-01T00:00:00+08:00"
+      target_block_start: "2020-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "2023-01-01T00:00:00+08:00"
+    - id: "C_AUDIT_2023_2026"
+      role: "stability_audit"
+      fit_history_end_exclusive: "2023-01-01T00:00:00+08:00"
+      target_block_start: "2023-01-01T00:00:00+08:00"
+      target_block_end_exclusive: "derived_from_catalog_truth_cutoff"
+  inner_selection:
+    method: "expanding_time_blocks_strictly_before_outer_target_block"
+    minimum_inner_time_blocks: 2
+    outer_block_scores_may_tune_model: false
+  issue_eligibility: >-
+    The target interval must be fully contained in the fold target block and fully
+    mature at the frozen truth cutoff.
+  parameter_label_embargo:
+    rule: "last_fit_label_end<=outer_target_block_start-30d"
+    issue_time_equivalent: "T_fit+h<=outer_target_block_start-30d"
+    feature_history_exception: >-
+      At each evaluation issue, already observed catalog history up to its causal
+      cutoff remains legitimate conditioning input; the embargo applies to labels
+      used for parameter choice, not to known past events.
+  primary_exposure_selection:
+    order: "issue_time_ascending"
+    rule: "greedy_nonoverlap_per_fold_horizon"
+    next_issue_constraint: "T_next>=T_previous+h+30d"
+    uses_target_or_score: false
+  operational_weekly_axis:
+    role: "descriptive_calibration_and_replay"
+    independent_sample_claim: false
+    uncertainty_blocking_required: true
+
+anomaly_time_folds:
+  coverage_only: "2022-07 through 2026-07 actual available reports"
+  outer_folds:
+    - id: "A_DEV_2023_2024"
+      fit_report_start: "2022-07-01"
+      fit_report_end_exclusive: "2023-07-01"
+      target_block_start: "2023-07-01"
+      target_block_end_exclusive: "2024-07-01"
+      role: "development"
+    - id: "A_DEV_2024_2025"
+      fit_report_start: "2022-07-01"
+      fit_report_end_exclusive: "2024-07-01"
+      target_block_start: "2024-07-01"
+      target_block_end_exclusive: "2025-07-01"
+      role: "development"
+    - id: "A_AUDIT_2025_2026"
+      fit_report_start: "2022-07-01"
+      fit_report_end_exclusive: "2025-07-01"
+      target_block_start: "2025-07-01"
+      target_block_end_exclusive: "derived_from_anomaly_and_truth_cutoff"
+      role: "transparent_stability_audit_not_blind"
+  horizon_evaluability: >-
+    A fold-horizon is evaluable only when the report-derived issue, target window,
+    catalog truth, and embargo are all complete; unavailable horizons remain null,
+    never zero and never replaced by a shorter horizon.
+  paired_base_prediction: "catalog_model_out_of_fold_for_the_same_issue"
+  contribution_requires_same_sample_pairing: true
+
+spatial_extrapolation:
+  primary_scientific_track: "csep_like_time_forward_on_frozen_national_support"
+  scientific_role: "secondary_transfer_stress_test_not_csep_primary_evidence"
+  frozen_zone_manifest: "data/manifests/anomaly_increment_r2_spatial_strata.json"
+  expected_manifest_sha256: "283a6790f6e7c16bc31d9498b2cc3cd043e19c8f141046afb898e988f25dcc83"
+  source_interpretation: "construction_linework_blocks_not_verified_official_tectonic_regions"
+  source_linework_sha256:
+    L1: "30d7fabbea95040fed596a37dfd07970c6e7699187c27ad064471db25ef5d5cd"
+    L2: "189b81655411225ad3d7a1860829835ad23b843c239134529bbad9f2d8d98c33"
+  frozen_zone_set_sha256: "294e070ca6c0ff68d74d6638ab8ec3cda08d3469b99a3958f4d21afa4fae4a62"
+  frozen_25km_cell_mapping_file_sha256: "171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e"
+  atomic_block_count: 39
+  event_block_assignment: "event_to_frozen_25km_cell_then_cell_to_frozen_zone"
+  outer_scheme: "leave_one_atomic_block_out_then_pool_all_oof_predictions"
+  outer_fit_count: 39
+  pooled_oof_alarm_rule: >-
+    Concatenate exactly one held-out score for every frozen cell, reconstruct one
+    national OOF surface, and apply each national alarm-area budget exactly once.
+  primary_training_buffer_km: 0.0
+  buffer_sensitivity_km: [75.0, 200.0]
+  buffer_sensitivity_is_project_scale_not_universal_standard: true
+  actual_train_test_distance_distribution_required: true
+  held_out_zone_targets_only_for_spatial_score: true
+  target_events_may_define_groups: false
+  model_scores_may_define_groups: false
+  purpose: "test rule transfer beyond remembered high-rate regions"
+  m6_plus:
+    may_select_or_balance_spatial_folds: false
+    zero_event_block_allowed_and_reported: true
+    evaluation: "pooled_oof_confirmation_only"
+    posthoc_block_merging: false
+  model_selection_geometry_folds:
+    scientific_role: "model_selection_only"
+    materialization_stage: "S1_before_any_model_score"
+    current_status: "deferred_target_blind"
+    atomic_inputs: "39_frozen_atomic_blocks"
+    projection: "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs"
+    representative_point: "centroid_of_zone_clipped_to_study_area"
+    algorithm: "coordinate_kmeans_plus_plus"
+    candidate_k_in_order: [5, 4, 3]
+    random_seed: 147
+    n_init: 100
+    allowed_selection_inputs:
+      - "frozen_geometry"
+      - "data_available_before_earliest_evaluation_period"
+      - "target_blind_background_power_simulation"
+    forbidden_selection_inputs:
+      - "evaluation_period_M5_or_M6_epicenters"
+      - "model_scores"
+      - "hits_or_misses"
+    choose_largest_k_with_preregistered_M5_6_power: true
+    m6_plus_may_not_balance_or_select_k: true
+    exact_zone_to_fold_table_and_sha256_required_before_scores: true
+    fallback_if_k3_underpowered: "time_only_selection_and_descriptive_spatial_results"
+
+feature_hypotheses:
+  catalog:
+    - "event counts and magnitude/energy weighted rates at 1/7/14/30/90/180/365d and multi-year windows"
+    - "25/50/75/100/150/250km spatial scales"
+    - "exponential decay and Omori/ETAS triggering"
+    - "time and distance to recent event, M4+, and M5+"
+    - "local b-value, Mc, moment, depth distribution, and changes"
+    - "acceleration, concentration, migration, and episode phase"
+    - "recent-to-long-term rate residual"
+    - "depth only with missingness mask and stratified sensitivity; never zero fill"
+    - "magnitude type excluded until an auditable source supplies it"
+  anomaly:
+    - "discipline-specific coverage-corrected intensity"
+    - "new, persistent, ended/unlisted, and change rate"
+    - "4/8/13/26/52-week trend and persistence"
+    - "50/100/200/300/500km concentration and spread"
+    - "cross-discipline concurrence and directional coherence"
+    - "report, station, and measurement coverage controls"
+  fault_and_strain:
+    - "distance, length density, orientation, and intersection geometry"
+    - "slip rate, dip, recurrence, and time since last large event"
+    - "rupture gap, locking, seismic quiescence, and Coulomb components"
+    - "strain-rate magnitude and direction"
+  magnitude:
+    - "regional and local Gutenberg-Richter b-value with uncertainty"
+    - "recent episode main magnitude, cumulative moment, depth, and mechanism"
+    - "historical maximum magnitude and magnitude-type quality"
+    - "fault length, slip, recurrence, and GCMT mechanism when causally legal"
+
+representative_models:
+  mandatory_baselines:
+    - "uniform_or_regional_constant_rate"
+    - "long_term_smoothed_seismicity_kde"
+    - "B0_R30"
+    - "gutenberg_richter_magnitude_distribution"
+    - "evaluable_etas_hawkes_or_explicit_not_evaluable"
+    - "fault_or_strain_only_long_term_prior"
+    - "human_forecast_independent_baseline"
+  where:
+    - "multi_scale_time_decay_kde"
+    - "ridge_or_elastic_net_conditional_spatial_point_process"
+    - "etas_hawkes_spatial_component"
+    - "one_gradient_boosted_tree"
+    - "one_small_neural_point_process_or_spatiotemporal_encoder"
+  when:
+    - "poisson_and_negative_binomial_count_model"
+    - "recent_rate_and_etas_hawkes_temporal_component"
+    - "one_gradient_boosted_tree"
+    - "one_small_neural_point_process"
+  magnitude:
+    - "regional_gutenberg_richter"
+    - "hierarchical_regularized_magnitude_distribution"
+    - "marked_point_process"
+    - "one_gradient_boosted_tree"
+  joint:
+    - "marked_spatiotemporal_point_process"
+    - "one_shared_encoder_with_where_when_magnitude_heads"
+    - "validation_only_nonnegative_stacking"
+  complexity_rule: >-
+    Each major nonlinear family receives at most one preregistered representative
+    after its sample gate; if it does not exceed the same-data statistical baseline,
+    stop that family without wider search.
+
+complex_model_sample_gates:
+  interpretation: >-
+    Passing a count gate means only that a model can be estimated, never that it is
+    scientifically effective. S0 ledgers decide which task heads are eligible; gates
+    cannot be relaxed after scores are seen.
+  regularized_m5_residual:
+    minimum_training_fixed_anchor_m5_6_episodes: 120
+    minimum_nonoverlapping_time_blocks: 3
+    minimum_episodes_per_block: 20
+  gradient_boosted_tree:
+    minimum_m4_plus_training_events_per_evaluable_outer_fold: 1000
+    minimum_mature_m5_6_fixed_anchor_episodes_across_development_folds: 100
+  small_neural_encoder_or_point_process:
+    minimum_m4_plus_training_events_per_evaluable_outer_fold: 2000
+    minimum_evaluable_outer_folds: 2
+    minimum_mature_m5_6_fixed_anchor_episodes_across_those_folds: 200
+  task_head_rule: >-
+    Where, magnitude, and joint heads must meet the corresponding event and episode
+    gates. A when head additionally requires at least three nonoverlapping target
+    blocks with at least 20 mature target episodes per block. Ineligible heads are
+    omitted or reduced to a simpler regularized model, not rescued by grid-row counts.
+  residual_signal_rule: >-
+    Even after a count gate passes, a complex representative is run only to test a
+    preregistered residual hypothesis against the same-data simple baseline.
+
+ablations:
+  data_family:
+    D0: "long_term_catalog_only"
+    D1: "D0_plus_recent_catalog"
+    D2: "D1_plus_fault_geometry"
+    D3: "D2_plus_fault_attributes_and_hazard_components"
+    D4: "D1_plus_strain_or_GNSS"
+    D5: "D1_plus_dynamic_anomaly"
+    D6: "D1_plus_fault_or_strain_plus_anomaly"
+    D7: "full_model_leave_one_data_family_out"
+  feature_groups:
+    - "recent_time_window"
+    - "spatial_scale"
+    - "magnitude"
+    - "depth"
+    - "b_value_and_Mc"
+    - "episode_phase"
+    - "each_anomaly_discipline"
+    - "anomaly_intensity_change_persistence_space_concurrence_coverage"
+    - "fault_geometry_kinematics_recurrence_hazard_strain"
+  model_groups:
+    - "KDE_vs_linear_point_process_vs_ETAS_vs_GBDT_vs_neural_point_process"
+    - "single_task_vs_multitask"
+    - "best_single_vs_ensemble"
+  required_strata:
+    - "horizon"
+    - "magnitude_band"
+    - "construction_region"
+    - "episode_anchor_balanced_subsequent_all"
+
+metrics:
+  where_primary:
+    - "strict_recall_at_each_actual_alarm_area_budget"
+    - "area_required_for_fixed_recall"
+    - "Molchan_miss_vs_alarm_area"
+  where_supporting:
+    - "continuous_spatial_log_score"
+    - "information_gain_nats_per_event_vs_best_legal_baseline"
+    - "70km_tolerance_recall_secondary_only"
+  when:
+    - "poisson_or_negative_binomial_log_score"
+    - "Brier_score_for_at_least_one_event"
+    - "reliability_curve"
+    - "event_count_bias_and_interval_coverage"
+  magnitude:
+    - "magnitude_log_score"
+    - "Brier_for_M5_6_and_M6_plus"
+    - "CRPS"
+    - "calibration_by_threshold"
+  joint:
+    - "CSEP_style_N_S_M_L_and_conditional_L"
+    - "joint_information_gain"
+  fairness:
+    same_issue: true
+    same_target: true
+    same_truth_version: true
+    same_support: true
+    same_actual_alarm_area_or_time_cost: true
+    same_fold: true
+  relative_scores_are_absolute_probability: false
+
+uncertainty_and_placebos:
+  bootstrap:
+    resamples: 2000
+    root_seed: 147
+    confidence_level: 0.95
+    units:
+      - "time_block"
+      - "episode"
+      - "construction_region"
+    grid_rows_are_independent_samples: false
+  report:
+    - "effect_size"
+    - "confidence_interval"
+    - "fold_direction_consistency"
+    - "raw_hit_episode_counts_and_percentages"
+  anomaly_placebos:
+    time_shuffle_replicates_per_fold: 200
+    space_shuffle_replicates_per_fold: 200
+    coverage_preserving_control: true
+    promising_requires_real_above_fraction_of_placebos: 0.80
+  sensitivity:
+    - "catalog_latency_0h_24h_7d"
+    - "location_error"
+    - "magnitude_error_and_type"
+    - "local_Mc"
+    - "deduplication"
+    - "episode_definition"
+
+scientific_gates:
+  adoption_requires:
+    - "positive direction in at least two time folds or two spatial holdouts"
+    - "no gain obtained by enlarging actual alarm area or alarm time"
+    - "main direction retained with 24h catalog latency"
+    - "gain not created by one episode, one region, or repeated grid rows"
+    - "interpretable gain in at least one of where, when, or magnitude"
+    - "validation error complementarity before entry to ensemble"
+  evidence_policy: >-
+    Small, stable, physically interpretable gains may continue as exploratory
+    evidence; always report effect size, uncertainty, fold consistency, and placebo
+    position. Do not turn a single conventional significance threshold into an
+    automatic zero-value rule.
+  stop_or_downgrade_when:
+    - "random-grid success disappears in temporal or spatial extrapolation"
+    - "gain disappears at 24h realistic latency"
+    - "gain is driven entirely by one episode or region"
+    - "complex model does not exceed the same-data simple baseline"
+    - "new data does not exceed time, space, or coverage-preserving placebos"
+    - "further tuning would reuse an opened outer evaluation block"
+    - "engineering work cannot change the next scientific evidence"
+  task_specific_retention_allowed: true
+  locked_test_policy: "single_use_only_after_one_final_combination_is_frozen_not_in_S0"
+
+stage_transition:
+  s0_acceptance_requires:
+    - "all data identities and causal availability statuses recorded"
+    - "native and paired-overlap sample ledgers created"
+    - "time folds, spatial folds, episode rules, tasks, models, ablations, and metrics frozen"
+    - "sample counts and score-free figures generated"
+    - "no candidate score, hit, recall, or information gain opened"
+    - "science value review and restart handoff updated"
+  next_scientific_test: >-
+    S1 catalog-only where, when, magnitude, and joint baselines on the frozen time
+    and spatial extrapolation design.
+  stop_condition: >-
+    If S0 cannot establish causal availability, mature target windows, and enough
+    independent time blocks or episodes for a declared model family, do not build
+    that family; reduce its complexity or defer that data panel instead of adding
+    engineering.
+
+resources:
+  s0_processes: 1
+  maximum_outer_fold_workers_later: 3
+  reserve_physical_cores: 2
+  numeric_library_threads_per_worker: 1
+  gpu_in_s0: false
+  gpu_later: "only one preregistered S4 representative after sample gate"

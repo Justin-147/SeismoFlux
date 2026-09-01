@@ -1,0 +1,7 @@
+﻿data_family,display_name,coverage_start,coverage_end,coverage_kind,scientific_role
+catalog_historical_large,长期大震目录（并入总目录）,1899-12-31,2026-07-09,event_history,1900+大震尾部敏感性
+catalog_modern,1970+地震目录,1970-01-01,2026-07-09,event_history,时间、地点、震级与联合任务主干
+anomaly_reports,异常周报/因果异常特征,2022-07-20,2026-07-01,report_history,短覆盖增量；只在共同issue配对比较
+simplified_fault_geometry,简化断层与属性快照,2026-07-12,2026-07-12,current_snapshot,当前快照；历史回顾仅作描述性结构敏感性
+true_fault_traces,真实断层迹线快照,2026-07-12,2026-07-12,current_snapshot,当前快照；历史回顾仅作描述性结构敏感性
+tectonic_and_map_layers,构造/底图快照,2026-07-12,2026-07-12,current_snapshot,当前快照；历史回顾仅作描述性结构敏感性

@@ -1,0 +1,93 @@
+{
+  "artifact_count": 13,
+  "artifacts": [
+    {
+      "byte_count": 2497,
+      "media_type": "text/markdown",
+      "path": "README.md",
+      "sha256": "81ad83b63618ab2c28280afdeb2954dc65064a24cc0db240d95e9a02ae318628"
+    },
+    {
+      "byte_count": 36565,
+      "media_type": "text/csv",
+      "path": "atomic_block_sample_waterlevels.csv",
+      "sha256": "e00f54bbfcb8886d3fddbe77debeeb6c2e108a9c477149829fc9950c2c9b2143"
+    },
+    {
+      "byte_count": 55073,
+      "media_type": "application/json",
+      "path": "authoritative_input_ledger.json",
+      "sha256": "4043fdd991bf48ad47ad7a638c80f04a4fbcc51836d81a7f4645b583cdbbdf16"
+    },
+    {
+      "byte_count": 198769,
+      "media_type": "application/json",
+      "path": "catalog_sample_ledger.json",
+      "sha256": "bef4a85379ca2c9aaf9917f501e8a84fe59311f9ddd029fac85bde95847c223e"
+    },
+    {
+      "byte_count": 894,
+      "media_type": "text/csv",
+      "path": "coverage_timeline_ledger.csv",
+      "sha256": "91945a0a257a9e66ead67b4ab34f7918e2e5509444d0fddf3eaf37ecd7e2d306"
+    },
+    {
+      "byte_count": 275688,
+      "media_type": "text/csv",
+      "path": "episode_ledger.csv",
+      "sha256": "edd50c93b318538d36d809850c13c2ce64ce31afaf1efd29d63db29c0960aac3"
+    },
+    {
+      "byte_count": 303,
+      "media_type": "text/csv",
+      "path": "episode_size_distribution.csv",
+      "sha256": "bcbccc0a63fe112e3bc024676bbf5d4db90ac20f4a17e64d2386a9731b76e91b"
+    },
+    {
+      "byte_count": 169920,
+      "media_type": "image/png",
+      "path": "figure_01_data_coverage_timeline.png",
+      "sha256": "ecaef44866f4ced3d3efaa6e9bf36c41f920e332e7e3e74e6368e0aeb74a2ee2"
+    },
+    {
+      "byte_count": 172340,
+      "media_type": "image/png",
+      "path": "figure_02_catalog_sample_funnel_episode_sizes.png",
+      "sha256": "96fad52562bae272fce0a44dfe476afc6b5f051529456dfde682e8eb418d3748"
+    },
+    {
+      "byte_count": 251505,
+      "media_type": "image/png",
+      "path": "figure_03_fold_horizon_sample_waterlevels.png",
+      "sha256": "8face5582dee5da33e34881e63871003a11c03fb63e8f166c4aee873e164e3ff"
+    },
+    {
+      "byte_count": 31469,
+      "media_type": "text/csv",
+      "path": "fold_horizon_sample_ledger.csv",
+      "sha256": "0d32cbc8700c0258d8a8730ed8fb516f47753c57a537ca206121a854f0ff474e"
+    },
+    {
+      "byte_count": 690991,
+      "media_type": "text/csv",
+      "path": "issue_maturity_ledger.csv",
+      "sha256": "23f581783e64ebf29b508fc95e96dd3805d5de952de6093af5f86860247096b0"
+    },
+    {
+      "byte_count": 160102,
+      "media_type": "application/json",
+      "path": "spatial_identity_ledger.json",
+      "sha256": "dd6efb5a22dab244be5c9d09c0fdf9b089f4884cc08b7225b9a461cd3a74540c"
+    }
+  ],
+  "content_sha256": "08293e0f393ed28a1eacad02d8cca107e8305b93e855b32335d08109eb174c03",
+  "gpu_used": false,
+  "locked_test_run": false,
+  "manifest_hash_scope": "canonical_manifest_content_excluding_content_sha256_and_self_file",
+  "manifest_type": "multitask_s0_score_blind_artifacts",
+  "model_fitting_run": false,
+  "network_accessed": false,
+  "process_policy": "single_process_numeric_libraries_single_thread",
+  "schema_version": 1,
+  "score_blind": true
+}

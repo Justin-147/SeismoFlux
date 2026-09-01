@@ -1,0 +1,1838 @@
+{
+  "anomaly_feature_bundle": {
+    "actual_snapshot_count": 205,
+    "bundle_id": "anomaly-feature-bundle-de7547faa9f87541",
+    "bundle_identity_sha256": "de7547faa9f87541c83f02788fa6e40111f753f232c511758540ba1794d9ce5d",
+    "feature_row_count": 3217885,
+    "first_report_date": "2022-07-20",
+    "identity_note": "S0 verifies the small bundle manifest and its content-addressed ID; it does not spend hours rehashing the 4GB feature store.",
+    "last_report_date": "2026-07-01",
+    "locked_test_run": false,
+    "manifest_file_sha256": "49c4e022f2a08aa0066047e87f04059a0f3d1768a248a036a0f1ae2f730559e9",
+    "path_relative_to_data_root": "stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541",
+    "status": "manifest_verified_without_rehashing_4GB_feature_store",
+    "target_or_earthquake_label_read_count": 0
+  },
+  "config_sha256": "fac63c49e0c6f05beada3b268ce255483bbfc3ced37562b6236c0bd6ec71dd02",
+  "content_sha256": "1e3d423479cb59a3f09a778c857e16b18c534659fefc78cac2a9c6b051fbe349",
+  "coverage_timeline": [
+    {
+      "coverage_end": "2026-07-09",
+      "coverage_kind": "event_history",
+      "coverage_start": "1899-12-31",
+      "data_family": "catalog_historical_large",
+      "display_name": "长期大震目录（并入总目录）",
+      "scientific_role": "1900+大震尾部敏感性"
+    },
+    {
+      "coverage_end": "2026-07-09",
+      "coverage_kind": "event_history",
+      "coverage_start": "1970-01-01",
+      "data_family": "catalog_modern",
+      "display_name": "1970+地震目录",
+      "scientific_role": "时间、地点、震级与联合任务主干"
+    },
+    {
+      "coverage_end": "2026-07-01",
+      "coverage_kind": "report_history",
+      "coverage_start": "2022-07-20",
+      "data_family": "anomaly_reports",
+      "display_name": "异常周报/因果异常特征",
+      "scientific_role": "短覆盖增量；只在共同issue配对比较"
+    },
+    {
+      "coverage_end": "2026-07-12",
+      "coverage_kind": "current_snapshot",
+      "coverage_start": "2026-07-12",
+      "data_family": "simplified_fault_geometry",
+      "display_name": "简化断层与属性快照",
+      "scientific_role": "当前快照；历史回顾仅作描述性结构敏感性"
+    },
+    {
+      "coverage_end": "2026-07-12",
+      "coverage_kind": "current_snapshot",
+      "coverage_start": "2026-07-12",
+      "data_family": "true_fault_traces",
+      "display_name": "真实断层迹线快照",
+      "scientific_role": "当前快照；历史回顾仅作描述性结构敏感性"
+    },
+    {
+      "coverage_end": "2026-07-12",
+      "coverage_kind": "current_snapshot",
+      "coverage_start": "2026-07-12",
+      "data_family": "tectonic_and_map_layers",
+      "display_name": "构造/底图快照",
+      "scientific_role": "当前快照；历史回顾仅作描述性结构敏感性"
+    }
+  ],
+  "data_catalog": {
+    "file_sha256": "0bd12b428d6395f5623ce343e0f52bd2f5edfa0529bc406c72a297430a136a50",
+    "path_relative_to_project": "data/manifests/data_catalog.json",
+    "snapshot_id": "debc98054172a4a1"
+  },
+  "data_root_semantics": "explicit_read_only_processed_root_not_serialized_as_machine_path",
+  "interpretation": {
+    "native_coverage": "each family uses its longest causally legal history",
+    "paired_overlap": "new-data contribution later requires identical issues and targets",
+    "s0_effect_evidence": "none; these are input and sample identities only"
+  },
+  "ledger_type": "multitask_s0_authoritative_input_ledger",
+  "panels": {
+    "anomaly_reports": {
+      "causal_or_historical_status": null,
+      "datasets": [
+        {
+          "actual_file_sha256": "aac44418994b6b99c633dcf536e452ad315439336bc580a13f719d95a069e176",
+          "actual_row_count": 205,
+          "byte_count": 20704,
+          "dataset_name": "anomaly_report_period",
+          "expected_file_sha256": "aac44418994b6b99c633dcf536e452ad315439336bc580a13f719d95a069e176",
+          "expected_row_count": 205,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/anomaly_report_period.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "report_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_sha256",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "report_year",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "report_period",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "report_date",
+              "nullable": false,
+              "type": "date32[day]"
+            },
+            {
+              "name": "available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "row_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "row_report_date_mismatch_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "row_report_date_before_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "row_report_date_after_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "deformation_row_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "fluid_row_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "electromagnetic_row_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "cross_fault_row_count",
+              "nullable": false,
+              "type": "int64"
+            }
+          ],
+          "status": "verified"
+        },
+        {
+          "actual_file_sha256": "a4837a6a865ca0d4939fd45d8d8e9c3e4fd90cf0a78e9bb07d57335d5743b80c",
+          "actual_row_count": 59904,
+          "byte_count": 1939513,
+          "dataset_name": "anomaly_observation",
+          "expected_file_sha256": "a4837a6a865ca0d4939fd45d8d8e9c3e4fd90cf0a78e9bb07d57335d5743b80c",
+          "expected_row_count": 59904,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/anomaly_observation.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "observation_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "anomaly_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "station_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "report_date",
+              "nullable": false,
+              "type": "date32[day]"
+            },
+            {
+              "name": "raw_row_report_date",
+              "nullable": false,
+              "type": "date32[day]"
+            },
+            {
+              "name": "available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "unit",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "station_name",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "longitude",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "latitude",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "discipline",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "measurement",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "instrument_or_method",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "observation_period",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "forecast_efficacy",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "trend_time",
+              "nullable": true,
+              "type": "date32[day]"
+            },
+            {
+              "name": "start_time",
+              "nullable": false,
+              "type": "timestamp[us, tz=+08:00]"
+            },
+            {
+              "name": "reported_end_time",
+              "nullable": true,
+              "type": "timestamp[us, tz=+08:00]"
+            },
+            {
+              "name": "end_flag",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "report_state",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "anomaly_type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "anomaly_description",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "annual_anomaly",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "r_value",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "r0_value",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "term_class",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "is_listed",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "right_censored",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "identity_complete",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "reliability_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "source_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_sha256",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_sheet",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_row",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_serial_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_period_year",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_period",
+              "nullable": false,
+              "type": "int64"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "2022-07 through 2026-07",
+      "family": "dynamic_anomaly",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "when",
+        "joint"
+      ]
+    },
+    "catalog_historical_large": {
+      "causal_or_historical_status": null,
+      "datasets": [
+        {
+          "actual_file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+          "actual_row_count": 40898,
+          "byte_count": 3270584,
+          "dataset_name": "earthquake_event",
+          "expected_file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+          "expected_row_count": 40898,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/earthquake_event.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "event_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "origin_time_utc",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "origin_time_local",
+              "nullable": false,
+              "type": "timestamp[us, tz=+08:00]"
+            },
+            {
+              "name": "longitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "latitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "depth_km",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "magnitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "magnitude_type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "place",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "catalog_sources",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "inside_study_area",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "dedup_confidence",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "anchor_source_record_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "quality_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            }
+          ],
+          "status": "verified"
+        },
+        {
+          "actual_file_sha256": "7c48cd5f4db5e85c6c10c7a3fdfc4d84ac3e5de3dde1e59f985f36bb47770556",
+          "actual_row_count": 43785,
+          "byte_count": 4928335,
+          "dataset_name": "earthquake_source_record",
+          "expected_file_sha256": "7c48cd5f4db5e85c6c10c7a3fdfc4d84ac3e5de3dde1e59f985f36bb47770556",
+          "expected_row_count": 43785,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/earthquake_source_record.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "source_record_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "duplicate_group_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_file_sha256",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_row",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "raw_record_sha256",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "origin_time_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "origin_time_local",
+              "nullable": false,
+              "type": "timestamp[us, tz=+08:00]"
+            },
+            {
+              "name": "origin_time_utc",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "longitude_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "latitude_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "depth_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "magnitude_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "longitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "latitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "depth_km",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "magnitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "magnitude_type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "place_raw",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "place",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "fixed_field_raw",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "inside_study_area",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "normalization_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "1900+ M5+",
+      "family": "earthquake_catalog",
+      "status": "verified_embedded_in_merged_catalog_not_a_separate_model_panel",
+      "tasks": [
+        "magnitude",
+        "where",
+        "joint"
+      ]
+    },
+    "catalog_modern": {
+      "causal_or_historical_status": null,
+      "datasets": [
+        {
+          "actual_file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+          "actual_row_count": 40898,
+          "byte_count": 3270584,
+          "dataset_name": "earthquake_event",
+          "expected_file_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+          "expected_row_count": 40898,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/earthquake_event.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "event_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "origin_time_utc",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "origin_time_local",
+              "nullable": false,
+              "type": "timestamp[us, tz=+08:00]"
+            },
+            {
+              "name": "longitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "latitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "depth_km",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "magnitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "magnitude_type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "place",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "catalog_sources",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "inside_study_area",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "dedup_confidence",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "anchor_source_record_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "quality_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "1970+",
+      "family": "earthquake_catalog",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "when",
+        "magnitude",
+        "joint"
+      ]
+    },
+    "fault_attributes": {
+      "causal_or_historical_status": "current_snapshot_structural_covariate_or_sensitivity_only_unless_historical_version_is_verified",
+      "datasets": [
+        {
+          "actual_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "actual_row_count": 519,
+          "byte_count": 122794,
+          "dataset_name": "fault_segment",
+          "expected_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "expected_row_count": 519,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_segment.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "fault_segment_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_id",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "fault_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "segment_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "simplified_geometry_wkb",
+              "nullable": false,
+              "type": "binary"
+            },
+            {
+              "name": "raw_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "is_new_in_source_version",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "strike_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "dip_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "slip_angle_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "geologic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_period_years",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_year_raw",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "elapsed_ratio_at_snapshot",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "rupture_gap_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "locking_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "microseismic_sparsity_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "coulomb_stress_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "long_term_hazard_score",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "missing_fields",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "geometry_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "attribute_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "hazard_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "true_trace_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_mapping_status",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_match_confidence",
+              "nullable": false,
+              "type": "string"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "current_snapshot_version_date_to_be_audited",
+      "family": "fault_attributes",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "magnitude",
+        "joint"
+      ]
+    },
+    "human_forecast_baseline": {
+      "causal_or_historical_status": "independent_baseline_only",
+      "datasets": [],
+      "expected_native_coverage": null,
+      "family": "human_forecast",
+      "status": "independent_baseline_not_materialized_in_s0",
+      "tasks": [
+        "where",
+        "when",
+        "magnitude"
+      ]
+    },
+    "long_term_hazard": {
+      "causal_or_historical_status": "current_snapshot_descriptive_only_unless_historical_version_is_verified",
+      "datasets": [
+        {
+          "actual_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "actual_row_count": 519,
+          "byte_count": 122794,
+          "dataset_name": "fault_segment",
+          "expected_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "expected_row_count": 519,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_segment.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "fault_segment_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_id",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "fault_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "segment_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "simplified_geometry_wkb",
+              "nullable": false,
+              "type": "binary"
+            },
+            {
+              "name": "raw_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "is_new_in_source_version",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "strike_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "dip_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "slip_angle_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "geologic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_period_years",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_year_raw",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "elapsed_ratio_at_snapshot",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "rupture_gap_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "locking_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "microseismic_sparsity_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "coulomb_stress_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "long_term_hazard_score",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "missing_fields",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "geometry_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "attribute_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "hazard_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "true_trace_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_mapping_status",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_match_confidence",
+              "nullable": false,
+              "type": "string"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "current_snapshot_version_date_to_be_audited",
+      "family": "long_term_hazard",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "magnitude",
+        "joint"
+      ]
+    },
+    "public_candidates": {
+      "causal_or_historical_status": null,
+      "datasets": [],
+      "expected_native_coverage": null,
+      "family": "future_public_data",
+      "status": "candidate_only_not_downloaded_or_used_in_s0",
+      "tasks": [
+        "where",
+        "when",
+        "magnitude",
+        "joint"
+      ]
+    },
+    "simplified_fault_geometry": {
+      "causal_or_historical_status": "current_snapshot_structural_covariate_or_sensitivity_only_unless_historical_version_is_verified",
+      "datasets": [
+        {
+          "actual_file_sha256": "df67c77d28fb62f016d472a888a26e1af27a9040cc623d89ffee54ec61886699",
+          "actual_row_count": 7339,
+          "byte_count": 218279,
+          "dataset_name": "fault_point_raw",
+          "expected_file_sha256": "df67c77d28fb62f016d472a888a26e1af27a9040cc623d89ffee54ec61886699",
+          "expected_row_count": 7339,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_point_raw.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "fault_point_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_id",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "point_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "longitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "latitude",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "is_new_in_source_version",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "fault_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "segment_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_row",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "quality_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            }
+          ],
+          "status": "verified"
+        },
+        {
+          "actual_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "actual_row_count": 519,
+          "byte_count": 122794,
+          "dataset_name": "fault_segment",
+          "expected_file_sha256": "8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627",
+          "expected_row_count": 519,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_segment.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "fault_segment_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_id",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "fault_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "segment_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "simplified_geometry_wkb",
+              "nullable": false,
+              "type": "binary"
+            },
+            {
+              "name": "raw_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "is_new_in_source_version",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "strike_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "dip_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "slip_angle_deg",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "geologic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geologic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_total_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_strike_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_rate_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "geodetic_dip_slip_error_mm_per_year",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_period_years",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "recurrence_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_year_raw",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "last_strong_earthquake_reliability",
+              "nullable": true,
+              "type": "int64"
+            },
+            {
+              "name": "elapsed_ratio_at_snapshot",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "name": "rupture_gap_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "locking_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "microseismic_sparsity_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "coulomb_stress_weight",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "long_term_hazard_score",
+              "nullable": false,
+              "type": "double"
+            },
+            {
+              "name": "missing_fields",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "geometry_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "attribute_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "hazard_source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "true_trace_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_mapping_status",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "true_trace_match_confidence",
+              "nullable": false,
+              "type": "string"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "current_static_snapshot",
+      "family": "fault_geometry",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "magnitude",
+        "joint"
+      ]
+    },
+    "tectonic_and_map_layers": {
+      "causal_or_historical_status": null,
+      "datasets": [
+        {
+          "actual_file_sha256": "db086ff700ee495391b1dafaa49e1f613776161f1d8d9eaf4a25a0fae2e9e887",
+          "actual_row_count": 1468,
+          "byte_count": 658320,
+          "dataset_name": "basemap_feature",
+          "expected_file_sha256": "db086ff700ee495391b1dafaa49e1f613776161f1d8d9eaf4a25a0fae2e9e887",
+          "expected_row_count": 1468,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/basemap_feature.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "basemap_feature_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_wkb",
+              "nullable": false,
+              "type": "binary"
+            },
+            {
+              "name": "raw_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "is_closed",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "geometry_hash",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "duplicate_group_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "duplicate_geometry",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "quality_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "delimiter_source_line",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_comments",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "model_feature_eligible",
+              "nullable": false,
+              "type": "bool"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "current_static_snapshot",
+      "family": "tectonic_partition_and_display",
+      "status": "verified",
+      "tasks": [
+        "spatial_holdout",
+        "where_if_physical_hypothesis"
+      ]
+    },
+    "true_fault_traces": {
+      "causal_or_historical_status": "current_snapshot_geometry_sensitivity_only_unless_historical_version_is_verified",
+      "datasets": [
+        {
+          "actual_file_sha256": "33a6825538bf9e54706012892e606d4a570c686ff85257ce49602a16948aacc7",
+          "actual_row_count": 7216,
+          "byte_count": 1471354,
+          "dataset_name": "fault_trace",
+          "expected_file_sha256": "33a6825538bf9e54706012892e606d4a570c686ff85257ce49602a16948aacc7",
+          "expected_row_count": 7216,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_trace.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "trace_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "source_segment_number",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "trace_name_raw",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "trace_name_normalized",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "geometry_wkb",
+              "nullable": true,
+              "type": "binary"
+            },
+            {
+              "name": "raw_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "geometry_point_count",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "is_closed",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "usable_for_geometry",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "geometry_hash",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "duplicate_group_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "duplicate_geometry",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "duplicate_name_conflict",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "quality_flags",
+              "nullable": false,
+              "type": "list<element: string>"
+            },
+            {
+              "name": "source_file",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "delimiter_source_line",
+              "nullable": false,
+              "type": "int64"
+            },
+            {
+              "name": "source_available_at",
+              "nullable": false,
+              "type": "timestamp[us, tz=UTC]"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            }
+          ],
+          "status": "verified"
+        },
+        {
+          "actual_file_sha256": "4141abb8e0100bea4cfab56fd659a51718bfd027877b4b1dcdc126e84a1f3d02",
+          "actual_row_count": 1611,
+          "byte_count": 52141,
+          "dataset_name": "fault_trace_crosswalk_audit",
+          "expected_file_sha256": "4141abb8e0100bea4cfab56fd659a51718bfd027877b4b1dcdc126e84a1f3d02",
+          "expected_row_count": 1611,
+          "hash_matches": true,
+          "path_relative_to_data_root": "stage1/debc98054172a4a1/fault_trace_crosswalk_audit.parquet",
+          "row_count_matches": true,
+          "schema": [
+            {
+              "name": "crosswalk_candidate_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_segment_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "trace_id",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "fault_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "trace_name_raw",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "name_match_method",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "match_confidence",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "name": "trace_duplicate_group_id",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "name": "trace_duplicate_name_conflict",
+              "nullable": false,
+              "type": "bool"
+            },
+            {
+              "name": "historical_model_eligible",
+              "nullable": false,
+              "type": "bool"
+            }
+          ],
+          "status": "verified"
+        }
+      ],
+      "expected_native_coverage": "current_static_snapshot",
+      "family": "fault_geometry",
+      "status": "verified",
+      "tasks": [
+        "where",
+        "magnitude",
+        "joint"
+      ]
+    }
+  },
+  "schema_version": 1,
+  "score_blind": true,
+  "source_inventory": {
+    "file_sha256": "69d8c0126d7aebbecfa253b175eda57c8a530de102095d9fd0d85dbc33e5d93c",
+    "path_relative_to_project": "data/manifests/source_inventory.csv"
+  },
+  "study_area": {
+    "actual_sha256": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02",
+    "expected_sha256": "5e5dcf012e080882161c95bf592a1ee39a0f0fdad7114bcff58d645aeb30bb02",
+    "hash_matches": true,
+    "path_relative_to_data_root": "china_mainland.geojson",
+    "properties": {
+      "bbox": [
+        73.446961,
+        20.22909,
+        135.08583,
+        53.557926
+      ],
+      "equal_area_crs": "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs",
+      "equal_area_km2": 9415305.754433,
+      "geodesic_area_km2": 9415313.311384,
+      "island_policy": "continuous_mainland_excludes_hainan_taiwan_and_other_islands",
+      "name": "china_mainland",
+      "normalized_coordinate_count": 45996,
+      "predictor_feature": false,
+      "selection_rule": "largest_valid_closed_ring_by_equal_area_then_lowest_segment_number",
+      "source_available_at": "2026-07-12T16:00:00Z",
+      "source_coordinate_count": 45996,
+      "source_file": "PlotBD/CN-border-L1.gmt",
+      "source_segment_number": 1,
+      "source_sha256": "f35c62ab35e7707a71885b370e07e504a902156321448c3de317542e8958e782",
+      "target_independent": true
+    }
+  }
+}

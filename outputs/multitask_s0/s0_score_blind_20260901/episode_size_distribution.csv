@@ -1,0 +1,11 @@
+﻿magnitude_bin,episode_size_class,minimum_members,maximum_members,episode_count,event_count
+m5_6,1,1,1,668,668
+m5_6,2,2,2,79,158
+m5_6,3–5,3,5,33,117
+m5_6,6–10,6,10,11,88
+m5_6,>10,11,,1,19
+m6_plus,1,1,1,158,158
+m6_plus,2,2,2,19,38
+m6_plus,3–5,3,5,7,26
+m6_plus,6–10,6,10,0,0
+m6_plus,>10,11,,0,0
