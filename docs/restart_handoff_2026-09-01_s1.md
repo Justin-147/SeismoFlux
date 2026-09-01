@@ -10,12 +10,14 @@
 - S0科学提交：`68ce5d1957e2c864553a105d0c5cdc8af9dd58a1`
 - S0闭合提交：`a1d83bb121ef0bfc5054804fd09a4b07717e0b0a`
 - S0远端分支头已回读为：`a1d83bb121ef0bfc5054804fd09a4b07717e0b0a`
-- 当前阶段：`S1_A_accepted_pending_remote_closure`
+- 当前阶段：`S1_B_catalog_baseline_implementation_in_progress`
 - 当前是否已打开S1模型成绩：否
 - 当前是否训练或评分：否
 - 锁定测试：未运行
 - science_first的15个Stage4未跟踪草稿：未触碰
-- 当前粗略进度：S1约`25%`；S1-A决定包与经典基线协议已独立验收GO，只剩提交、推送和远端回读，尚无S1模型效果
+- 当前粗略进度：S1约`30%`；S1-A已验收、提交、推送并远端回读，正在进入目录基线实现，尚无S1新模型效果
+- S1-A科学提交：`706098fba2d3074d4b237d25423f5b91eeb9646b`
+- S1-A远端回读：2026-09-01 15:02（Asia/Shanghai），分支头与科学提交一致
 
 ## S0已经解决什么
 
@@ -63,6 +65,9 @@ S1-A独立科学验收已通过，剩余P0/P1为0/0；验收见`docs/s1a_accepta
 `05702fb7cc225e41078318f17f5ab8a195ac2dc7d56b3fdb8942d3e338b7e391`，经典基线协议
 `288dd696d8911c11bec083deaf3bdee3b0252f465c634f52f1832d00e6408530`。主执行者复跑6项聚焦
 测试、ruff和diff-check均通过。
+
+S1-A已完成远端闭合，记录见`docs/s1a_remote_closure_2026-09-01.md`；不得返回继续修改候选、参数
+网格、回退或停止门。当前开始S1-B最简单目录基线实现与开发时间外推。
 
 ## S1拟比较的最小模型族
 
