@@ -88,9 +88,11 @@ C2目录问题完成后转入S2断层、危险性和应变，再做S3异常，�
 
 ## 7. 本轮阶段验收与安全恢复点
 
-当前状态：`AUDIT_AND_C2A_PROTOCOL_ACCEPTED_PENDING_REMOTE_CLOSURE`。
-审计与协议已通过验证和独立科学复审；必须实际完成提交推送后才运行。验收记录为
-`docs/s1c2a_audit_protocol_acceptance_2026-09-02.md`。以下状态不会预先宣称预测运行成功：
+当前状态：`S1_C2A_IMPLEMENTATION_ACCEPTED_PENDING_PUSH_AND_PREDICTION`。
+审计与协议已由提交`3c2948d125a532672df65c3da543113ac7c79bb8`完成验证、独立科学复审、推送与
+远端回读；验收记录为`docs/s1c2a_audit_protocol_acceptance_2026-09-02.md`。正在实现最小位置
+对照已完成，实现验收为`docs/s1c2a_implementation_acceptance_2026-09-02.md`，25项聚焦合成验证和
+真实文件只读预检通过；尚未启动真实预测或新评分。以下状态不会预先宣称预测运行成功：
 
 ```yaml
 audit_decision: retain_existing_results_and_run_finite_new_input_sensitivity
@@ -106,6 +108,18 @@ locked_test_run: false
 science_first_Stage4_drafts_touched: false
 ```
 
-安全顺序：完成本轮审计和C2A协议的必要验证、验收、提交、推送；随后直接实现最小位置对照并运行，
-不修改C0旧runner/scorer。新预测全部保存后统一评分、生成效果图和离线回放、复审科学价值并更新本文。
+安全顺序：协议阶段已闭合；完成最小位置对照的合成验证与提交推送后运行，不修改C0旧runner/scorer。
+执行入口为`scripts/run_multitask_s1_c2a.py`，明确指定`--phase predict`或`--phase score`，单次调用
+不会自动跨阶段。新预测全部保存后统一评分、生成效果图和离线回放、复审科学价值并更新本文。
 如果中断，先查输出manifest和相关进程，避免重复实例；不能把未完成数组或未保存的口头状态当检查点。
+
+实现完成且其验收提交推送后，预测恢复命令为（在本工作树运行）：
+
+```powershell
+$env:PYTHONPATH = Join-Path (Get-Location) 'src'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& 'D:\AIPred\SeismoFlux\.venv\Scripts\python.exe' -u scripts/run_multitask_s1_c2a.py --phase predict --project-root 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata' --data-root 'D:\AIPred\SeismoFlux\data' --workers 2
+```
+
+只有`outputs/multitask_s1/s1c2a_input_sensitivity_v1/prediction_manifest.json`已完成并通过核验后，才
+将同一命令的`--phase predict`改为`--phase score`。不要运行旧C0全量脚本，不需要再次选择参数。
