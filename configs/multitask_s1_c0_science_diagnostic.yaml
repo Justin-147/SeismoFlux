@@ -1,0 +1,68 @@
+schema_version: 1
+diagnostic_id: "multitask-s1-c0-uniform-tie-and-magnitude-cluster-v1"
+created_date: "2026-09-02"
+stage: "S1-C0-post-score-scientific-diagnostic"
+trigger: "independent_review_found_uniform_alarm_tie_degeneracy_and_event_dependence"
+role: "interpretation_repair_only_no_model_selection_no_retraining"
+
+frozen_inputs:
+  raw_scores:
+    path: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase/raw_scores.parquet"
+    sha256: "8165c4643dfaff5985761b24852f09e6fe1c922c4aed705ad2e405a5ed18d6d4"
+    row_count: 88136
+  development_summary:
+    path: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/score_phase/development_summary.json"
+    sha256: "a419959acfb6b0b1eb7ff91726f2c8911e20ebaed3b85a8808e247cd13185871"
+  authoritative_catalog:
+    data_root_path: "processed/stage1/debc98054172a4a1/earthquake_event.parquet"
+    sha256: "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347"
+  study_area_km2: 9415305.754432771
+
+uniform_tie_diagnostic:
+  population: "24h_delay_M5_6_30d_600000km2_strict_anchor_episode"
+  required_model: "L0_UNIFORM"
+  required_check: "all_L0_event_log_densities_are_identical"
+  sealed_fixed_prefix_result_role: "audit_record_only_not_uniform_random_baseline"
+  random_area_expected_recall: "L0_actual_alarm_area_km2 / study_area_km2"
+  expected_hit_count: "random_area_expected_recall * pooled_episode_count"
+  inferential_rule: "do_not_use_attempt2_L0_strict_recall_bootstrap_CI_as_random_tie_inference"
+  interpretable_fixed_baseline: "L1_REGIONAL_CONSTANT"
+  report_only_point_differences:
+    - "L2_KDE_CAUSAL_minus_L1_REGIONAL_CONSTANT_by_fold_and_pooled"
+    - "L3_B0_R30_CAUSAL_minus_L1_REGIONAL_CONSTANT_by_fold_and_pooled"
+  posthoc_pairwise_ci_allowed: false
+
+magnitude_dependence_diagnostic:
+  population: "same_445_unique_physical_M5_plus_events_used_by_M0_conditioned_and_M3"
+  effect: "per_event_log_probability_M3_minus_M0_conditioned_M5_plus"
+  cluster_definition:
+    source: "full_authoritative_in_study_catalog"
+    magnitude: "M>=5"
+    method: "fixed_first_event_anchor_non_transitive"
+    max_time_days: 30
+    max_distance_km: 75.0
+    combine_M5_6_and_M6_plus: true
+  bootstrap:
+    unit: "combined_M5_plus_fixed_anchor_episode"
+    replicates: 20000
+    seed: 20260902
+    interval: "percentile_2.5_97.5"
+    statistic: "sum_event_effects_in_resampled_clusters / sum_event_counts_in_resampled_clusters"
+  sensitivities:
+    - "four_outer_fold_mean_effects"
+    - "remove_largest_combined_M5_plus_episode_then_recompute_mean"
+  wording_gate:
+    cluster_interval_strictly_positive: "cluster_robust_small_development_signal"
+    otherwise: "four_fold_same_direction_small_development_signal_not_cluster_confirmed"
+
+forbidden:
+  - "overwrite_or_modify_attempt2_predictions_raw_scores_or_summary"
+  - "retrain_or_reselect_any_model"
+  - "open_holdout_audit_or_locked_test"
+  - "change_area_horizon_magnitude_bins_folds_or_target_denominator"
+  - "use_diagnostic_to_select_a_champion"
+
+outputs:
+  directory: "outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/science_diagnostic_v1"
+  result: "science_diagnostic.json"
+  manifest: "manifest.json"
