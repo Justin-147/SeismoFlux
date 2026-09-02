@@ -2,7 +2,8 @@
 
 > 当前最高恢复入口，接替`restart_handoff_2026-09-02_s1c2_resumed.md`；旧结果保留。
 > 21:19统一评分完成；最终静态图、离线回放和科学复审均已通过。主任务由54/147提高到58/147。
-> 当前为`S1_C2B_SCIENCE_ACCEPTED_PENDING_GIT_CLOSURE`；完成本次提交推送后关闭S1，进入S2。
+> 当前为`S1_C2B_CLOSED_READY_FOR_S2`；科学提交`544360e34b139581508deba5c62d14bccf46d535`
+> 已于21:59推送并远端回读一致。S1已闭合，下一阶段为S2断层等新增数据检验。
 
 ## 1. 先用通俗话说明
 
@@ -61,8 +62,8 @@ C0分数，但曾把C1挡在预测之前。补充C2A已经实际比较：原模�
 
 预测、评分、最终图件与科学验收均已完成，详情见第9节。**不得再次启动C2B预测、评分或为进度条
 重跑任何旧任务。** 21:44只读核验没有相关Python后台进程，整机CPU约9.5%，不是任务卡住。
-当前先完成结果提交、推送与远端闭合，再进入S2。若重启发生在推送之前，核对分支状态和第9节，
-仅补齐尚未完成的提交推送；不重新计算已核验的成绩。
+科学结果已提交推送并远端闭合，当前进入S2的经典方法核对及首个断层几何配对设计。若意外中断，
+先核对本节与第9节以及随后新交接，不重新计算已核验的C2B成绩，也不重复提交整个输出目录。
 
 建议工作拆分：
 
@@ -83,8 +84,8 @@ D2特征对照只归因于整个大震历史空间特征；D0本来已含1970后
 | 阶段 | 通俗任务 | 当前进展 |
 | --- | --- | --- |
 | S0 | 摸清数据、时间/地点/震级任务和可用样本 | 已完成 |
-| S1 | 先把目录模型做成可信参考，比较目录处理与有限新模型 | C0/C2A完成；C1无预测停止；C2B科学验收通过、待本次提交推送闭合 |
-| S2 | 加断层、危险性、应变，看是否改善中长期位置 | 下一阶段；S1远端闭合后先做断层几何配对 |
+| S1 | 先把目录模型做成可信参考，比较目录处理与有限新模型 | 已闭合；C0/C2A完成，C1无预测停止，C2B有开发增益并已推送 |
+| S2 | 加断层、危险性、应变，看是否改善中长期位置 | 当前下一项；先做经典方法核对及断层几何配对设计 |
 | S3 | 加205期动态异常，检验其超出目录的贡献 | 未开始 |
 | S4 | 有限树模型和一个小型神经/多任务模型 | 未开始 |
 | S5 | 组合互补方法，用消融区分数据和特征贡献 | 未开始 |
@@ -108,7 +109,7 @@ project_completed: false
 
 ## 5. 验收、运行与恢复记录
 
-当前状态：`S1_C2B_SCIENCE_ACCEPTED_PENDING_GIT_CLOSURE`；最终验收见第9节。以下保留协议和运行沿革。
+当前状态：`S1_C2B_CLOSED_READY_FOR_S2`；最终验收及科学提交远端闭合见第9节。以下保留协议和运行沿革。
 12项配置/账本聚焦测试、Ruff与
 独立科学复审已通过，见`docs/s1c2b_protocol_acceptance_2026-09-02.md`。协议提交
 `b35d8a760fee1443211e619e2c7d96a97892b899`已推送并由`git ls-remote`回读确认；允许进入有限实现。
@@ -141,7 +142,8 @@ C2B_final_score_curve_rows: 1400
 C2B_final_pairing_summaries: 918
 C2B_final_static_and_offline_render: accepted_rendered_v2
 C2B_scientific_acceptance: PASS
-C2B_results_git_closure: pending
+C2B_results_git_closure: complete_remote_verified
+C2B_results_commit: 544360e34b139581508deba5c62d14bccf46d535
 heartbeat_status: ACTIVE
 holdout_opened: false
 audit_2023_plus_opened: false
@@ -319,7 +321,10 @@ stderr：data/interim/c2b_logs/score_20260902T210014.stderr.log
 原预测PID33996及评分PID15244均已退出，不按旧PID重启。根库、冻结P1、science_first的Stage4
 草稿未被本次修改；未打开2020—2022留出、2023+审计或锁定测试，未获取未来目录。
 
-科学验收：`PASS`。本次结果提交和远端闭合：待完成，恢复时先查实际git状态。只提交渲染代码、
-测试、报告/交接/蓝图、聚合summary/score_manifest及六张公开聚合PNG/SVG；含逐事件数据的
+科学验收：`PASS`。科学提交`544360e34b139581508deba5c62d14bccf46d535`已推送至
+`origin/codex/p2r-multitask-multidata`，21:59:21的`git ls-remote`回读与本地一致。只提交渲染代码、
+测试、报告/交接/蓝图、聚合summary/score_manifest及六张公开聚合PNG/SVG；另以两条精确
+`.gitattributes`规则保存聚合结果原字节，避免换行自动转换改变哈希。含逐事件数据的
 NPZ/parquet、案例地图、HTML、render_manifest及合成QA目录保留本机。禁止整体添加输出目录。
-阶段推送完成后才进入S2。心跳保持每30分钟，以最新结果和S2为下一工作，不能仍按旧评分中提示恢复。
+S1阶段已经完成，允许进入S2。心跳已更新并保持每30分钟，以最新结果和S2为下一工作，
+不能仍按旧评分中提示恢复。本节闭合记录将另行随文档提交同步，不改变科学结果。
