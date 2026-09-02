@@ -79,9 +79,14 @@ stop_condition: complete_finite_C2B_then_move_to_S2_multidata
 implementation_acceptance: PASS
 C2B_real_predictions_created_at_acceptance: false
 C2B_scores_created_at_acceptance: false
-git_closure: pending_see_latest_handoff
+git_closure: complete_remote_verified
+implementation_commit: fcce264465627cf5cdeb2b361618de0b33a6fe4c
 holdout_opened: false
 locked_test_run: false
 frozen_P1_modified: false
 science_first_Stage4_drafts_touched: false
 ```
+
+验收之后的运行状态：实现提交推送及远端确认完成后，于北京时间19:40:28启动PID33996的唯一
+后台预测进程，2折线程、BelowNormal。最新检查点、资源及恢复入口见最新交接；此处的
+“验收时尚未预测”是历史状态，不代表后台未启动。

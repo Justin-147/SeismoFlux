@@ -1,7 +1,7 @@
 # 最新续接：S1-C2B有限目录模型比较（2026-09-02）
 
 > 当前最高恢复入口，接替`restart_handoff_2026-09-02_s1c2_resumed.md`；旧结果保留。
-> 本轮进展是下一项科学比较的训练资料核对和协议，不是新模型已提高预测的证据。
+> C2B协议和实现均已验收推送，19:40启动真实历史训练/预测。尚无C2B新成绩，不能声称效果提高。
 
 ## 1. 先用通俗话说明
 
@@ -13,9 +13,10 @@
 C0分数，但曾把C1挡在预测之前。补充C2A已经实际比较：原模型54个、仅删确定高Mc地区52个、再
 删未知地区53个，没有稳定提高。这个分支已结束，不再反复调整全国比例或目录类型。
 
-正在准备的新比较将问：热点范围画得大些还是小些、近期地震的先后顺序，以及更早的大震历史，
+已经启动的新比较将问：热点范围画得大些还是小些、近期地震的先后顺序，以及更早的大震历史，
 有没有帮助？具体是三种训练资料、九个有限位置模型，覆盖五种预测时限和两种震级档。模型训练
-与较晚历史评价分开，数据变化与模型变化分别比较；已有训练账本，**还没有C2B新预测或成绩**。
+与较晚历史评价分开，数据变化与模型变化分别比较。19:42已完成21/413个不同历史起报时点的因果
+基础核计算（约5.1%），尚未完成外折预测检查点；**还没有C2B新成绩或提升结论**。
 
 ## 2. 工作位置、必读文件与不能动的边界
 
@@ -53,9 +54,9 @@ C0分数，但曾把C1挡在预测之前。补充C2A已经实际比较：原模�
 
 ### 下一安全动作
 
-协议阶段验收推送后，实现并验证专用位置模型路径，再执行真实训练/预测。不得直接调用C0完整
-runner，因为它还会进入与本轮无关的负二项、震级和联合拟合。应复用既有日历、格网、因果历史和
-位置评价，只新增所需空间核/少量组合逻辑。拟建模块名称不是已有产物，恢复时先检查实际文件。
+协议和专用位置路径均已验收推送，当前安全动作是检查唯一后台进程、因果缓存与各时限预测检查点，
+不要重复启动。若进程已退出且全折未完成，先查stderr与已有输出，在相同代码/协议/输入下恢复
+同一个输出目录；不运行C0完整runner，也不改变模型或目标。全四折五时限完成后才进入评分。
 
 建议工作拆分：
 
@@ -76,7 +77,7 @@ D2特征对照只归因于整个大震历史空间特征；D0本来已含1970后
 | 阶段 | 通俗任务 | 当前进展 |
 | --- | --- | --- |
 | S0 | 摸清数据、时间/地点/震级任务和可用样本 | 已完成 |
-| S1 | 先把目录模型做成可信参考，比较目录处理与有限新模型 | C0/C2A完成；C1无预测停止；C2B协议已落盘，计算待启动 |
+| S1 | 先把目录模型做成可信参考，比较目录处理与有限新模型 | C0/C2A完成；C1无预测停止；C2B真实训练/预测运行中 |
 | S2 | 加断层、危险性、应变，看是否改善中长期位置 | 未开始，C2B后立即转入 |
 | S3 | 加205期动态异常，检验其超出目录的贡献 | 未开始 |
 | S4 | 有限树模型和一个小型神经/多任务模型 | 未开始 |
@@ -90,7 +91,7 @@ D2特征对照只归因于整个大震历史空间特征；D0本来已含1970后
 ```yaml
 science_value_category: necessary_enabler
 evidence: three_causal_panel_counts_and_nine_finite_models_defined_no_new_C2B_skill
-decision: proceed_to_small_location_only_implementation_and_real_comparison
+decision: continue_running_registered_C2B_predictions_then_measure_paired_skill
 next_scientific_test: same_targets_same_alarm_budget_independent_region_recall
 stop_condition: finite_C2B_comparison_done_then_close_S1_and_start_S2
 off_target: false
@@ -101,12 +102,13 @@ project_completed: false
 
 ## 5. 验收、运行与恢复记录
 
-当前状态：`S1_C2B_IMPLEMENTATION_ACCEPTED_GIT_CLOSURE_PENDING`。12项配置/账本聚焦测试、Ruff与
+当前状态：`S1_C2B_PREDICTION_RUNNING`。12项配置/账本聚焦测试、Ruff与
 独立科学复审已通过，见`docs/s1c2b_protocol_acceptance_2026-09-02.md`。协议提交
 `b35d8a760fee1443211e619e2c7d96a97892b899`已推送并由`git ls-remote`回读确认；允许进入有限实现。
 位置数学、因果面板与位置专用训练预测/评分路径已实现；合计53项聚焦验证、Ruff和独立科学复审
 通过，真实数据只读预检通过。见`docs/s1c2b_implementation_acceptance_2026-09-02.md`。
-仍未训练真实C2B模型；实现提交推送后即可启动。
+实现提交`fcce264465627cf5cdeb2b361618de0b33a6fe4c`已推送并通过`git ls-remote`确认。
+2026-09-02北京时间19:40:28已启动真实历史训练与预测（PID33996）。
 
 ```yaml
 C2A_closed_and_pushed: true
@@ -115,9 +117,15 @@ C2B_protocol_scientific_review: PASS
 C2B_protocol_tests: PASS_12_focused_tests
 C2B_protocol_git_closure: complete_remote_verified
 C2B_protocol_commit: b35d8a760fee1443211e619e2c7d96a97892b899
-C2B_model_implementation_status: accepted_waiting_git_closure
+C2B_model_implementation_status: accepted_pushed_remote_verified
+C2B_implementation_commit: fcce264465627cf5cdeb2b361618de0b33a6fe4c
 C2B_model_implementation_complete: true
-C2B_predictions_created: false
+C2B_prediction_run_started: true
+C2B_saved_outer_prediction_issue_horizon_pairs_at_1942: 0
+C2B_completed_horizon_checkpoints_at_1942: 0
+C2B_total_horizon_checkpoints: 20
+C2B_causal_component_dates_saved_at_1942: 21
+C2B_causal_component_dates_total: 413
 C2B_scores_created: false
 C2B_actual_predictive_improvement: unknown
 heartbeat_status: ACTIVE
@@ -135,10 +143,25 @@ science_first_Stage4_drafts_touched: false
 
 心跳保持每30分钟。机器24物理/48逻辑核心，日常检查单进程；大任务默认2最多3折线程、数值库
 单线程、BelowNormal，至少保留2个物理核心。19:12检查没有Python/pythonw后台进程，两CPU负载
-31%/5%（全机约18%，不是本项目在训练）。此时还没有C2B训练后台进程，不能将协议编写声称为
-“模型正在训练”。继续时先查进程和输出，避免重复实例，并及时把完成比例/检查点写入本文。
+31%/5%（当时全机约18%，尚未训练）。19:40已启动唯一C2B进程PID33996，2折线程、BelowNormal；
+19:41两秒采样占整机CPU4.13%（约1.98个逻辑核心）、常驻内存277.9 MiB。启动前可用内存约45.7GiB。
+19:42 stderr为0字节。没有完整外折检查点是因为正在先计算更早训练期，不是界面卡住。
 
-运行命令（在实现提交推送后执行；日志和PID记录需按真实启动补齐）：
+```text
+进程：33996（实际恢复前重新核验，不能仅相信旧PID）
+stdout：data/interim/c2b_logs/predict_20260902T194028.stdout.log
+stderr：data/interim/c2b_logs/predict_20260902T194028.stderr.log
+同一输出：outputs/multitask_s1/s1c2b_catalog_models_v1
+因果基础核：component_cache/issue_<microseconds>.npz
+预测检查点：folds/<fold>/horizon_<ddd>/horizon_manifest.json
+全部完成标志：prediction_manifest.json（必须核验四折后才能评分）
+```
+
+每个起报时点核缓存包含全部所需长期/近期空间基础，跨模型和时限复用，不包含未来目标。413个
+不同历史日期包含内层与外层，不是独立震例数；其百分比也不是外折预测已完成百分比。
+真实逐事件/数组产物只存本机，不能`git add -A`或把整个输出目录公开推送。
+
+同一预测任务的恢复命令（先确认不存在相关活跃进程，不另建输出目录）：
 
 ```powershell
 $env:PYTHONPATH = 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\src'
