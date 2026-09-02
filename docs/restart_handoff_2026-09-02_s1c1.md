@@ -45,11 +45,10 @@
 
 ## 恢复后的唯一下一安全动作
 
-1. 若本次科学闭合尚未提交，先完成定向回归、Ruff、strict mypy和差异检查；
-2. 提交、推送并远端逐字节回读本轮实现、结果、验收和本文；
-3. 远端闭合后更新本节的提交身份；
-4. 另立S1-C2成绩前协议，先调研并登记经典目录完整性与分覆盖期方法，再冻结有限数据面板和模型；
-5. C2只做一次有限开发比较，不重开C1、不动95%门、不打开holdout/audit/locked；C2完成后关闭S1
+1. S1-C1科学提交`5a99f4ce446320cd955e47966cb060ab1252067a`已经推送，远端提交和六项关键
+   文件的Git blob逐项一致；不得返回修改该阶段；
+2. 另立S1-C2成绩前协议，先调研并登记经典目录完整性与分覆盖期方法，再冻结有限数据面板和模型；
+3. C2只做一次有限开发比较，不重开C1、不动95%门、不打开holdout/audit/locked；C2完成后关闭S1
    并进入S2多数据实验。
 
 S1-C2的科学问题是：1970+长历史和较高震级、更可靠但更稀疏的目录各适合哪些任务，尚未完成的
@@ -73,9 +72,10 @@ S1-C2的科学问题是：1970+长历史和较高震级、更可靠但更稀疏�
   科学目标或陷入无效工程。
 
 ```yaml
-current_stage: S1_C1_REMOTE_CLOSURE_PENDING
+current_stage: S1_C2_SCORE_BLIND_PROTOCOL_DESIGN
 s1c1_status: evidence_insufficient_no_prediction_no_score
-next_after_remote_closure: S1_C2_score_blind_protocol
+s1c1_scientific_commit: 5a99f4ce446320cd955e47966cb060ab1252067a
+next_action: S1_C2_score_blind_protocol
 holdout_opened: false
 audit_opened: false
 locked_test_run: false
