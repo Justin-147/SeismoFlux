@@ -1,13 +1,15 @@
 # 最新交接：S2-A断层几何增量
 
-更新时间：2026-09-02 22:36（北京时间）。当前：`S2A_PROTOCOL_ACCEPTED_PENDING_SYNC`。
+更新时间：2026-09-02 22:55（北京时间）。当前：`S2A_IMPLEMENTATION_ACCEPTED_PENDING_SYNC`。
 本文件接替`docs/restart_handoff_2026-09-02_s1c2b.md`；旧文档与结果保留。
 
 ## 1. 一句话状态
 
 项目尚未全部完成。S1目录比较已验收推送，现有小幅地点提升保留；现在检验加入断层图能否少漏震区。
-首个有限S2-A协议已经落盘、配置检查和独立科学复审通过，待提交推送；没有S2-A真实训练/评分进程，
-也没有新的预测效果。验收见`docs/s2a_protocol_acceptance_2026-09-02.md`。
+首个有限S2-A协议已经通过配置检查和独立科学复审，并完成提交推送。新断层层与只读复用
+目录的预测/评分接线也已完成，71项必要合成验证及独立科学复核通过，正提交推送。
+没有S2-A真实训练/评分进程，也没有新的预测效果。
+验收见`docs/s2a_protocol_acceptance_2026-09-02.md`。
 
 S0数据/任务已完成；S1有限目录基准已完成；S2断层/危险性/应变正在做首轮几何；S3异常、S4有限
 机器学习、S5组合消融、S6综合稳健性和论文展示尚未完成；S7外部检验并行，不能阻塞历史研究。
@@ -62,3 +64,29 @@ S0数据/任务已完成；S1有限目录基准已完成；S2断层/危险性/�
 22:33资源核验无SeismoFlux Python任务，两CPU16%/6%，总约11%，没有占满核心。
 本轮先同步协议/方法/配置测试/验收/交接及蓝图，再分别实现几何层和预测/评分接线。
 当前尚无S2预测器和成绩；不得把本节误当已可恢复真实计算。
+
+## 6. 22:42已进入有限实现
+
+协议提交`5ffd1013640ccea220a23cc3e47dcb4e163e8f95`已推送至
+`origin/codex/p2r-multitask-multidata`；22:36:54远端回读一致。上节“待同步”由本节取代。
+
+新模块位于`src/seismoflux/multitask_s2/`。几何模块已完成合成验证，预测与评分模块仍在实现，
+不得因文件存在便启动真实计算。命令入口`scripts/run_multitask_s2a.py`分别支持predict/score，
+输出仅限`outputs/multitask_s2/`；旧目录结果只读。必要实现测试/科学复核/验收提交推送后才能运行。
+评分将按折留检查点，防止中断后整组重做。代码和测试开发不构成新的预测证据。
+
+## 7. 22:55实现验收，待同步后立即计算
+
+最小几何/预测/评分与CLI已完成，见`docs/s2a_implementation_acceptance_2026-09-02.md`。
+主代理集成验证71项通过（9.51秒）、Ruff通过；独立科学复核未发现阻断问题。没有改变协议参数、
+数据、原目录结果或目标口径。实现提交远端确认后，不再扩展实现，立即启动真实有限计算。
+
+预测入口（从活动工作树、设置PYTHONPATH=src及数值库单线程后，由隐藏BelowNormal进程运行）：
+
+```powershell
+& 'D:\AIPred\SeismoFlux\.venv\Scripts\python.exe' scripts/run_multitask_s2a.py --phase predict --project-root 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata' --data-root 'D:\AIPred\SeismoFlux\data' --workers 2
+```
+
+只有`outputs/multitask_s2/s2a_fault_geometry_v1/prediction_manifest.json`完整并核验后，才将phase改为
+`score`，逐折评分；两阶段共用同一run.lock，不能同时启动。还没有运行PID或真实检查点。
+图件/交互薄渲染器正在另行准备，只用合成数据，不阻塞预测，不将草稿当最终交付。
