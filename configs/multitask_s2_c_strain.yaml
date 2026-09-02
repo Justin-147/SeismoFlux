@@ -1,0 +1,205 @@
+schema_version: 1
+protocol_id: s2c-finite-independent-strain-increment-v1
+stage: S2-C
+status: protocol_frozen_before_S2C_predictions
+scientific_role: GSRM_2014_static_retrospective_development_with_post_release_era_slice_not_independent_test
+S1_and_S2AB_development_results_seen: true
+S2C_predictions_or_scores_seen_at_registration: false
+methods_document: docs/s2c_strain_methods_2026-09-03.md
+parent_protocol: configs/multitask_s2_b_slip_rate.yaml
+parent_protocol_sha256: a57218c9fbedc21ae28a62de4980fc26b17e990aa32f3613b9ae95fc1db19d29
+parent_contract: configs/multitask_s1_development_contract.yaml
+
+inputs:
+  data_root_required: true
+  catalog_protocol: configs/multitask_s1_c2b_catalog_models.yaml
+  catalog_protocol_sha256: 4f497690643a64466cbd9eec358977f1c8c1d4655bc4cc9ca5a65dbc95859243
+  catalog_run: outputs/multitask_s1/s1c2b_catalog_models_v1
+  catalog_prediction_manifest_sha256: 110c795bacae7aa4e00fe72eb3195fee947c1c913d8752da721d9e122db2a01c
+  catalog_score_manifest_sha256: ae96f95f2e7fbd92c8f6f692b0f4f95f7dd48787d5bcfc2cdf53e0138dde8dc5
+  catalog_main_model: C2B_D0_MULTISCALE
+  catalog_panel: D0_CANONICAL_M4_1970
+  local_two_catalogs_effective_magnitude_type: Ms
+  numeric_magnitude_conversion: none
+  external_catalog_Ms_assumption: false
+  old_catalog_cache_and_predictions: read_only_never_recalculate_or_overwrite
+  grid_id: 3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763
+  grid_cells: 15697
+  grid_cell_size_km: 25.0
+  grid_area_km2: 9415305.754432771
+  national_support_percentage_gate: null
+  local_Mc_masks_applied: false
+  strain_source:
+    path: external/gsrm_v2_1_20260903/GSRM_average_strain_v2.1.txt
+    sha256: 26cb5f6fd5faca7050375e5cac8396a9713585031206d8ba221575feae33b42b
+    compressed_sha256: 070a16e671a594f9b3ca22748ae26c0fa6fb4920bb46af85ceb15b94a05330b6
+    expected_rows: 145086
+    expected_columns: 14
+    columns: [lat, long, exx, eyy, exy, sd_exx, sd_eyy, sd_exy, cc_xxyy, cc_xxxy, cc_yyxy, e1, e2, azi_e1]
+    used_columns: [lat, long, exx, eyy, exy]
+    units: 1e-9_per_year
+    version: GSRM_2.1
+    header_release_date: '2014-03-01'
+    retrieved_at: '2026-09-02T18:01:14.4040831Z'
+    historical_exact_bytes_confirmed: false
+    license: CC-BY-NC-SA-3.0
+    attribution: GEM_Foundation_2014_Kreemer_Blewitt_Klein_2014
+    sha256_is_case_insensitive_hex: true
+  static_snapshot_available_at: '2014-03-01T00:00:00+00:00'
+  available_at_semantics: product_header_release_date_not_exact_historical_byte_proof
+  excluded_features: [uncertainty_inverse_weights, principal_direction, long_term_hazard_score,
+    rupture_gap_weight, locking_weight, microseismic_sparsity_weight, coulomb_stress_weight,
+    last_strong_earthquake_year, elapsed_ratio_at_snapshot, fault_rates, dynamic_anomalies]
+
+calendar:
+  outer_folds: [C_DEV_2000_2004, C_DEV_2005_2009, C_DEV_2010_2014, C_DEV_2015_2019]
+  horizons_days: [7, 30, 90, 180, 365]
+  outer_issue_counts_per_horizon: [176, 116, 56, 32, 16]
+  outer_total_issue_horizon_pairs: 396
+  forecast_axis: Thursday_00_00_Asia_Shanghai
+  catalog_delay_hours: 24
+  target_interval: '(issue,issue+horizon]'
+  exposure_rule: unchanged_nonoverlapping_horizon_plus_30d_from_S1
+  outer_embargo_days: 30
+  post_release_development_folds: [C_DEV_2015_2019]
+  early_folds_role: current_product_retrospective_description_not_causal_forecast
+  post_release_role: separately_reported_development_slice_not_independent_confirmation
+
+spatial_math:
+  source_crs: EPSG_4326_existing_GSRM_longitude_latitude_interpretation
+  longitude_width_degrees: 0.25
+  latitude_height_degrees: 0.2
+  coordinates_are_cell_midpoints: true
+  geodetic_edge_maximum_segment_degrees: 0.05
+  projected_crs: existing_China_Albers_equal_area
+  remapping: source_cell_constant_scalar_times_exact_projected_intersection_area
+  strain_scalar: 'sqrt(exx**2+eyy**2+2*exy**2)'
+  component_shear: tensor_not_engineering_no_division_by_two
+  strain_mass: 'sum_j(A_intersect_ij*S_j)/sum_ij(A_intersect_ij*S_j)'
+  unit_mass: 'sum_j(A_intersect_ij)/sum_ij(A_intersect_ij)'
+  uncovered_domain_role: GSRM_modeled_rigid_area_not_missing_GNSS_observations
+  source_zero_strain: retain_zero_not_missing
+  nonfinite_source_values: input_error_not_impute
+  raw_cell_overlap: forbidden_except_shared_edges
+  earthquake_target_or_domain_filtering_by_strain: false
+  duplicate_source_cells: input_error
+  smoothing_scales: []
+  additional_download_required: false
+  artificial_probability_floor: null
+  transformation_candidates: [official_second_invariant_only]
+  interpretation: relative_spatial_mass_not_absolute_earthquake_probability_or_moment_rate
+
+models:
+  S2C_UNIT_ONLY: {layer: UNIT, family: static_only}
+  S2C_UNIT_CATALOG_MIX: {layer: UNIT, family: catalog_mixture}
+  S2C_STRAIN_ONLY: {layer: STRAIN, family: static_only}
+  S2C_STRAIN_CATALOG_MIX: {layer: STRAIN, family: catalog_mixture}
+
+selection:
+  granularity: outer_fold_x_horizon_shared_by_Ms5_6_and_Ms6_plus
+  target_catalog: unchanged_canonical_national_Ms4_plus
+  inner_catalog_branches:
+    - {train_blocks: [I1], validate_block: I2}
+    - {train_blocks: [I1, I2], validate_block: I3}
+  inner_catalog_training_end_and_label_visibility: at_or_before_validation_start_minus_30d
+  inner_catalog_selector: unchanged_C2B_four_multiscale_candidates_and_tie_order
+  inner_catalog_minimum_nonempty_blocks: 2
+  I2_catalog_consequence: exact_K75_fallback_only_one_earlier_block
+  outer_catalog_surface: reuse_saved_C2B_D0_MULTISCALE
+  validation_blocks: [I2, I3]
+  strain_label_end_and_visibility: at_or_before_outer_start_minus_30d
+  static_values_in_inner: fixed_current_product_retrospective_features_not_historical_issue_claim
+  alpha_candidates: [0.0, 0.25, 0.5, 0.75, 1.0]
+  mixture: '(1-alpha)*C+alpha*static_layer'
+  mixture_tie_order: smaller_alpha
+  tie_tolerance: 1.0e-12
+  block_statistic: mean_log_density_over_positive_event_counts
+  candidate_rule: maximize_equal_mean_of_nonempty_I2_I3_block_scores
+  empty_block: NA_keep_exposure
+  target_in_zero_mass_cell: negative_infinity_block_score_not_missing
+  all_candidates_negative_infinity: first_in_registered_tie_order_with_explicit_status
+  no_nonempty_blocks_mixture: exact_catalog_alpha_zero
+  static_only_selection: none_fixed_field_and_report_inner_fit_score
+
+zero_mass:
+  allowed_log_mass: finite_or_negative_infinity
+  forbidden: [NaN, positive_infinity, all_negative_infinity]
+  alpha_endpoints: exact
+  positive_count_dot_only: true
+  outer_zero_density_ties: same_existing_grid_row_column_ID_order
+  nonfinite_log_score_JSON: null_with_negative_infinity_from_zero_mass_status
+  empty_log_score_JSON: null_with_no_events_status
+  negative_infinity_minus_negative_infinity: undefined_not_zero
+  change_old_S1_or_S2_code: false
+
+evaluation:
+  references: [C2B_D0_MULTISCALE, C2B_D0_AGE_WEIGHTED, C0_L3_B0_R30_CAUSAL, C0_L0_UNIFORM]
+  reuse_verified_saved_reference_scores: true
+  magnitude_bands: [Ms5_6, Ms6_plus]
+  magnitude_boundaries: '[5,6);[6,infinity)'
+  main_anchor: Ms5_6_30d_600000km2_strict_fixed_first_anchor_episode_recall
+  expected_main_anchor_count: 147
+  post_release_expected_main_anchor_count: 32
+  area_budgets_km2: [300000.0, 450000.0, 600000.0, 750000.0, 960000.0]
+  ranking: descending_relative_mass_per_actual_area_then_existing_grid_order
+  alarm_selection: unchanged_whole_cell_prefix_no_skipping_no_overspending
+  actual_area: report_model_specific_area
+  strict_hit_tolerance_km: 0.0
+  secondary_hit_tolerance_km: 70.0
+  episode_definition: fixed_first_anchor_30d_75km_no_chaining
+  views: [all_events, fixed_anchor, episode_balanced, subsequent_events]
+  bootstrap_replicates: 2000
+  bootstrap_seed: 147
+  bootstrap_unit: unchanged_nonoverlapping_time_exposure_with_whole_episodes
+  confidence_interval_is_hard_adoption_gate: false
+  evaluation_slices: [all_four_development_folds_retrospective, post_release_2015_2019_development]
+  expected_curves_per_slice: 800
+  expected_pairings_per_slice: 600
+  time_magnitude_or_joint_skill_claim: false
+  new_independent_test_evidence: false
+  final_at_most_10_region_product_certified: false
+
+planned_pairs:
+  - [S2C_STRAIN_CATALOG_MIX, S2C_UNIT_CATALOG_MIX, strain_strength_over_same_support_procedures]
+  - [S2C_STRAIN_ONLY, S2C_UNIT_ONLY, pure_strain_strength_over_same_support]
+  - [S2C_UNIT_CATALOG_MIX, C2B_D0_MULTISCALE, deformation_support_increment]
+  - [S2C_STRAIN_CATALOG_MIX, C2B_D0_MULTISCALE, total_strain_increment]
+  - [S2C_UNIT_ONLY, C0_L0_UNIFORM, pure_deformation_support_vs_national_uniform]
+  - [S2C_STRAIN_ONLY, C0_L0_UNIFORM, pure_strain_vs_national_uniform]
+
+run_boundary:
+  before_real_run: protocol_and_implementation_acceptance_test_commit_push
+  save_all_four_fold_predictions_before_outer_scoring: true
+  holdout_2020_2022_opened: false
+  audit_2023_plus_opened: false
+  locked_test_run: false
+  future_catalog_downloads: false
+  frozen_P1_modified: false
+  science_first_Stage4_drafts_touched: false
+  old_S1_S2_predictions_scores_or_implementation_modified: false
+  post_score_scale_weight_transform_or_source_search: false
+  hazard_scores_or_dynamic_anomalies_used: false
+
+resources:
+  default_fold_workers: 2
+  maximum_fold_workers: 3
+  minimum_reserved_physical_cores: 2
+  numerical_threads_per_worker: 1
+  priority: BelowNormal
+  no_duplicate_instances: true
+
+outputs:
+  root: outputs/multitask_s2/s2c_strain_v1
+  preserve_completed_checkpoints: true
+  public: code_documents_and_aggregate_results_only_with_source_attribution
+  local_only: source_data_strain_maps_event_arrays_case_figures_and_offline_replay
+  strain_derived_artifact_license: CC-BY-NC-SA-3.0
+  static_figures: same_area_recall_and_strength_support_contribution_with_post_release_slice
+  offline_interactive: honest_retrospective_replay_with_zero_mass_and_time_role
+
+science_review:
+  present_value: necessary_protocol_no_S2C_score
+  next_evidence: same_sample_same_budget_new_and_lost_independent_earthquake_regions
+  if_no_gain: close_strain_variant_then_S3_without_extended_search
+  small_task_specific_gain: retain_effect_size_fold_direction_and_uncertainty_for_S5
+  hazard_status: historical_versions_unknown_not_a_causal_predictor_not_blocking_strain_or_S3
