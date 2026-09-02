@@ -1,8 +1,8 @@
 # 最新重启交接：S2-C物理资料研究准备
 
-更新时间：2026-09-03 02:20（北京时间）。状态：`S2C_PROTOCOL_ACCEPTED_PENDING_SYNC_THEN_IMPLEMENTATION`。
+更新时间：2026-09-03 02:39（北京时间）。状态：`S2C_IMPLEMENTATION_ACCEPTED_PENDING_SYNC`。
 接替`docs/restart_handoff_2026-09-03_s2b.md`；旧文档中的运行PID和待评分文字只作历史快照。
-唯一实施蓝图为`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`，当前按第1.9—1.18节及本文件继续。
+唯一实施蓝图为`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`，当前按第1.9—1.19节及本文件继续。
 
 ## 1. 先说结论
 
@@ -141,3 +141,17 @@ origin引用均为后者。预测/评分/最终图/离线回放与阶段验收�
 四项必要配置检查、Ruff、独立完整科学复审通过，尚无新模型或分数。协议提交推送后，下一唯一
 动作是应变层及最薄预测/评分适配；实现必要验收同步后实际计算，不再扩充协议、目录审计或地图工程。
 02:13:32系统核验无项目Python，CPU0 12%、CPU1 0%、整机约6%；这是快照，启动前再查重复。
+
+02:32续接：协议提交`6603a6cdc15cc0be7f1fe0ec16396a2ed872739e`已于02:21:36推送并回读一致。
+现在直接实现新的`strain.py`、`strain_predict.py`、`strain_score.py`及专用入口和必要测试；
+旧S1/S2文件与协议不改。空间层与预测适配并行编写，主线程负责评分和整合。
+尚未启动真实全源重映射、训练或外层评分；必要实现验收和同步后才启动两折线程计算。
+若中断，先查看这些新文件与测试状态，不重新调研、不从头下载、不重跑已经完成的旧阶段。
+
+02:39实现已完成并通过独立科学复审，42项聚焦合成检查与Ruff通过；验收记录为
+`docs/s2c_implementation_acceptance_2026-09-03.md`。尚无真实新训练或预测分数。
+下一步先按白名单提交推送新实现，成功后立即运行`scripts/run_multitask_s2c.py --phase predict`，
+项目/数据根显式指定，默认两折线程；全预测验证后才`--phase score`。
+结果目录为`outputs/multitask_s2/s2c_strain_v1`；总summary为四折，`post_release_development`
+字段是预定2015—2019分列，同一逐事件表按fold筛选，不二次更换目标。
+心跳已更新并返回ACTIVE、每30分钟，入口已改成当前协议/实现，不再重做应变源预检。
