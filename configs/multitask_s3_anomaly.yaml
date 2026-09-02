@@ -1,0 +1,208 @@
+protocol_id: S3A_ANOMALY_200KM_V1
+status: protocol_accepted_pending_remote_confirmation
+authority: SEISMOFLUX_IMPLEMENTATION_HANDOFF.md#121
+scope: retrospective_development_not_independent_test
+scientific_question: incremental_where_and_when_information_beyond_catalog_and_reporting_coverage
+access:
+  data_root: 'D:\AIPred\SeismoFlux\data'
+  catalog: processed/stage1/debc98054172a4a1/earthquake_event.parquet
+  feature_store: processed/stage3/anomaly_history/anomaly-feature-bundle-de7547faa9f87541/anomaly_feature_store.parquet
+  feature_store_sha256: cd383d52cbb85ebba0e495e58f6e3d50d350f952e5432d5cd21386f6224042ef
+  state_history_sha256: d948d59851778ad4c73be398e521883520fdd87880b0604628986cee2cb2813a
+  allowed_roles: [A_DEV_2023_2024, A_DEV_2024_2025]
+  report_start_inclusive: '2022-07-01T00:00:00+08:00'
+  report_end_exclusive: '2025-07-01T00:00:00+08:00'
+  label_start_exclusive: '2022-07-01T00:00:00+08:00'
+  label_end_exclusive: '2025-07-01T00:00:00+08:00'
+  conditioning_history_start: '1970-01-01T00:00:00+08:00'
+  forbidden_score_roles: [A_AUDIT_2025_2026, C_HOLDOUT_2020_2022, C_AUDIT_2023_2026, locked_test]
+  read_new_targets_only_after: protocol_acceptance_commit_push_remote_confirmed
+  read_all_205_reports_then_filter: false
+  human_forecast_and_post_outcome_fields: forbidden
+  future_report_null_world_exception: offline_time_counterfactual_only_within_registered_development_pools
+  used_a_events_may_later_be_claimed_globally_unseen_c_test: false
+folds:
+  - id: A_DEV_2023_2024
+    fit_report_start: '2022-07-01T00:00:00+08:00'
+    target_start: '2023-07-01T00:00:00+08:00'
+    target_end_exclusive: '2024-07-01T00:00:00+08:00'
+    inner_blocks: [A_I1]
+  - id: A_DEV_2024_2025
+    fit_report_start: '2022-07-01T00:00:00+08:00'
+    target_start: '2024-07-01T00:00:00+08:00'
+    target_end_exclusive: '2025-07-01T00:00:00+08:00'
+    inner_blocks: [A_I1, A_I2, A_I3]
+inner_blocks:
+  A_I1: ['2023-01-01T00:00:00+08:00', '2023-06-01T00:00:00+08:00']
+  A_I2: ['2023-07-01T00:00:00+08:00', '2024-01-01T00:00:00+08:00']
+  A_I3: ['2024-01-01T00:00:00+08:00', '2024-06-01T00:00:00+08:00']
+time:
+  timezone: Asia/Shanghai
+  issue_axis: actual_report_available_at
+  catalog_latency_hours: 24
+  target_interval: '(T,T+h] strictly inside its target block'
+  fit_label_end_rule: 'T+h <= validation_or_outer_start-30d; label availability <= same cutoff'
+  all_labels_mature_at_frozen_truth_cutoff: true
+  missing_report: unknown_no_fabricated_issue
+  fit_exposure_step: greedy_earliest_next_T_at_least_previous_T_plus_h
+  primary_evaluation_step: greedy_earliest_next_T_at_least_previous_T_plus_h_plus_30d
+  operational_axis: all_eligible_reports_descriptive_not_independent_replicates
+  unevaluable_horizon: null_never_zero_or_shortened
+targets:
+  horizons_days: [7, 30, 90, 180, 365]
+  priority_horizons_days: [7, 30, 90]
+  formal_magnitude_bands: [Ms5_6, Ms6_plus]
+  spatial_fit_band: Ms4_plus
+  count_fit_band: Ms5_plus
+  local_catalog_magnitude_semantics: user_declared_Ms_raw_values_no_conversion_or_type_missing_drop
+  episode_rule: inherit_multitask_s0_fixed_first_anchor_30d_75km
+  episode_views: [anchor, episode_balanced, subsequent, all]
+support:
+  grid: inherit_multitask_s0_national_25km
+  cells: 15697
+  nationwide_quality_area_veto: null
+  local_Mc_mask: false
+  alarm_area_budgets_km2: [300000, 450000, 600000, 750000, 960000]
+  strict_buffer_km: 0
+  secondary_buffer_km: 70
+  grid_prefix_is_final_max_10_regions_product: false
+background:
+  primary_spatial: C2B_MULTI_latest_C_development_parameters_transferred
+  old_parameter_fold: C_DEV_2015_2019
+  old_parameter_label_end_no_later_than: '2014-12-02T00:00:00+08:00'
+  panel: D0_inside_country_1970_Ms4_plus
+  kernel_scales_km: [25, 75, 150]
+  weights_by_horizon:
+    7: [0.5, 0.5, 0.0]
+    30: [0.5, 0.5, 0.0]
+    90: [0.5, 0.5, 0.0]
+    180: [0.5, 0.5, 0.0]
+    365: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+  recompute_for_new_a_issues_from_causal_long_history: true
+  reuse_old_c_prediction_arrays: false
+  secondary_spatial: 'R30=0.75*K75_long_D0+0.25*K75_recent_30d; causal Q; empty recent uses long'
+  count: 'mu0_b=h*N_b([1970-01-01,Q]) / exposure_days(1970-01-01,Q); Q=T-24h'
+  new_catalog_parameter_search: false
+features:
+  radius_km: 200
+  gaussian_sigma_km: 200
+  gaussian_truncation_km: 600
+  radius_distance: frozen_projected_euclidean
+  raw:
+    - {id: deformation, column: gaussian_200km__discipline_deformation_count, transform: log1p, group: snapshot}
+    - {id: fluid, column: gaussian_200km__discipline_fluid_count, transform: log1p, group: snapshot}
+    - {id: electromagnetic, column: gaussian_200km__discipline_electromagnetic_count, transform: log1p, group: snapshot}
+    - {id: cross_fault, column: gaussian_200km__discipline_cross_fault_count, transform: log1p, group: snapshot}
+    - {id: source_new, column: gaussian_200km__source_new_count, transform: log1p, group: snapshot}
+    - {id: first_seen, column: gaussian_200km__first_seen_count, transform: log1p, group: snapshot}
+    - {id: not_continued, column: gaussian_200km__not_continued_count, transform: log1p, group: snapshot}
+    - {id: age, column: gaussian_200km__age_mean_days, transform: log1p, group: snapshot}
+    - {id: listed_slope, column: radius_200km__listed_count__slope_13w_per_week, transform: asinh, group: dynamic}
+    - {id: listed_acceleration, column: radius_200km__listed_count__acceleration_4v13_per_week2, transform: asinh, group: dynamic}
+    - {id: first_seen_slope, column: radius_200km__first_seen_count__slope_13w_per_week, transform: asinh, group: dynamic}
+    - {id: discipline_entropy, column: gaussian_200km__discipline_shannon_normalized, transform: identity, group: snapshot}
+    - {id: station_coverage, column: gaussian_200km__distinct_reporting_station_count_reporting_coverage_proxy, transform: log1p, group: coverage}
+    - {id: measurement_coverage, column: gaussian_200km__distinct_reporting_measurement_count_reporting_coverage_proxy, transform: log1p, group: coverage}
+    - {id: station_coverage_ratio, column: gaussian_200km__current_to_trailing_station_reporting_coverage_proxy, transform: identity, group: coverage}
+    - {id: measurement_coverage_ratio, column: gaussian_200km__current_to_trailing_measurement_reporting_coverage_proxy, transform: identity, group: coverage}
+  missing_controls:
+    - {id: age_missing, rule: is_missing_age, group: snapshot}
+    - {id: dynamic_missing, rule: fraction_missing_among_three_dynamic_columns, group: dynamic}
+    - {id: entropy_missing, rule: is_missing_discipline_entropy, group: snapshot}
+    - {id: coverage_missing, rule: any_missing_among_two_coverage_ratios, group: coverage}
+  designs:
+    COV: [station_coverage, measurement_coverage, station_coverage_ratio, measurement_coverage_ratio, coverage_missing]
+    SNAP: [deformation, fluid, electromagnetic, cross_fault, source_new, first_seen, not_continued, age, discipline_entropy, station_coverage, measurement_coverage, station_coverage_ratio, measurement_coverage_ratio, age_missing, entropy_missing, coverage_missing]
+    DYN: [deformation, fluid, electromagnetic, cross_fault, source_new, first_seen, not_continued, age, listed_slope, listed_acceleration, first_seen_slope, discipline_entropy, station_coverage, measurement_coverage, station_coverage_ratio, measurement_coverage_ratio, age_missing, dynamic_missing, entropy_missing, coverage_missing]
+  preprocessing:
+    imputation: finite_training_mean_equal_issue_actual_grid_area_weighted_after_transform
+    completely_missing_training_column: fill_zero_and_inactive
+    spatial_scaler: training_only_equal_issue_area_weighted_mean_sd_inherited_C2B
+    temporal_aggregation: actual_area_mean_of_imputed_transformed_grid_features_and_missing_controls
+    temporal_scaler: training_only_equal_issue_mean_sd
+    constant_training_column: coefficient_fixed_zero
+    learned_clipping_or_feature_search: false
+  interpretation: reported_entity_counts_not_instrument_amplitudes_age_not_confirmed_duration_entropy_not_joint_growth
+models:
+  family: generalized_loglinear_ridge
+  spatial:
+    variants: [CATALOG, R30_REFERENCE, CAT_COV, CAT_SNAP, CAT_DYN]
+    formula: 'q_i = p0_i*exp(beta*z_i)/sum_c(p0_c*exp(beta*z_c))'
+    objective: mean_per_Ms4_event_conditional_spatial_NLL_plus_lambda_half_beta_norm_squared
+    absolute_event_probability: false
+    no_events_or_no_legal_training: beta_zero_with_explicit_untrainable_status
+  count:
+    variants: [T0, T0_CAL, T0_CAL_COV, T0_CAL_SNAP, T0_CAL_DYN]
+    formula: 'mu_b = mu0_b*exp(a+beta*z_national); mu means expected count in the complete h-day window'
+    objective: mean_per_issue_Ms5_plus_Poisson_NLL_plus_lambda_half_beta_norm_squared
+    intercept_penalized: false
+    intercept_only_formula: 'a=log(sum(y_Ms5plus)/sum(mu0_Ms5plus))'
+    shared_multiplier_for_both_magnitude_bands: true
+    learns_magnitude_distribution: false
+    no_legal_training_or_all_zero_y_or_fit_failure: original_T0_and_explicit_status_not_finite_MLE
+    outputs: [expected_count, poisson_model_probability_at_least_one]
+    probability_claim: model_based_not_empirically_validated_absolute_probability
+  selection:
+    ridge_candidates: [0.1, 1.0, 10.0]
+    required_evaluable_inner_blocks: 2
+    fewer_inner_blocks_lambda: 10.0
+    criterion_spatial: pooled_validation_event_conditional_NLL
+    criterion_count: pooled_validation_issue_Poisson_NLL
+    ties: largest_lambda_with_absolute_tolerance_1e-10
+    fit_and_scaler_refit_inside_each_inner_training_only: true
+    baseline_fallback_after_viewing_outer_scores: forbidden
+    optimizer: single_start_L_BFGS_B
+    maxiter: 2000
+    ftol: 1.0e-10
+    gtol: 1.0e-6
+    restart_or_hyperparameter_expansion_after_failure: false
+placebos:
+  root_seed: 147
+  time_replicates_per_fold: 200
+  space_replicates_per_fold: 200
+  horizons: [7, 30, 90, 180, 365]
+  role: offline_attribution_diagnostic_not_a_forecast_or_exact_conditional_randomization_test
+  time:
+    operation: joint_without_replacement_permutation_of_nine_snapshot_values_and_two_radius_base_series
+    source_pools: per_fold_horizon_partition_of_only_authorized_reports
+    boundaries: all_inner_outer_block_starts_ends_and_actual_latest_eligible_training_and_validation_issue_cutoffs_for_h
+    endpoint_membership: inclusive_latest_eligible_issue_stays_training_side
+    donor_may_be_later_than_recipient: true_only_inside_offline_null_world_and_same_partition
+    rebuilt: three_dynamic_values_and_their_missing_control_from_pseudo_time_prefix
+    null_snapshot_masks: travel_with_donor
+    singleton_pool: identity_and_report_effective_permutation_fraction
+  space:
+    operation: same_issue_same_static_construction_zone_and_inside_outside_entity_coordinate_pair_bijection
+    rebuilt: nine_snapshot_values_two_radius_base_series_then_dynamic_and_dependent_missing_controls
+    source_time_changes: false
+  fixed: [catalog_background, targets, issue_axis, alarm_area, four_coverage_values, coverage_missing_control]
+  each_replicate_refits: [training_imputation, training_scaler, inner_lambda_selection, spatial_and_count_models]
+  no_claim_to_preserve: [full_conditional_joint_distribution, temporal_autocorrelation, entity_spatiotemporal_continuity]
+  failures: report_counts_and_do_not_drop_or_replace_failed_replicates
+  promising_fraction_reference: 0.80
+evaluation:
+  save_all_outer_predictions_before_reading_any_outer_effect_scores: true
+  primary_contrasts: [CAT_DYN_minus_CAT_COV, CAT_DYN_minus_CAT_SNAP, T0_CAL_DYN_minus_T0_CAL_COV, T0_CAL_DYN_minus_T0_CAL_SNAP]
+  retain_all_vs_catalog_and_T0_CAL: true
+  where: [strict_anchor_recall_each_area, area_for_recall, spatial_log_score, Molchan]
+  when: [Poisson_log_score_including_empty_windows, Brier_at_least_one, count_bias, reliability]
+  uncertainty: inherit_S0_2000_seed147_paired_episode_and_time_block_bootstrap_not_grid_rows
+  report: [training_and_inner_performance, later_development_performance, actual_issues_events_anchors, fold_horizon_band_strata, gains_and_losses, placebo_position_and_failures]
+  no_new_result_is_failure: false
+continuation:
+  s3a_only: one_200km_low_dimensional_trial_not_entire_S3_complete
+  s3b_later: bounded_predeclared_other_scales_and_discipline_ablation_without_expanding_after_outer_tuning
+  do_not_repeat: [support95_Ms_audit, S1_catalog_search, S2_geometry_slip_strain_search, old_D1]
+  small_task_specific_gains: retain_with_uncertainty_and_scientific_review
+  unchanged_or_negative_result: close_this_variant_and_reassess_before_more_complexity
+resources:
+  default_fold_workers: 2
+  maximum_fold_workers: 3
+  numerical_library_threads: 1
+  reserve_physical_cores: 2
+  priority: BelowNormal
+  background_window: Hidden
+  duplicate_check_before_start: true
+publication:
+  local_only: [raw_sources, event_arrays, case_maps, event_interactive_html]
+  public_whitelist: [code, protocol, documentation, aggregate_scores, non_event_location_aggregate_figures]
