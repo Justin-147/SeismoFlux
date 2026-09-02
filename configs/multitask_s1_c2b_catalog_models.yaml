@@ -1,0 +1,246 @@
+schema_version: 1
+protocol_id: s1c2b-finite-catalog-panels-and-location-models-v1
+stage: S1-C2B
+status: protocol_frozen_before_C2B_predictions
+scientific_role: development_comparison_not_independent_confirmation
+prior_C0_and_C2A_results_seen: true
+C2B_predictions_or_scores_seen_at_freeze: false
+parent_contract: configs/multitask_s1_development_contract.yaml
+parent_run_contract: configs/multitask_s1_development_run.yaml
+methods_document: docs/s1c2b_methods_protocol_2026-09-02.md
+
+inputs:
+  data_root_required: true
+  canonical_catalog: processed/stage1/debc98054172a4a1/earthquake_event.parquet
+  canonical_catalog_sha256: 2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347
+  canonical_catalog_rows: 40898
+  source_records: processed/stage1/debc98054172a4a1/earthquake_source_record.parquet
+  source_records_sha256: 7c48cd5f4db5e85c6c10c7a3fdfc4d84ac3e5de3dde1e59f985f36bb47770556
+  source_record_rows: 43785
+  magnitude_semantics: data/manifests/catalog_magnitude_semantics_2026-09-02.json
+  effective_type_local_two_sources: Ms
+  numeric_magnitude_conversion: none
+  external_catalog_Ms_assumption: false
+  panel_ledger: outputs/multitask_s1/s1c2b_protocol_v1/panel_ledger.json
+  panel_ledger_sha256: b08de8b0a8d2b84d581a5f0b5c4b2bb37d9d7e3f58a73f4e4e99373266ee1ed6
+  membership: any_source_record_visible_at_issue_cutoff_not_anchor_source_only
+  values: unchanged_canonical_event_values_no_rededuplication
+  domain: unchanged_full_national_study_area
+  grid_id: 3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763
+  grid_cell_size_km: 25.0
+  grid_cells: 15697
+  grid_area_km2: 9415305.754432771
+  national_support_percentage_gate: null
+  local_Mc_masks_applied: false
+
+panels:
+  D0_CANONICAL_M4_1970:
+    start_local: '1970-01-01T00:00:00+08:00'
+    magnitude_minimum: 4.0
+    required_source: null
+  D1_M3SOURCE_M4_1980:
+    start_local: '1980-01-01T00:00:00+08:00'
+    magnitude_minimum: 4.0
+    required_source: earthquake_catalog_m3_plus
+  D2_M5SOURCE_M5_1950:
+    start_local: '1950-01-01T00:00:00+08:00'
+    magnitude_minimum: 5.0
+    required_source: earthquake_catalog_m5_plus
+
+calendar:
+  outer_folds: [C_DEV_2000_2004, C_DEV_2005_2009, C_DEV_2010_2014, C_DEV_2015_2019]
+  horizons_days: [7, 30, 90, 180, 365]
+  forecast_axis: Thursday_00_00_Asia_Shanghai
+  main_catalog_delay_hours: 24
+  causal_visibility: origin_time_and_available_at_at_or_before_issue_minus_24h
+  source_member_visibility: source_origin_and_available_at_at_or_before_issue_minus_24h
+  target_interval: '(issue,issue+horizon]'
+  primary_exposure_rule: greedy_issue_ascending_next_at_least_previous_plus_horizon_plus_30d
+  outer_issue_counts_per_horizon: [176, 116, 56, 32, 16]
+  outer_total_issue_horizon_pairs: 396
+  inner_blocks: exactly_I1_I2_I3_from_parent_contract
+  outer_embargo_days: 30
+  outer_parameters: fixed_within_fold_and_horizon
+  history_updates: causal_at_each_issue
+
+location_math:
+  equal_event_KDE: isotropic_Gaussian_on_existing_projected_km_coordinates
+  kernel_bandwidths_km: [25.0, 75.0, 150.0]
+  cell_integration: density_at_existing_grid_point_times_actual_clipped_cell_area
+  boundary_normalization: each_component_over_whole_national_grid_before_mixing
+  empty_recent_component: exact_same_panel_long_KDE75
+  empty_long_panel: area_uniform_over_unchanged_national_grid_with_diagnostic_no_issue_deletion
+  representation: finite_normalized_float64_log_cell_mass_with_derived_mass
+  numerical_underflow: log_space_scoring_no_epsilon_floor_no_new_uniform_mixture
+  interpretation: relative_spatial_mass_not_absolute_earthquake_probability
+
+fixed_models:
+  C2B_D0_K75:
+    panel: D0_CANONICAL_M4_1970
+    type: long_KDE75
+  C2B_D1_K75:
+    panel: D1_M3SOURCE_M4_1980
+    type: long_KDE75
+  C2B_D2_K75:
+    panel: D2_M5SOURCE_M5_1950
+    type: long_KDE75
+  C2B_D0_R30:
+    panel: D0_CANONICAL_M4_1970
+    type: long_KDE75_plus_same_panel_recent30_KDE75
+    alpha: 0.25
+  C2B_D1_R30:
+    panel: D1_M3SOURCE_M4_1980
+    type: long_KDE75_plus_same_panel_recent30_KDE75
+    alpha: 0.25
+
+selected_models:
+  C2B_D0_MULTISCALE:
+    panel: D0_CANONICAL_M4_1970
+    bandwidth_order_km: [25.0, 75.0, 150.0]
+    candidates:
+      K75: [0.0, 1.0, 0.0]
+      fine: [0.5, 0.5, 0.0]
+      balanced: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+      broad: [0.0, 0.5, 0.5]
+    tie_order: [K75, broad, balanced, fine]
+  C2B_D0_AGE_WEIGHTED:
+    panel: D0_CANONICAL_M4_1970
+    base: long_KDE75
+    recent_interval: '(issue-365d,issue-24h]'
+    recent_kernel_bandwidth_km: 75.0
+    event_weight: 'exp(-log(2)*age_days_at_issue/half_life_days)'
+    half_life_days_candidates: [7.0, 30.0, 90.0]
+    alpha_candidates: [0.0, 0.25, 0.5, 0.75]
+    unique_candidates: 10
+    alpha_zero: one_exact_KDE75_candidate_no_half_life_search
+    tie_rule: smaller_alpha_then_larger_half_life
+    scientific_limit: normalized_relative_age_weighting_not_quiet_time_rate_decay
+
+selection:
+  granularity: outer_fold_x_horizon_shared_by_M5_6_and_M6_plus
+  target_catalog: unchanged_canonical_national_Ms4_plus_not_panel_filtered
+  future_target_visibility: available_at_at_or_before_selection_or_fit_cutoff
+  block_statistic: event_mean_log_cell_mass_minus_log_actual_cell_area
+  candidate_rule: maximize_equal_weight_mean_of_nonempty_I1_I2_I3_blocks
+  empty_block: NA_not_zero
+  minimum_nonempty_blocks_for_selection: 2
+  insufficient_blocks: exact_D0_KDE75_no_target_or_issue_deletion
+  tie_tolerance: 1.0e-12
+  retrospective_targets_may_inform_features_or_boundaries: false
+
+ridge:
+  models:
+    C2B_D0_RIDGE_CORE: [log_K25_over_K75, log_K150_over_K75, log_E30_365_over_K75]
+    C2B_D0_RIDGE_M5: [log_K25_over_K75, log_K150_over_K75, log_E30_365_over_K75, log_D2_K75_over_K75]
+  base: fixed_D0_KDE75_never_outer_selected_C0_bandwidth
+  E30_365: same_age_weighted_component_half_life_30d_365d_history
+  feature_definition: differences_of_finite_normalized_log_cell_masses_area_factors_cancel
+  target: canonical_Ms4_plus_cell_counts_in_each_earlier_issue_horizon
+  loss: pooled_equal_event_conditional_multinomial_NLL_plus_half_lambda_squared_L2
+  intercept: none_total_rate_profiled_out
+  lambda_candidates: [0.1, 1.0, 10.0]
+  cross_validation:
+    - train_blocks: [I1]
+      validate_block: I2
+    - train_blocks: [I1, I2]
+      validate_block: I3
+  training_target_end: at_or_before_validation_block_start_minus_30d
+  label_available_cutoff: at_or_before_validation_block_start_minus_30d
+  scaler:
+    fit_scope: legal_training_issues_only_separately_for_each_CV_branch_and_final_refit
+    issue_weighting: equal_issue
+    cell_weighting: actual_cell_area_divided_by_national_area
+    center: weighted_mean
+    scale: weighted_population_standard_deviation
+    zero_variance: inactive_coefficient_zero
+    winsorization: none
+    clipping: none
+  validation: equal_mean_of_two_nonempty_block_event_mean_log_densities
+  ties: largest_lambda_within_1e-12
+  fewer_than_two_nonempty_validation_blocks: fixed_lambda_10_then_legal_refit
+  fit_without_training_events: beta_zero_same_KDE75_no_issue_deletion
+  numerical_fit_failure: record_not_evaluable_use_beta_zero_no_new_optimizer_search
+  final_refit: pooled_I1_I2_I3_only_labels_ended_and_available_at_or_before_outer_start_minus_30d
+  optimization:
+    method: L-BFGS-B
+    initial_beta: zero
+    maximum_iterations: 2000
+    ftol: 1.0e-10
+    gtol: 1.0e-6
+    multiple_starts: false
+  existing_D1_reuse: objective_mathematics_only_no_anomaly_features_or_calendar_or_frozen_code_changes
+
+evaluation:
+  existing_references: [L0_UNIFORM, L1_REGIONAL_CONSTANT, L2_KDE_CAUSAL, L2_KDE75_LEGACY, L3_B0_R30_CAUSAL]
+  reuse_C0_predictions_and_targets_after_C2B_prediction_completion: true
+  rebuild_C0_predictions: false
+  magnitude_bands: [Ms5_6, Ms6_plus]
+  magnitude_boundaries: '[5,6);[6,infinity)'
+  main_anchor: Ms5_6_30d_600000km2_strict_fixed_first_anchor_episode_recall
+  expected_main_anchor_count: 147
+  area_budgets_km2: [300000.0, 450000.0, 600000.0, 750000.0, 960000.0]
+  ranking: descending_relative_mass_per_actual_cell_area_then_existing_fixed_grid_id_order
+  alarm_selection: inherited_whole_cell_prefix_without_skipping_or_overspending
+  actual_area: report_for_every_model_issue_budget_pair_not_claim_exact_equality
+  strict_hit_tolerance_km: 0.0
+  secondary_hit_tolerance_km: 70.0
+  episode_definition: inherited_first_anchor_fixed_30d_75km_no_transitive_chaining
+  views: [all_events, fixed_anchor, episode_balanced, subsequent_events]
+  paired_units: same_horizon_same_issue_same_targets_same_national_domain_same_budget
+  support_metrics: [spatial_log_density, information_gain, recall_area_curve]
+  bootstrap_replicates: 2000
+  bootstrap_seed: 147
+  bootstrap_unit: nonoverlapping_time_exposure_with_whole_episodes_retained
+  pooling_horizons_or_budgets_to_inflate_sample_size: false
+  single_event_gains: retain_and_describe_check_boundary_cell_and_fold_sensitivity_not_auto_reject
+  confidence_interval_is_hard_adoption_gate: false
+  time_magnitude_or_joint_refit: false
+  region_product_limit_already_satisfied: false
+  final_region_product: later_at_most_10_regions_and_960000km2_not_certified_by_grid_prefix
+
+planned_pairs:
+  - [C2B_D1_K75, C2B_D0_K75, panel_overall_difference_not_pure_year_effect]
+  - [C2B_D2_K75, C2B_D0_K75, panel_overall_difference_not_pure_magnitude_effect]
+  - [C2B_D1_R30, C2B_D0_R30, panel_difference_with_same_recent_model]
+  - [C2B_D0_R30, C2B_D0_K75, fixed_recent30_contribution]
+  - [C2B_D0_MULTISCALE, C2B_D0_K75, spatial_scale_contribution]
+  - [C2B_D0_AGE_WEIGHTED, C2B_D0_K75, relative_age_weighting_contribution]
+  - [C2B_D0_AGE_WEIGHTED, C2B_D0_R30, relative_age_model_vs_recent30]
+  - [C2B_D0_RIDGE_CORE, C2B_D0_K75, learned_spatial_combination]
+  - [C2B_D0_RIDGE_M5, C2B_D0_RIDGE_CORE, added_M5_panel_feature]
+
+run_boundary:
+  save_all_four_fold_predictions_before_outer_scoring: true
+  record_selected_parameters_and_inner_evidence: true
+  holdout_2020_2022_opened: false
+  audit_2023_plus_opened: false
+  locked_test_run: false
+  future_catalog_downloads: false
+  frozen_P1_modified: false
+  science_first_Stage4_drafts_touched: false
+  C2A_masks_crossed_with_models: false
+  ETAS_or_negative_binomial_reopened: false
+  before_real_run: protocol_and_implementation_acceptance_test_commit_push
+
+resources:
+  default_fold_workers: 2
+  maximum_fold_workers: 3
+  minimum_reserved_physical_cores: 2
+  numerical_threads_per_worker: 1
+  priority: BelowNormal
+  GPU: not_required_for_small_kernel_and_ridge_models
+  no_duplicate_instances: true
+
+outputs:
+  root: outputs/multitask_s1/s1c2b_catalog_models_v1
+  aggregate_public_only: true
+  local_event_level_artifacts: true
+  static_figures: main_paired_hits_and_recall_area_curves_by_horizon_and_band
+  offline_interactive: saved_prediction_replay_not_current_forecast
+  preserve_negative_and_positive_results: true
+
+science_review:
+  current_value: necessary_enabler_no_new_C2B_predictive_evidence
+  next_evidence: paired_location_prediction_gain_by_data_panel_model_horizon_and_magnitude
+  decision_after_finite_comparison: retain_useful_components_then_close_S1_and_enter_S2
+  stop_condition: no_unbounded_new_catalog_models_or_completeness_tuning
