@@ -1,0 +1,208 @@
+schema_version: 1
+protocol_id: "multitask-s1-c1-causal-local-completeness-v1"
+created_date: "2026-09-02"
+stage: "S1-C1"
+status: "score_blind_protocol_frozen_before_support_diagnostics_predictions_and_scores"
+scientific_question: "does_the_S1_C0_L2_or_L3_location_gain_survive_causal_local_catalog_completeness_control"
+scientific_role: "single_factor_location_training_centre_eligibility_test"
+score_blind_at_freeze: true
+new_S1_C1_scores_read_at_freeze: false
+prediction_run_at_freeze: false
+holdout_authorized: false
+audit_authorized: false
+locked_test_authorized: false
+champion_selection_allowed: false
+
+parent_bindings:
+  S1_C0_run_contract:
+    path: "configs/multitask_s1_development_run.yaml"
+    sha256: "af5ece932988827cb7f9d3db474c2541f92e54224fdefc3d820dc01d15fc0e85"
+  S1_development_contract:
+    path: "configs/multitask_s1_development_contract.yaml"
+    sha256: "8501371eee2912547861840a43ed699885635b8934b9dfdb67e412e265674505"
+  S1_C0_scientific_acceptance:
+    path: "docs/s1c0_scientific_acceptance_2026-09-02.md"
+    sha256: "2bd16041f7d8cdaf1361b661024938f7ac0c1c6828ee4022efe98318904e9f7f"
+
+frozen_development_design:
+  enabled_outer_folds:
+    - "C_DEV_2000_2004"
+    - "C_DEV_2005_2009"
+    - "C_DEV_2010_2014"
+    - "C_DEV_2015_2019"
+  target_episode_count: 147
+  target_episode_definition: "inside_study_area_M5_6_fixed_first_event_anchor_30d_75km_non_transitive"
+  prediction_and_scoring_domain: "unchanged_full_national_study_area"
+  study_area_km2: 9415305.754432771
+  operational_grid_cell_km: 25.0
+  operational_grid_id: "3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763"
+  forecast_axis: "Thursday_00_00_Asia_Shanghai"
+  main_catalog_delay_hours: 24
+  horizons_days: [7, 30, 90, 180, 365]
+  main_horizon_days: 30
+  area_budgets_km2: [300000.0, 450000.0, 600000.0, 750000.0, 960000.0]
+  main_alarm_area_km2: 600000.0
+  main_scientific_anchor: "24h_delay_M5_6_30d_600000km2_strict_0km_fixed_anchor_episode_recall"
+  target_denominator_may_change: false
+  prediction_or_scoring_domain_may_shrink: false
+
+causal_completeness_snapshots:
+  anchors:
+    - "each_inner_block_start"
+    - "each_outer_fold_start"
+  cutoff_rule: "snapshot_anchor_minus_24h"
+  visibility_at_cutoff: "origin_time<=cutoff_and_available_at<=cutoff"
+  freeze_rule: "one_eligibility_mask_per_inner_block_or_outer_fold_frozen_within_that_block_or_fold"
+  per_issue_Mc_reestimation_allowed: false
+  later_block_or_fold_end_backfill_allowed: false
+  issue_training_history_rule: "causally_expand_visible_history_to_each_issue_minus_24h_then_apply_the_frozen_block_or_fold_eligibility_mask"
+  temporal_completeness_role: "score_blind_diagnostic_only_no_change_to_this_spatial_training_centre_rule"
+  S1_location_and_M0_history_start_local: "1970-01-01T00:00:00+08:00"
+
+local_completeness_method:
+  catalog_population: "deduplicated_physical_events_inside_study_area_from_1970_visible_at_snapshot_cutoff"
+  equal_area_crs: "+proj=aea +lat_1=25 +lat_2=47 +lat_0=0 +lon_0=105 +datum=WGS84 +units=m +no_defs +type=crs"
+  fixed_origin_m: [0.0, 0.0]
+  cell_boundary_rule: "half_open_floor_index_higher_index_on_internal_boundary"
+  base_cell_km: 500.0
+  sparse_parent_cell_km: 1000.0
+  parent_mapping: "base_row_floor_div_2_and_base_column_floor_div_2_on_shared_zero_origin"
+  magnitude_bin_width: 0.1
+  estimator: "maximum_curvature_histogram_peak_plus_0.2"
+  histogram_peak_tie_rule: "choose_higher_magnitude_bin"
+  minimum_events_per_estimated_stratum: 200
+  base_cell_rule: "estimate_raw_Mc_in_500km_cell_when_event_count>=200_otherwise_inherit_fixed_1000km_parent"
+  sparse_parent_rule: "if_parent_event_count<200_mark_each_child_base_cell_indeterminate"
+  raw_Mc_training_threshold: 4.0
+  high_Mc_rule: "raw_Mc>4_excludes_training_centres_only_in_the_corresponding_500km_base_cell"
+  high_Mc_effect_outside_corresponding_cell: "none"
+  indeterminate_main_rule: "retain_under_explicit_frozen_common_Mc_4_assumption_without_claiming_catalog_completeness"
+  required_sensitivity: "exclude_all_training_centres_in_indeterminate_base_cells"
+  fixed_support_scale_interpretation: "study_specific_preregistered_support_scale_not_a_unique_literature_standard"
+
+shared_training_eligibility:
+  primary_models: ["L1_REGIONAL_CONSTANT", "L2_KDE_CAUSAL", "L2_KDE75_LEGACY", "L3_B0_R30_CAUSAL", "M0_GR_GLOBAL"]
+  rule: "all_primary_models_use_the_same_snapshot_specific_training_centre_eligibility_mask"
+  C0_unfiltered_models_role: "frozen_sensitivity_only_not_primary_comparison"
+  L0_UNIFORM_role:
+    spatial_log_density: "unchanged_proper_score_reference"
+    alarm_recall: "report_analytic_alarm_area_expectation_only"
+    fixed_tie_prefix: "audit_record_only_not_a_random_baseline"
+
+unchanged_model_and_selection_contract:
+  inheritance: "all_model_candidates_parameter_values_inner_blocks_selection_rules_embargoes_and_fallbacks_are_byte_bound_to_parent_S1_C0_run_contract"
+  new_candidates_or_parameters_allowed: false
+  L1_tau_years_candidates: [1.0, 5.0, 10.0]
+  L2_bandwidth_km_candidates: [75.0, 100.0, 150.0, 200.0, 300.0]
+  L2_fixed_continuity_reference_km: 75.0
+  L3_alpha_candidates: [0.0, 0.25, 0.5, 0.75]
+  location_parameter_selection: "unchanged_from_parent_S1_C0_run_contract"
+  T1_NEGATIVE_BINOMIAL:
+    status: "stopped_after_S1_C0_unstable_direction"
+    mechanical_bundle_generation_allowed: "C0_unchanged_only_when_required_for_NPZ_or_schema_compatibility"
+    use_for_C1_tuning: false
+    use_for_C1_scientific_gate: false
+    add_parameters: false
+  T0_POISSON_EXPANDING:
+    mechanical_bundle_generation_allowed: "C0_unchanged_only_when_required_for_NPZ_or_schema_compatibility"
+    use_for_C1_tuning: false
+    use_for_C1_scientific_gate: false
+  M3_GR_LONG_M5:
+    status: "unchanged_from_S1_C0"
+    affected_by_local_completeness_mask: false
+  M0_GR_GLOBAL:
+    local_completeness_mask_applied: true
+    scientific_role_in_C1: "same_scored_event_diagnostic_only_not_a_C1_selection_or_gate"
+
+frozen_runs:
+  main_common_Mc4:
+    run_id: "multitask-s1-c1-main-common-mc4-v1"
+    indeterminate_rule: "retain_training_centres_under_frozen_common_Mc_4_assumption"
+    output_root: "outputs/multitask_s1/s1c1_local_completeness_v1/main_common_mc4"
+  sensitivity_exclude_indeterminate:
+    run_id: "multitask-s1-c1-sensitivity-exclude-indeterminate-v1"
+    indeterminate_rule: "exclude_training_centres_in_all_indeterminate_500km_base_cells"
+    output_root: "outputs/multitask_s1/s1c1_local_completeness_v1/sensitivity_exclude_indeterminate"
+  output_roots_must_be_disjoint: true
+  cross_run_prediction_or_score_file_reuse_allowed: false
+
+support_area_gate:
+  supported_base_cell_definition: "Mc_estimable_from_base_or_parent_and_raw_Mc<=4"
+  numerator: "exact_equal_area_intersection_of_study_area_and_union_of_supported_500km_base_cells"
+  denominator: "unchanged_full_national_study_area_area"
+  minimum_fraction_every_snapshot: 0.95
+  failure_timing: "before_any_model_scoring"
+  failure_status: "evidence_insufficient"
+  failure_action: "stop_primary_C1_test_do_not_shrink_domain_do_not_change_targets_do_not_add_parameters"
+
+scientific_gate:
+  primary_comparisons:
+    - "L2_KDE_CAUSAL_minus_L1_REGIONAL_CONSTANT"
+    - "L3_B0_R30_CAUSAL_minus_L1_REGIONAL_CONSTANT"
+  pooled_effect_must_be_positive: true
+  positive_direction_minimum_folds: 2
+  same_alarm_area_required: true
+  area_inflation_allowed: false
+  main_alarm_area_km2: 600000.0
+  leave_largest_episode_direction_must_not_fully_reverse: true
+  leave_fixed_500km_target_blind_region_direction_must_not_fully_reverse: true
+  additional_parameter_search_allowed: false
+  small_stable_gain_allowed: true
+  mixed_or_near_zero_action: "stop_this_family_and_reassess_the_next_scientifically_useful_data_or_model"
+  gate_pass_does_not_select_champion: true
+  gate_pass_does_not_open_holdout_audit_or_locked_test: true
+
+recent_R30_increment_gate:
+  comparison: "L3_B0_R30_CAUSAL_minus_L2_KDE_CAUSAL"
+  pooled_effect_must_be_positive: true
+  positive_direction_minimum_folds: 2
+  leave_largest_episode_direction_must_not_fully_reverse: true
+  leave_fixed_500km_target_blind_region_direction_must_not_fully_reverse: true
+  failure_action: "stop_R30_component_only_do_not_stop_L2_or_the_full_location_family"
+  additional_parameter_search_allowed: false
+
+execution_sequence:
+  - id: "C1_P0_PROTOCOL_REMOTE_CLOSURE"
+    may_compute_model_predictions: false
+    may_compute_model_scores: false
+    completion: "this_protocol_and_plain_language_document_tested_accepted_committed_pushed_and_remote_readback"
+  - id: "C1_P1_SCORE_BLIND_SUPPORT_DIAGNOSTIC"
+    may_compute_model_predictions: false
+    may_compute_model_scores: false
+    scope: "build_causal_snapshot_masks_support_area_diagnostics_and_synthetic_tests_only"
+    completion: "diagnostic_artifacts_tested_accepted_committed_pushed_and_remote_readback"
+  - id: "C1_P2_PREDICT_AND_SEAL"
+    may_compute_model_predictions: true
+    may_read_outer_targets_or_scores: false
+    completion: "all_four_outer_fold_prediction_bundles_sealed_and_hash_verified"
+  - id: "C1_P3_SCORE_AFTER_SEAL"
+    authorization: "all_C1_P2_fold_seals_verified_and_support_area_gate_passed"
+    may_read_outer_targets_or_scores: true
+    completion: "scientific_value_review_before_any_further_model_or_data_extension"
+
+forbidden:
+  - "read_or_run_2020_2022_holdout"
+  - "read_or_run_2023_plus_audit"
+  - "read_or_run_locked_test"
+  - "use_future_earthquakes_to_estimate_Mc_or_training_eligibility"
+  - "reestimate_Mc_at_each_issue"
+  - "change_folds_targets_horizons_area_budgets_models_parameters_or_selection_rules"
+  - "normalize_or_score_only_on_supported_cells"
+  - "drop_high_Mc_or_indeterminate_cells_from_prediction_or_scoring_domain"
+  - "copy_global_temporal_Mc_failure_rules_into_this_spatial_single_factor_test"
+  - "tune_T1_or_add_any_parameter_from_C1_evidence"
+  - "touch_science_first_Stage4_untracked_drafts"
+
+resources:
+  maximum_fold_workers: 3
+  minimum_reserved_physical_cores: 2
+  numerical_library_threads_per_worker: 1
+
+planned_artifacts:
+  protocol_document: "docs/s1c1_blind_protocol_2026-09-02.md"
+  support_diagnostic_root: "outputs/multitask_s1/s1c1_local_completeness_v1/support_diagnostic"
+  main_prediction_root: "outputs/multitask_s1/s1c1_local_completeness_v1/main_common_mc4/prediction_phase"
+  main_score_root: "outputs/multitask_s1/s1c1_local_completeness_v1/main_common_mc4/score_phase"
+  sensitivity_prediction_root: "outputs/multitask_s1/s1c1_local_completeness_v1/sensitivity_exclude_indeterminate/prediction_phase"
+  sensitivity_score_root: "outputs/multitask_s1/s1c1_local_completeness_v1/sensitivity_exclude_indeterminate/score_phase"
+  historical_predictions_overwrite: false
