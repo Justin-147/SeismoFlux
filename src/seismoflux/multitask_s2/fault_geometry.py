@@ -213,8 +213,8 @@ def _source_lines(
     table = pq.read_table(pa.BufferReader(payload), columns=columns, use_threads=False)
     if table.num_rows != specification["expected_rows"]:
         raise ValueError(f"{source} geometry source row count changed")
-    if table[id_column].null_count or table[geometry_column].null_count:
-        raise ValueError(f"{source} geometry IDs and WKB must not be null")
+    if table[id_column].null_count:
+        raise ValueError(f"{source} geometry IDs must not be null")
     identifiers = table[id_column].to_pylist()
     if any(not isinstance(value, str) or not value for value in identifiers):
         raise ValueError(f"{source} geometry IDs must be nonempty strings")
@@ -233,6 +233,8 @@ def _source_lines(
     ]
     if len(selected_wkb) != specification["expected_usable_lines"]:
         raise ValueError(f"{source} usable geometry count changed")
+    if any(value is None for value in selected_wkb):
+        raise ValueError(f"{source} usable geometry WKB must not be null")
     lines = tuple(from_wkb(value) for value in selected_wkb)
     for line in lines:
         if (

@@ -320,3 +320,33 @@ def test_source_rejects_wrong_row_count_or_false_usable_count(tmp_path: Path) ->
 def test_input_path_cannot_escape_data_root(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="data root"):
         _verified_payload(tmp_path, "../outside.parquet", "0" * 64)
+
+
+@pytest.mark.parametrize("null_row_is_usable", [False, True])
+def test_null_wkb_is_allowed_only_when_existing_flag_excludes_row(
+    null_row_is_usable: bool,
+) -> None:
+    line = to_wkb(LineString([(105.0, 30.0), (105.0, 31.0)]))
+    table = pa.table(
+        {
+            "trace_id": ["valid-line", "null-geometry"],
+            "geometry_wkb": [line, None],
+            "usable_for_geometry": [True, null_row_is_usable],
+        }
+    )
+    specification = {
+        "allowed_columns": ["trace_id", "geometry_wkb", "usable_for_geometry"],
+        "id_column": "trace_id",
+        "geometry_column": "geometry_wkb",
+        "usable_column": "usable_for_geometry",
+        "expected_rows": 2,
+        "expected_usable_lines": 2 if null_row_is_usable else 1,
+    }
+    if null_row_is_usable:
+        with pytest.raises(ValueError, match="usable geometry WKB must not be null"):
+            _source_lines(_parquet_bytes(table), "TRACE", specification)
+    else:
+        lines, audit = _source_lines(_parquet_bytes(table), "TRACE", specification)
+        assert len(lines) == 1
+        assert lines[0].equals(LineString([(105.0, 30.0), (105.0, 31.0)]))
+        assert audit["excluded_by_existing_usability_flag"] == 1
