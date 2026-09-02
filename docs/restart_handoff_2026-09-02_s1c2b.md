@@ -59,9 +59,12 @@ runner，因为它还会进入与本轮无关的负二项、震级和联合拟�
 
 建议工作拆分：
 
-1. 位置数学：稳定log空间高斯核、有限混合、训练期加权标准化及条件ridge目标。
-2. 因果面板和训练预测：源成员映射、已有内层/外折日历、各h严格过去选择、四折检查点。
-3. 评价：四折完成后才复用C0开发目标；九模型及C0参考，全部h/震级/面积，配对新增与丢失。
+1. 位置数学：`src/seismoflux/multitask_s1/c2b_models.py`已实现，稳定log空间高斯核、有限混合、
+   训练期加权标准化及条件ridge目标。
+2. 因果面板和训练预测：`c2b_inputs.py`与`c2b_predict.py`已实现源成员映射、内层/外折日历、
+   各h严格过去选择、每折每时限检查点；不调用旧完整模型跑法。
+3. 评价：`c2b_score.py`已实现全四折完成后才复用C0目标；九模型及C0参考，全部h/震级/面积，
+   配对新增与丢失。严格0km为主，70km仅辅助投影距离敏感性。
 4. 结果一出来就解释增量，完成最小有用的静态图与离线回放，不在展示工程上拖延多数据研究。
 
 模型细节以精确YAML为准。指数近期权重只表示相对年龄，不能宣称发震率会随安静期自动减弱。
@@ -98,16 +101,22 @@ project_completed: false
 
 ## 5. 验收、运行与恢复记录
 
-当前状态：`S1_C2B_PROTOCOL_ACCEPTED_GIT_CLOSURE_PENDING`。12项配置/账本聚焦测试、Ruff与独立
-科学复审已通过，见`docs/s1c2b_protocol_acceptance_2026-09-02.md`。完成提交与远端回读后进入实现。
+当前状态：`S1_C2B_IMPLEMENTATION_ACCEPTED_GIT_CLOSURE_PENDING`。12项配置/账本聚焦测试、Ruff与
+独立科学复审已通过，见`docs/s1c2b_protocol_acceptance_2026-09-02.md`。协议提交
+`b35d8a760fee1443211e619e2c7d96a97892b899`已推送并由`git ls-remote`回读确认；允许进入有限实现。
+位置数学、因果面板与位置专用训练预测/评分路径已实现；合计53项聚焦验证、Ruff和独立科学复审
+通过，真实数据只读预检通过。见`docs/s1c2b_implementation_acceptance_2026-09-02.md`。
+仍未训练真实C2B模型；实现提交推送后即可启动。
 
 ```yaml
 C2A_closed_and_pushed: true
 C2B_training_panel_ledger_created: true
 C2B_protocol_scientific_review: PASS
 C2B_protocol_tests: PASS_12_focused_tests
-C2B_protocol_git_closure: pending
-C2B_model_implementation_complete: false
+C2B_protocol_git_closure: complete_remote_verified
+C2B_protocol_commit: b35d8a760fee1443211e619e2c7d96a97892b899
+C2B_model_implementation_status: accepted_waiting_git_closure
+C2B_model_implementation_complete: true
 C2B_predictions_created: false
 C2B_scores_created: false
 C2B_actual_predictive_improvement: unknown
@@ -128,3 +137,14 @@ science_first_Stage4_drafts_touched: false
 单线程、BelowNormal，至少保留2个物理核心。19:12检查没有Python/pythonw后台进程，两CPU负载
 31%/5%（全机约18%，不是本项目在训练）。此时还没有C2B训练后台进程，不能将协议编写声称为
 “模型正在训练”。继续时先查进程和输出，避免重复实例，并及时把完成比例/检查点写入本文。
+
+运行命令（在实现提交推送后执行；日志和PID记录需按真实启动补齐）：
+
+```powershell
+$env:PYTHONPATH = 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\src'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+& 'D:\AIPred\SeismoFlux\.venv\Scripts\python.exe' scripts/run_multitask_s1_c2b.py --phase predict --project-root 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata' --data-root 'D:\AIPred\SeismoFlux\data' --workers 2
+```
+
+正式后台启动必须设置隐藏窗口和BelowNormal。脚本在加载数值库前设单线程；输出目录的进程锁
+避免重复计算。现有完整时限预测不重跑；全折完成前不得调用`--phase score`。

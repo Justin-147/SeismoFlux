@@ -56,7 +56,8 @@ stop_condition: no_more_protocol_expansion_close_S1_after_finite_C2B_results
 C2B_prediction_gain_demonstrated: false
 protocol_acceptance: PASS
 publication_scope: aggregate_ledger_code_and_documents_only
-git_closure: pending_at_document_creation_see_latest_handoff
+git_closure: complete_remote_verified
+protocol_commit: b35d8a760fee1443211e619e2c7d96a97892b899
 ```
 
 注意：测试通过只说明可以开展这项科学比较，不能当成预测改善证据。
