@@ -15,6 +15,7 @@ from seismoflux.multitask_s2.strain import (
     _remap_projected,
     _source_rectangles,
     _strain_scalar,
+    _study_source_indices,
     blend_log_masses,
     load_strain_surfaces,
     validate_log_mass,
@@ -80,14 +81,27 @@ def test_densified_edges():
     assert rectangle.bounds == (100, 30, 100.25, 30.2)
 
 
+def test_study_prefilter_retains_boundary_crossing_cells_not_remote_duplicates():
+    lon = np.array([0.125, 0.125, 72.9, 100.0, 140.0])
+    lat = np.full(5, 30.0)
+    indices = _study_source_indices(lon, lat, 0.25, 0.2, (73.0, 18.0, 135.0, 54.0))
+    np.testing.assert_array_equal(indices, [2, 3])
+    assert len(_source_rectangles(lon[indices], lat[indices], 0.25, 0.2)) == 2
+
+
 def test_all_zero_strain_rejected_not_floored():
     with pytest.raises(ValueError, match="STRAIN"):
         _remap_projected([box(0, 0, 1000, 1000)], np.array([0.0]), [box(0, 0, 1000, 1000)])
 
 
-def test_loader_synthetic_source_and_identity(tmp_path):
+@pytest.mark.parametrize("outside_duplicates", [False, True])
+def test_loader_synthetic_source_and_identity(tmp_path, outside_duplicates):
     path = tmp_path / "tiny.txt"
-    path.write_text("# synthetic only\n30 100 3 4 0 0 0 0 0 0 0 3 4 0\n")
+    content = "# synthetic only\n30 100 3 4 0 0 0 0 0 0 0 3 4 0\n"
+    if outside_duplicates:
+        content += "30 0.125 3 4 0 0 0 0 0 0 0 3 4 0\n"
+        content += "30 0.125 5 6 0 0 0 0 0 0 0 5 6 0\n"
+    path.write_text(content)
     polygon = transform(
         Transformer.from_crs("EPSG:4326", EQUAL_AREA_CRS, always_xy=True).transform,
         _densified_rectangle((99.875, 29.9, 100.125, 30.1), 0.05),
@@ -112,7 +126,7 @@ def test_loader_synthetic_source_and_identity(tmp_path):
             "strain_source": {
                 "path": "tiny.txt",
                 "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                "expected_rows": 1,
+                "expected_rows": 3 if outside_duplicates else 1,
                 "expected_columns": 14,
                 "license": "synthetic",
                 "attribution": "synthetic",
@@ -130,7 +144,11 @@ def test_loader_synthetic_source_and_identity(tmp_path):
     }
     result = load_strain_surfaces(data_root=tmp_path, domain=domain, protocol=protocol)
     np.testing.assert_allclose(result.layers["STRAIN"], [0])
-    assert result.audit["source_rows"] == 1
+    assert result.audit["source_rows"] == (3 if outside_duplicates else 1)
+    assert result.audit["candidate_source_cells"] == 1
+    assert result.audit["global_duplicate_centers"] == int(outside_duplicates)
+    assert result.audit["study_candidate_duplicate_centers"] == 0
+    assert not result.audit["global_records_deduplicated_or_averaged"]
     assert result.audit["principal_norm_max_absolute_difference"] == 0
     protocol["inputs"]["strain_source"]["sha256"] = "bad"
     with pytest.raises(ValueError, match="SHA256"):

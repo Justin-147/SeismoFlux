@@ -1,6 +1,6 @@
 # 最新重启交接：S2-C物理资料研究准备
 
-更新时间：2026-09-03 02:39（北京时间）。状态：`S2C_IMPLEMENTATION_ACCEPTED_PENDING_SYNC`。
+更新时间：2026-09-03 02:50（北京时间）。状态：`S2C_SCOPE_FIX_ACCEPTED_PENDING_SYNC_THEN_ATTEMPT2`。
 接替`docs/restart_handoff_2026-09-03_s2b.md`；旧文档中的运行PID和待评分文字只作历史快照。
 唯一实施蓝图为`SEISMOFLUX_IMPLEMENTATION_HANDOFF.md`，当前按第1.9—1.19节及本文件继续。
 
@@ -155,3 +155,22 @@ origin引用均为后者。预测/评分/最终图/离线回放与阶段验收�
 结果目录为`outputs/multitask_s2/s2c_strain_v1`；总summary为四折，`post_release_development`
 字段是预定2015—2019分列，同一逐事件表按fold筛选，不二次更换目标。
 心跳已更新并返回ACTIVE、每30分钟，入口已改成当前协议/实现，不再重做应变源预检。
+
+## 8. 02:50最高优先级续接：局部修复后运行attempt2
+
+实现`d29d46bb7368ff9fdbcdfa159e097be8f4ee29cf`已于02:41:49推送并回读一致；02:42:39启动
+PID29604，02:43:27在静态层生成之前报“duplicate source cells”并退出，没有S2-C预测或分数。
+原因和修复详见`docs/s2c_source_scope_fix_2026-09-03.md`：全球50组重复中心全部在经±0.125°，
+与中国格相交面积为0。不是中国资料冲突，不能让域外问题挡住域内试验。
+新实现仅把研究域矩形预筛选放到重复/重叠检查之前，保留跨边界单元和域内拒绝；不改原资料或
+冻结协议/模型/目标，不平均或删改冲突记录。首目录保留为无效运行，不回写任何身份。
+
+修复通过独立科学复审；必要回归后提交推送，随后**显式使用新输出目录**
+`outputs/multitask_s2/s2c_strain_v1_attempt2`运行预测、验证、评分与展示。不要不带output-root
+继续旧v1。默认两折线程、数值库1、BelowNormal、亲和性15，启动前再查重复进程。
+展示适配在并行编写，只用合成资料，不得在四折预测完成前读真实外折目标。
+
+02:51修复后的44项合成回归全部通过（24.86秒），协议SHA保持
+`e9e0800279b9db64722c35763b0dae4d228d90173ddceb660e614ffbcc78876e`。
+新展示入口`scripts/render_multitask_s2c.py`已完成，4项合成/交互检查通过，实际图件须待评分完成。
+当前无活动真实模型进程；下一动作是同步范围修复并启动attempt2，不是继续查全球重复源。

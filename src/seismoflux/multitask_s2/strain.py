@@ -87,6 +87,23 @@ def _source_rectangles(lon: np.ndarray, lat: np.ndarray, width: float, height: f
     return rectangles
 
 
+def _study_source_indices(
+    lon: np.ndarray,
+    lat: np.ndarray,
+    width: float,
+    height: float,
+    study_bounds: Sequence[float],
+) -> np.ndarray:
+    """Keep intersecting cell rectangles, not just centers; far cells have A_ij=0."""
+    left, bottom, right, top = study_bounds
+    return np.flatnonzero(
+        (lon + width / 2 >= left)
+        & (lon - width / 2 <= right)
+        & (lat + height / 2 >= bottom)
+        & (lat - height / 2 <= top)
+    )
+
+
 def _densified_rectangle(bounds: Sequence[float], step: float) -> Polygon:
     left, bottom, right, top = bounds
     corners = [(left, bottom), (right, bottom), (right, top), (left, top)]
@@ -160,20 +177,31 @@ def load_strain_surfaces(
     lat, lon = table[:, 0], table[:, 1]
     scalars = _strain_scalar(table[:, 2], table[:, 3], table[:, 4])
     spatial = protocol["spatial_math"]
-    rectangles = _source_rectangles(
-        lon, lat, spatial["longitude_width_degrees"], spatial["latitude_height_degrees"]
+    candidates = _study_source_indices(
+        lon,
+        lat,
+        spatial["longitude_width_degrees"],
+        spatial["latitude_height_degrees"],
+        domain.study_area_wgs84.bounds,
     )
-    # Geographic study bounds prefilter sources, never earthquake locations.
-    candidates = STRtree(rectangles).query(box(*domain.study_area_wgs84.bounds))
+    # Global Greenwich-seam duplicates cannot contribute to the China integral.
+    # Do not clean or average them; retain validation for all actually used cells.
+    _, center_counts = np.unique(table[:, :2], axis=0, return_counts=True)
+    rectangles = _source_rectangles(
+        lon[candidates],
+        lat[candidates],
+        spatial["longitude_width_degrees"],
+        spatial["latitude_height_degrees"],
+    )
     projector = Transformer.from_crs("EPSG:4326", EQUAL_AREA_CRS, always_xy=True)
     projected = [
         transform(
             projector.transform,
             _densified_rectangle(
-                rectangles[i].bounds, spatial["geodetic_edge_maximum_segment_degrees"]
+                rectangle.bounds, spatial["geodetic_edge_maximum_segment_degrees"]
             ),
         )
-        for i in candidates
+        for rectangle in rectangles
     ]
     layers, areas, weighted = _remap_projected(projected, scalars[candidates], targets)
     # Principal values are a one-time diagnostic only, never used in layers.
@@ -185,7 +213,12 @@ def load_strain_surfaces(
         "candidate_source_cells": len(candidates),
         "grid_id": grid.grid_id,
         "grid_cells": grid.cell_count,
-        "source_cell_overlap": "none_except_shared_edge_roundoff",
+        "source_cell_overlap": "none_in_study_candidates_except_shared_edge_roundoff",
+        "duplicate_overlap_validation_scope": "source_rectangles_intersecting_fixed_study_bounds",
+        "global_duplicate_centers": int(np.count_nonzero(center_counts > 1)),
+        "global_duplicate_extra_rows": int(np.sum(center_counts - 1)),
+        "study_candidate_duplicate_centers": 0,
+        "global_records_deduplicated_or_averaged": False,
         "shared_edge_roundoff_tolerance_degrees": 1e-9,
         "strain_scalar": spatial["strain_scalar"],
         "tensor_shear": True,
