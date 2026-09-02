@@ -2,6 +2,8 @@
 
 更新时间：2026-09-02 23:38（北京时间）。当前：`S2A_SCIENCE_COMPLETE_REMOTE_CONFIRMED_NEXT_STATIC_PHYSICS`。
 本文件接替`docs/restart_handoff_2026-09-02_s1c2b.md`；旧文档与结果保留。
+**2026-09-03续接入口已转到`docs/restart_handoff_2026-09-03_s2b.md`。S2-A全部完成，下面的
+过程记录不代表仍在运行；旧的“尚无S2效果/实现”表述仅对应当时的时间点。**
 
 ## 1. 一句话状态
 

@@ -1,0 +1,256 @@
+schema_version: 1
+protocol_id: s2b-finite-fault-slip-rate-increment-v1
+stage: S2-B
+status: protocol_frozen_before_S2B_predictions
+scientific_role: current_static_slip_rates_retrospective_development_not_historical_prospective
+S1_development_results_seen: true
+S2A_development_results_seen: true
+S2B_predictions_or_scores_seen_at_registration: false
+methods_document: docs/s2b_slip_rate_methods_2026-09-03.md
+parent_protocol: configs/multitask_s2_a_fault_geometry.yaml
+parent_protocol_sha256: d6e19dca67063030e8eafdfd766f13f2310a5e52790cc4b2b7fe8707cf58b5c9
+parent_contract: configs/multitask_s1_development_contract.yaml
+
+inputs:
+  data_root_required: true
+  catalog_protocol: configs/multitask_s1_c2b_catalog_models.yaml
+  catalog_protocol_sha256: 4f497690643a64466cbd9eec358977f1c8c1d4655bc4cc9ca5a65dbc95859243
+  catalog_run: outputs/multitask_s1/s1c2b_catalog_models_v1
+  catalog_prediction_manifest_sha256: 110c795bacae7aa4e00fe72eb3195fee947c1c913d8752da721d9e122db2a01c
+  catalog_score_manifest_sha256: ae96f95f2e7fbd92c8f6f692b0f4f95f7dd48787d5bcfc2cdf53e0138dde8dc5
+  catalog_main_model: C2B_D0_MULTISCALE
+  catalog_panel: D0_CANONICAL_M4_1970
+  local_two_catalogs_effective_magnitude_type: Ms
+  numeric_magnitude_conversion: none
+  external_catalog_Ms_assumption: false
+  old_catalog_cache_and_predictions: read_only_never_recalculate_or_overwrite
+  missing_old_component_cache: stop_and_report_not_write_old_run
+  grid_id: 3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763
+  grid_cells: 15697
+  grid_cell_size_km: 25.0
+  grid_area_km2: 9415305.754432771
+  national_support_percentage_gate: null
+  local_Mc_masks_applied: false
+  fault_segments:
+    path: processed/stage1/debc98054172a4a1/fault_segment.parquet
+    sha256: 8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627
+    id_column: fault_segment_id
+    geometry_column: simplified_geometry_wkb
+    allowed_columns: [fault_segment_id, simplified_geometry_wkb,
+      geologic_total_rate_mm_per_year, geodetic_total_rate_mm_per_year]
+    expected_rows: 519
+    expected_unique_ids: 519
+    expected_usable_lines: 519
+    rate_units: mm_per_year
+    expected_geologic_nonnull_and_positive: 385
+    expected_geodetic_nonnull_and_positive: 515
+    expected_both_nonnull: 385
+    expected_geodetic_only: 130
+    expected_both_missing: 4
+    geologic_rate_range_mm_per_year: [0.01, 21.2]
+    geodetic_rate_range_mm_per_year: [0.04, 18.22]
+  rate_values: original_total_columns_no_component_reconstruction_no_winsorization
+  missing_rate_policy: unknown_not_zero_exclude_only_from_required_line_panel_not_earthquake_targets
+  automatic_rate_imputation: false
+  static_snapshot_available_at: '2026-07-12T16:00:00+00:00'
+  original_historical_model_eligible: false
+  source_eligibility_flags_modified: false
+  crosswalk_attribute_transfer: false
+  detailed_trace_attributes_used: false
+  excluded_features: [rate_components, rate_errors_without_confidence_definition,
+    recurrence_period, last_strong_earthquake_year, elapsed_ratio_at_snapshot,
+    rupture_gap_weight, locking_weight, microseismic_sparsity_weight,
+    coulomb_stress_weight, long_term_hazard_score, source_version_flags,
+    strike_deg, dip_deg, slip_angle_deg]
+
+panels:
+  COMMON:
+    required_nonnull_columns: [geologic_total_rate_mm_per_year, geodetic_total_rate_mm_per_year]
+    expected_segments: 385
+  NATIVE_GD:
+    required_nonnull_columns: [geodetic_total_rate_mm_per_year]
+    expected_segments: 515
+
+layers:
+  COMMON_UNIT: {panel: COMMON, weight_column: null, constant_weight: 1.0}
+  COMMON_GEO: {panel: COMMON, weight_column: geologic_total_rate_mm_per_year, constant_weight: null}
+  COMMON_GD: {panel: COMMON, weight_column: geodetic_total_rate_mm_per_year, constant_weight: null}
+  NATIVE_UNIT: {panel: NATIVE_GD, weight_column: null, constant_weight: 1.0}
+  NATIVE_GD: {panel: NATIVE_GD, weight_column: geodetic_total_rate_mm_per_year, constant_weight: null}
+
+calendar:
+  outer_folds: [C_DEV_2000_2004, C_DEV_2005_2009, C_DEV_2010_2014, C_DEV_2015_2019]
+  horizons_days: [7, 30, 90, 180, 365]
+  outer_issue_counts_per_horizon: [176, 116, 56, 32, 16]
+  outer_total_issue_horizon_pairs: 396
+  inner_blocks: exactly_I1_I2_I3_from_parent_contract
+  forecast_axis: Thursday_00_00_Asia_Shanghai
+  catalog_delay_hours: 24
+  target_interval: '(issue,issue+horizon]'
+  exposure_rule: unchanged_nonoverlapping_horizon_plus_30d_from_S1
+  outer_embargo_days: 30
+
+geometry_math:
+  source_crs_assumption: EPSG_4326_WGS84_existing_interpretation_not_independently_confirmed
+  projected_crs: existing_China_Albers_equal_area
+  query_points: existing_clipped_cell_point_on_surface_not_new_centers
+  distance_units: km
+  kernel: 'K_s(r)=exp(-r^2/(2*s^2))/(2*pi*s^2)'
+  line_integral: 'q_s(x_i)=sum_j_in_panel(v_j*integral_over_L_j(K_s(norm(x_i-u))*d_length))'
+  normalized_cell_mass: 'F_s(i)=A_i*q_s(x_i)/sum_k(A_k*q_s(x_k))'
+  line_contribution: proportional_to_projected_length_times_original_rate_or_unit_weight
+  per_line_unit_mass_normalization: false
+  raw_lines: preserve_original_projected_edges_no_auto_merging_or_redrawing
+  layer_support_selection: rate_nonnull_only_not_earthquake_coordinates_or_results
+  target_or_grid_filtering_by_layer_support: false
+  scales_km: [25.0, 75.0, 150.0]
+  scale_meaning: Gaussian_standard_deviation_not_rupture_radius_or_hit_tolerance
+  scale_tie_order_km: [75.0, 150.0, 25.0]
+  mixture: '(1-alpha)*C+alpha*F'
+  alpha_candidates: [0.0, 0.25, 0.5, 0.75, 1.0]
+  unique_mixture_candidates_per_layer: 13
+  alpha_zero: one_exact_catalog_candidate_scale_null
+  mixture_tie_order: smaller_alpha_then_scale_tie_order
+  numerical_representation: finite_float64_normalized_log_cell_mass
+  Gaussian_tail_truncation_radius_km: null
+  artificial_probability_floor: null
+  additional_background_weight: null
+  interpretation: relative_spatial_mass_not_absolute_occurrence_probability_or_moment_rate
+
+numerical_integration:
+  method: midpoint_quadrature_on_each_original_projected_straight_edge
+  subinterval_count: 'ceil(edge_length_km/maximum_step_km)'
+  quadrature_point_weight: represented_edge_length_km_times_layer_weight
+  zero_length_edges: zero_contribution
+  same_panel_layers_share_quadrature_points: true
+  production_maximum_step_km: 3.125
+  diagnostic_maximum_step_km: 6.25
+  diagnostic_runs: 1
+  diagnostic_uses_earthquake_targets: false
+  diagnostic_metrics: [normalized_layer_total_variation, alarm_cell_differences_at_fixed_budgets]
+  production_always_uses_fine_step: true
+  step_selected_by_outer_results: false
+  repeated_adaptive_refinement: false
+  national_percentage_agreement_gate: null
+
+models:
+  S2B_COMMON_UNIT_ONLY: {layer: COMMON_UNIT, family: fault_only}
+  S2B_COMMON_UNIT_CATALOG_MIX: {layer: COMMON_UNIT, family: catalog_mixture}
+  S2B_COMMON_GEO_ONLY: {layer: COMMON_GEO, family: fault_only}
+  S2B_COMMON_GEO_CATALOG_MIX: {layer: COMMON_GEO, family: catalog_mixture}
+  S2B_COMMON_GD_ONLY: {layer: COMMON_GD, family: fault_only}
+  S2B_COMMON_GD_CATALOG_MIX: {layer: COMMON_GD, family: catalog_mixture}
+  S2B_NATIVE_UNIT_ONLY: {layer: NATIVE_UNIT, family: fault_only}
+  S2B_NATIVE_UNIT_CATALOG_MIX: {layer: NATIVE_UNIT, family: catalog_mixture}
+  S2B_NATIVE_GD_ONLY: {layer: NATIVE_GD, family: fault_only}
+  S2B_NATIVE_GD_CATALOG_MIX: {layer: NATIVE_GD, family: catalog_mixture}
+
+selection:
+  granularity: outer_fold_x_horizon_shared_by_Ms5_6_and_Ms6_plus
+  target_catalog: unchanged_canonical_national_Ms4_plus
+  inner_catalog_branches:
+    - {train_blocks: [I1], validate_block: I2}
+    - {train_blocks: [I1, I2], validate_block: I3}
+  inner_catalog_training_end_and_label_visibility: at_or_before_validation_start_minus_30d
+  inner_catalog_selector: unchanged_C2B_four_multiscale_candidates_and_tie_order
+  inner_catalog_minimum_nonempty_blocks: 2
+  I2_catalog_consequence: explicit_exact_K75_fallback_because_only_I1_is_earlier
+  insufficient_inner_catalog_blocks: exact_K75_no_block_or_issue_deletion
+  outer_catalog_surface: reuse_saved_C2B_D0_MULTISCALE_no_refit_no_backfill_into_inner_validation
+  geometry_validation_blocks: [I2, I3]
+  geometry_label_end_and_visibility: at_or_before_outer_start_minus_30d
+  block_statistic: event_mean_log_cell_mass_minus_log_actual_cell_area
+  geometry_candidate_rule: maximize_equal_mean_of_nonempty_I2_I3_block_statistics
+  minimum_nonempty_blocks_for_geometry_selection: 1
+  empty_block: NA_not_zero_keep_empty_exposures
+  zero_nonempty_blocks_fault_only: fixed_scale_75km
+  zero_nonempty_blocks_mixture: exact_catalog_alpha_zero
+  tie_tolerance: 1.0e-12
+  pure_and_mixture_scales: independently_selected_finite_procedures_not_single_parameter_ablation
+  geometry_or_blocks_may_use_target_coordinates: false
+
+evaluation:
+  references: [C2B_D0_MULTISCALE, C2B_D0_AGE_WEIGHTED, C0_L3_B0_R30_CAUSAL, C0_L0_UNIFORM]
+  reuse_verified_saved_reference_scores: true
+  reuse_same_C0_target_vectors_after_all_S2B_predictions: true
+  magnitude_bands: [Ms5_6, Ms6_plus]
+  magnitude_boundaries: '[5,6);[6,infinity)'
+  main_anchor: Ms5_6_30d_600000km2_strict_fixed_first_anchor_episode_recall
+  expected_main_anchor_count: 147
+  geological_focus_horizons_days: [90, 180, 365]
+  area_budgets_km2: [300000.0, 450000.0, 600000.0, 750000.0, 960000.0]
+  ranking: descending_relative_mass_per_actual_area_then_existing_grid_order
+  alarm_selection: unchanged_whole_cell_prefix_no_skipping_no_overspending
+  actual_area: report_model_specific_actual_area_not_claim_exact_equality
+  strict_hit_tolerance_km: 0.0
+  secondary_hit_tolerance_km: 70.0
+  episode_definition: unchanged_fixed_first_anchor_30d_75km_no_transitive_chaining
+  views: [all_events, fixed_anchor, episode_balanced, subsequent_events]
+  support_metrics: [spatial_log_density, information_gain, recall_area_curve]
+  bootstrap_replicates: 2000
+  bootstrap_seed: 147
+  bootstrap_unit: unchanged_nonoverlapping_time_exposure_with_whole_episodes
+  confidence_interval_is_hard_adoption_gate: false
+  pooling_horizons_or_budgets_to_inflate_sample_size: false
+  time_magnitude_or_joint_skill_claim: false
+  final_at_most_10_region_product_certified: false
+
+planned_pairs:
+  - [S2B_COMMON_GEO_CATALOG_MIX, S2B_COMMON_UNIT_CATALOG_MIX, common_geologic_rate_over_geometry]
+  - [S2B_COMMON_GD_CATALOG_MIX, S2B_COMMON_UNIT_CATALOG_MIX, common_geodetic_rate_over_geometry]
+  - [S2B_NATIVE_GD_CATALOG_MIX, S2B_NATIVE_UNIT_CATALOG_MIX, native_geodetic_rate_over_geometry]
+  - [S2B_COMMON_UNIT_CATALOG_MIX, C2B_D0_MULTISCALE, common_geometry_increment]
+  - [S2B_COMMON_GEO_CATALOG_MIX, C2B_D0_MULTISCALE, common_geologic_total_increment]
+  - [S2B_COMMON_GD_CATALOG_MIX, C2B_D0_MULTISCALE, common_geodetic_total_increment]
+  - [S2B_NATIVE_UNIT_CATALOG_MIX, C2B_D0_MULTISCALE, native_geometry_increment]
+  - [S2B_NATIVE_GD_CATALOG_MIX, C2B_D0_MULTISCALE, native_geodetic_total_increment]
+  - [S2B_COMMON_GD_CATALOG_MIX, S2B_COMMON_GEO_CATALOG_MIX, same_faults_two_original_rate_sources]
+  - [S2B_NATIVE_GD_CATALOG_MIX, S2B_COMMON_GD_CATALOG_MIX, native_vs_common_rate_coverage_procedures]
+  - [S2B_NATIVE_UNIT_CATALOG_MIX, S2B_COMMON_UNIT_CATALOG_MIX, added_line_coverage_geometry_reference]
+  - [S2B_COMMON_GEO_ONLY, S2B_COMMON_UNIT_ONLY, pure_common_geologic_rate_increment]
+  - [S2B_COMMON_GD_ONLY, S2B_COMMON_UNIT_ONLY, pure_common_geodetic_rate_increment]
+  - [S2B_NATIVE_GD_ONLY, S2B_NATIVE_UNIT_ONLY, pure_native_geodetic_rate_increment]
+
+run_boundary:
+  before_real_run: protocol_and_implementation_acceptance_test_commit_push
+  save_all_four_fold_predictions_before_outer_scoring: true
+  current_snapshot_role_must_be_displayed: true
+  holdout_2020_2022_opened: false
+  audit_2023_plus_opened: false
+  locked_test_run: false
+  future_catalog_downloads: false
+  frozen_P1_modified: false
+  science_first_Stage4_drafts_touched: false
+  old_S1_predictions_or_scores_modified: false
+  old_S2A_predictions_or_scores_modified: false
+  S2A_predictor_rerun: false
+  post_score_additional_scale_or_weight_search: false
+  post_score_rate_transform_or_panel_change: false
+  hazard_strain_or_dynamic_anomalies_in_this_run: false
+  rate_components_or_moment_rates_reconstructed: false
+  support_or_target_selection_by_earthquake_results: false
+
+resources:
+  default_fold_workers: 2
+  maximum_fold_workers: 3
+  minimum_reserved_physical_cores: 2
+  numerical_threads_per_worker: 1
+  priority: BelowNormal
+  no_duplicate_instances: true
+
+outputs:
+  root: outputs/multitask_s2/s2b_slip_rate_v1
+  preserve_completed_checkpoints: true
+  public: code_documents_aggregate_results_and_aggregate_figures_only
+  local_only: event_arrays_geometry_maps_case_figures_and_offline_replay
+  static_figures: paired_recall_by_horizon_band_area_and_rate_geometry_coverage_contribution
+  offline_interactive: historical_development_replay_with_snapshot_caveat
+
+science_review:
+  present_value: necessary_preparation_no_S2B_predictive_evidence
+  next_evidence: same_sample_same_budget_paired_recall_gains_and_losses
+  rate_contribution: compare_weighted_and_unit_layers_on_identical_line_support
+  coverage_contribution: compare_native_and_common_with_both_weighted_and_unit_controls
+  source_comparison_limit: different_observation_periods_and_inversion_methods_not_measurement_accuracy_proof
+  if_no_gain: close_rate_variant_without_new_search_then_hazard_strain_and_S3_anomalies
+  small_task_specific_gain: retain_effect_size_fold_direction_uncertainty_and_limitations_for_S5
