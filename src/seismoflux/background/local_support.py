@@ -386,6 +386,85 @@ class LocalSupportStudyAreaIdentity:
 
 
 @dataclass(frozen=True, slots=True)
+class LocalSupportBaseCell:
+    """One immutable cell in the pure-spatial fixed 500 km partition."""
+
+    cell_id: str
+    row: int
+    column: int
+    clipped_geometry: BaseGeometry
+    clipped_area_m2: float
+
+    def __post_init__(self) -> None:
+        if type(self.row) is not int or type(self.column) is not int:
+            raise ValueError("local support base-cell indices must be integers")
+        if self.cell_id != _fixed_cell_id(SPATIAL_BASE_CELL_KM, self.row, self.column):
+            raise ValueError("local support base-cell ID does not match its fixed grid index")
+        area_m2 = float(self.clipped_area_m2)
+        if (
+            not isinstance(self.clipped_geometry, BaseGeometry)
+            or self.clipped_geometry.is_empty
+            or not self.clipped_geometry.is_valid
+            or not math.isfinite(area_m2)
+            or area_m2 <= 0.0
+            or float(self.clipped_geometry.area) != area_m2
+        ):
+            raise ValueError("local support base cell must have exact positive clipped geometry")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalSupportBasePartition:
+    """Immutable pure-spatial partition of the sealed equal-area study geometry.
+
+    ``study_area_sha256`` hashes the same normalized two-dimensional little-endian
+    WKB used by :class:`LocalSupportSnapshot`.  No temporal, completeness,
+    support-retention, or normalization decision is made by this object.
+    """
+
+    study_area_sha256: str
+    total_area_m2: float
+    cells: tuple[LocalSupportBaseCell, ...]
+
+    def __post_init__(self) -> None:
+        if not _SHA256_RE.fullmatch(self.study_area_sha256):
+            raise ValueError("study_area_sha256 must be a lowercase SHA-256")
+        if type(self.cells) is not tuple or any(
+            not isinstance(cell, LocalSupportBaseCell) for cell in self.cells
+        ):
+            raise ValueError("local support base partition requires an immutable cell tuple")
+        order = tuple((cell.row, cell.column) for cell in self.cells)
+        if not order or order != tuple(sorted(order)) or len(order) != len(set(order)):
+            raise ValueError("local support base cells must be unique and row/column sorted")
+        total_area_m2 = math.fsum(cell.clipped_area_m2 for cell in self.cells)
+        if (
+            not math.isfinite(float(self.total_area_m2))
+            or self.total_area_m2 <= 0.0
+            or self.total_area_m2 != total_area_m2
+        ):
+            raise ValueError("base-partition area must equal the exact clipped-cell sum")
+
+    def resolve(self, *, x_m: float, y_m: float) -> LocalSupportBaseCell | None:
+        """Return the covered base cell, or ``None`` outside the study domain."""
+
+        x_value = float(x_m)
+        y_value = float(y_m)
+        if not math.isfinite(x_value) or not math.isfinite(y_value):
+            raise ValueError("local support point coordinates must be finite")
+        cells_by_key = {(cell.row, cell.column): cell for cell in self.cells}
+        clipped_by_key = {
+            key: _ClippedCell(
+                row=cell.row,
+                column=cell.column,
+                geometry=cell.clipped_geometry,
+                area_m2=cell.clipped_area_m2,
+            )
+            for key, cell in cells_by_key.items()
+        }
+        key = _resolve_base_cell_key(x_value, y_value, clipped_by_key)
+        return None if key is None else cells_by_key[key]
+
+
+@dataclass(frozen=True, slots=True)
 class _ClippedCell:
     row: int
     column: int
@@ -503,6 +582,34 @@ def _resolve_base_cell_key(
         if clipped is not None and clipped.geometry.covers(event_point):
             return key
     return None
+
+
+def build_local_support_base_partition(
+    study_area_equal_area: BaseGeometry,
+) -> LocalSupportBasePartition:
+    """Build the fixed 500 km clipped partition without fitting completeness.
+
+    This is a read-only view over the same private spatial construction used by
+    :func:`build_local_support_snapshot`; it deliberately has no event, time,
+    magnitude-completeness, retained-support, or density-normalization input.
+    """
+
+    clipped_cells = _build_clipped_base_cells(study_area_equal_area)
+    cells = tuple(
+        LocalSupportBaseCell(
+            cell_id=_fixed_cell_id(SPATIAL_BASE_CELL_KM, cell.row, cell.column),
+            row=cell.row,
+            column=cell.column,
+            clipped_geometry=cell.geometry,
+            clipped_area_m2=cell.area_m2,
+        )
+        for cell in clipped_cells
+    )
+    return LocalSupportBasePartition(
+        study_area_sha256=hashlib.sha256(_geometry_wkb(study_area_equal_area)).hexdigest(),
+        total_area_m2=math.fsum(cell.clipped_area_m2 for cell in cells),
+        cells=cells,
+    )
 
 
 class LocalSupportCellLocator:
@@ -1160,6 +1267,8 @@ __all__ = [
     "MAXIMUM_SUPPORTED_RAW_MC",
     "MINIMUM_RETAINED_AREA_FRACTION",
     "LocalSupportAudit",
+    "LocalSupportBaseCell",
+    "LocalSupportBasePartition",
     "LocalSupportCell",
     "LocalSupportCellLocator",
     "LocalSupportCellManifest",
@@ -1172,6 +1281,7 @@ __all__ = [
     "LocalSupportTemporalManifest",
     "SupportSource",
     "SupportStatus",
+    "build_local_support_base_partition",
     "build_local_support_manifest",
     "build_local_support_snapshot",
     "build_local_support_study_area_identity",
