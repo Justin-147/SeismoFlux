@@ -95,7 +95,7 @@ C2目录问题完成后转入S2断层、危险性和应变，再做S3异常，�
 
 ## 7. 本轮阶段验收与安全恢复点
 
-当前状态：`S1_C2A_SCIENTIFIC_COMPLETE_PENDING_RESULT_COMMIT_PUSH`。
+当前状态：`S1_C2A_CLOSED_NEXT_C2B_PROTOCOL_PENDING`。
 审计与协议已由提交`3c2948d125a532672df65c3da543113ac7c79bb8`完成验证、独立科学复审、推送与
 远端回读；验收记录为`docs/s1c2a_audit_protocol_acceptance_2026-09-02.md`。最小位置对照实现
 验收为`docs/s1c2a_implementation_acceptance_2026-09-02.md`，25项聚焦合成验证和
@@ -112,8 +112,9 @@ C2目录问题完成后转入S2断层、危险性和应变，再做S3异常，�
 A为32/46/52，B为32/46/53。真实产物独立复核、两张静态图目视验证、离线数据与JS语法检查通过。
 浏览器安全策略拒绝本地file地址，点击交互未实测；不绕过限制，也不把它变成科学研究停止门。
 本次运行日志为`data/interim/c2a_logs/predict_20260902T181249.stdout.log`及对应stderr文件。
-真实成绩与验收见`docs/s1c2a_scientific_results_2026-09-02.md`。待本轮结果提交、推送与远端回读后，
-进入C2B有限协议设计；此处不预先填入尚未产生的科学结果提交SHA。
+真实成绩与验收见`docs/s1c2a_scientific_results_2026-09-02.md`。科学结果提交
+`4f5a2bea66516d5e580ffc3ee3ba8839f424f5e7`已推送至`origin/codex/p2r-multitask-multidata`并通过
+`git ls-remote`回读确认。C2A阶段闭合，下一安全点为C2B有限协议设计；本轮没有开始C2B计算。
 
 ```yaml
 audit_decision: retain_existing_results_and_run_finite_new_input_sensitivity
@@ -124,7 +125,8 @@ S1_C2A_predictions_created: complete_four_of_four_folds_116_issues
 S1_C2A_scores_read: true
 S1_C2A_score_status: complete_same_predictions_same_targets
 S1_C2A_scientific_acceptance: PASS_no_new_stable_predictive_gain
-S1_C2A_result_commit_pushed: false
+S1_C2A_result_commit_pushed: true
+S1_C2A_scientific_commit: 4f5a2bea66516d5e580ffc3ee3ba8839f424f5e7
 S1_C2B_protocol_frozen: false
 S1_C2B_predictions_created: false
 heartbeat_status: ACTIVE
