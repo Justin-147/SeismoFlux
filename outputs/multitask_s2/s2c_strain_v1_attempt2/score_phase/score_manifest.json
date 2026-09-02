@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "complete": true,
+  "identity": {
+    "protocol_sha256": "e9e0800279b9db64722c35763b0dae4d228d90173ddceb660e614ffbcc78876e",
+    "prediction_manifest_sha256": "ad8de1fb75c9d07b5a891ea906784f6f78505983fa2ac7bf2c11cc46a27fcb33",
+    "catalog_score_manifest_sha256": "ae96f95f2e7fbd92c8f6f692b0f4f95f7dd48787d5bcfc2cdf53e0138dde8dc5",
+    "C0_raw_scores_sha256": "8165c4643dfaff5985761b24852f09e6fe1c922c4aed705ad2e405a5ed18d6d4",
+    "implementation_hashes": {
+      "strain_score.py": "9d9010adf065d52acc2fa958b5105338ebdcc66fc39465e6d2e4dd83ae36a824",
+      "strain.py": "c050e8b9f1923c84b151563d0414a391d5a5263b371991c8bfd0b55fcfae6866",
+      "fault_score.py": "16034207e5ce5b0fce60cbe9a539ed442543db301964244d87cbb94f10283f2e",
+      "c2b_score.py": "6843b5fdbe63ced5319ebb496b70f5d637bda05fdc26959df714084b900439ce"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "exposure_results.parquet",
+      "sha256": "3c226e1f364004eeaacfe362dca54af517fbed2ad504576bc010849873567bd4"
+    },
+    {
+      "path": "event_results.parquet",
+      "sha256": "59f4bdb58dc60658780a0bf226d82ebb5e9d5f6db416459f2a912a441a505ff8"
+    },
+    {
+      "path": "alarm_prefixes.parquet",
+      "sha256": "274f501ca25e641b3af2d7600921946f700ef0da1c8ca6d62433169fef3d125a"
+    },
+    {
+      "path": "paired_anchor_results.parquet",
+      "sha256": "822eb8be5bba4bdf629055ba2d60e7ecbd2429b72498bafdde33262108d33788"
+    },
+    {
+      "path": "grid_geometry.parquet",
+      "sha256": "a0cbcb3dfa08cf6cafc281ed33cfa20d91c82a618ee1e232f6e631d351e11311"
+    },
+    {
+      "path": "summary.json",
+      "sha256": "05b7f617cf347e1ec0a42fd2166953bd4645ada7e9a2fe4bd9e940f998d699f5"
+    }
+  ]
+}

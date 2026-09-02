@@ -179,7 +179,22 @@ def test_axes_and_cases(renderer, fixture_data):
     assert all(c["net_hits"] == 0 for c in renderer._select_cases(data)["cases"])
 
 
-def test_render_slices_license_local_boundary(renderer, fixture_data, tmp_path):
+def test_render_slices_license_local_boundary(renderer, fixture_data, tmp_path, monkeypatch):
+    save = renderer._shared._save_figure
+
+    def check_percent_axes(fig, root, stem):
+        if stem == renderer.STATIC_STEMS[0]:
+            assert all(ax.get_xlim() == (0, 100) for ax in fig.axes)
+            for ax in fig.axes:
+                for text in ax.texts:
+                    if text.get_text().startswith("100.0%"):
+                        assert text.get_position()[0] < 100
+                        assert text.get_ha() == "right"
+        if stem == renderer.STATIC_STEMS[1]:
+            assert all(ax.get_ylim() == (0, 100) for ax in fig.axes)
+        save(fig, root, stem)
+
+    monkeypatch.setattr(renderer._shared, "_save_figure", check_percent_axes)
     _write_fixture(tmp_path, fixture_data, renderer)
     page = renderer.render(tmp_path)
     text = page.read_text(encoding="utf-8")

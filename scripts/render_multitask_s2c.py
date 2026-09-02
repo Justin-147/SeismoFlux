@@ -157,10 +157,19 @@ def _static_figures(summary: dict[str, Any], root: Path) -> None:
                 if not np.isfinite(v)
                 else f"{v:.1f}% · {r['anchor_hits']:g}/{r['anchor_total']:g}"
             )
-            ax.text((v if np.isfinite(v) else 0) + 1, i, label, va="center", fontsize=9)
+            inside = np.isfinite(v) and v > 85
+            ax.text(
+                v - 1 if inside else (v if np.isfinite(v) else 0) + 1,
+                i,
+                label,
+                va="center",
+                ha="right" if inside else "left",
+                fontsize=9,
+                color="white" if inside else "#243746",
+            )
         ax.set_yticks(range(len(models)), [MODEL_LABELS[m] for m in models], fontsize=10)
         ax.invert_yaxis()
-        ax.set_xlim(0, 125)
+        ax.set_xlim(0, 100)
         ax.set_xlabel("独立首震锚点严格区域召回（%）")
         ax.set_title(title, loc="left", pad=17)
         ax.grid(axis="x", alpha=0.2)
@@ -190,7 +199,7 @@ def _static_figures(summary: dict[str, Any], root: Path) -> None:
                 )
             total = lookup[(REFERENCE, h, "M5_6", 0.0, 600000.0)]["anchor_total"]
             ax.set_title(f"{title}\n{h} 天 · Ms 5–6 · N={total:g}", fontsize=10)
-            ax.set_ylim(0, 105)
+            ax.set_ylim(0, 100)
             ax.set_xticks([30, 60, 96])
             ax.grid(alpha=0.2)
             if j == 0:
