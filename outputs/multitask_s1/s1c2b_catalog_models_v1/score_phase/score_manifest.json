@@ -1,0 +1,85 @@
+{
+  "identity": {
+    "protocol_sha256": "4f497690643a64466cbd9eec358977f1c8c1d4655bc4cc9ca5a65dbc95859243",
+    "prediction_manifest": {
+      "schema_version": 1,
+      "protocol_id": "s1c2b-finite-catalog-panels-and-location-models-v1",
+      "protocol_sha256": "4f497690643a64466cbd9eec358977f1c8c1d4655bc4cc9ca5a65dbc95859243",
+      "grid_id": "3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763",
+      "catalog_sha256": "2193514eec2889dbf4ae9598c5d45ef8961a8f3fcd26c7183b233dbe20842347",
+      "source_records_sha256": "7c48cd5f4db5e85c6c10c7a3fdfc4d84ac3e5de3dde1e59f985f36bb47770556",
+      "model_ids": [
+        "C2B_D0_K75",
+        "C2B_D1_K75",
+        "C2B_D2_K75",
+        "C2B_D0_R30",
+        "C2B_D1_R30",
+        "C2B_D0_MULTISCALE",
+        "C2B_D0_AGE_WEIGHTED",
+        "C2B_D0_RIDGE_CORE",
+        "C2B_D0_RIDGE_M5"
+      ],
+      "implementation_hashes": {
+        "c2b_predict.py": "b01dd4ea731780bf0494396573d8c4c4fd5ba6d5edff3eaa86077aa57c977392",
+        "c2b_inputs.py": "d433b4bcbfe6198ef2ca30b99590f61265d9a95d08fb8570a50a2437ce87076d",
+        "c2b_models.py": "da3e0cbcdf4f6d8df0f7d3003e5da520d317fb690b50d40184c49d51e527b7e8"
+      },
+      "folds": [
+        {
+          "path": "folds/C_DEV_2000_2004/fold_manifest.json",
+          "sha256": "4800ff6eb1ab6527cf899cd0f10833a881f9e6c4458240d83cfc913846667df8",
+          "fold_id": "C_DEV_2000_2004",
+          "issue_count": 99
+        },
+        {
+          "path": "folds/C_DEV_2005_2009/fold_manifest.json",
+          "sha256": "2cb86a3edb92021d6d5d320485f1939d686cc296d25652a63c4d425dddaf38ac",
+          "fold_id": "C_DEV_2005_2009",
+          "issue_count": 99
+        },
+        {
+          "path": "folds/C_DEV_2010_2014/fold_manifest.json",
+          "sha256": "9a1103455d053b4baaa4f9b1f52dbe48824beb57a4d83754e8ef3a5fec1fd401",
+          "fold_id": "C_DEV_2010_2014",
+          "issue_count": 99
+        },
+        {
+          "path": "folds/C_DEV_2015_2019/fold_manifest.json",
+          "sha256": "0b483cf94cd993148ce7805340e28443f4efbbcde4601ff33757f35b2bed32ce",
+          "fold_id": "C_DEV_2015_2019",
+          "issue_count": 99
+        }
+      ],
+      "completed_utc": "2026-09-02T12:54:27.128331+00:00",
+      "issue_horizon_pairs": 396,
+      "outer_targets_read": false
+    },
+    "C0_raw_scores_sha256": "8165c4643dfaff5985761b24852f09e6fe1c922c4aed705ad2e405a5ed18d6d4"
+  },
+  "artifacts": [
+    {
+      "path": "summary.json",
+      "sha256": "29445b03aaa7aac01878711c0fb97561fe6881cbe28084d72de44d6c6b2331e3"
+    },
+    {
+      "path": "exposure_results.parquet",
+      "sha256": "1ad3c0bb97d1e736827cfacef1ab910e78cb7c884cae8492e008f70028a61509"
+    },
+    {
+      "path": "event_results.parquet",
+      "sha256": "4ec5be9ea178471221db5fe0f8eadffc7a5cb5b21723650feffd420f3ab40d06"
+    },
+    {
+      "path": "paired_anchor_results.parquet",
+      "sha256": "a755e1be98923832253e73b55bbf5e07036e97292b180c52348bb952f32fc7bf"
+    },
+    {
+      "path": "alarm_prefixes.parquet",
+      "sha256": "95a69cdc30e1743096f863c47991830b2be9725a1d24fc90233dd38613931e83"
+    },
+    {
+      "path": "grid_geometry.parquet",
+      "sha256": "a0cbcb3dfa08cf6cafc281ed33cfa20d91c82a618ee1e232f6e631d351e11311"
+    }
+  ]
+}

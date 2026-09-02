@@ -11,3 +11,5 @@
 *.pptx binary
 *.pdf binary
 outputs/prospective/p1_b0_r30/** -text
+outputs/multitask_s1/s1c2b_catalog_models_v1/score_phase/summary.json -text
+outputs/multitask_s1/s1c2b_catalog_models_v1/score_phase/score_manifest.json -text
