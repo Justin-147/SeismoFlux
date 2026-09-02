@@ -1,0 +1,208 @@
+schema_version: 1
+protocol_id: s2a-finite-fault-geometry-increment-v1
+stage: S2-A
+status: protocol_frozen_before_S2A_predictions
+scientific_role: current_static_geometry_retrospective_development_not_historical_prospective
+S1_development_results_seen: true
+S2A_predictions_or_scores_seen_at_freeze: false
+methods_document: docs/s2a_fault_geometry_methods_2026-09-02.md
+parent_contract: configs/multitask_s1_development_contract.yaml
+
+inputs:
+  data_root_required: true
+  catalog_protocol: configs/multitask_s1_c2b_catalog_models.yaml
+  catalog_protocol_sha256: 4f497690643a64466cbd9eec358977f1c8c1d4655bc4cc9ca5a65dbc95859243
+  catalog_run: outputs/multitask_s1/s1c2b_catalog_models_v1
+  catalog_prediction_manifest_sha256: 110c795bacae7aa4e00fe72eb3195fee947c1c913d8752da721d9e122db2a01c
+  catalog_score_manifest_sha256: ae96f95f2e7fbd92c8f6f692b0f4f95f7dd48787d5bcfc2cdf53e0138dde8dc5
+  catalog_main_model: C2B_D0_MULTISCALE
+  catalog_panel: D0_CANONICAL_M4_1970
+  local_two_catalogs_effective_magnitude_type: Ms
+  numeric_magnitude_conversion: none
+  external_catalog_Ms_assumption: false
+  old_catalog_cache_and_predictions: read_only_never_recalculate_or_overwrite
+  missing_old_component_cache: stop_and_report_not_write_old_run
+  grid_id: 3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763
+  grid_cells: 15697
+  grid_cell_size_km: 25.0
+  grid_area_km2: 9415305.754432771
+  national_support_percentage_gate: null
+  local_Mc_masks_applied: false
+  geometry_sources:
+    SIMPLE:
+      path: processed/stage1/debc98054172a4a1/fault_segment.parquet
+      sha256: 8f37d08f2427aab78f45dc9ae32130582706eb8c5d58d4d9b1e8b18d719f8627
+      id_column: fault_segment_id
+      geometry_column: simplified_geometry_wkb
+      allowed_columns: [fault_segment_id, simplified_geometry_wkb]
+      expected_rows: 519
+      expected_usable_lines: 519
+      usable_column: null
+    TRACE:
+      path: processed/stage1/debc98054172a4a1/fault_trace.parquet
+      sha256: 33a6825538bf9e54706012892e606d4a570c686ff85257ce49602a16948aacc7
+      id_column: trace_id
+      geometry_column: geometry_wkb
+      allowed_columns: [trace_id, geometry_wkb, usable_for_geometry]
+      expected_rows: 7216
+      expected_usable_lines: 7215
+      usable_column: usable_for_geometry
+  static_snapshot_available_at: '2026-07-12T16:00:00+00:00'
+  original_historical_model_eligible: false
+  source_eligibility_flags_modified: false
+  excluded_features: [slip_rate, geodetic_rate, recurrence_period, last_strong_earthquake_year,
+    elapsed_ratio_at_snapshot, rupture_gap_weight, locking_weight,
+    microseismic_sparsity_weight, coulomb_stress_weight, long_term_hazard_score,
+    source_version_flags, strike_deg, dip_deg, slip_angle_deg]
+  crosswalk_attribute_transfer: false
+  cell_to_block_mapping:
+    path: interim/stage4/anomaly_increment_r2/construction_zone_cell_mapping.parquet
+    sha256: 171a500de9f9dd475f2c37a5426debc7c6f2d34ddd418056729c39b27118108e
+    blocks: 39
+    ordering: existing_grid_cell_order_and_UTF8_byte_sorted_zone_ids
+    role: fixed_target_blind_coarsening_not_new_spatial_partition
+
+calendar:
+  outer_folds: [C_DEV_2000_2004, C_DEV_2005_2009, C_DEV_2010_2014, C_DEV_2015_2019]
+  horizons_days: [7, 30, 90, 180, 365]
+  outer_issue_counts_per_horizon: [176, 116, 56, 32, 16]
+  outer_total_issue_horizon_pairs: 396
+  inner_blocks: exactly_I1_I2_I3_from_parent_contract
+  forecast_axis: Thursday_00_00_Asia_Shanghai
+  catalog_delay_hours: 24
+  target_interval: '(issue,issue+horizon]'
+  exposure_rule: unchanged_nonoverlapping_horizon_plus_30d_from_S1
+  outer_embargo_days: 30
+
+geometry_math:
+  source_crs_assumption: EPSG_4326_WGS84_existing_interpretation_not_independently_confirmed
+  projected_crs: existing_China_Albers_equal_area
+  query_points: existing_clipped_cell_point_on_surface_not_new_centers
+  distance: minimum_projected_Euclidean_point_to_LineString_distance_in_km
+  duplicate_lines: retain_minimum_distance_is_duplicate_invariant
+  proximity: 'q_s(i)=1/(1+(d_i/s)^2)'
+  power: 2.0
+  scales_km: [25.0, 75.0, 150.0]
+  scale_meaning: half_proximity_distance_not_rupture_radius_or_hit_tolerance
+  scale_tie_order_km: [75.0, 150.0, 25.0]
+  normalized_cell_mass: 'F_s(i)=q_s(i)*A_i/sum_j(q_s(j)*A_j)'
+  coarse_cell_mass: 'Fcoarse_s(i)=sum_j_in_block_i(F_s(j))*A_i/sum_j_in_block_i(A_j)'
+  coarse_control: preserves_each_frozen_block_mass_removes_within_block_fault_detail
+  coarse_control_is_formal_permutation_or_transfer_test: false
+  pure_fault_scale_alarm_ranking: identical_for_same_source_scales_change_density_not_rank
+  mixture: '(1-alpha)*C+alpha*F_or_Fcoarse'
+  alpha_candidates: [0.0, 0.25, 0.5, 0.75, 1.0]
+  unique_mixture_candidates_per_source_and_representation: 13
+  alpha_zero: one_exact_catalog_candidate_scale_null
+  mixture_tie_order: smaller_alpha_then_scale_tie_order
+  numerical_representation: finite_float64_normalized_log_cell_mass
+  interpretation: relative_spatial_mass_not_absolute_occurrence_probability
+
+models:
+  S2A_SIMPLE_FAULT_ONLY: {source: SIMPLE, representation: fine, family: fault_only}
+  S2A_SIMPLE_CATALOG_MIX: {source: SIMPLE, representation: fine, family: catalog_mixture}
+  S2A_SIMPLE_COARSE_MIX: {source: SIMPLE, representation: coarse, family: catalog_mixture}
+  S2A_TRACE_FAULT_ONLY: {source: TRACE, representation: fine, family: fault_only}
+  S2A_TRACE_CATALOG_MIX: {source: TRACE, representation: fine, family: catalog_mixture}
+  S2A_TRACE_COARSE_MIX: {source: TRACE, representation: coarse, family: catalog_mixture}
+
+selection:
+  granularity: outer_fold_x_horizon_shared_by_Ms5_6_and_Ms6_plus
+  target_catalog: unchanged_canonical_national_Ms4_plus
+  inner_catalog_branches:
+    - {train_blocks: [I1], validate_block: I2}
+    - {train_blocks: [I1, I2], validate_block: I3}
+  inner_catalog_training_end_and_label_visibility: at_or_before_validation_start_minus_30d
+  inner_catalog_selector: unchanged_C2B_four_multiscale_candidates_and_tie_order
+  inner_catalog_minimum_nonempty_blocks: 2
+  I2_catalog_consequence: explicit_exact_K75_fallback_because_only_I1_is_earlier
+  insufficient_inner_catalog_blocks: exact_K75_no_block_or_issue_deletion
+  outer_catalog_surface: reuse_saved_C2B_D0_MULTISCALE_no_refit_no_backfill_into_inner_validation
+  geometry_validation_blocks: [I2, I3]
+  geometry_label_end_and_visibility: at_or_before_outer_start_minus_30d
+  block_statistic: event_mean_log_cell_mass_minus_log_actual_cell_area
+  geometry_candidate_rule: maximize_equal_mean_of_nonempty_I2_I3_block_statistics
+  minimum_nonempty_blocks_for_geometry_selection: 1
+  empty_block: NA_not_zero_keep_empty_exposures
+  zero_nonempty_blocks_fault_only: fixed_scale_75km
+  zero_nonempty_blocks_mixture: exact_catalog_alpha_zero
+  tie_tolerance: 1.0e-12
+  pure_and_mixture_scales: independently_selected_finite_procedures_not_single_parameter_ablation
+  geometry_or_blocks_may_use_target_coordinates: false
+
+evaluation:
+  references: [C2B_D0_MULTISCALE, C2B_D0_AGE_WEIGHTED, C0_L3_B0_R30_CAUSAL, C0_L0_UNIFORM]
+  reuse_verified_saved_reference_scores: true
+  reuse_same_C0_target_vectors_after_all_S2A_predictions: true
+  magnitude_bands: [Ms5_6, Ms6_plus]
+  magnitude_boundaries: '[5,6);[6,infinity)'
+  main_anchor: Ms5_6_30d_600000km2_strict_fixed_first_anchor_episode_recall
+  expected_main_anchor_count: 147
+  geological_focus_horizons_days: [90, 180, 365]
+  area_budgets_km2: [300000.0, 450000.0, 600000.0, 750000.0, 960000.0]
+  ranking: descending_relative_mass_per_actual_area_then_existing_grid_order
+  alarm_selection: unchanged_whole_cell_prefix_no_skipping_no_overspending
+  actual_area: report_model_specific_actual_area_not_claim_exact_equality
+  strict_hit_tolerance_km: 0.0
+  secondary_hit_tolerance_km: 70.0
+  episode_definition: unchanged_fixed_first_anchor_30d_75km_no_transitive_chaining
+  views: [all_events, fixed_anchor, episode_balanced, subsequent_events]
+  support_metrics: [spatial_log_density, information_gain, recall_area_curve]
+  bootstrap_replicates: 2000
+  bootstrap_seed: 147
+  bootstrap_unit: unchanged_nonoverlapping_time_exposure_with_whole_episodes
+  confidence_interval_is_hard_adoption_gate: false
+  pooling_horizons_or_budgets_to_inflate_sample_size: false
+  time_magnitude_or_joint_skill_claim: false
+  final_at_most_10_region_product_certified: false
+
+planned_pairs:
+  - [S2A_SIMPLE_CATALOG_MIX, C2B_D0_MULTISCALE, added_simple_fault_geometry]
+  - [S2A_TRACE_CATALOG_MIX, C2B_D0_MULTISCALE, added_trace_geometry]
+  - [S2A_SIMPLE_COARSE_MIX, C2B_D0_MULTISCALE, added_simple_coarse_region_information]
+  - [S2A_TRACE_COARSE_MIX, C2B_D0_MULTISCALE, added_trace_coarse_region_information]
+  - [S2A_SIMPLE_CATALOG_MIX, S2A_SIMPLE_COARSE_MIX, fine_vs_coarse_finite_representation]
+  - [S2A_TRACE_CATALOG_MIX, S2A_TRACE_COARSE_MIX, fine_vs_coarse_finite_representation]
+  - [S2A_SIMPLE_CATALOG_MIX, S2A_SIMPLE_FAULT_ONLY, mixed_vs_geometry_only]
+  - [S2A_TRACE_CATALOG_MIX, S2A_TRACE_FAULT_ONLY, mixed_vs_geometry_only]
+  - [S2A_SIMPLE_FAULT_ONLY, C0_L0_UNIFORM, pure_geometry_vs_area_uniform]
+  - [S2A_TRACE_FAULT_ONLY, C0_L0_UNIFORM, pure_geometry_vs_area_uniform]
+  - [S2A_TRACE_CATALOG_MIX, S2A_SIMPLE_CATALOG_MIX, source_geometry_difference_not_resolution_only]
+
+run_boundary:
+  before_real_run: protocol_and_implementation_acceptance_test_commit_push
+  save_all_four_fold_predictions_before_outer_scoring: true
+  current_snapshot_role_must_be_displayed: true
+  holdout_2020_2022_opened: false
+  audit_2023_plus_opened: false
+  locked_test_run: false
+  future_catalog_downloads: false
+  frozen_P1_modified: false
+  science_first_Stage4_drafts_touched: false
+  old_S1_predictions_or_scores_modified: false
+  post_score_additional_scale_or_weight_search: false
+  slip_attributes_hazard_or_strain_in_this_run: false
+
+resources:
+  default_fold_workers: 2
+  maximum_fold_workers: 3
+  minimum_reserved_physical_cores: 2
+  numerical_threads_per_worker: 1
+  priority: BelowNormal
+  no_duplicate_instances: true
+
+outputs:
+  root: outputs/multitask_s2/s2a_fault_geometry_v1
+  preserve_completed_checkpoints: true
+  public: code_documents_aggregate_results_and_aggregate_figures_only
+  local_only: event_arrays_geometry_maps_case_figures_and_offline_replay
+  static_figures: paired_recall_by_horizon_band_area_and_fine_coarse_comparison
+  offline_interactive: historical_development_replay_with_snapshot_caveat
+
+science_review:
+  present_value: necessary_preparation_no_S2A_predictive_evidence
+  next_evidence: same_sample_same_budget_paired_recall_gains_and_losses
+  if_only_coarse_improves: retain_regional_information_not_claim_precise_fault_location_gain
+  if_fine_exceeds_coarse: possible_finer_geometry_increment_not_prospective_proof
+  if_no_gain: close_this_variant_without_new_scales_then_separate_attributes_and_strain
+  small_task_specific_gain: retain_effect_size_fold_direction_uncertainty_and_limitations
