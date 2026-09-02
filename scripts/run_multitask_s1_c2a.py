@@ -36,6 +36,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     arguments = build_parser().parse_args(argv)
+    import pyarrow as pa
+
+    pa.set_cpu_count(1)
+    pa.set_io_thread_count(1)
     print(
         json.dumps(
             {

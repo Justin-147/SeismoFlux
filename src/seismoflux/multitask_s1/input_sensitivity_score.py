@@ -79,7 +79,9 @@ def _issue_us(value: object) -> int:
     stamp = pd.Timestamp(value)
     if stamp.tzinfo is None:
         raise InputSensitivityScoreError("target issue must be timezone aware")
-    return int(stamp.tz_convert("UTC").as_unit("us").value)
+    # Timestamp.value is always nanoseconds, even after as_unit("us").
+    # Read the explicitly microsecond-typed numpy scalar instead.
+    return int(stamp.tz_convert("UTC").as_unit("us").asm8.view("i8"))
 
 
 def validate_target_rows(

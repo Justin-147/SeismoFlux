@@ -1,0 +1,4512 @@
+{
+  "schema_version": 1,
+  "protocol_id": "multitask-s1-c2a-fixed-parameter-input-sensitivity-v1",
+  "run_id": "multitask-s1-c2a-input-sensitivity-v1",
+  "scientific_role": "post_C0_development_fixed_parameter_training_input_sensitivity_not_independent_confirmation",
+  "effective_magnitude_type": "Ms",
+  "horizon_days": 30,
+  "magnitude_interval": "Ms in [5,6)",
+  "main_alarm_area_km2": 600000.0,
+  "grid_id": "3aacdbdda04fed652dd5ee3674906f674c127cb735dea5d5e989527b20809763",
+  "study_area_km2": 9415305.754432771,
+  "primary_exposure_count": 116,
+  "fixed_anchor_episode_count": 147,
+  "unique_target_event_count": 189,
+  "empty_exposure_count": 34,
+  "model_ids": [
+    "C0_L1_REGIONAL_CONSTANT",
+    "C0_L2_KDE_CAUSAL",
+    "C0_L3_B0_R30_CAUSAL",
+    "A_L1_REGIONAL_CONSTANT",
+    "A_L2_KDE_CAUSAL",
+    "A_L3_B0_R30_CAUSAL",
+    "B_L1_REGIONAL_CONSTANT",
+    "B_L2_KDE_CAUSAL",
+    "B_L3_B0_R30_CAUSAL"
+  ],
+  "curves": [
+    {
+      "model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 20,
+      "anchor_total": 147,
+      "anchor_recall": 0.1360544217687075,
+      "actual_area_mean_km2": 299652.5521906516,
+      "actual_area_min_km2": 299384.62698103854,
+      "actual_area_max_km2": 299997.88156310446,
+      "all_event_hits": 22,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 7,
+          "anchor_total": 39,
+          "anchor_recall": 0.1794871794871795
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 1,
+          "anchor_total": 36,
+          "anchor_recall": 0.027777777777777776
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 6,
+          "anchor_total": 40,
+          "anchor_recall": 0.15
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 6,
+          "anchor_total": 32,
+          "anchor_recall": 0.1875
+        }
+      ]
+    },
+    {
+      "model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 25,
+      "anchor_total": 147,
+      "anchor_recall": 0.17006802721088435,
+      "actual_area_mean_km2": 449653.6914884263,
+      "actual_area_min_km2": 449383.1319058711,
+      "actual_area_max_km2": 449988.9138781246,
+      "all_event_hits": 29,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 7,
+          "anchor_total": 40,
+          "anchor_recall": 0.175
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 7,
+          "anchor_total": 32,
+          "anchor_recall": 0.21875
+        }
+      ]
+    },
+    {
+      "model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 32,
+      "anchor_total": 147,
+      "anchor_recall": 0.21768707482993196,
+      "actual_area_mean_km2": 599620.7613210579,
+      "actual_area_min_km2": 599377.0891820808,
+      "actual_area_max_km2": 599992.5259905551,
+      "all_event_hits": 37,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 12,
+          "anchor_total": 40,
+          "anchor_recall": 0.3
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 38,
+      "anchor_total": 147,
+      "anchor_recall": 0.2585034013605442,
+      "actual_area_mean_km2": 749621.3817880566,
+      "actual_area_min_km2": 749425.6576095944,
+      "actual_area_max_km2": 749896.0174805335,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 10,
+          "anchor_total": 39,
+          "anchor_recall": 0.2564102564102564
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 5,
+          "anchor_total": 36,
+          "anchor_recall": 0.1388888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 49,
+      "anchor_total": 147,
+      "anchor_recall": 0.3333333333333333,
+      "actual_area_mean_km2": 959552.7318167192,
+      "actual_area_min_km2": 959392.8488117658,
+      "actual_area_max_km2": 959997.4900794795,
+      "all_event_hits": 58,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 9,
+          "anchor_total": 36,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 10,
+          "anchor_total": 32,
+          "anchor_recall": 0.3125
+        }
+      ]
+    },
+    {
+      "model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 35,
+      "anchor_total": 147,
+      "anchor_recall": 0.23809523809523808,
+      "actual_area_mean_km2": 299704.35428988683,
+      "actual_area_min_km2": 299379.23888311593,
+      "actual_area_max_km2": 299974.73429940885,
+      "all_event_hits": 38,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 6,
+          "anchor_total": 36,
+          "anchor_recall": 0.16666666666666666
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 11,
+          "anchor_total": 40,
+          "anchor_recall": 0.275
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 7,
+          "anchor_total": 32,
+          "anchor_recall": 0.21875
+        }
+      ]
+    },
+    {
+      "model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 40,
+      "anchor_total": 147,
+      "anchor_recall": 0.272108843537415,
+      "actual_area_mean_km2": 449647.5027160901,
+      "actual_area_min_km2": 449386.23884916934,
+      "actual_area_max_km2": 449999.3885735633,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 8,
+          "anchor_total": 36,
+          "anchor_recall": 0.2222222222222222
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 13,
+          "anchor_total": 40,
+          "anchor_recall": 0.325
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 8,
+          "anchor_total": 32,
+          "anchor_recall": 0.25
+        }
+      ]
+    },
+    {
+      "model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 46,
+      "anchor_total": 147,
+      "anchor_recall": 0.3129251700680272,
+      "actual_area_mean_km2": 599660.1976084742,
+      "actual_area_min_km2": 599396.1880532632,
+      "actual_area_max_km2": 599918.5829736204,
+      "all_event_hits": 55,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 12,
+          "anchor_total": 39,
+          "anchor_recall": 0.3076923076923077
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 10,
+          "anchor_total": 36,
+          "anchor_recall": 0.2777777777777778
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 10,
+          "anchor_total": 32,
+          "anchor_recall": 0.3125
+        }
+      ]
+    },
+    {
+      "model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 55,
+      "anchor_total": 147,
+      "anchor_recall": 0.3741496598639456,
+      "actual_area_mean_km2": 749687.9300847301,
+      "actual_area_min_km2": 749387.2808662399,
+      "actual_area_max_km2": 749988.4216849067,
+      "all_event_hits": 64,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 13,
+          "anchor_total": 36,
+          "anchor_recall": 0.3611111111111111
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 12,
+          "anchor_total": 32,
+          "anchor_recall": 0.375
+        }
+      ]
+    },
+    {
+      "model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 62,
+      "anchor_total": 147,
+      "anchor_recall": 0.4217687074829932,
+      "actual_area_mean_km2": 959721.0348798278,
+      "actual_area_min_km2": 959386.6013046231,
+      "actual_area_max_km2": 959995.409403553,
+      "all_event_hits": 73,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 16,
+          "anchor_total": 39,
+          "anchor_recall": 0.41025641025641024
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 14,
+          "anchor_total": 36,
+          "anchor_recall": 0.3888888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 15,
+          "anchor_total": 32,
+          "anchor_recall": 0.46875
+        }
+      ]
+    },
+    {
+      "model_id": "A_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 39,
+      "anchor_total": 147,
+      "anchor_recall": 0.2653061224489796,
+      "actual_area_mean_km2": 299692.66331584187,
+      "actual_area_min_km2": 299378.39989705646,
+      "actual_area_max_km2": 299987.9896576864,
+      "all_event_hits": 46,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 9,
+          "anchor_total": 36,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "A_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 45,
+      "anchor_total": 147,
+      "anchor_recall": 0.30612244897959184,
+      "actual_area_mean_km2": 449637.5563002819,
+      "actual_area_min_km2": 449382.47014292807,
+      "actual_area_max_km2": 449997.85356060846,
+      "all_event_hits": 52,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 10,
+          "anchor_total": 36,
+          "anchor_recall": 0.2777777777777778
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 11,
+          "anchor_total": 32,
+          "anchor_recall": 0.34375
+        }
+      ]
+    },
+    {
+      "model_id": "A_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 52,
+      "anchor_total": 147,
+      "anchor_recall": 0.35374149659863946,
+      "actual_area_mean_km2": 599697.8483201228,
+      "actual_area_min_km2": 599381.9853717965,
+      "actual_area_max_km2": 599999.5395152817,
+      "all_event_hits": 60,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 15,
+          "anchor_total": 39,
+          "anchor_recall": 0.38461538461538464
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 11,
+          "anchor_total": 36,
+          "anchor_recall": 0.3055555555555556
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 12,
+          "anchor_total": 32,
+          "anchor_recall": 0.375
+        }
+      ]
+    },
+    {
+      "model_id": "A_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 57,
+      "anchor_total": 147,
+      "anchor_recall": 0.3877551020408163,
+      "actual_area_mean_km2": 749687.629274343,
+      "actual_area_min_km2": 749378.8001578783,
+      "actual_area_max_km2": 749993.9321086485,
+      "all_event_hits": 67,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 15,
+          "anchor_total": 39,
+          "anchor_recall": 0.38461538461538464
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 12,
+          "anchor_total": 36,
+          "anchor_recall": 0.3333333333333333
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 13,
+          "anchor_total": 32,
+          "anchor_recall": 0.40625
+        }
+      ]
+    },
+    {
+      "model_id": "A_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 68,
+      "anchor_total": 147,
+      "anchor_recall": 0.46258503401360546,
+      "actual_area_mean_km2": 959705.9968571393,
+      "actual_area_min_km2": 959377.1579829166,
+      "actual_area_max_km2": 959999.6966428171,
+      "all_event_hits": 82,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 19,
+          "anchor_total": 39,
+          "anchor_recall": 0.48717948717948717
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 15,
+          "anchor_total": 36,
+          "anchor_recall": 0.4166666666666667
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 18,
+          "anchor_total": 40,
+          "anchor_recall": 0.45
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 16,
+          "anchor_total": 32,
+          "anchor_recall": 0.5
+        }
+      ]
+    },
+    {
+      "model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 20,
+      "anchor_total": 147,
+      "anchor_recall": 0.1360544217687075,
+      "actual_area_mean_km2": 299648.40081000776,
+      "actual_area_min_km2": 299386.71056469914,
+      "actual_area_max_km2": 299998.76300437987,
+      "all_event_hits": 22,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 7,
+          "anchor_total": 39,
+          "anchor_recall": 0.1794871794871795
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 1,
+          "anchor_total": 36,
+          "anchor_recall": 0.027777777777777776
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 6,
+          "anchor_total": 40,
+          "anchor_recall": 0.15
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 6,
+          "anchor_total": 32,
+          "anchor_recall": 0.1875
+        }
+      ]
+    },
+    {
+      "model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 26,
+      "anchor_total": 147,
+      "anchor_recall": 0.17687074829931973,
+      "actual_area_mean_km2": 449650.10379869223,
+      "actual_area_min_km2": 449383.1319058711,
+      "actual_area_max_km2": 449993.2732332274,
+      "all_event_hits": 30,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 7,
+          "anchor_total": 40,
+          "anchor_recall": 0.175
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 8,
+          "anchor_total": 32,
+          "anchor_recall": 0.25
+        }
+      ]
+    },
+    {
+      "model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 32,
+      "anchor_total": 147,
+      "anchor_recall": 0.21768707482993196,
+      "actual_area_mean_km2": 599621.6523027064,
+      "actual_area_min_km2": 599377.0891820808,
+      "actual_area_max_km2": 599999.3169753171,
+      "all_event_hits": 37,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 12,
+          "anchor_total": 40,
+          "anchor_recall": 0.3
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 38,
+      "anchor_total": 147,
+      "anchor_recall": 0.2585034013605442,
+      "actual_area_mean_km2": 749624.0980057112,
+      "actual_area_min_km2": 749383.1319058711,
+      "actual_area_max_km2": 749935.7902423862,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 10,
+          "anchor_total": 39,
+          "anchor_recall": 0.2564102564102564
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 5,
+          "anchor_total": 36,
+          "anchor_recall": 0.1388888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 49,
+      "anchor_total": 147,
+      "anchor_recall": 0.3333333333333333,
+      "actual_area_mean_km2": 959537.0738302632,
+      "actual_area_min_km2": 959381.3491569769,
+      "actual_area_max_km2": 959979.6977899144,
+      "all_event_hits": 58,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 9,
+          "anchor_total": 36,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 10,
+          "anchor_total": 32,
+          "anchor_recall": 0.3125
+        }
+      ]
+    },
+    {
+      "model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 36,
+      "anchor_total": 147,
+      "anchor_recall": 0.24489795918367346,
+      "actual_area_mean_km2": 299771.34504980757,
+      "actual_area_min_km2": 299387.336239491,
+      "actual_area_max_km2": 299965.4251796671,
+      "all_event_hits": 39,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 7,
+          "anchor_total": 36,
+          "anchor_recall": 0.19444444444444445
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 11,
+          "anchor_total": 40,
+          "anchor_recall": 0.275
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 7,
+          "anchor_total": 32,
+          "anchor_recall": 0.21875
+        }
+      ]
+    },
+    {
+      "model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 40,
+      "anchor_total": 147,
+      "anchor_recall": 0.272108843537415,
+      "actual_area_mean_km2": 449639.52256995183,
+      "actual_area_min_km2": 449386.23884916934,
+      "actual_area_max_km2": 449999.3885735633,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 8,
+          "anchor_total": 36,
+          "anchor_recall": 0.2222222222222222
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 13,
+          "anchor_total": 40,
+          "anchor_recall": 0.325
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 8,
+          "anchor_total": 32,
+          "anchor_recall": 0.25
+        }
+      ]
+    },
+    {
+      "model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 46,
+      "anchor_total": 147,
+      "anchor_recall": 0.3129251700680272,
+      "actual_area_mean_km2": 599666.3483980526,
+      "actual_area_min_km2": 599396.1880532632,
+      "actual_area_max_km2": 599986.6787456088,
+      "all_event_hits": 55,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 12,
+          "anchor_total": 39,
+          "anchor_recall": 0.3076923076923077
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 10,
+          "anchor_total": 36,
+          "anchor_recall": 0.2777777777777778
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 10,
+          "anchor_total": 32,
+          "anchor_recall": 0.3125
+        }
+      ]
+    },
+    {
+      "model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 56,
+      "anchor_total": 147,
+      "anchor_recall": 0.38095238095238093,
+      "actual_area_mean_km2": 749707.1471156065,
+      "actual_area_min_km2": 749386.1005579685,
+      "actual_area_max_km2": 749988.4216849067,
+      "all_event_hits": 66,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 14,
+          "anchor_total": 36,
+          "anchor_recall": 0.3888888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 12,
+          "anchor_total": 32,
+          "anchor_recall": 0.375
+        }
+      ]
+    },
+    {
+      "model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 63,
+      "anchor_total": 147,
+      "anchor_recall": 0.42857142857142855,
+      "actual_area_mean_km2": 959718.305518983,
+      "actual_area_min_km2": 959386.6013046231,
+      "actual_area_max_km2": 959995.409403553,
+      "all_event_hits": 74,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 17,
+          "anchor_total": 39,
+          "anchor_recall": 0.4358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 14,
+          "anchor_total": 36,
+          "anchor_recall": 0.3888888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 15,
+          "anchor_total": 32,
+          "anchor_recall": 0.46875
+        }
+      ]
+    },
+    {
+      "model_id": "B_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 38,
+      "anchor_total": 147,
+      "anchor_recall": 0.2585034013605442,
+      "actual_area_mean_km2": 299672.2623931231,
+      "actual_area_min_km2": 299378.39989705646,
+      "actual_area_max_km2": 299994.1515709705,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 10,
+          "anchor_total": 39,
+          "anchor_recall": 0.2564102564102564
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 9,
+          "anchor_total": 36,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "B_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 44,
+      "anchor_total": 147,
+      "anchor_recall": 0.29931972789115646,
+      "actual_area_mean_km2": 449649.11914672336,
+      "actual_area_min_km2": 449382.47014292807,
+      "actual_area_max_km2": 449991.43539052596,
+      "all_event_hits": 51,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 13,
+          "anchor_total": 39,
+          "anchor_recall": 0.3333333333333333
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 10,
+          "anchor_total": 36,
+          "anchor_recall": 0.2777777777777778
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 11,
+          "anchor_total": 32,
+          "anchor_recall": 0.34375
+        }
+      ]
+    },
+    {
+      "model_id": "B_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 53,
+      "anchor_total": 147,
+      "anchor_recall": 0.36054421768707484,
+      "actual_area_mean_km2": 599690.0154535038,
+      "actual_area_min_km2": 599391.7266853323,
+      "actual_area_max_km2": 599999.5395152817,
+      "all_event_hits": 61,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 11,
+          "anchor_total": 36,
+          "anchor_recall": 0.3055555555555556
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 15,
+          "anchor_total": 40,
+          "anchor_recall": 0.375
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 13,
+          "anchor_total": 32,
+          "anchor_recall": 0.40625
+        }
+      ]
+    },
+    {
+      "model_id": "B_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 57,
+      "anchor_total": 147,
+      "anchor_recall": 0.3877551020408163,
+      "actual_area_mean_km2": 749666.1475666832,
+      "actual_area_min_km2": 749378.1995424322,
+      "actual_area_max_km2": 749993.9321086485,
+      "all_event_hits": 67,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 15,
+          "anchor_total": 39,
+          "anchor_recall": 0.38461538461538464
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 12,
+          "anchor_total": 36,
+          "anchor_recall": 0.3333333333333333
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 13,
+          "anchor_total": 32,
+          "anchor_recall": 0.40625
+        }
+      ]
+    },
+    {
+      "model_id": "B_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 68,
+      "anchor_total": 147,
+      "anchor_recall": 0.46258503401360546,
+      "actual_area_mean_km2": 959690.5836793885,
+      "actual_area_min_km2": 959386.6013046231,
+      "actual_area_max_km2": 959995.6681338324,
+      "all_event_hits": 82,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 18,
+          "anchor_total": 39,
+          "anchor_recall": 0.46153846153846156
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 16,
+          "anchor_total": 36,
+          "anchor_recall": 0.4444444444444444
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 18,
+          "anchor_total": 40,
+          "anchor_recall": 0.45
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 16,
+          "anchor_total": 32,
+          "anchor_recall": 0.5
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 20,
+      "anchor_total": 147,
+      "anchor_recall": 0.1360544217687075,
+      "actual_area_mean_km2": 299646.4719502438,
+      "actual_area_min_km2": 299381.50202830543,
+      "actual_area_max_km2": 299999.7801838879,
+      "all_event_hits": 22,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 7,
+          "anchor_total": 39,
+          "anchor_recall": 0.1794871794871795
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 1,
+          "anchor_total": 36,
+          "anchor_recall": 0.027777777777777776
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 6,
+          "anchor_total": 40,
+          "anchor_recall": 0.15
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 6,
+          "anchor_total": 32,
+          "anchor_recall": 0.1875
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 26,
+      "anchor_total": 147,
+      "anchor_recall": 0.17687074829931973,
+      "actual_area_mean_km2": 449663.00029833376,
+      "actual_area_min_km2": 449380.1805443738,
+      "actual_area_max_km2": 449988.9138781246,
+      "all_event_hits": 30,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 7,
+          "anchor_total": 40,
+          "anchor_recall": 0.175
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 8,
+          "anchor_total": 32,
+          "anchor_recall": 0.25
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 32,
+      "anchor_total": 147,
+      "anchor_recall": 0.21768707482993196,
+      "actual_area_mean_km2": 599628.0874034537,
+      "actual_area_min_km2": 599377.0891820808,
+      "actual_area_max_km2": 599992.5259905551,
+      "all_event_hits": 37,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 9,
+          "anchor_total": 39,
+          "anchor_recall": 0.23076923076923078
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 2,
+          "anchor_total": 36,
+          "anchor_recall": 0.05555555555555555
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 12,
+          "anchor_total": 40,
+          "anchor_recall": 0.3
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 38,
+      "anchor_total": 147,
+      "anchor_recall": 0.2585034013605442,
+      "actual_area_mean_km2": 749615.8321991717,
+      "actual_area_min_km2": 749392.395113177,
+      "actual_area_max_km2": 749896.0174805335,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 10,
+          "anchor_total": 39,
+          "anchor_recall": 0.2564102564102564
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 5,
+          "anchor_total": 36,
+          "anchor_recall": 0.1388888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 50,
+      "anchor_total": 147,
+      "anchor_recall": 0.3401360544217687,
+      "actual_area_mean_km2": 959528.0945628094,
+      "actual_area_min_km2": 959391.8671151127,
+      "actual_area_max_km2": 959979.6200462548,
+      "all_event_hits": 59,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 9,
+          "anchor_total": 36,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 11,
+          "anchor_total": 32,
+          "anchor_recall": 0.34375
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 35,
+      "anchor_total": 147,
+      "anchor_recall": 0.23809523809523808,
+      "actual_area_mean_km2": 299704.35428988683,
+      "actual_area_min_km2": 299379.23888311593,
+      "actual_area_max_km2": 299974.73429940885,
+      "all_event_hits": 38,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 6,
+          "anchor_total": 36,
+          "anchor_recall": 0.16666666666666666
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 11,
+          "anchor_total": 40,
+          "anchor_recall": 0.275
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 7,
+          "anchor_total": 32,
+          "anchor_recall": 0.21875
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 40,
+      "anchor_total": 147,
+      "anchor_recall": 0.272108843537415,
+      "actual_area_mean_km2": 449644.0353474675,
+      "actual_area_min_km2": 449386.23884916934,
+      "actual_area_max_km2": 449999.3885735633,
+      "all_event_hits": 45,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 8,
+          "anchor_total": 36,
+          "anchor_recall": 0.2222222222222222
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 13,
+          "anchor_total": 40,
+          "anchor_recall": 0.325
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 8,
+          "anchor_total": 32,
+          "anchor_recall": 0.25
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 46,
+      "anchor_total": 147,
+      "anchor_recall": 0.3129251700680272,
+      "actual_area_mean_km2": 599639.3680513889,
+      "actual_area_min_km2": 599396.1880532632,
+      "actual_area_max_km2": 599918.5829736204,
+      "all_event_hits": 55,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 12,
+          "anchor_total": 39,
+          "anchor_recall": 0.3076923076923077
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 10,
+          "anchor_total": 36,
+          "anchor_recall": 0.2777777777777778
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 10,
+          "anchor_total": 32,
+          "anchor_recall": 0.3125
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 56,
+      "anchor_total": 147,
+      "anchor_recall": 0.38095238095238093,
+      "actual_area_mean_km2": 749696.218396264,
+      "actual_area_min_km2": 749387.2808662399,
+      "actual_area_max_km2": 749998.1688359681,
+      "all_event_hits": 65,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 14,
+          "anchor_total": 36,
+          "anchor_recall": 0.3888888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 16,
+          "anchor_total": 40,
+          "anchor_recall": 0.4
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 12,
+          "anchor_total": 32,
+          "anchor_recall": 0.375
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 64,
+      "anchor_total": 147,
+      "anchor_recall": 0.43537414965986393,
+      "actual_area_mean_km2": 959667.8832653476,
+      "actual_area_min_km2": 959386.6013046231,
+      "actual_area_max_km2": 959995.409403553,
+      "all_event_hits": 75,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 16,
+          "anchor_total": 39,
+          "anchor_recall": 0.41025641025641024
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 15,
+          "anchor_total": 36,
+          "anchor_recall": 0.4166666666666667
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 16,
+          "anchor_total": 32,
+          "anchor_recall": 0.5
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_hits": 41,
+      "anchor_total": 147,
+      "anchor_recall": 0.2789115646258503,
+      "actual_area_mean_km2": 299682.4429729353,
+      "actual_area_min_km2": 299378.39989705646,
+      "actual_area_max_km2": 299999.66670069064,
+      "all_event_hits": 48,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 11,
+          "anchor_total": 39,
+          "anchor_recall": 0.28205128205128205
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 11,
+          "anchor_total": 36,
+          "anchor_recall": 0.3055555555555556
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 9,
+          "anchor_total": 32,
+          "anchor_recall": 0.28125
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_hits": 47,
+      "anchor_total": 147,
+      "anchor_recall": 0.3197278911564626,
+      "actual_area_mean_km2": 449642.3853269921,
+      "actual_area_min_km2": 449381.80553158047,
+      "actual_area_max_km2": 449997.85356060846,
+      "all_event_hits": 54,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 14,
+          "anchor_total": 39,
+          "anchor_recall": 0.358974358974359
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 12,
+          "anchor_total": 36,
+          "anchor_recall": 0.3333333333333333
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 10,
+          "anchor_total": 40,
+          "anchor_recall": 0.25
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 11,
+          "anchor_total": 32,
+          "anchor_recall": 0.34375
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_hits": 54,
+      "anchor_total": 147,
+      "anchor_recall": 0.3673469387755102,
+      "actual_area_mean_km2": 599698.4366306692,
+      "actual_area_min_km2": 599381.9853717965,
+      "actual_area_max_km2": 599999.7354923143,
+      "all_event_hits": 62,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 15,
+          "anchor_total": 39,
+          "anchor_recall": 0.38461538461538464
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 13,
+          "anchor_total": 36,
+          "anchor_recall": 0.3611111111111111
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 14,
+          "anchor_total": 40,
+          "anchor_recall": 0.35
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 12,
+          "anchor_total": 32,
+          "anchor_recall": 0.375
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_hits": 59,
+      "anchor_total": 147,
+      "anchor_recall": 0.4013605442176871,
+      "actual_area_mean_km2": 749675.3592315009,
+      "actual_area_min_km2": 749378.8001578783,
+      "actual_area_max_km2": 749993.9321086485,
+      "all_event_hits": 69,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 15,
+          "anchor_total": 39,
+          "anchor_recall": 0.38461538461538464
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 14,
+          "anchor_total": 36,
+          "anchor_recall": 0.3888888888888889
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 17,
+          "anchor_total": 40,
+          "anchor_recall": 0.425
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 13,
+          "anchor_total": 32,
+          "anchor_recall": 0.40625
+        }
+      ]
+    },
+    {
+      "model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_hits": 69,
+      "anchor_total": 147,
+      "anchor_recall": 0.46938775510204084,
+      "actual_area_mean_km2": 959699.9174312229,
+      "actual_area_min_km2": 959377.1579829166,
+      "actual_area_max_km2": 959999.6966428171,
+      "all_event_hits": 82,
+      "all_event_total": 189,
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "anchor_hits": 19,
+          "anchor_total": 39,
+          "anchor_recall": 0.48717948717948717
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "anchor_hits": 16,
+          "anchor_total": 36,
+          "anchor_recall": 0.4444444444444444
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "anchor_hits": 18,
+          "anchor_total": 40,
+          "anchor_recall": 0.45
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "anchor_hits": 16,
+          "anchor_total": 32,
+          "anchor_recall": 0.5
+        }
+      ]
+    }
+  ],
+  "pairings": [
+    {
+      "candidate_model_id": "A_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 20,
+      "unchanged_miss": 127,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 1,
+      "unchanged_hit": 25,
+      "unchanged_miss": 121,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.0408163265306123,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": -1,
+          "anchor_total": 32,
+          "delta_recall_pp": -3.125,
+          "direction": "negative"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 32,
+      "unchanged_miss": 115,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 38,
+      "unchanged_miss": 109,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 1,
+      "unchanged_hit": 49,
+      "unchanged_miss": 97,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.0408163265306123,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": -1,
+          "anchor_total": 32,
+          "delta_recall_pp": -3.125,
+          "direction": "negative"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 35,
+      "unchanged_miss": 112,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 40,
+      "unchanged_miss": 107,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 46,
+      "unchanged_miss": 101,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 1,
+      "lost": 2,
+      "unchanged_hit": 54,
+      "unchanged_miss": 90,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.7210884353741496,
+        1.3605442176870748
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -1,
+          "anchor_total": 36,
+          "delta_recall_pp": -2.7777777777777777,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 2,
+      "unchanged_hit": 62,
+      "unchanged_miss": 83,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -1,
+          "anchor_total": 36,
+          "delta_recall_pp": -2.7777777777777777,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": -1,
+          "anchor_total": 32,
+          "delta_recall_pp": -3.125,
+          "direction": "negative"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 2,
+      "unchanged_hit": 39,
+      "unchanged_miss": 106,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 2,
+      "unchanged_hit": 45,
+      "unchanged_miss": 100,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 2,
+      "unchanged_hit": 52,
+      "unchanged_miss": 93,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 2,
+      "unchanged_hit": 57,
+      "unchanged_miss": 88,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 1,
+      "lost": 2,
+      "unchanged_hit": 67,
+      "unchanged_miss": 77,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.7380952380952372,
+        1.3605442176870748
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -1,
+          "anchor_total": 36,
+          "delta_recall_pp": -2.7777777777777777,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 20,
+      "unchanged_miss": 127,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 26,
+      "unchanged_miss": 121,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 32,
+      "unchanged_miss": 115,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 38,
+      "unchanged_miss": 109,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L1_REGIONAL_CONSTANT",
+      "reference_model_id": "C0_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 1,
+      "unchanged_hit": 49,
+      "unchanged_miss": 97,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.0408163265306123,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": -1,
+          "anchor_total": 32,
+          "delta_recall_pp": -3.125,
+          "direction": "negative"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 1,
+      "lost": 0,
+      "unchanged_hit": 35,
+      "unchanged_miss": 111,
+      "net_hits": 1,
+      "delta_recall_pp": 0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        0.0,
+        2.0408163265306123
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 1,
+          "anchor_total": 36,
+          "delta_recall_pp": 2.7777777777777777,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 40,
+      "unchanged_miss": 107,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 0,
+      "unchanged_hit": 46,
+      "unchanged_miss": 101,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        0.0,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 2,
+      "lost": 2,
+      "unchanged_hit": 54,
+      "unchanged_miss": 89,
+      "net_hits": 0,
+      "delta_recall_pp": 0.0,
+      "bootstrap_ci95_pp": [
+        -2.7210884353741496,
+        2.7210884353741496
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "C0_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 1,
+      "lost": 2,
+      "unchanged_hit": 62,
+      "unchanged_miss": 82,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -2.7380952380952372,
+        1.3605442176870748
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 1,
+          "anchor_total": 39,
+          "delta_recall_pp": 2.564102564102564,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -1,
+          "anchor_total": 36,
+          "delta_recall_pp": -2.7777777777777777,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": -1,
+          "anchor_total": 32,
+          "delta_recall_pp": -3.125,
+          "direction": "negative"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 3,
+      "unchanged_hit": 38,
+      "unchanged_miss": 106,
+      "net_hits": -3,
+      "delta_recall_pp": -2.0408163265306123,
+      "bootstrap_ci95_pp": [
+        -4.761904761904762,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": -1,
+          "anchor_total": 39,
+          "delta_recall_pp": -2.564102564102564,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 0,
+      "lost": 3,
+      "unchanged_hit": 44,
+      "unchanged_miss": 100,
+      "net_hits": -3,
+      "delta_recall_pp": -2.0408163265306123,
+      "bootstrap_ci95_pp": [
+        -4.761904761904762,
+        0.0
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": -1,
+          "anchor_total": 39,
+          "delta_recall_pp": -2.564102564102564,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 2,
+      "lost": 3,
+      "unchanged_hit": 51,
+      "unchanged_miss": 91,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        2.0408163265306123
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": -1,
+          "anchor_total": 39,
+          "delta_recall_pp": -2.564102564102564,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 1,
+      "lost": 3,
+      "unchanged_hit": 56,
+      "unchanged_miss": 87,
+      "net_hits": -2,
+      "delta_recall_pp": -1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -4.081632653061225,
+        1.3605442176870748
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "C0_L3_B0_R30_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 2,
+      "lost": 3,
+      "unchanged_hit": 66,
+      "unchanged_miss": 76,
+      "net_hits": -1,
+      "delta_recall_pp": -0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        2.0408163265306123
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": -1,
+          "anchor_total": 39,
+          "delta_recall_pp": -2.564102564102564,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 0,
+          "anchor_total": 36,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 15,
+      "lost": 0,
+      "unchanged_hit": 20,
+      "unchanged_miss": 112,
+      "net_hits": 15,
+      "delta_recall_pp": 10.204081632653061,
+      "bootstrap_ci95_pp": [
+        5.442176870748299,
+        14.965986394557824
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 5,
+          "anchor_total": 36,
+          "delta_recall_pp": 13.88888888888889,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 5,
+          "anchor_total": 40,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 18,
+      "lost": 3,
+      "unchanged_hit": 22,
+      "unchanged_miss": 104,
+      "net_hits": 15,
+      "delta_recall_pp": 10.204081632653061,
+      "bootstrap_ci95_pp": [
+        4.761904761904762,
+        16.3265306122449
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 2,
+          "anchor_total": 39,
+          "delta_recall_pp": 5.128205128205128,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 6,
+          "anchor_total": 36,
+          "delta_recall_pp": 16.666666666666664,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 6,
+          "anchor_total": 40,
+          "delta_recall_pp": 15.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 20,
+      "lost": 6,
+      "unchanged_hit": 26,
+      "unchanged_miss": 95,
+      "net_hits": 14,
+      "delta_recall_pp": 9.523809523809524,
+      "bootstrap_ci95_pp": [
+        2.7210884353741496,
+        16.3265306122449
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 22,
+      "lost": 5,
+      "unchanged_hit": 33,
+      "unchanged_miss": 87,
+      "net_hits": 17,
+      "delta_recall_pp": 11.564625850340136,
+      "bootstrap_ci95_pp": [
+        5.442176870748299,
+        18.367346938775512
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L2_KDE_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 20,
+      "lost": 7,
+      "unchanged_hit": 42,
+      "unchanged_miss": 78,
+      "net_hits": 13,
+      "delta_recall_pp": 8.843537414965986,
+      "bootstrap_ci95_pp": [
+        2.0408163265306123,
+        15.646258503401361
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 2,
+          "anchor_total": 39,
+          "delta_recall_pp": 5.128205128205128,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 5,
+          "anchor_total": 36,
+          "delta_recall_pp": 13.88888888888889,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 5,
+          "anchor_total": 32,
+          "delta_recall_pp": 15.625,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 21,
+      "lost": 2,
+      "unchanged_hit": 18,
+      "unchanged_miss": 106,
+      "net_hits": 19,
+      "delta_recall_pp": 12.925170068027212,
+      "bootstrap_ci95_pp": [
+        6.802721088435375,
+        19.047619047619047
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 4,
+          "anchor_total": 40,
+          "delta_recall_pp": 10.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 24,
+      "lost": 4,
+      "unchanged_hit": 21,
+      "unchanged_miss": 98,
+      "net_hits": 20,
+      "delta_recall_pp": 13.60544217687075,
+      "bootstrap_ci95_pp": [
+        7.465986394557825,
+        19.74489795918358
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 5,
+          "anchor_total": 39,
+          "delta_recall_pp": 12.82051282051282,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 3,
+          "anchor_total": 40,
+          "delta_recall_pp": 7.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 4,
+          "anchor_total": 32,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 26,
+      "lost": 6,
+      "unchanged_hit": 26,
+      "unchanged_miss": 89,
+      "net_hits": 20,
+      "delta_recall_pp": 13.60544217687075,
+      "bootstrap_ci95_pp": [
+        6.785714285714287,
+        20.408163265306122
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 6,
+          "anchor_total": 39,
+          "delta_recall_pp": 15.384615384615385,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 9,
+          "anchor_total": 36,
+          "delta_recall_pp": 25.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 26,
+      "lost": 7,
+      "unchanged_hit": 31,
+      "unchanged_miss": 83,
+      "net_hits": 19,
+      "delta_recall_pp": 12.925170068027212,
+      "bootstrap_ci95_pp": [
+        5.442176870748299,
+        19.727891156462583
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 5,
+          "anchor_total": 39,
+          "delta_recall_pp": 12.82051282051282,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 7,
+          "anchor_total": 36,
+          "delta_recall_pp": 19.444444444444446,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 3,
+          "anchor_total": 40,
+          "delta_recall_pp": 7.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 4,
+          "anchor_total": 32,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 26,
+      "lost": 7,
+      "unchanged_hit": 42,
+      "unchanged_miss": 72,
+      "net_hits": 19,
+      "delta_recall_pp": 12.925170068027212,
+      "bootstrap_ci95_pp": [
+        6.122448979591836,
+        20.408163265306122
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 5,
+          "anchor_total": 39,
+          "delta_recall_pp": 12.82051282051282,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 6,
+          "anchor_total": 36,
+          "delta_recall_pp": 16.666666666666664,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 6,
+          "anchor_total": 32,
+          "delta_recall_pp": 18.75,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 13,
+      "lost": 9,
+      "unchanged_hit": 26,
+      "unchanged_miss": 99,
+      "net_hits": 4,
+      "delta_recall_pp": 2.7210884353741496,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        8.843537414965986
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 0,
+          "anchor_total": 39,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 3,
+          "anchor_total": 36,
+          "delta_recall_pp": 8.333333333333332,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": -1,
+          "anchor_total": 40,
+          "delta_recall_pp": -2.5,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 2,
+          "anchor_total": 32,
+          "delta_recall_pp": 6.25,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 13,
+      "lost": 8,
+      "unchanged_hit": 32,
+      "unchanged_miss": 94,
+      "net_hits": 5,
+      "delta_recall_pp": 3.4013605442176873,
+      "bootstrap_ci95_pp": [
+        -2.7210884353741496,
+        9.523809523809524
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 2,
+          "anchor_total": 36,
+          "delta_recall_pp": 5.555555555555555,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": -3,
+          "anchor_total": 40,
+          "delta_recall_pp": -7.5,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 12,
+      "lost": 6,
+      "unchanged_hit": 40,
+      "unchanged_miss": 89,
+      "net_hits": 6,
+      "delta_recall_pp": 4.081632653061225,
+      "bootstrap_ci95_pp": [
+        -1.3605442176870748,
+        9.523809523809524
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 1,
+          "anchor_total": 36,
+          "delta_recall_pp": 2.7777777777777777,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 0,
+          "anchor_total": 40,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 2,
+          "anchor_total": 32,
+          "delta_recall_pp": 6.25,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 12,
+      "lost": 10,
+      "unchanged_hit": 45,
+      "unchanged_miss": 80,
+      "net_hits": 2,
+      "delta_recall_pp": 1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -4.761904761904762,
+        7.482993197278912
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 1,
+          "anchor_total": 39,
+          "delta_recall_pp": 2.564102564102564,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -1,
+          "anchor_total": 36,
+          "delta_recall_pp": -2.7777777777777777,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "A_L3_B0_R30_CAUSAL",
+      "reference_model_id": "A_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 14,
+      "lost": 8,
+      "unchanged_hit": 54,
+      "unchanged_miss": 71,
+      "net_hits": 6,
+      "delta_recall_pp": 4.081632653061225,
+      "bootstrap_ci95_pp": [
+        -2.0408163265306123,
+        10.204081632653061
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 1,
+          "anchor_total": 36,
+          "delta_recall_pp": 2.7777777777777777,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 16,
+      "lost": 0,
+      "unchanged_hit": 20,
+      "unchanged_miss": 111,
+      "net_hits": 16,
+      "delta_recall_pp": 10.884353741496598,
+      "bootstrap_ci95_pp": [
+        6.122448979591836,
+        16.3265306122449
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 6,
+          "anchor_total": 36,
+          "delta_recall_pp": 16.666666666666664,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 5,
+          "anchor_total": 40,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 18,
+      "lost": 4,
+      "unchanged_hit": 22,
+      "unchanged_miss": 103,
+      "net_hits": 14,
+      "delta_recall_pp": 9.523809523809524,
+      "bootstrap_ci95_pp": [
+        3.4013605442176873,
+        15.646258503401361
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 2,
+          "anchor_total": 39,
+          "delta_recall_pp": 5.128205128205128,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 6,
+          "anchor_total": 36,
+          "delta_recall_pp": 16.666666666666664,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 6,
+          "anchor_total": 40,
+          "delta_recall_pp": 15.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 0,
+          "anchor_total": 32,
+          "delta_recall_pp": 0.0,
+          "direction": "zero"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 20,
+      "lost": 6,
+      "unchanged_hit": 26,
+      "unchanged_miss": 95,
+      "net_hits": 14,
+      "delta_recall_pp": 9.523809523809524,
+      "bootstrap_ci95_pp": [
+        2.7210884353741496,
+        16.3265306122449
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 23,
+      "lost": 5,
+      "unchanged_hit": 33,
+      "unchanged_miss": 86,
+      "net_hits": 18,
+      "delta_recall_pp": 12.244897959183673,
+      "bootstrap_ci95_pp": [
+        6.105442176870749,
+        19.047619047619047
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 9,
+          "anchor_total": 36,
+          "delta_recall_pp": 25.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L2_KDE_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 21,
+      "lost": 7,
+      "unchanged_hit": 42,
+      "unchanged_miss": 77,
+      "net_hits": 14,
+      "delta_recall_pp": 9.523809523809524,
+      "bootstrap_ci95_pp": [
+        2.7210884353741496,
+        16.3265306122449
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 5,
+          "anchor_total": 36,
+          "delta_recall_pp": 13.88888888888889,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 5,
+          "anchor_total": 32,
+          "delta_recall_pp": 15.625,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 20,
+      "lost": 2,
+      "unchanged_hit": 18,
+      "unchanged_miss": 107,
+      "net_hits": 18,
+      "delta_recall_pp": 12.244897959183673,
+      "bootstrap_ci95_pp": [
+        6.122448979591836,
+        18.367346938775512
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 3,
+          "anchor_total": 39,
+          "delta_recall_pp": 7.6923076923076925,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 4,
+          "anchor_total": 40,
+          "delta_recall_pp": 10.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 23,
+      "lost": 5,
+      "unchanged_hit": 21,
+      "unchanged_miss": 98,
+      "net_hits": 18,
+      "delta_recall_pp": 12.244897959183673,
+      "bootstrap_ci95_pp": [
+        6.122448979591836,
+        18.367346938775512
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 8,
+          "anchor_total": 36,
+          "delta_recall_pp": 22.22222222222222,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 3,
+          "anchor_total": 40,
+          "delta_recall_pp": 7.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 27,
+      "lost": 6,
+      "unchanged_hit": 26,
+      "unchanged_miss": 88,
+      "net_hits": 21,
+      "delta_recall_pp": 14.285714285714285,
+      "bootstrap_ci95_pp": [
+        6.802721088435375,
+        21.768707482993197
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 5,
+          "anchor_total": 39,
+          "delta_recall_pp": 12.82051282051282,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 9,
+          "anchor_total": 36,
+          "delta_recall_pp": 25.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 3,
+          "anchor_total": 40,
+          "delta_recall_pp": 7.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 4,
+          "anchor_total": 32,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 25,
+      "lost": 6,
+      "unchanged_hit": 32,
+      "unchanged_miss": 84,
+      "net_hits": 19,
+      "delta_recall_pp": 12.925170068027212,
+      "bootstrap_ci95_pp": [
+        6.122448979591836,
+        19.727891156462583
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 5,
+          "anchor_total": 39,
+          "delta_recall_pp": 12.82051282051282,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 7,
+          "anchor_total": 36,
+          "delta_recall_pp": 19.444444444444446,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 3,
+          "anchor_total": 40,
+          "delta_recall_pp": 7.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 4,
+          "anchor_total": 32,
+          "delta_recall_pp": 12.5,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L1_REGIONAL_CONSTANT",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 26,
+      "lost": 7,
+      "unchanged_hit": 42,
+      "unchanged_miss": 72,
+      "net_hits": 19,
+      "delta_recall_pp": 12.925170068027212,
+      "bootstrap_ci95_pp": [
+        5.442176870748299,
+        20.408163265306122
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 4,
+          "anchor_total": 39,
+          "delta_recall_pp": 10.256410256410255,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 7,
+          "anchor_total": 36,
+          "delta_recall_pp": 19.444444444444446,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 2,
+          "anchor_total": 40,
+          "delta_recall_pp": 5.0,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 6,
+          "anchor_total": 32,
+          "delta_recall_pp": 18.75,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 300000.0,
+      "anchor_total": 147,
+      "gained": 11,
+      "lost": 9,
+      "unchanged_hit": 27,
+      "unchanged_miss": 100,
+      "net_hits": 2,
+      "delta_recall_pp": 1.3605442176870748,
+      "bootstrap_ci95_pp": [
+        -4.761904761904762,
+        7.482993197278912
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": -1,
+          "anchor_total": 39,
+          "delta_recall_pp": -2.564102564102564,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 2,
+          "anchor_total": 36,
+          "delta_recall_pp": 5.555555555555555,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": -1,
+          "anchor_total": 40,
+          "delta_recall_pp": -2.5,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 2,
+          "anchor_total": 32,
+          "delta_recall_pp": 6.25,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 450000.0,
+      "anchor_total": 147,
+      "gained": 12,
+      "lost": 8,
+      "unchanged_hit": 32,
+      "unchanged_miss": 95,
+      "net_hits": 4,
+      "delta_recall_pp": 2.7210884353741496,
+      "bootstrap_ci95_pp": [
+        -3.4013605442176873,
+        8.843537414965986
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 2,
+          "anchor_total": 39,
+          "delta_recall_pp": 5.128205128205128,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 2,
+          "anchor_total": 36,
+          "delta_recall_pp": 5.555555555555555,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": -3,
+          "anchor_total": 40,
+          "delta_recall_pp": -7.5,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 600000.0,
+      "anchor_total": 147,
+      "gained": 13,
+      "lost": 6,
+      "unchanged_hit": 40,
+      "unchanged_miss": 88,
+      "net_hits": 7,
+      "delta_recall_pp": 4.761904761904762,
+      "bootstrap_ci95_pp": [
+        -0.6802721088435374,
+        10.884353741496598
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 2,
+          "anchor_total": 39,
+          "delta_recall_pp": 5.128205128205128,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 1,
+          "anchor_total": 36,
+          "delta_recall_pp": 2.7777777777777777,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 3,
+          "anchor_total": 32,
+          "delta_recall_pp": 9.375,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 750000.0,
+      "anchor_total": 147,
+      "gained": 11,
+      "lost": 10,
+      "unchanged_hit": 46,
+      "unchanged_miss": 80,
+      "net_hits": 1,
+      "delta_recall_pp": 0.6802721088435374,
+      "bootstrap_ci95_pp": [
+        -5.442176870748299,
+        6.802721088435375
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 1,
+          "anchor_total": 39,
+          "delta_recall_pp": 2.564102564102564,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": -2,
+          "anchor_total": 36,
+          "delta_recall_pp": -5.555555555555555,
+          "direction": "negative"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    },
+    {
+      "candidate_model_id": "B_L3_B0_R30_CAUSAL",
+      "reference_model_id": "B_L2_KDE_CAUSAL",
+      "area_budget_km2": 960000.0,
+      "anchor_total": 147,
+      "gained": 13,
+      "lost": 8,
+      "unchanged_hit": 55,
+      "unchanged_miss": 71,
+      "net_hits": 5,
+      "delta_recall_pp": 3.4013605442176873,
+      "bootstrap_ci95_pp": [
+        -2.7210884353741496,
+        9.523809523809524
+      ],
+      "per_fold": [
+        {
+          "fold_id": "C_DEV_2000_2004",
+          "net_hits": 1,
+          "anchor_total": 39,
+          "delta_recall_pp": 2.564102564102564,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2005_2009",
+          "net_hits": 2,
+          "anchor_total": 36,
+          "delta_recall_pp": 5.555555555555555,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2010_2014",
+          "net_hits": 1,
+          "anchor_total": 40,
+          "delta_recall_pp": 2.5,
+          "direction": "positive"
+        },
+        {
+          "fold_id": "C_DEV_2015_2019",
+          "net_hits": 1,
+          "anchor_total": 32,
+          "delta_recall_pp": 3.125,
+          "direction": "positive"
+        }
+      ]
+    }
+  ],
+  "bootstrap": {
+    "unit": "paired_fixed_anchor_episode",
+    "replicates": 2000,
+    "root_seed": 147,
+    "interval": "percentile_95",
+    "research_stop_gate": false
+  },
+  "interpretation": "Development fixed-parameter input sensitivity, not independent confirmation, optimized capacity or absolute earthquake probability.",
+  "area_interpretation": "Same nominal budgets, unchanged full national domain, model-specific actual whole-cell areas are reported.",
+  "holdout_read": false,
+  "locked_test_run": false
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source_score_manifest_sha256": "0651d3483acf6f48a3b287d0e1f11aba26425e67b63126b8f89eee3e5b02221c",
+  "event_coordinate_semantics": "original_catalog_epicentre_from_C0_target_payload_not_grid_centre",
+  "alarm_coordinate_semantics": "provided_grid_representative_points_not_cell_polygons",
+  "network_resources": [],
+  "synthetic_fixture": false,
+  "artifacts": [
+    {
+      "path": "01_main_anchor_hits.png",
+      "sha256": "716be97bc867b32f340ee3d8728f3bc0d3a75f7217268a380610facc1cd76a3e"
+    },
+    {
+      "path": "01_main_anchor_hits.svg",
+      "sha256": "cd0470a9bbf32d60f9212c01caaf056282b6208c797060b08ac4cd44a1be4612"
+    },
+    {
+      "path": "02_l3_area_curves.png",
+      "sha256": "43a32a3a1b1ac35962c82249eb742ab0b64f3ca6588d7b21ecd66a5db5ebf334"
+    },
+    {
+      "path": "02_l3_area_curves.svg",
+      "sha256": "53ad08a6f253569d0b9e5ea8d11480c9ce2d1f5676dd39923d2dbc092049a138"
+    },
+    {
+      "path": "seismoflux_s1c2a_replay.html",
+      "sha256": "680bdd6ed9925c37e7758360010e3920a4e9de24fb14299822dd70e8f3111502"
+    }
+  ]
+}

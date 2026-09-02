@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "complete": true,
+  "identity": {
+    "protocol_sha256": "4aa9070c190f0e599870bde93899bcb2153f34e5069bf923a2499bce8e9c64bd",
+    "prediction_manifest_sha256": "68a5e7f0c06b8b0ec10bb9cbc580471bdfa5a60f66d7a7ff1eefd5915509986f",
+    "C0_raw_scores_sha256": "8165c4643dfaff5985761b24852f09e6fe1c922c4aed705ad2e405a5ed18d6d4"
+  },
+  "artifacts": [
+    {
+      "path": "alarm_prefixes.parquet",
+      "sha256": "d30f1fcbc17f03868b273d91bbf081372e7c51c321306e1c1614a9ffdf0f5c42"
+    },
+    {
+      "path": "event_results.parquet",
+      "sha256": "854bf3712862176d9ee3b2ce31a141cf3447c94baaa8969e2c432f3a940bd818"
+    },
+    {
+      "path": "exposure_scores.csv",
+      "sha256": "647eea861be7efbcb0de2d6be643f02f49a7bf01d8876ffdb9e3c6f1e538ac91"
+    },
+    {
+      "path": "grid_cells.csv",
+      "sha256": "105e793c1d4d23cd6cd4da724467aa03f60e636b85905fb922df70e0ce2048e1"
+    },
+    {
+      "path": "paired_episode_results.csv",
+      "sha256": "6428ce0dd16bc5f7e23e0035117298d01061b43716bb41e89cf55de7a21d5775"
+    },
+    {
+      "path": "summary.json",
+      "sha256": "4ff2ad36df4d85fb958599631ca59182e8f741253bcc7860484afa293da6432e"
+    }
+  ]
+}

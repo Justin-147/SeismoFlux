@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from types import ModuleType
 
@@ -45,7 +46,8 @@ def _raw_targets() -> tuple[pd.DataFrame, dict[str, tuple[int, ...]]]:
     issues = {}
     for fold_index, fold in enumerate(DEVELOPMENT_FOLD_IDS):
         issue = pd.Timestamp(f"{2000 + 5 * fold_index}-01-05T16:00:00+00:00")
-        issues[fold] = (int(issue.as_unit("us").value),)
+        elapsed = issue.to_pydatetime() - datetime(1970, 1, 1, tzinfo=UTC)
+        issues[fold] = ((elapsed.days * 86400 + elapsed.seconds) * 1_000_000,)
         targets = _targets(fold_index if fold_index < 2 else None)
         for model in scorer.BASE_MODELS:
             payload = {
@@ -73,6 +75,22 @@ def _raw_targets() -> tuple[pd.DataFrame, dict[str, tuple[int, ...]]]:
     return pd.DataFrame(rows), issues
 
 
+@pytest.mark.parametrize(
+    ("timestamp", "expected_microseconds"),
+    [
+        ("2000-01-05T16:00:00+00:00", 947_088_000_000_000),
+        ("2000-01-06T00:00:00+08:00", 947_088_000_000_000),
+        ("1970-01-01T00:00:00.000001+00:00", 1),
+        ("1969-12-31T23:59:59.999999+00:00", -1),
+    ],
+)
+def test_issue_keys_use_epoch_microseconds_not_timestamp_value_nanoseconds(
+    timestamp: str, expected_microseconds: int
+) -> None:
+    assert scorer._issue_us(timestamp) == expected_microseconds
+    assert scorer._issue_us(pd.Timestamp(timestamp)) == expected_microseconds
+
+
 def test_target_identity_preserves_empty_periods_and_same_three_model_population() -> None:
     rows, issues = _raw_targets()
     result = scorer.validate_target_rows(
@@ -87,6 +105,15 @@ def test_target_identity_preserves_empty_periods_and_same_three_model_population
     with pytest.raises(scorer.InputSensitivityScoreError, match="target keys or metadata differ"):
         scorer.validate_target_rows(
             changed, expected_issues=issues, cell_count=4, expected_anchor_count=2
+        )
+
+
+def test_real_duplicate_target_exposure_is_still_rejected() -> None:
+    rows, issues = _raw_targets()
+    duplicated = pd.concat([rows, rows.iloc[:1]], ignore_index=True)
+    with pytest.raises(scorer.InputSensitivityScoreError, match="duplicate"):
+        scorer.validate_target_rows(
+            duplicated, expected_issues=issues, cell_count=4, expected_anchor_count=2
         )
 
 

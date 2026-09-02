@@ -15,8 +15,11 @@
 2. 用户两份目录默认都是Ms。这只补全类型说明，没有改变计算，所以入库、样本数、旧预测和分数
    都不需要重跑。机器空值原样保留，以来源补充说明解释，不随意转换Mw。
 
-下一项C2A只做一个小问题：保留或排除Mc暂时估不出的稀疏地区，已有模型的预测会变好还是变差？
-不重新调参数、不换目标、不扩大报警范围。
+补充对照C2A已经完成：同一147个震序、约60万km²，原长期＋近期模型命中54个，A仅去掉确定高Mc
+地区后命中52个，B再去掉Mc未知地区后命中53个。主指标没有提升。B的长期模型在30万km²有多命中
+1个的小正结果，其余面积无稳定优势，也完整保留。保留C0基线，结束这条筛选分支，不再重跑C2A。
+
+下一项是C2B有限覆盖面板与模型比较，随后进入多数据研究。当前并没有完成整个项目。
 
 ## 2. 工作位置与基准身份
 
@@ -35,13 +38,14 @@
 2. `docs/s1_support_threshold_magnitude_audit_2026-09-02.md`；
 3. `data/manifests/catalog_magnitude_semantics_2026-09-02.json`；
 4. `configs/multitask_s1_c2a_input_sensitivity.yaml`；
-5. `docs/SEISMOFLUX_MULTITASK_MULTIDATA_SCIENCE_PLAN_2026-09-01.md`总路线；
-6. 上一暂停交接第4—7节的覆盖文献与后续C2方案，尚未冻结的模型参数仍不能冒充已决定。
+5. `docs/s1c2a_scientific_results_2026-09-02.md`（真实结果、图件、科学价值复审与验收）；
+6. `docs/SEISMOFLUX_MULTITASK_MULTIDATA_SCIENCE_PLAN_2026-09-01.md`总路线；
+7. 上一暂停交接第4—7节的覆盖文献与后续C2方案，尚未冻结的模型参数仍不能冒充已决定。
 
 旧文档中“95%未达所以不能再研究”和“本地震级类型未知”的当前解释，均以本轮补充为准。原文件
 和原产物不改，避免把现在的认识写回当时的研究记录。
 
-## 4. C2A精确范围
+## 4. 已完成的C2A精确范围
 
 - 仍是2000—2004、2005—2009、2010—2014、2015—2019四折；每折29个30天主曝光，共116期。
 - Ms4+、1970起全源权威目录。每期只用当期前24小时已发生且可获得的事件。
@@ -57,8 +61,10 @@
 
 ## 5. 其后怎么做
 
-C2A完整报告后结束这项完整性问题。C2剩余工作仍是有限的覆盖面板对照、多尺度KDE、指数时间
-衰减和低维ridge组合；按问题分别设计，不能与两个掩膜做全交叉搜索。
+C2A完整报告已经形成，这项局地筛选问题到此结束。C2剩余工作称为C2B：有限的覆盖面板对照、
+多尺度KDE、指数时间衰减和低维ridge组合；按问题分别设计，不能与两个掩膜做全交叉搜索。
+当前C2B精确配置尚未冻结，也没有开始训练或查看任何C2B候选成绩。先把文献已支持的机制和
+有限候选落实，完成协议验收与提交推送后运行；不要把这段准备扩展成新一轮完整性门控。
 
 数据面板比较用同一固定模型；模型改进比较要用相同数据基线；若有新超参，只在对应外折之前的
 内层选择。D1面板同时改变来源成员和起始年代时，只能称“面板整体差异”；若不增加桥接对照就
@@ -72,7 +78,7 @@ C2目录问题完成后转入S2断层、危险性和应变，再做S3异常，�
 | 阶段 | 通俗任务 | 当前状态 |
 | --- | --- | --- |
 | S0 | 查清数据、规定时间/地点/震级任务与样本 | 已完成 |
-| S1 | 比较目录模型及目录处理是否真的提高预测 | C0已完成；C1无预测停止；C2A准备执行 |
+| S1 | 比较目录模型及目录处理是否真的提高预测 | C0、C2A已完成；C1无预测停止；C2B有限模型比较待开展 |
 | S2 | 加断层、危险性、应变，看中长期增量 | 未开始 |
 | S3 | 加205期异常，看是否超过目录及置乱对照 | 未开始 |
 | S4 | 有限树模型与一个小型神经/多任务模型 | 未开始 |
@@ -83,24 +89,44 @@ C2目录问题完成后转入S2断层、危险性和应变，再做S3异常，�
 心跳`seismoflux`已恢复ACTIVE，每30分钟；每次说明用了哪些数据、方法、训练/开发/独立检验效果、
 完整S0—S7线以及离最终目标还差什么，并检查偏离与纠偏。未有新预测成绩时要直接说没有。
 
-本次恢复的只读资源检查：24物理/48逻辑核心，整机CPU约24%，可用内存约47GiB；未发现Python
-训练/评分进程。新任务默认2、最多3个折工作线程，数值库单线程，至少保留2个物理核心。
+机器为24物理/48逻辑核心。C2A预测实际2线程、BelowNormal优先级，抽样占整机CPU约3.97%；
+评分单进程单数值线程，抽样约2.08%。计算与绘图均已退出，末次检查没有Python训练/评分进程。
+新任务默认2、最多3个折工作线程，数值库单线程，至少保留2个物理核心。
 
 ## 7. 本轮阶段验收与安全恢复点
 
-当前状态：`S1_C2A_IMPLEMENTATION_ACCEPTED_PENDING_PUSH_AND_PREDICTION`。
+当前状态：`S1_C2A_SCIENTIFIC_COMPLETE_PENDING_RESULT_COMMIT_PUSH`。
 审计与协议已由提交`3c2948d125a532672df65c3da543113ac7c79bb8`完成验证、独立科学复审、推送与
-远端回读；验收记录为`docs/s1c2a_audit_protocol_acceptance_2026-09-02.md`。正在实现最小位置
-对照已完成，实现验收为`docs/s1c2a_implementation_acceptance_2026-09-02.md`，25项聚焦合成验证和
-真实文件只读预检通过；尚未启动真实预测或新评分。以下状态不会预先宣称预测运行成功：
+远端回读；验收记录为`docs/s1c2a_audit_protocol_acceptance_2026-09-02.md`。最小位置对照实现
+验收为`docs/s1c2a_implementation_acceptance_2026-09-02.md`，25项聚焦合成验证和
+真实文件只读预检通过；实现提交`35e33f1895cb8f275e879732acea184345a67e1f`已推送并远端回读。
+真实预测已于北京时间18:12:49启动，PID为31500，2个折线程、BelowNormal优先级。
+18:14:08抽样为整机CPU3.97%、内存约304.5MiB；这不是所有程序的总占用。
+四个外折已于北京时间18:16:47完成保存（116/116期、100%）。预测清单SHA-256为
+`68a5e7f0c06b8b0ec10bb9cbc580471bdfa5a60f66d7a7ff1eefd5915509986f`。
+18:17:14启动的首次评分在校验旧C0目标起报期时停止，报错为
+`extra, duplicate, or non-development target issue`。根因为评分适配把同一个日期的纳秒整数误当微秒，
+不是目标改变或重复。已只修复该转换，新增独立日期常量回归，31项聚焦测试通过；独立复核116期、
+34空期及147个锚点与预测完全一致，未重算预测、未改变评价。
+评分于18:22:24以单进程PID32428恢复，18:26:22成功结束；该进程已退出。主指标C0为32/46/54，
+A为32/46/52，B为32/46/53。真实产物独立复核、两张静态图目视验证、离线数据与JS语法检查通过。
+浏览器安全策略拒绝本地file地址，点击交互未实测；不绕过限制，也不把它变成科学研究停止门。
+本次运行日志为`data/interim/c2a_logs/predict_20260902T181249.stdout.log`及对应stderr文件。
+真实成绩与验收见`docs/s1c2a_scientific_results_2026-09-02.md`。待本轮结果提交、推送与远端回读后，
+进入C2B有限协议设计；此处不预先填入尚未产生的科学结果提交SHA。
 
 ```yaml
 audit_decision: retain_existing_results_and_run_finite_new_input_sensitivity
 catalog_values_changed: false
 S1_C0_rerun_required_for_95_or_Ms: false
 S1_C1_Mc_recomputation_required: false
-S1_C2A_predictions_created: false
-S1_C2A_scores_read: false
+S1_C2A_predictions_created: complete_four_of_four_folds_116_issues
+S1_C2A_scores_read: true
+S1_C2A_score_status: complete_same_predictions_same_targets
+S1_C2A_scientific_acceptance: PASS_no_new_stable_predictive_gain
+S1_C2A_result_commit_pushed: false
+S1_C2B_protocol_frozen: false
+S1_C2B_predictions_created: false
 heartbeat_status: ACTIVE
 holdout_opened: false
 audit_2023_plus_opened: false
@@ -108,18 +134,32 @@ locked_test_run: false
 science_first_Stage4_drafts_touched: false
 ```
 
-安全顺序：协议阶段已闭合；完成最小位置对照的合成验证与提交推送后运行，不修改C0旧runner/scorer。
-执行入口为`scripts/run_multitask_s1_c2a.py`，明确指定`--phase predict`或`--phase score`，单次调用
-不会自动跨阶段。新预测全部保存后统一评分、生成效果图和离线回放、复审科学价值并更新本文。
-如果中断，先查输出manifest和相关进程，避免重复实例；不能把未完成数组或未保存的口头状态当检查点。
+安全顺序：核验已完成结果，不重跑C2A、不改C0/C1/P1；确认本轮结果已推送后，转入第5节的C2B。
+若发现中断留下未提交文件，只核对本轮已列明代码/图件/文档，不使用`git add -A`带入旧草稿。
 
-实现完成且其验收提交推送后，预测恢复命令为（在本工作树运行）：
+已有图件入口（相对于本工作树）：
 
-```powershell
-$env:PYTHONPATH = Join-Path (Get-Location) 'src'
-$env:PYTHONDONTWRITEBYTECODE = '1'
-& 'D:\AIPred\SeismoFlux\.venv\Scripts\python.exe' -u scripts/run_multitask_s1_c2a.py --phase predict --project-root 'D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata' --data-root 'D:\AIPred\SeismoFlux\data' --workers 2
+```text
+outputs/multitask_s1/s1c2a_input_sensitivity_v1/visualization/01_main_anchor_hits.png
+outputs/multitask_s1/s1c2a_input_sensitivity_v1/visualization/02_l3_area_curves.png
+outputs/multitask_s1/s1c2a_input_sensitivity_v1/visualization/seismoflux_s1c2a_replay.html
 ```
 
-只有`outputs/multitask_s1/s1c2a_input_sensitivity_v1/prediction_manifest.json`已完成并通过核验后，才
-将同一命令的`--phase predict`改为`--phase score`。不要运行旧C0全量脚本，不需要再次选择参数。
+预测清单SHA：`68a5e7f0c06b8b0ec10bb9cbc580471bdfa5a60f66d7a7ff1eefd5915509986f`。
+评分摘要SHA：`4ff2ad36df4d85fb958599631ca59182e8f741253bcc7860484afa293da6432e`。
+评分清单SHA：`0651d3483acf6f48a3b287d0e1f11aba26425e67b63126b8f89eee3e5b02221c`。
+逐事件资料与离线页仅本机保存；公开同步只含聚合结果、静态图、代码及文档。
+
+## 8. 最新科学价值复审
+
+```yaml
+science_value_category: direct_ablation_evidence_without_new_predictive_gain
+evidence: same_147_anchors_C0_54_A_52_B_53_at_600000km2_30d
+decision: retain_C0_reference_close_fixed_parameter_mask_branch
+next_scientific_test: finite_C2B_coverage_and_model_comparison_then_S2_multidata_increment
+stop_condition: no_further_C2A_threshold_mask_or_parameter_search
+project_completed: false
+```
+
+本轮排除的是一个没有稳定增量的固定参数处理分支，不是否定全部完整性方法。下一步必须贡献新的
+模型或数据效果证据，不能继续在95%、类型空值、日期适配或图件工程上循环。
