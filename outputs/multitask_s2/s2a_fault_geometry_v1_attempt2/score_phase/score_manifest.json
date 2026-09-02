@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "complete": true,
+  "identity": {
+    "protocol_sha256": "d6e19dca67063030e8eafdfd766f13f2310a5e52790cc4b2b7fe8707cf58b5c9",
+    "prediction_manifest_sha256": "5744cefc88dd83f6d71b981f9bf96faff0dbcea2b09ea1184ac934e45f15bef4",
+    "catalog_score_manifest_sha256": "ae96f95f2e7fbd92c8f6f692b0f4f95f7dd48787d5bcfc2cdf53e0138dde8dc5",
+    "C0_raw_scores_sha256": "8165c4643dfaff5985761b24852f09e6fe1c922c4aed705ad2e405a5ed18d6d4"
+  },
+  "artifacts": [
+    {
+      "path": "exposure_results.parquet",
+      "sha256": "1dd2c9c9f98546f0c4d9b97d0adf6a36ca4e63eed09dd7fd2c8d1284ada0c2c8"
+    },
+    {
+      "path": "event_results.parquet",
+      "sha256": "ba9810ea5c422a0fd3fe04ac6e36b3c7eb1901936b5f54aa372f0aad52fc4311"
+    },
+    {
+      "path": "alarm_prefixes.parquet",
+      "sha256": "3b0100355b4e6af532708b752e5c07c052a183ab0137ab2bf3cb716dcbe65c0d"
+    },
+    {
+      "path": "paired_anchor_results.parquet",
+      "sha256": "22337a0f5ebefd3669aea57a0660ab92916f6b5b01ff5c08a29504752b8b38d8"
+    },
+    {
+      "path": "grid_geometry.parquet",
+      "sha256": "a0cbcb3dfa08cf6cafc281ed33cfa20d91c82a618ee1e232f6e631d351e11311"
+    },
+    {
+      "path": "summary.json",
+      "sha256": "ef2a3c3d0a822a7e328e5aa95aedeac24fbdc3c941a80216941756e6a40b8e8a"
+    }
+  ]
+}

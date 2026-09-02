@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1152pt" height="496.8pt" viewBox="0 0 1152 496.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-02T23:19:41.971082</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.0, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 496.8 
+L 1152 496.8 
+L 1152 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 195.84 352.728 
+L 529.92 352.728 
+L 529.92 84.456 
+L 195.84 84.456 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g clip-path="url(#p4a564f75f2)">
+    <image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAA0MAAAKfCAYAAACsSxMPAAAOiElEQVR4nO3ZsU1CURiGYTCUzkDrApQO4BJWJiZOZEJCRe1AtExgcXpc4NpyuHmfZ4Ivf/fm344xbhsAYPXO18vsCQCr8jR7AAAAwAxiCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAk7WYPgP+crxfH4SF9fX7MngCwKj+H39kTYJHPEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAEDSdoxxmz0CAADg3nyGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAEDSbvYAgLV5fnudPQEWfR9PLsNDet+/zJ4Ai3yGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAADZFfyzLF7aMZ0zdAAAAAElFTkSuQmCC" id="image53b34e648d" transform="scale(1 -1) translate(0 -268.4)" x="196" y="-84.4" width="334" height="268.4"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m53f6e160f7" d="M 0 0 
+L 0 3.5 
+" style="stroke: #253642; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m53f6e160f7" x="229.248" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(219.836281 367.87009)">7 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(215.6105 378.568332)">N=53</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="296.064" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(283.72025 367.87009)">30 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(279.494469 378.568332)">N=147</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="362.88" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(350.53625 367.87009)">90 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(346.310469 378.568332)">N=202</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="429.696" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(414.420219 367.87009)">180 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(413.126469 378.568332)">N=237</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="496.512" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(481.236219 367.87009)">365 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(479.942469 378.568332)">N=229</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_6">
+      <defs>
+       <path id="m96d3c148a7" d="M 0 0 
+L -3.5 0 
+" style="stroke: #253642; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m96d3c148a7" x="195.84" y="117.99" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="188.84" y="122.182187" transform="rotate(-0 188.84 122.182187)">简化精细 − 目录</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="195.84" y="185.058" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="188.84" y="189.250187" transform="rotate(-0 188.84 189.250187)">详细精细 − 目录</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="195.84" y="252.126" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="188.84" y="256.318187" transform="rotate(-0 188.84 256.318187)">简化精细 − 粗化</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="195.84" y="319.194" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="188.84" y="323.386188" transform="rotate(-0 188.84 323.386188)">详细精细 − 粗化</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 195.84 352.728 
+L 195.84 84.456 
+" style="fill: none; stroke: #acb8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 195.84 352.728 
+L 529.92 352.728 
+" style="fill: none; stroke: #acb8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(221.943312 115.178232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(212.289094 126.946299)">+1/−1</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(288.759312 115.178232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(279.105094 126.946299)">+1/−1</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(355.575312 115.178232)">+3</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(345.921094 126.946299)">+4/−1</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(422.391312 115.178232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(412.737094 126.946299)">+4/−3</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(489.207312 115.178232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(479.553094 126.946299)">+4/−4</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(221.943312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(212.289094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(288.759312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(279.105094 194.014299)">+1/−1</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(355.575312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(345.921094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(422.391312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(412.737094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(489.207312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(479.553094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(221.943312 249.314232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(212.289094 261.082299)">+1/−1</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(288.759312 249.314232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(279.105094 261.082299)">+2/−1</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(355.575312 249.314232)">+3</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(345.921094 261.082299)">+5/−2</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(422.391312 249.314232)">+3</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(412.737094 261.082299)">+6/−3</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(490.907156 249.314232)">-2</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(479.553094 261.082299)">+4/−6</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(221.943312 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(212.289094 328.150299)">+0/−0</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(288.759312 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(279.105094 328.150299)">+1/−1</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(355.575312 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(345.921094 328.150299)">+0/−0</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(422.391312 316.382232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(412.737094 328.150299)">+1/−0</text>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(489.207312 316.382232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(479.553094 328.150299)">+1/−0</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 14px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #253642" x="362.88" y="71.456" transform="rotate(-0 362.88 71.456)">Ms 5–6</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_5">
+    <path d="M 737.28 352.728 
+L 1071.36 352.728 
+L 1071.36 84.456 
+L 737.28 84.456 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g clip-path="url(#pf6f527dcd5)">
+    <image xlink:href="data:image/png;base64,
+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AkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACApO2yLI/RIwCA/5unszMC/IHPEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABI2s3TefQGWHXdH1yGp3S830ZPgFW3y8lleEo/H1+jJ8AqnyEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACAJDEEAAAkiSEAACBJDAEAAEliCAAASBJDAABAkhgCAACSxBAAAJAkhgAAgCQxBAAAJIkhAAAgSQwBAABJYggAAEgSQwAAQJIYAgAAksQQAACQJIYAAIAkMQQAACSJIQAAIEkMAQAASWIIAABIEkMAAECSGAIAAJLEEAAAkCSGAACATdEvqHkkLWxyjGIAAAAASUVORK5CYII=" id="imageae0389970f" transform="scale(1 -1) translate(0 -268.4)" x="737.2" y="-84.4" width="334" height="268.4"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_6">
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="770.688" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(761.276281 367.87009)">7 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(759.982531 378.568332)">N=7</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="837.504" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_32">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(825.16025 367.87009)">30 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(823.8665 378.568332)">N=25</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="904.32" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_33">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(891.97625 367.87009)">90 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(890.6825 378.568332)">N=40</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="971.136" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_34">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(955.860219 367.87009)">180 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(957.4985 378.568332)">N=52</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m53f6e160f7" x="1037.952" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_35">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(1022.676219 367.87009)">365 天</text>
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #253642" transform="translate(1024.3145 378.568332)">N=45</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_5">
+     <g id="line2d_15">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="737.28" y="117.99" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_36">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="730.28" y="122.182187" transform="rotate(-0 730.28 122.182187)">简化精细 − 目录</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_16">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="737.28" y="185.058" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_37">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="730.28" y="189.250187" transform="rotate(-0 730.28 189.250187)">详细精细 − 目录</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="737.28" y="252.126" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_38">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="730.28" y="256.318187" transform="rotate(-0 730.28 256.318187)">简化精细 − 粗化</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#m96d3c148a7" x="737.28" y="319.194" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_39">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #253642" x="730.28" y="323.386188" transform="rotate(-0 730.28 323.386188)">详细精细 − 粗化</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_6">
+    <path d="M 737.28 352.728 
+L 737.28 84.456 
+" style="fill: none; stroke: #acb8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 737.28 352.728 
+L 1071.36 352.728 
+" style="fill: none; stroke: #acb8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(765.083156 115.178232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(753.729094 126.946299)">+0/−1</text>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(830.199313 115.178232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(820.545094 126.946299)">+1/−0</text>
+   </g>
+   <g id="text_42">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(898.715156 115.178232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(887.361094 126.946299)">+0/−1</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(965.531156 115.178232)">-2</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(954.177094 126.946299)">+0/−2</text>
+   </g>
+   <g id="text_44">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1030.647312 115.178232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1020.993094 126.946299)">+2/−1</text>
+   </g>
+   <g id="text_45">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(763.383312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(753.729094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_46">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(830.199313 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(820.545094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_47">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(897.015312 182.246232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(887.361094 194.014299)">+0/−0</text>
+   </g>
+   <g id="text_48">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(965.531156 182.246232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(954.177094 194.014299)">+0/−1</text>
+   </g>
+   <g id="text_49">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1032.347156 182.246232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1020.993094 194.014299)">+0/−1</text>
+   </g>
+   <g id="text_50">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(765.083156 249.314232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(753.729094 261.082299)">+0/−1</text>
+   </g>
+   <g id="text_51">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(830.199313 249.314232)">+1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(820.545094 261.082299)">+1/−0</text>
+   </g>
+   <g id="text_52">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(898.715156 249.314232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(887.361094 261.082299)">+0/−1</text>
+   </g>
+   <g id="text_53">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(965.531156 249.314232)">-2</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(954.177094 261.082299)">+0/−2</text>
+   </g>
+   <g id="text_54">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1030.647312 249.314232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1020.993094 261.082299)">+1/−1</text>
+   </g>
+   <g id="text_55">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(763.383312 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(753.729094 328.150299)">+0/−0</text>
+   </g>
+   <g id="text_56">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(830.199313 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(820.545094 328.150299)">+0/−0</text>
+   </g>
+   <g id="text_57">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(897.015312 316.382232)">+0</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(887.361094 328.150299)">+0/−0</text>
+   </g>
+   <g id="text_58">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(965.531156 316.382232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(954.177094 328.150299)">+0/−1</text>
+   </g>
+   <g id="text_59">
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1032.347156 316.382232)">-1</text>
+    <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #243746" transform="translate(1020.993094 328.150299)">+0/−1</text>
+   </g>
+   <g id="text_60">
+    <text style="font-size: 14px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #253642" x="904.32" y="71.456" transform="rotate(-0 904.32 71.456)">Ms 6+</text>
+   </g>
+  </g>
+  <g id="axes_3">
+   <g id="patch_8">
+    <path d="M 1094.4 352.728 
+L 1107.8136 352.728 
+L 1107.8136 84.456 
+L 1094.4 84.456 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAACIAAAKfCAYAAAALjBpAAAAEbUlEQVR4nO3dwRHcMAxDURjL9JNi0n8nlnMWK/iH/yrwEFhKdjLJ8+/vny8ADUQDMX2C0EBMIY/SQDQQ83sYbW0gGohxjyxOBFzWBqGBaCDGPbJ46IHL2iA0EOPPdzEa7EQaiHGPLB564LI+QWggxolwo2kQGogGYvzVLB564LI2CA1EAzHukcWJbJaVO5Ef5PfbQDQQA0kmmIk0EGM0yxQykgaigRijWYyGPJGGoIFoIKb+9a+bZQWXtd5HLkZDnkhD0EA0EOMeWZwIuawNQQPRQIx7ZJk+jHQaiAZiLOtiNOSJNAQNRAMx7pHFiZDL2hA0EA3EuEcWL8+bZcVOpIEY98jiobdZVu5Ent8vBA1EAzGt0UCjefzV3ObphKCBaCDGsmKjqSv+Zlm5ZX0s682ycstay0qN5vl5Vby4R8BlrS/hl6nvvjfLip1IAzG+hC9uVm5Z64qnRvP4nfXmZgWX9efl+eJnic2yYifSQIwv4YubdbOs2Ik0EPM83kcubtbNsoInUsazNBANxLhZudHUQ+9iWcllbQgaiHGzYqOJm5UazeOb3s3NullW7EQaiPHyvLhZyWVtCBqI8RrAjaZ+lqBG8xjNZeJmvVlW7EQaiHHFL25WclkbggZivAZgo4n/zjM2mjCepYEYy8qNJoxnaSAaiPFXs1jWzbKCJxLGszQQDcS4WbnRhPEsDcRYVm40YTxLAzGf/5stNZpAnqWBaCDGFb9Y1s2yYifSQAzlWRqIcbNyownjWRqIsazcaMJ4lgaigRh/NYtl3SwrdiINxHx5QtBAzPm+EDQQDcScGM1lIF0NpiMNxFhWcDQMDcR46HGjCWPHNxDjoYeN5lhWbDSfe+TiNQBc1lhWaDQfI5lwJnIsKzaaj9HWBmJ89+VG81lWaDSfK/7mHuGW9bhHsNGEoYEYy4qN5vPQu81hXNCC6UgDMb6EY6N5vY/c5v0YF4EGooEY7yPLvMeyQsv6ullvRsOdyPHQo0bzuke40ZwQNBBjWbnRHMt68XUCXNaP8TWvgWggxkNvsaybZcVOpIEYP+Yt7hFuWV8vzzfLyi3r8bMENZrX95qbEyGX9YSggWggxj2yzPGGhi3rcY9cnMhmWbETaSDmfd0jF/cIuKzHsl6cyGZZsRNpIMY9sjiRzbJiJ9JAjHtkmff17xhdLOvmRLATaSDGzYqN5vgSfrOs3LK+lvVmNOCJvH7epEZzjObiRDbLip1IAzHukcXXCW5Zj4fezYlslhU7kQZi3COLEwGX9fNPsKjRHF/CL05ks6ybE8FOpIEYNys2mtdD72ZZuWU9lvVmNJsTwU6kgRj3yOJEwGX9/GJEjeb4xejiRDbLip1IAzHukcWJcMv6eejdJv6jW9SyxrJyo/lC0ECMe4QbzfFN7+JEwGX9LCs1muOhd3GPgMv6uUeo0RyjuTgRblk//wTrZlm5ZY2bFRvN56F3sazksn4haCAaiHHFL04EXNbPQ+9iWcFlPR561Gg+98jFPbJhyvofL3dYtsEBNyYAAAAASUVORK5CYII=" id="image80fa997133" transform="scale(1 -1) translate(0 -268.4)" x="1094.4" y="-84.4" width="13.6" height="268.4"/>
+   <g id="matplotlib.axis_5"/>
+   <g id="matplotlib.axis_6">
+    <g id="ytick_9">
+     <g id="line2d_19">
+      <defs>
+       <path id="md8bf4462b3" d="M 0 0 
+L 3.5 0 
+" style="stroke: #253642; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="352.728" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_61">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="356.788059" transform="rotate(-0 1114.8136 356.788059)">-3</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_20">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="308.016" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_62">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="312.076059" transform="rotate(-0 1114.8136 312.076059)">-2</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="263.304" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_63">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="267.364059" transform="rotate(-0 1114.8136 267.364059)">-1</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_22">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="218.592" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_64">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="222.652059" transform="rotate(-0 1114.8136 222.652059)">0</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_23">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="173.88" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_65">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="177.940059" transform="rotate(-0 1114.8136 177.940059)">1</text>
+     </g>
+    </g>
+    <g id="ytick_14">
+     <g id="line2d_24">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="129.168" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_66">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="133.228059" transform="rotate(-0 1114.8136 133.228059)">2</text>
+     </g>
+    </g>
+    <g id="ytick_15">
+     <g id="line2d_25">
+      <g>
+       <use xlink:href="#md8bf4462b3" x="1107.8136" y="84.456" style="fill: #253642; stroke: #253642; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_67">
+      <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="1114.8136" y="88.516059" transform="rotate(-0 1114.8136 88.516059)">3</text>
+     </g>
+    </g>
+    <g id="text_68">
+     <text style="font-size: 11px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #253642" x="1138.280319" y="218.592" transform="rotate(-90 1138.280319 218.592)">净增加的独立锚点命中数</text>
+    </g>
+   </g>
+   <g id="LineCollection_1"/>
+   <g id="patch_9">
+    <path d="M 1094.4 352.728 
+L 1101.1068 352.728 
+L 1107.8136 352.728 
+L 1107.8136 84.456 
+L 1101.1068 84.456 
+L 1094.4 84.456 
+L 1094.4 352.728 
+z
+" style="fill: none; stroke: #acb8c2; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+  </g>
+  <g id="text_69">
+   <text style="font-size: 18px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="57.6" y="20.059875" transform="rotate(-0 57.6 20.059875)">断层的补充信息：精细位置，还是大区分布？</text>
+  </g>
+  <g id="text_70">
+   <text style="font-size: 10px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #253642" x="57.6" y="49.68" transform="rotate(-0 57.6 49.68)">60 万 km² · 严格 0 km；大字为净命中，下行为新增／丢失。不同列样本数不同，不相加。</text>
+  </g>
+  <g id="text_71">
+   <text style="font-size: 9px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #536775" transform="translate(57.6 450.645398)">断层资料为 2026 年收集快照：仅检验对历史地点分布的补充信息，不代表当时可发布的预测，也不是真正前瞻检验。</text>
+   <text style="font-size: 9px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #536775" transform="translate(57.6 465.046277)">各时限／震级分别评价；不合并扩大独立样本。相对空间分配不是绝对发震概率。</text>
+   <text style="font-size: 9px; font-family: 'Microsoft YaHei', 'Arial', 'DejaVu Sans', sans-serif; fill: #536775" transform="translate(57.6 479.412)">同一报警预算，实际完整格面积略有差异；粗化保留既定大区总质量，不是空间置乱或迁移检验。</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p4a564f75f2">
+   <rect x="195.84" y="84.456" width="334.08" height="268.272"/>
+  </clipPath>
+  <clipPath id="pf6f527dcd5">
+   <rect x="737.28" y="84.456" width="334.08" height="268.272"/>
+  </clipPath>
+ </defs>
+</svg>
