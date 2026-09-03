@@ -1,7 +1,7 @@
 # 最新续接：S3-A异常地点/时间试验
 
 更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_PREDICTIONS_COMPLETE_INITIAL_SCORING_ACCEPTED_PENDING_PUSH`。
+状态：`S3A_INITIAL_EFFECTS_REVIEWED_STATIC_FIGURES_READY_NULLS_REPLAY_PENDING`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
 ## 最新安全点（本节覆盖下方历史过程状态）
@@ -14,8 +14,22 @@
 12:01:02已完成10/10块、0失败；全部预测随后独立读回验证通过，PID11488已退出。
 24个可拟合的设计×折×时限组合均完成空间与次数拟合；训练损失有改善，但这不是较晚预测提升证据。
 12:01整机CPU8%；当前无持续拟合任务。365天两个块均为NA，不是拟合失败。
-较晚评价尚未评分，最小评分入口`score_runner.py`和合成检查已于12:10通过独立复核；
-185项S3相关检查通过。提交推送后直接执行评分，不重启已完成训练。
+最小评分入口`score_runner.py`和合成检查已于12:10通过独立复核；185项S3相关检查通过。
+12:10:58评分/图代码及交接提交`440c0f843735ec3bdc2c7d3c3252661fa242ce00`已推送回读一致。
+12:11:39启动首次较晚历史评分PID31268，12:17:13完成全部10块。训练、准备和评分进程均已退出。
+12:28整机CPU4%，无S3相关后台进程。这是正常完成，不是中断；不因没有Python进程重启旧计算。
+预测manifest的SHA仍为`6470226f92bc23f0556e4bae267ff754ed44a4cb9c00b004c2a1140a864d3f2d`，
+与评分前一致。真实结果已做独立科学复审，三张静态PNG/SVG已生成并可视核对。
+
+**当前最高优先级：先读本机 `outputs/multitask_s3/s3a_score_v1/SCIENCE_REVIEW.md` 和
+`science_scores.json`，从原定归因对照与获益/丢失震例回放继续。不要重做背景、训练、评分或初步复审。**
+本轮已按用户原则保留局部研究候选，未整体升级全部任务；首次结果已向用户报告，之后只讲新增证据。
+具体聚合成绩、结果说明、图和事件诊断只在本机；本次公开提交仍仅代码/测试/交接，不添加新派生结果载荷。
+心跳已去除硬编码的过时恢复点，继续ACTIVE、每30分钟；总按本文件实时安全点判断，不因旧提示重跑。
+
+下一阶段边界：S3-A初步效果已完成，整个S3未完成。保持原有数据/模型/指标/200+200置乱不变，
+补时间/空间归因、震序等权/区域分层、获益及丢失震例本机交互回放，再完成完整S3-A科学验收；
+随后才按总方案推进S3-B有限尺度/学科消融、S4机器学习、S5组合、S6成果、S7独立检验。
 
 下列是已完成的启动命令，仅供追溯，不再执行。若未来确有损坏/中断证据，先复核后再决定续接，
 不能因目前无Python进程而重跑：
@@ -34,19 +48,23 @@ python -m seismoflux.multitask_s3.runner --project-root D:\AIPred\SeismoFlux\dat
 原定200+200置乱、静态图/本机回放与科学价值复审。不要因为10块完成就说整个S3或项目完成。
 只新增本机拟合目录忽略规则；旧Stage4/旧实验逐事件文件未改，不用git add -A。
 
-下一最小工作是完成评分装配入口，调用`runner.verify_complete_predictions`核验十块后才构造
-外层targets。不改正在运行的模型/runner或输入；不复跑已有预测。纯评分结果含`_local`仅本机。
+评分装配入口已完成，调用`runner.verify_complete_predictions`核验十块后构造外层targets。
+不改已完成的模型/runner或输入，不复跑已有预测。以下接线说明供后续分层/回放使用，
+不是重新做一次主评分的指令。纯评分结果含`_local`仅本机。
 70km可复用`c2b_score.projected_near_cells(STRtree(domain.locator.clipped_geometries), x_m, y_m)`，
 坐标用既定`EQUAL_AREA_CRS`投影；每正式带用S0`build_episodes`完整限定历史的成员映射，
 episode等权采用`1/global_member_count`，不在窗口内重组。39块只读既有冻结的cell→construction_zone
 映射，不重跑S0；映射hash见`configs/multitask_s0.yaml`。主起报配对区间可复用纯
 `c2b_score.exposure_bootstrap`，物理震序区间可复用`development_summary._bootstrap_episode_ratio`；
 绝不调用旧完整C评分入口或旧`science_gate`。区间用于说明不确定性，不作采纳硬门。
-评分入口预期CLI为`python -m seismoflux.multitask_s3.score_runner --project-root <本工作树>
+已执行的评分CLI为`python -m seismoflux.multitask_s3.score_runner --project-root <本工作树>
 --data-root D:\AIPred\SeismoFlux\data --prediction-dir <本工作树>/outputs/multitask_s3/s3a_fit_v1
 --output-dir <本工作树>/outputs/multitask_s3/s3a_score_v1`；单进程单数值线程，合成核对/提交推送后执行。
-不能假定这段预计命令已经运行。产物为本机`science_scores.json`和`event_diagnostics_local.json`；
+该评分命令已于12:11:39运行。日志为`data/interim/s3/s3a_score_v1.stdout.log`与同名`stderr.log`。
+产物为本机`science_scores.json`和`event_diagnostics_local.json`；
 前者预计含两折和跨折的主不重叠/全报告描述对比，后者含事件诊断，仅本机保存。
+三张静态图在`s3a_score_v1/rendered`：固定60万预算命中率、次数信息变化、全部五预算净命中热图；
+最后一张同时展示局部收益与损失，不能只展示有利预算。当前尚未生成本轮交互页面。
 
 ## 本轮历史过程（已关闭事项不向用户反复复述）
 

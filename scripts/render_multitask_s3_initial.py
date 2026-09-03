@@ -154,13 +154,83 @@ def render(source: Path, output: Path) -> dict[str, object]:
     for suffix in ("png", "svg"):
         fig.savefig(second.with_suffix(f".{suffix}"), dpi=180, facecolor="white")
     plt.close(fig)
+
+    budgets = (300000, 450000, 600000, 750000, 960000)
+    area_points = []
+    matrices = {}
+    for band, _ in BANDS:
+        for design in ("SNAP", "DYN"):
+            values = np.full((len(HORIZONS), len(budgets)), np.nan)
+            for row, horizon in enumerate(HORIZONS):
+                axis = payload["pooled_folds"][f"h{horizon:03d}__{band}"]["primary_nonoverlap"]
+                contrast = axis["spatial_contrasts"][f"CAT_{design}_minus_CATALOG"]
+                for column, budget in enumerate(budgets):
+                    entry = next(
+                        item for item in contrast["alarms"] if item["area_budget_km2"] == budget
+                    )
+                    score = entry["strict"]["views"]["anchor"]
+                    if score["total"]:
+                        values[row, column] = score["net_hits"]
+                    area_points.append(
+                        {
+                            "band": band,
+                            "design": design,
+                            "horizon_days": horizon,
+                            "budget_km2": budget,
+                            **score,
+                        }
+                    )
+            matrices[band, design] = values
+    limit = max(1.0, max(float(np.nanmax(np.abs(value))) for value in matrices.values()))
+    fig, axes = plt.subplots(2, 2, figsize=(13, 8.5))
+    for row, (band, title) in enumerate(BANDS):
+        for column, (design, label) in enumerate((("SNAP", "异常现状"), ("DYN", "现状与趋势"))):
+            ax = axes[row, column]
+            values = matrices[band, design]
+            mesh = ax.imshow(values, cmap="BrBG", vmin=-limit, vmax=limit, aspect="auto")
+            for y in range(len(HORIZONS)):
+                for x_index in range(len(budgets)):
+                    value = values[y, x_index]
+                    label_value = (
+                        "—" if not np.isfinite(value) else f"{int(value):+d}" if value else "0"
+                    )
+                    color = (
+                        "white" if np.isfinite(value) and abs(value) > limit * 0.6 else "#263245"
+                    )
+                    ax.text(
+                        x_index, y, label_value, ha="center", va="center", fontsize=14, color=color
+                    )
+            ax.set_title(f"{title} · {label}", loc="left", pad=10, fontweight="bold")
+            ax.set_xticks(range(len(budgets)), ["30万", "45万", "60万", "75万", "96万"])
+            ax.set_yticks(range(len(HORIZONS)), [f"{h}天" for h in HORIZONS])
+            ax.set_xlabel("报警面积预算 / km²")
+            ax.set_xticks(np.arange(-0.5, len(budgets), 1), minor=True)
+            ax.set_yticks(np.arange(-0.5, len(HORIZONS), 1), minor=True)
+            ax.grid(which="minor", color="white", linewidth=2)
+            ax.tick_params(which="minor", bottom=False, left=False)
+    fig.suptitle("局部收益在哪里？把全部预定面积一起看", x=0.07, y=0.97, ha="left", fontsize=19)
+    fig.text(
+        0.07,
+        0.91,
+        "数字是相对地震目录多命中的首震数：正数有收益，负数有损失；—表示没有目标震例",
+        color="#657183",
+    )
+    fig.subplots_adjust(left=0.08, right=0.88, top=0.84, bottom=0.15, hspace=0.5, wspace=0.22)
+    colorbar = fig.colorbar(mesh, cax=fig.add_axes((0.91, 0.25, 0.018, 0.49)))
+    colorbar.set_label("净增加首震命中数（新增 − 丢失）")
+    fig.text(0.07, 0.035, footer, fontsize=9, color="#687383")
+    third = output / "03_all_budgets_net_anchor_gain"
+    for suffix in ("png", "svg"):
+        fig.savefig(third.with_suffix(f".{suffix}"), dpi=180, facecolor="white")
+    plt.close(fig)
     result: dict[str, object] = {
         "source_sha256": sha256(source),
         "local_only": True,
         "alarm_budget_km2": 600000,
         "spatial_points": points,
         "count_points": count_points,
-        "figures": [first.name, second.name],
+        "figures": [first.name, second.name, third.name],
+        "all_budget_points": area_points,
         "scope": "initial_historical_development_not_full_S3",
     }
     write_json(output / "render_manifest.json", result)
