@@ -1,7 +1,7 @@
 # 最新续接：S3-A异常地点/时间试验
 
 更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_PUBLICATION_CLOSED_REFERENCE_PREPARATION_IMPLEMENTED_TRAINING_ASSEMBLY_IN_PROGRESS`。
+状态：`S3A_REFERENCE_PREPARATION_RUNNING_TRAINING_PRIMITIVES_ACCEPTED_RUNNER_PENDING`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
 **最高优先级：公开确认与推送已解决，直接续接S3真实日期背景和训练装配，不再等待同一授权。**
@@ -24,8 +24,35 @@
 本机目录为 `outputs/multitask_s3/s3a_prepared_v1`，恢复命令在首次启动命令后加 `--resume`；
 若遗留 `preparation.lock`，先核对PID和命令不存在后再处理锁，不创建重复实例。
 纯缓存往返/身份与形状检查已通过；这不是预测效果证据。输入模块原78项检查本轮再次通过。
-纯内存 `training.py` 和 `targets.py` 正由两个执行者装配，尚未启动真实异常拟合；训练执行器
+纯内存 `training.py` 和 `targets.py` 已实现并通过合成验收，尚未启动真实异常拟合；训练执行器
 仍需接入两模块与缓存，再按全部外折预测保存后统一评分。不能把缓存完成称为S3训练完成。
+
+11:31:59准备代码提交 `a4165f8ed5faab18d462e96efca39a2cb3e291cf` 已推送并回读一致。
+11:32:26启动唯一准备任务PID42188，BelowNormal、Hidden、2工作线程、数值库1线程。
+11:33:36检查点完成4/153期（2.6%），0失败；11:33:47进程活跃，整机CPU瞬时18%。
+日志在本工作树 `data/interim/s3/s3a_prepared_v1.stdout.log` 和同名 `stderr.log`；
+进度在 `outputs/multitask_s3/s3a_prepared_v1/preparation.json`。首次启动后不得再运行无`--resume`
+的新实例。旧PID只是本次检查记录，后续心跳必须核对当前进程；完成后不重启准备。
+
+训练与标签原语验收见 `s3a_training_assembly_acceptance_2026-09-03.md`。本轮相关合成检查132项
+通过；Ruff通过。下个最小工作是新增薄`runner.py`和真实评分衔接，不是继续抽象训练框架。
+已确认接口：
+
+- `targets.prepare_anchor_ids(frame)`：对完整限定历史一次建立两个震级带的固定首震；
+- `targets.build_window_targets(frame, issue_time=..., horizon_days=..., available_by=..., cell_indices=..., cell_count=..., anchor_ids_by_band=...)`
+  返回`spatial_counts_ms4`、`count_ms5plus`和`bands`内事件ID/格号/首震掩膜，仅本机保存；
+- `training.S3TrainingSample(issue_time_utc, features, background_log_mass, offset_ms5plus, spatial_event_counts, count_ms5plus)`；
+  features是既有20列已变换矩阵，不能再次log/asinh；
+- `training.S3InnerBlock(block_id, training_samples, validation_samples)`，
+  `training.select_and_fit(training_samples, inner_blocks=..., design='COV'/'SNAP'/'DYN', areas_km2=...)`；
+  内块训练标签用各`label_fit_cutoff`，内验证标签最多到外层`label_fit_cutoff`，不要把未来标签提前可用；
+- 拟合对象`predict_log_mass(features, background_log_mass)`、`predict_log_mean(features, offset_ms5plus)`、
+  `predict_calibrated_log_mean(offset_ms5plus)`、`to_dict()`；两个正式震级共享乘子，分带log次数应从
+  Ms5+的log均值加各带目录基准率比例得到，不能声称新学得震级比例。
+
+准备缓存每期保存`features/kernel_25/kernel_75/kernel_150/r30_log_mass`及三个震级带每日期望次数；
+用既定权重按h混合、次数乘h。只读核缓存，无需重跑KDE；样本按calendar选择，所有外折预测保存
+后才接外层评分。`runner.py`、`scoring.py`与本轮置乱执行器尚未实现，不假定它们已存在。
 
 ## 1. 当前目标、完成情况
 
