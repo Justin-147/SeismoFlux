@@ -1,10 +1,32 @@
 # 最新续接：S3-A异常地点/时间试验
 
 更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_REFERENCE_PREPARATION_RUNNING_TRAINING_PRIMITIVES_ACCEPTED_RUNNER_PENDING`。
+状态：`S3A_REFERENCE_PREPARATION_RUNNING_PREDICTION_RUNNER_ACCEPTED_PENDING_PUSH`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
-**最高优先级：公开确认与推送已解决，直接续接S3真实日期背景和训练装配，不再等待同一授权。**
+## 最新安全点（本节覆盖下方历史过程状态）
+
+11:54已接通真实预测执行器`multitask_s3.runner`与纯评分组件`multitask_s3.scoring`。
+178项相关合成/配置检查和独立科学接线审查通过；见`s3a_runner_acceptance_2026-09-03.md`。
+当前准备PID42188仍在运行，11:52检查点120/153；下一次恢复先读实时manifest，不能引用本段旧期数。
+尚无异常拟合或较晚评价成绩。11:50整机CPU13%，可用内存30.0/63.7GiB，唯一S3准备进程。
+
+下一动作：本轮接线代码提交推送、准备完成且进程退出后，启动唯一真实拟合任务：
+
+```powershell
+python -m seismoflux.multitask_s3.runner --project-root D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata --data-root D:\AIPred\SeismoFlux\data --prepared-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_prepared_v1 --output-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_fit_v1 --workers 2
+```
+
+沿用本工作树src/Python环境，数值库线程1、BelowNormal、Hidden。不是当前shell的任意python。
+首次启动前查重复实例。中断后只加`--resume`续同目录，遗留`prediction.lock`必须先核对PID/命令再处理。
+检查点为`s3a_fit_v1/prediction_manifest.json`，每折每h保存一个块，共10块（其中365天明确NA）。
+全部预测落盘后才接外层评分。纯评分组件不是完整结果，尚需评分装配、震序等权/区域汇总、
+原定200+200置乱、静态图/本机回放与科学价值复审。不要因为10块完成就说整个S3或项目完成。
+只新增本机拟合目录忽略规则；旧Stage4/旧实验逐事件文件未改，不用git add -A。
+
+## 本轮历史过程（已关闭事项不向用户反复复述）
+
+**公开确认已解决，不再等待同一授权。**
 本轮用户紧接载荷说明明确回复“授权。”；精确记录为 `s3_public_aggregate_authorization_2026-09-03.md`。
 既有输入提交 `08e8d1ce1707076de5104281fb7449b8d0b1634c` 原样保留，允许向公开
 `Justin-147/SeismoFlux` 推送其中的聚合统计及本轮指导/交接补记。此前拒绝是历史状态，不是当前阻碍。
@@ -29,13 +51,16 @@
 
 11:31:59准备代码提交 `a4165f8ed5faab18d462e96efca39a2cb3e291cf` 已推送并回读一致。
 11:32:26启动唯一准备任务PID42188，BelowNormal、Hidden、2工作线程、数值库1线程。
-11:33:36检查点完成4/153期（2.6%），0失败；11:33:47进程活跃，整机CPU瞬时18%。
+11:36:37检查点完成24/153期（15.7%），0失败；11:36:42进程仍活跃、BelowNormal，
+累计CPU约464秒、工作集约4.5GB。最近整机CPU采样为11:33:47的18%，不把累计CPU秒当使用率。
 日志在本工作树 `data/interim/s3/s3a_prepared_v1.stdout.log` 和同名 `stderr.log`；
 进度在 `outputs/multitask_s3/s3a_prepared_v1/preparation.json`。首次启动后不得再运行无`--resume`
 的新实例。旧PID只是本次检查记录，后续心跳必须核对当前进程；完成后不重启准备。
 
 训练与标签原语验收见 `s3a_training_assembly_acceptance_2026-09-03.md`。本轮相关合成检查132项
 通过；Ruff通过。下个最小工作是新增薄`runner.py`和真实评分衔接，不是继续抽象训练框架。
+11:35:45训练/目标原语及验收、交接已推送并回读一致：`9f08ffca9c22bbc749d9acb2ff6aded1f7feb5ae`。
+本段最新运行状态是推送后的本地交接补记；代码已同步，不因此重复验收或重新启动已有准备任务。
 已确认接口：
 
 - `targets.prepare_anchor_ids(frame)`：对完整限定历史一次建立两个震级带的固定首震；
@@ -52,7 +77,7 @@
 
 准备缓存每期保存`features/kernel_25/kernel_75/kernel_150/r30_log_mass`及三个震级带每日期望次数；
 用既定权重按h混合、次数乘h。只读核缓存，无需重跑KDE；样本按calendar选择，所有外折预测保存
-后才接外层评分。`runner.py`、`scoring.py`与本轮置乱执行器尚未实现，不假定它们已存在。
+后才接外层评分。`runner.py`和纯`scoring.py`已于11:54验收；外层评分装配和本轮置乱执行器尚待完成。
 
 ## 1. 当前目标、完成情况
 
@@ -94,7 +119,7 @@ S2-C科学提交`dbda2cba6bc418682d92ce9b1042e549c37edde5`、闭合`da37b13e6739
    未启动则在实现必要检查/提交推送后运行 `python -m seismoflux.multitask_s3.preparation`，
    参数为本工作树 `--project-root`、数据根 `--data-root`、上述 `--output-dir`、`--workers 2`。
    已运行不重复启动，已完成直接接训练，不再索要授权、不重复输入水位或扩大冻结协议。
-2. 薄输入已实现并接通，直接编写/执行最小训练预测装配，不要重复造输入层：
+2. 薄输入与训练预测执行器已实现并接通，按顶部命令执行，不要重复造输入/训练层：
    `calendar.build_fold_calendar`给训练、内验证、全部和主评价起报，`time_null_partitions`给每h反事实池；
    `features.read_report_issue_metadata/load_issue_features`按指定日期列读取，只给授权范围；
    `catalog_background.build_catalog_background_components(...).for_horizon(h)`每期核只算一次；
