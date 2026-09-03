@@ -1,16 +1,45 @@
 # 最新续接：S3-A异常地点/时间试验
 
-更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_CASES_REVIEWED_STATIC_READY_NULL_RUN_AND_INTERACTIVE_PENDING`。
+更新时间：2026-09-03 13:33（北京时间；归因预测已实际启动）。
+状态：`S3A_NULL_PREDICTIONS_RUNNING_CASES_STATIC_READY`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
 ## 最新安全点（本节覆盖下方历史过程状态）
 
-### 13:17 本次归因运行接线
+### 13:33 当前最高优先级安全点：原定归因任务正在运行
+
+代码提交`4fae83e963e6c74011d05e8b67bd289f981f4d12`已推送并回读一致。确认无重复实例后，
+13:17:58以唯一PID **39156**启动下方同一命令，两个折线程、数值库1线程、Hidden、BelowNormal。
+全部合法报告的恒等时间重建，以及首/中/末报告的恒等空间重建均通过；这核实了未置乱时输入等价。
+任务当前为`predicting_nulls`，不是等待启动，不得再次启动或重跑原准备、训练、主评分与震例账本。
+
+13:32:31检查点：已保存 **45/4000个预测块（1.125%）**，失败0；完整复本另列，不能混为分块数：
+
+|归因对照|2023—2024折|2024—2025折|
+|---|---:|---:|
+|时间置乱|6/200|2/200|
+|空间置乱|0/200|0/200|
+
+每折先时间、后空间，空间暂为0是既定顺序，不是卡住；尚未完成整个复本的已存块也计入45块。
+13:33:06只读核对仍为1个S3实例：进程CPU约4.30%（以整机48逻辑核归一）、内存3.57GiB，
+整机CPU13.5%，BelowNormal，stderr为空。24个物理核心中绝大多数可供其它任务使用。
+这些是带时间戳的样本，不是后续资源占用保证。
+
+当前尚无置乱对照最终效果，`outer_effect_scores_computed=false`。不要因部分复本完成就提前选择
+结果或调整模型；全部预测保存/失败如实登记后统一比较。这一步检验已见局部收益是否依赖异常
+发生的正确时间和地点，是归因解释，不是重新设置进步采纳门槛。当前未偏离科学目标，无需改计划。
+
+下一步：检查原任务的新检查点及唯一进程，保持同一冻结的200+200继续；完成后接统一归因评分。
+本机离线交互回放、震序等权/区域分层与完整S3-A复审仍待完成，可在不干扰本任务的前提下推进。
+纯描述汇总组件`null_summary.py`已补齐并经4项合成检查；未读取或计算真实置乱效果，不是归因完成。
+正在运行的manifest绑定了实现哈希，**本任务结束前不得修改其中绑定的实现文件**；新增纯汇总与
+文档不属于本次预测身份。中断时只按下方原目录`--resume`，先查PID/命令，不能另开新实例或换种子。
+
+### 13:17 归因运行接线（已完成，仅供追溯）
 
 原定两类置乱已接上薄`null_runner.py`；空间纯重建`null_space.py`及仅合法日期状态读取
 `null_state_inputs.py`已完成。259项S3合成检查与Ruff通过，独立科学接线审查通过。
-没有重训/重评分原结果，也没有新增模型或改变采纳标准。新代码推送回读后可启动下列唯一任务：
+没有重训/重评分原结果，也没有新增模型或改变采纳标准。推送回读后已启动下列唯一任务：
 
 ```powershell
 python -m seismoflux.multitask_s3.null_runner --project-root D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata --data-root D:\AIPred\SeismoFlux\data --prepared-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_prepared_v1 --reference-prediction-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_fit_v1 --output-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_null_v1 --kind both --workers 2
@@ -48,11 +77,11 @@ BelowNormal/Hidden运行`multitask_s3.case_runner`，12:48:27完成并正常退�
 本轮是对已有增量的科学解释，不是新一轮效果提升或独立验证。图、事件账本及CASE_REVIEW只留本机。
 12:52核对无S3后台进程，整机CPU21%；不是中断。交互地图、时间/空间复本仍未开始，不误报。
 
-**下一立即动作：读取本机CASE_REVIEW与本文件，装配原定时间/空间归因执行，补离线交互回放。
-不要重复case_runner、初步评分或训练。** 时间归因纯函数和边界读取已就绪；空间接线最短路径见
+**12:52当时的下一动作（现已由顶部运行中安全点接替）：读取本机CASE_REVIEW与本文件，装配原定
+时间/空间归因执行，补离线交互回放。不要重复case_runner、初步评分或训练。** 当时时间归因已就绪；接线依据见
 下方。近期目录与异常互补、次数任务限制见旧初步复审，不复播。
 
-### 归因下一步最小接线（不改变实验）
+### 归因最小接线依据（13:17已实现，仅供追溯）
 
 - `null_inputs.load_radius_bases`只读3身份列+两原始radius列；`null_features.permute_time_features`
   接已缓存20列，九快照/16和18缺失同donor，覆盖12—15/19留recipient，三动态/17由完整伪历史重建。
