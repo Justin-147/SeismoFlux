@@ -1,0 +1,56 @@
+# S3-A：已有预测的震序与地区分层
+
+2026-09-03。当前验收范围为原定解释性汇总的接线，真实汇总将在本次代码提交推送后执行。
+不修改`S3A_ANOMALY_200KM_V1`的模型、特征、外折、时限、震级、报警预算或200+200归因对照。
+
+## 科学问题与方法
+
+这一步回答：已有改善在多次相关地震降权后是否仍存在，主要落在哪些地区、时限和震级任务？
+这是对已保存历史开发预测的解释，不是新训练、新盲测或根据结果再选择参数。
+沿用`docs/s0_episode_declustering_review_2026-09-01.md`已经复审的固定首震锚点定义，以及S0/S1
+既有配对震序、起报时间块bootstrap；不在本轮发明新的震序规则、显著性要求或地域通过门。
+
+- 只读原`science_scores.json`的哈希、已完成的事件诊断和震例账本，沿用原命中及实际报警成本。
+  不读取正在计算的置乱效果，不打开A2025+审计、C留出/审计或锁定测试，不联网取得地震目录。
+- 为已有事件附加震序成员身份时，使用原身份的本地目录：北京时间1970-01-01起、2025-07-01前，
+  `available_at`不晚于原冻结真值截止、研究区内、Ms4+；由既有有界读取器在载入前过滤。
+  在该完整合法历史上分别为Ms[5,6)与Ms≥6建固定首震30天/75km震序，再连接已有评价事件。
+  不在起报窗、地区或单折内重建震序，核对已有锚点标记完全相同。
+- `anchor`、`subsequent`、`all`使用单位权重；`episode_balanced`每个事件固定权重为
+  `1/该正式震级带全合法历史震序成员数`。某窗口或地区只出现部分成员时不重新归一化。
+  权重总数和重复起报中的事件暴露数不称为独立样本数，另报不同事件与不同震序数量。
+- 地区沿用S0的静态cell-to-construction-zone映射及39个匿名区编号，不根据真实震中划界。
+  这里是在时间开发结果内分组，不是39次空间外推试验；某区的效果仍对应原全国报警预算，
+  不重新给该区分配面积、排序或计算命中。没有事件的地区明确NA，不记成零召回。
+- 每折和合并折分别保留7/30/90/180/365天、两震级、六对比、五预算、strict/70km和四事件视图。
+  主非重叠起报及全部合法报告均保留，365天无完整评价窗时明确NA，不缩短窗口。
+- 主起报轴的全国配对区间直接复用2000次、根种子147的既有两类bootstrap。
+  震序按全历史ID聚类，合并折不将同一震序拆成多个独立单位；时间块包含完整日历中的无事件窗。
+  既有震序区间为比例，输出转换成百分点；时间块组件本来就是百分点，不二次换算。
+  两个组件原有百分位约定保持不变。时间组件不返回有效抽样数，明确记未知，不虚报全部有效。
+  区域分层仅给点汇总；全部报告轴因窗口重叠仅描述，不套用独立起报抽样。
+- 区间宽、跨零、某折NA或收益集中于某区，不否定已见点改善。保留增加与丢失命中，按适用范围
+  继续积累；本轮分层不构成新的采用门，也不在本轮生成一个事后“最优地区模型”。
+
+## 验收与恢复
+
+`strata_summary.py`、`strata_uncertainty.py`、`strata_runner.py`及三个对应测试文件构成本次白名单。
+44项合成检查通过：全历史成员权重、两震级锚点与已有实现一致、链式延长不引入、区域不重归一化、
+正负配对、空区NA、完整空窗、原组件单位与可复现性、身份错误先停止、原检查点恢复不覆盖。
+Ruff及三个新增源文件的类型检查通过。独立只读科学接线复审未发现剩余阻断；早期草稿的起报时间
+字段名已在首次真实执行前修正为原manifest的`issue_times_utc`，不涉及重新计算任何预测。
+
+提交推送并核对远端后，以一个独立、Hidden、BelowNormal、数值库单线程的进程运行：
+
+```powershell
+python -m seismoflux.multitask_s3.strata_runner --project-root D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata --data-root D:\AIPred\SeismoFlux\data --prediction-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_fit_v1 --score-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1 --case-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1\case_ledger_v1 --output-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1\strata_v1
+```
+
+使用根目录venv和本工作树src。启动前确认没有同职责进程，原`null_runner`保留运行。
+每个折范围×时限保存一个JSON，共15个检查点；最后写`strata_manifest.json`。
+中断后只在不存在相关实例且最终清单尚未完成时用原命令加`--resume`，验证相同输入/实现及已存块，
+不能创建新版本替换结果。完成后核验汇总、补科学解释和交接，不重新运行该任务。
+输出全部保留本机；本次只公开代码、合成测试及本文档，不扩展既定逐事件/位置数据公开范围。
+
+当前科学价值：必要的结果解释，尚未形成新的预测增益；它直接帮助判断后续有限模型与组合应该
+保留哪些互补成分。主要归因计算继续按原协议完成，S3-A和整个S3都不能据此提前宣称完成。
