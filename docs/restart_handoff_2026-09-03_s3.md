@@ -6,6 +6,30 @@
 
 ## 最新安全点（本节覆盖下方历史过程状态）
 
+### 13:51 本次续接：归因继续，离线回放接线已通过核验
+
+原归因PID39156保持运行，13:49:07已存111/4000块（2.775%），0失败；时间两折完整复本16/200、
+6/200，空间两折0/200，仍按既定顺序排队。13:42:10唯一S3实例，进程CPU4.59%、内存3.55GiB，
+整机CPU14%，BelowNormal、stderr为空。没有重启或修改本次归因实现，也没有读取其效果成绩。
+
+利用等待期补现有结果的本机离线回放，新增`replay_runner.py`和`replay_html.py`：只读原预测、
+诊断、震例账本和静态几何，不重新拟合、评分或读取目录目标。按原排序恢复报警网格，逐预算核对
+实际成本；命中标志直接读原数组。保留全部日期、两震级档、空窗、正负案例和365天NA。
+双图显示同一预算下参考/候选，事件点击及局部放大只改视图。次数表保留本档全部事件。
+16项合成核验、Ruff、类型检查及独立科学接线复审通过；包含Node严格DOM的全部筛选轴/空窗/NA/
+双图视域测试。它是交互逻辑核验，不冒称真实浏览器视觉验收；沿用已记录的file访问限制，不绕过。
+
+完成代码白名单提交推送后，单进程、数值库1线程、Hidden、BelowNormal运行一次：
+
+```powershell
+python -m seismoflux.multitask_s3.replay_runner --project-root D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata --data-root D:\AIPred\SeismoFlux\data --prediction-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_fit_v1 --score-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1 --case-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1\case_ledger_v1 --output-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_score_v1\replay_v1
+```
+
+先查无重复`replay_runner`，现有`null_runner`必须保留。输出`replay_v1/seismoflux_s3a_replay.html`
+和`replay_manifest.json`；若已完整存在，不再生成。日志`data/interim/s3/s3a_replay_v1.stdout.log`
+及同名stderr。全部页面与含坐标载荷仅本机，公开只提交代码/合成测试/交接文档。
+这是让既有效果可直接查看与追溯，不是新预测提升；原定归因仍是主要科学计算。
+
 ### 13:33 当前最高优先级安全点：原定归因任务正在运行
 
 代码提交`4fae83e963e6c74011d05e8b67bd289f981f4d12`已推送并回读一致。确认无重复实例后，
