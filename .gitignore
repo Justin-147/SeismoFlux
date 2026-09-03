@@ -55,6 +55,8 @@ outputs/multitask_s1/s1c0_all_m4_screen_v1_attempt2/**
 # C2A local arrays and event-level replay contain source-derived records.
 # Only reviewed aggregate summaries/figures are explicitly staged for publication.
 outputs/multitask_s1/s1c2a_input_sensitivity_v1/**
+# S3 per-report feature and forecast-reference arrays remain local.
+outputs/multitask_s3/s3a_prepared_v1/**
 
 # Stage-4 local authorization and one-shot attempt state.  These files are
 # generated only after the scoring-code tag exists and must never be published.

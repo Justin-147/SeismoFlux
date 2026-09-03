@@ -1,10 +1,10 @@
 # 最新续接：S3-A异常地点/时间试验
 
 更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_INPUTS_ACCEPTED_PUBLICATION_AUTHORIZED_PENDING_REMOTE_CONFIRMATION`。
+状态：`S3A_PUBLICATION_CLOSED_REFERENCE_PREPARATION_IMPLEMENTED_TRAINING_ASSEMBLY_IN_PROGRESS`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
-**最高优先级：公开确认已解决，完成本轮提交推送后直接续接S3训练，不再等待同一授权。**
+**最高优先级：公开确认与推送已解决，直接续接S3真实日期背景和训练装配，不再等待同一授权。**
 本轮用户紧接载荷说明明确回复“授权。”；精确记录为 `s3_public_aggregate_authorization_2026-09-03.md`。
 既有输入提交 `08e8d1ce1707076de5104281fb7449b8d0b1634c` 原样保留，允许向公开
 `Justin-147/SeismoFlux` 推送其中的聚合统计及本轮指导/交接补记。此前拒绝是历史状态，不是当前阻碍。
@@ -15,7 +15,17 @@
 心跳保持每30分钟，按 `SCIENCE_DECISIONS_AND_REPORTING.md` 去重，只报变化与当前工作。
 本轮更新尚不产生新的预测成绩；S3训练执行器还需装配，不能说153期预测已经完成。
 最近进程核对（11:02）无Python/pythonw；开始新计算前仍先检查重复实例。
-上次已确认远端仍为协议提交 `ea9b025cc86ab77d269ba20f95703f0c884b3949`，本轮实际推送待下文更新。
+11:24:52远端已回读一致：`85e223d53bb915513fcc0bf8ef5bd26302aef4a8`，包含既有输入提交和本轮
+最高科研准则、授权及去重文档。公开等待点闭合，不再作为心跳阻碍或复述旧等待经过。
+
+本轮已新增 `multitask_s3/preparation.py`，为全部153个真实A起报生成可复用的目录背景和20列
+报告特征缓存；不是重跑输入水位，也不产生异常模型成绩。每期保存三个目录尺度、R30和全国
+长期率，五个时限复用，避免每种模型重复计算。最多3线程，当前计划2线程，数值库1线程。
+本机目录为 `outputs/multitask_s3/s3a_prepared_v1`，恢复命令在首次启动命令后加 `--resume`；
+若遗留 `preparation.lock`，先核对PID和命令不存在后再处理锁，不创建重复实例。
+纯缓存往返/身份与形状检查已通过；这不是预测效果证据。输入模块原78项检查本轮再次通过。
+纯内存 `training.py` 和 `targets.py` 正由两个执行者装配，尚未启动真实异常拟合；训练执行器
+仍需接入两模块与缓存，再按全部外折预测保存后统一评分。不能把缓存完成称为S3训练完成。
 
 ## 1. 当前目标、完成情况
 
@@ -53,8 +63,10 @@ S2-C科学提交`dbda2cba6bc418682d92ce9b1042e549c37edde5`、闭合`da37b13e6739
 
 ## 3. 最高优先级安全续接
 
-1. 协议已远端确认，输入阶段聚合统计公开授权也已取得；先完成既有输入提交和本轮补记的推送回读，
-   然后直接继续，不再次索要授权、不重复输入水位或扩大冻结协议。
+1. 输入阶段已远端闭合。先查本机 `s3a_prepared_v1/preparation.json` 的完成期数、时间和实际PID；
+   未启动则在实现必要检查/提交推送后运行 `python -m seismoflux.multitask_s3.preparation`，
+   参数为本工作树 `--project-root`、数据根 `--data-root`、上述 `--output-dir`、`--workers 2`。
+   已运行不重复启动，已完成直接接训练，不再索要授权、不重复输入水位或扩大冻结协议。
 2. 薄输入已实现并接通，直接编写/执行最小训练预测装配，不要重复造输入层：
    `calendar.build_fold_calendar`给训练、内验证、全部和主评价起报，`time_null_partitions`给每h反事实池；
    `features.read_report_issue_metadata/load_issue_features`按指定日期列读取，只给授权范围；
