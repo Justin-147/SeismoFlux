@@ -6,6 +6,31 @@
 
 ## 最新安全点（本节覆盖下方历史过程状态）
 
+### 13:17 本次归因运行接线
+
+原定两类置乱已接上薄`null_runner.py`；空间纯重建`null_space.py`及仅合法日期状态读取
+`null_state_inputs.py`已完成。259项S3合成检查与Ruff通过，独立科学接线审查通过。
+没有重训/重评分原结果，也没有新增模型或改变采纳标准。新代码推送回读后可启动下列唯一任务：
+
+```powershell
+python -m seismoflux.multitask_s3.null_runner --project-root D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata --data-root D:\AIPred\SeismoFlux\data --prepared-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_prepared_v1 --reference-prediction-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_fit_v1 --output-dir D:\AIPred\SeismoFlux\data\interim\worktrees\p2r_multitask_multidata\outputs\multitask_s3\s3a_null_v1 --kind both --workers 2
+```
+
+使用本工作树src和根venv，数值库线程1、BelowNormal、Hidden，先确认无重复S3实例。
+检查点`outputs/multitask_s3/s3a_null_v1/null_prediction_manifest.json`；日志
+`data/interim/s3/s3a_null_v1.stdout.log`及同名stderr。中断后保持目录与命令，添加`--resume`；
+若`null_prediction.lock`遗留，先核对其PID和命令确实不在，再处理锁，禁止重复实例。
+
+总量为每折时间200、空间200；两个折、五时限共4000个预测块（365天保留明确NA）。
+按折依次做时间复本，再做空间复本；空间每个复本的同一场供五时限共用，时间按h对应分池。
+根seed147的索引命名空间已固定写入manifest，不因中断另抽种子。
+先检查全报告恒等时间重建、首/中/末三个报告恒等空间重建；这是输入等价核对，不计入复本。
+`by_kind_fold`分开记录completed/failed复本，`completed_blocks/failed_blocks`是分块数，不能混叫。
+`terminal_percent`包含已登记失败，不是成功率；所有块落盘/失败如实记录后，才另行统一评分。
+目前尚无新置乱效果；不要说归因完成或S3完成。磁盘/权限/内存/身份异常是中断，不能当科学负结果。
+
+### 先前完成状态（不重复计算或复述成绩）
+
 12:46本次心跳从归因/震例环节继续，没有重做准备、拟合、评分或初步效果复审。
 新增`case_ledger.py/case_runner.py`，只把已有逐事件命中对应到受限目录，保留全部六对比、五预算、
 严格/70km的新增、丢失、共同命中、共同漏报；不挑案例，不重算命中，不读取新评价角色。
