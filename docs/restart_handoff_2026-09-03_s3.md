@@ -1,7 +1,7 @@
 # 最新续接：S3-A异常地点/时间试验
 
 更新时间：2026-09-03（本轮用户明确授权并更新最高科研准则后）。
-状态：`S3A_INITIAL_EFFECTS_REVIEWED_STATIC_FIGURES_READY_NULLS_REPLAY_PENDING`。
+状态：`S3A_CASES_REVIEWED_STATIC_READY_NULL_RUN_AND_INTERACTIVE_PENDING`。
 接替`docs/restart_handoff_2026-09-03_s2c.md`，旧文档保留S2结果与95%/Ms审计证据。
 
 ## 最新安全点（本节覆盖下方历史过程状态）
@@ -13,9 +13,39 @@
 仅指定合法报告行组的两基础列读取。复用既有时间公式，不调用旧D1全205期入口。
 221项S3相关合成检查和Ruff通过；时间重建另经独立只读数值复核通过。
 本次只完成归因组件，**200+200置乱尚未启动，不能报为完成复本**；仍缺空间实体重建和归因运行装配。
-下一立即动作：代码提交推送后运行`multitask_s3.case_runner`，输出到既有忽略目录下
-`outputs/multitask_s3/s3a_score_v1/case_ledger_v1`，读取真实获益/丢失震例，再补本机回放。
-若已有该目录，先读其结果，不重复启动。近期目录与异常互补、次数任务限制见下文旧初步复审，不复播。
+代码提交`380c4b97c8c11a8353f18d9edb24b534c34ac900`已推送回读一致；随后单进程、数值库1线程、
+BelowNormal/Hidden运行`multitask_s3.case_runner`，12:48:27完成并正常退出。
+输出`outputs/multitask_s3/s3a_score_v1/case_ledger_v1/case_ledger_local.json`已存在且完整，
+不要重跑。`CASE_REVIEW.md`已落实全部获益/丢失震例与地区集中性解释，不再只展示整体分数。
+图代码`f6ed3c7fab59aff9315a6f7ea222dd2f99f5639a`已推送回读一致，合成矩阵核验与Ruff通过；
+本机`case_ledger_v1/rendered/04_all_changed_anchor_cases.png/.svg`已生成并可视核对，包含
+全部发生得失变化的主轴首震和全部预设面积，保留共同命中/漏报及未落入该主轴的区分。
+本轮是对已有增量的科学解释，不是新一轮效果提升或独立验证。图、事件账本及CASE_REVIEW只留本机。
+12:52核对无S3后台进程，整机CPU21%；不是中断。交互地图、时间/空间复本仍未开始，不误报。
+
+**下一立即动作：读取本机CASE_REVIEW与本文件，装配原定时间/空间归因执行，补离线交互回放。
+不要重复case_runner、初步评分或训练。** 时间归因纯函数和边界读取已就绪；空间接线最短路径见
+下方。近期目录与异常互补、次数任务限制见旧初步复审，不复播。
+
+### 归因下一步最小接线（不改变实验）
+
+- `null_inputs.load_radius_bases`只读3身份列+两原始radius列；`null_features.permute_time_features`
+  接已缓存20列，九快照/16和18缺失同donor，覆盖12—15/19留recipient，三动态/17由完整伪历史重建。
+  必须传该折全部合法报告轴，不是仅训练/主评分抽样日期；调用已有`calendar.time_null_partitions`。
+- 空间坐标仅复用`d1_replay.placebos.permute_d1_coordinates_within_zones`纯双射函数，输入每期
+  `D1CoordinateEntity(state_id,construction_stratum_id,longitude,latitude)`，保留inside/outside后缀。
+  仅替换状态的经纬度，再`spatial_entity_arrays`→`compute_selected_spatial_features`，只取200km
+  九快照与两radius；不能用旧Stage4快速快照（缺本轮学科/source_new列）。三动态复用新函数。
+- 状态文件只读授权issue的row groups，再`states_from_records`→`build_issue_snapshots`。
+  完整AnomalyState schema只在已授权的行组中读取，不能加载全205期再过滤。
+- 分层映射路径/哈希见`configs/d1_retrospective_development.yaml`；仅借用静态分区身份。
+  entity mapping用Arrow授权日期predicate只读state_id/issue_time_utc/construction_stratum_id，
+  cell mapping只取construction_zone_id；不要调用D1完整加载、verify/preflight或prepare入口。
+- 根seed147，需在新薄执行器明确记录kind/fold/h/replicate索引；不复用旧D1 fold_1/2/3命名。
+  复本仍为每折时间200、空间200，失败不删/不补抽；每次重新填补/标准化/内选择/拟合。
+  模型纯拟合复用S3`predict_block`或training，不改冻结文件；保存复本预测后才评分。
+- 先小合成核验/提交推送，再做原身份准备和原规模复本；两折线程、库1线程、隐藏低优先级。
+  不为做归因另建通用平台，不因无显著性否决已可复核局部收益。
 
 11:54已接通真实预测执行器`multitask_s3.runner`与纯评分组件`multitask_s3.scoring`。
 178项相关合成/配置检查和独立科学接线审查通过；见`s3a_runner_acceptance_2026-09-03.md`。
@@ -32,8 +62,8 @@
 预测manifest的SHA仍为`6470226f92bc23f0556e4bae267ff754ed44a4cb9c00b004c2a1140a864d3f2d`，
 与评分前一致。真实结果已做独立科学复审，三张静态PNG/SVG已生成并可视核对。
 
-**当前最高优先级：先读本机 `outputs/multitask_s3/s3a_score_v1/SCIENCE_REVIEW.md` 和
-`science_scores.json`，从原定归因对照与获益/丢失震例回放继续。不要重做背景、训练、评分或初步复审。**
+先前初步复审见本机 `outputs/multitask_s3/s3a_score_v1/SCIENCE_REVIEW.md` 和
+`science_scores.json`；本次已继续到震例复审，最高优先级以本节顶部新安全点为准。
 本轮已按用户原则保留局部研究候选，未整体升级全部任务；首次结果已向用户报告，之后只讲新增证据。
 具体聚合成绩、结果说明、图和事件诊断只在本机；本次公开提交仍仅代码/测试/交接，不添加新派生结果载荷。
 心跳已去除硬编码的过时恢复点，继续ACTIVE、每30分钟；总按本文件实时安全点判断，不因旧提示重跑。
